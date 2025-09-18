@@ -94,7 +94,7 @@ export function AppSidebar() {
         <SidebarHeader>
           <SidebarMenu>
             <SidebarMenuItem>
-              <Image src="/assets/logo/horizontal/main.png" alt="Church Workflow" width={200} height={140} />
+              <Image src="/assets/logo/horizontal/main.png" alt="Church Workflow" width={180} height={120} />
             </SidebarMenuItem>
           </SidebarMenu>
         </SidebarHeader>
