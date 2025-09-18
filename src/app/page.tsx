@@ -1,7 +1,7 @@
 export default function Home() {
   return (
-    <div>
-      <p>Welcome to Church Workflow</p>
+    <div className="p-5">
+      <p>Church On Cloud</p>
     </div>
   );
 }
