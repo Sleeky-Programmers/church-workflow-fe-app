@@ -6,14 +6,14 @@ import {
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
-} from "./ui/breadcrumb";
-import { Input } from "./ui/input";
-import { Separator } from "./ui/separator";
-import { SidebarTrigger } from "./ui/sidebar";
-import { Button } from "./ui/button";
-import { Avatar, AvatarFallback } from "./ui/avatar";
+} from "../ui/breadcrumb";
+import { Input } from "../ui/input";
+import { Separator } from "../ui/separator";
+import { SidebarTrigger } from "../ui/sidebar";
+import { Button } from "../ui/button";
+import { Avatar, AvatarFallback } from "../ui/avatar";
 
-export function AppNavbar() {
+export function Navbar() {
   return (
     <header className="w-full flex items-center h-16 gap-2 px-3 md:px-6 border-b">
       <div className="flex items-center gap-2 min-w-0">

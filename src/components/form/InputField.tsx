@@ -1,7 +1,7 @@
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 
-export const FormInput = ({
+export const InputField = ({
   id,
   label,
   type,

@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import { Raleway } from "next/font/google";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
-import { AppSidebar } from "@/components/app-sidebar";
+import { AppSidebar } from "@/components/layout/Sidebar";
 import "./globals.css";
-import { AppNavbar } from "@/components/app-navbar";
+import { Navbar } from "@/components/layout/Navbar";
 
 const raleway = Raleway({
   subsets: ["latin"],
@@ -26,7 +26,7 @@ export default function RootLayout({
           <AppSidebar />
 
           <SidebarInset>
-            <AppNavbar />
+            <Navbar />
             <div className="p-4 md:p-6">{children}</div>
           </SidebarInset>
         </SidebarProvider>
