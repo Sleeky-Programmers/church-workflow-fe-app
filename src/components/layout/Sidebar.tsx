@@ -1,3 +1,5 @@
+"use client"
+
 import {
   Activity,
   Calendar1,
@@ -25,6 +27,7 @@ import {
 } from "@/components/ui/sidebar";
 import Link from "next/link";
 import Image from "next/image";
+import { usePathname } from "next/navigation";
 
 const pages = [
   {
@@ -88,6 +91,22 @@ const footer = [
 ];
 
 export function AppSidebar() {
+  const pathname = usePathname();
+
+  const isActive = (url: string) => {
+    if (!url) {
+      return false;
+    }
+
+    const normalize = (p: string | null | undefined) => {
+      return p ? p.replace(/\/+$|^$/, "") : "";
+    }
+
+    const current = normalize(pathname);
+    const target = normalize(url);
+    return current === target;
+  }
+
   return (
     <Sidebar>
       <SidebarContent>
@@ -105,7 +124,7 @@ export function AppSidebar() {
             <SidebarMenu>
               {pages.map((page) => (
                 <SidebarMenuItem key={page.title}>
-                  <SidebarMenuButton asChild>
+                  <SidebarMenuButton asChild isActive={isActive(page.url)}>
                     <Link href={page.url}>
                       <page.icon />
                       <span>{page.title}</span>
@@ -121,7 +140,7 @@ export function AppSidebar() {
           <SidebarMenu>
             {footer.map((page) => (
               <SidebarMenuItem key={page.title}>
-                <SidebarMenuButton asChild>
+                <SidebarMenuButton asChild isActive={isActive(page.url)}>
                   <Link href={page.url}>
                     <page.icon />
                     <span>{page.title}</span>
