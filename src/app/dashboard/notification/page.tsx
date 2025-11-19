@@ -94,12 +94,10 @@ export default function Notification() {
                 !notification.isRead ? "bg-sky-50" : "hover:bg-gray-50"
               }`}
             >
-              {/* left dot */}
               <div className="flex items-start">
                 <span className={`block mt-2 w-2 h-2 rounded-full ${!notification.isRead ? "bg-sky-500" : "bg-transparent"}`} />
               </div>
 
-              {/* icon + text: title and description horizontally */}
               <div className="flex items-center gap-3 min-w-0 w-full">
                 <div className={`flex items-center justify-center w-10 h-10 rounded-md ${notification.iconBg} ${notification.iconColor}`}>
                   <Icon className="w-5 h-5" />
