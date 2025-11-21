@@ -9,53 +9,10 @@ import { Input } from "@/components/ui/input";
 import { Text } from "@/components/ui/typography/Text";
 import ActivityLogPopup from "@/components/features/dashboard/ActivityLogPopup";
 import { ActivityRow } from "@/types";
-
-const sampleData: ActivityRow[] = [
-  {
-    id: "1",
-    timestamp: "2025-05-15T10:34:00",
-    user: { name: "John Doe", initials: "JD" },
-    action: "Submitted a requisition",
-    module: "Requisition",
-    details: "For media projector (₦150,000)",
-  },
-  {
-    id: "2",
-    timestamp: "2025-05-14T19:15:00",
-    user: { name: "Admin", initials: "AD" },
-    action: "Approved requisition",
-    module: "Requisition",
-    details: "For generator diesel",
-  },
-  {
-    id: "3",
-    timestamp: "2025-05-14T17:42:00",
-    user: { name: "Gloria A.", initials: "GA" },
-    action: "Added new church member",
-    module: "Membership",
-    details: "Member: Peter Samuel",
-  },
-  {
-    id: "4",
-    timestamp: "2025-05-13T14:05:00",
-    user: { name: "Ruth B.", initials: "RB" },
-    action: "Logged in",
-    module: "Authentication",
-    details: "IP: 102.67.34.98",
-  },
-  {
-    id: "5",
-    timestamp: "2025-05-14T17:42:00",
-    user: { name: "David O.", initials: "DO" },
-    action: "Sent out event reminders",
-    module: "Events",
-    details: "For Sunday Thanksgiving Service",
-  },
-];
+import { ActivityLogData } from "@/lib/data";
 
 export default function ActivityLogPage() {
   const [query, setQuery] = useState("");
-  const [data] = useState<ActivityRow[]>(sampleData);
   const avatarColors = ["#E7EFF7", "#FFF1E6", "#E6F2E6"];
 
   const avatarTextColors = [
@@ -66,17 +23,20 @@ export default function ActivityLogPage() {
   const [selectedRow, setSelectedRow] = useState<ActivityRow | null>(null);
 
   const filtered = useMemo(() => {
-    if (!query) return data;
+    if (!query) {
+      return ActivityLogData;
+    }
+
     const q = query.toLowerCase();
-    return data.filter(
-      (r) =>
+    return ActivityLogData.filter(
+      (r: ActivityRow) =>
         r.user.name.toLowerCase().includes(q) ||
         r.action.toLowerCase().includes(q) ||
         r.module.toLowerCase().includes(q) ||
         r.details.toLowerCase().includes(q) ||
         new Date(r.timestamp).toLocaleString().toLowerCase().includes(q)
     );
-  }, [data, query]);
+  }, [query]);
 
   const columns: Column<ActivityRow>[] = [
     {
@@ -150,7 +110,7 @@ export default function ActivityLogPage() {
       </div>
 
       {(() => {
-        const rowsWithColor = filtered.map((r, i) => ({
+        const rowsWithColor = filtered.map((r: any, i: number) => ({
           ...r,
           avatarColor: avatarColors[i % avatarColors.length],
           avatarTextColor: avatarTextColors[i % avatarTextColors.length],

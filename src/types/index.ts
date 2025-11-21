@@ -6,3 +6,13 @@ export type ActivityRow = {
   module: string;
   details: string;
 };
+
+export type NotificationTypes = {
+  icon: any;
+  title: string;
+  description: string;
+  date: string;
+  isRead: boolean;
+  iconBg: string;
+  iconColor: string;
+}

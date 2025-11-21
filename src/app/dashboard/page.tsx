@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState } from "react";
+import React from "react";
 import { CalendarDays, User } from "lucide-react";
 import { Span, Text } from "@/components/ui/typography/Text";
 import { StatCard } from "@/components/features/dashboard/StatCard";
@@ -26,57 +26,9 @@ import {
 } from "recharts";
 import { Button } from "@/components/ui/button";
 import Heading from "@/components/ui/typography/Heading";
+import { DashboardData } from "@/lib/data";
 
 export default function Dashboard() {
-  const [stats] = useState({
-    totalMembers: "30,350",
-    serviceAttendance: "3,671",
-    totalIncome: "2,318",
-    totalMembersGrowth: "+10%",
-    attendanceGrowth: "-10.5%",
-    incomeGrowth: "+15%",
-  });
-
-  const [attendanceData] = useState([
-    { month: "Jan", thisMonth: 11598, lastMonth: 9000 },
-    { month: "Feb", thisMonth: 12000, lastMonth: 10000 },
-    { month: "Mar", thisMonth: 15000, lastMonth: 11000 },
-    { month: "Apr", thisMonth: 21000, lastMonth: 17000 },
-    { month: "May", thisMonth: 26000, lastMonth: 22000 },
-    { month: "Jun", thisMonth: 23000, lastMonth: 20000 },
-    { month: "Jul", thisMonth: 25000, lastMonth: 21000 },
-  ]);
-
-  const [incomeExpenses] = useState([
-    { month: "Jan", income: 800, expenses: 400 },
-    { month: "Feb", income: 1200, expenses: 600 },
-    { month: "Mar", income: 1400, expenses: 700 },
-    { month: "Apr", income: 1100, expenses: 500 },
-    { month: "May", income: 1500, expenses: 800 },
-    { month: "Jun", income: 1300, expenses: 700 },
-  ]);
-
-  const [incomeBreakdown] = useState([
-    { name: "Tithes", value: 52.1, color: "#2563EB" },
-    { name: "Offering", value: 22.8, color: "#F97316" },
-    { name: "Seeds", value: 13.9, color: "#10B981" },
-    { name: "Donations", value: 11.2, color: "#EF4444" },
-  ]);
-
-  const [upcomingEvents] = useState([
-    { title: "Sunday Service", when: "Tomorrow" },
-    { title: "Leaders Meeting", when: "Tomorrow" },
-    { title: "Morning Devotion", when: "Monday" },
-    { title: "Bible Study", when: "Monday" },
-    { title: "Prayer Meeting", when: "Thursday" },
-  ]);
-
-  const [birthdays] = useState([
-    { name: "Pastor John", when: "Tomorrow" },
-    { name: "John Doe", when: "Thursday" },
-    { name: "Pastor Peter", when: "Saturday" },
-  ]);
-
   return (
     <>
       <div className="flex items-center justify-between mb-6">
@@ -90,15 +42,15 @@ export default function Dashboard() {
             <StatCard
               compact
               title="Total Members"
-              count={stats.totalMembers}
-              growth={stats.totalMembersGrowth}
+              count={DashboardData.stats.totalMembers}
+              growth={DashboardData.stats.totalMembersGrowth}
             />
 
             <StatCard
               compact
               title="Service Attendance"
-              count={stats.serviceAttendance}
-              growth={stats.attendanceGrowth}
+              count={DashboardData.stats.serviceAttendance}
+              growth={DashboardData.stats.attendanceGrowth}
               growthText="Last Event"
             />
 
@@ -106,8 +58,8 @@ export default function Dashboard() {
               compact
               title="Total Income"
               statFilter="This Month"
-              count={stats.totalIncome}
-              growth={stats.incomeGrowth}
+              count={DashboardData.stats.totalIncome}
+              growth={DashboardData.stats.incomeGrowth}
             />
           </div>
 
@@ -130,7 +82,7 @@ export default function Dashboard() {
                       lastMonth: { color: "#93C5FD" },
                     }}
                   >
-                    <LineChart data={attendanceData} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
+                    <LineChart data={DashboardData.attendanceData} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
                       <CartesianGrid strokeDasharray="3 3" stroke="#E6E6E6" />
                       <XAxis dataKey="month" />
                       <YAxis />
@@ -155,10 +107,10 @@ export default function Dashboard() {
 
               <Text text="Services" className="text-blue-500" />
               <div className="mt-2 space-y-3">
-                {upcomingEvents.map((e: any, i: any) => (
+                {DashboardData.upcomingEvents.map((e: any, i: any) => (
                   <div key={i} className="flex items-center justify-between gap-3">
                     <div className="flex items-center gap-3">
-                      <span className="w-2 h-2 rounded-full bg-sky-600 block" />
+                      <Span className="w-2 h-2 rounded-full bg-sky-600 block" />
                       <div>
                         <Heading level={5} text={e.title} />
                         <Span text="Services" />
@@ -173,7 +125,7 @@ export default function Dashboard() {
 
               <Text text="Birthdays" className="text-blue-500" />
               <div className="mt-3 space-y-2">
-                {birthdays.map((b, i) => (
+                {DashboardData.birthdays.map((b, i) => (
                   <div key={i} className="flex items-center justify-between gap-3">
                     <div className="flex items-center gap-2">
                       <Avatar>
@@ -207,7 +159,7 @@ export default function Dashboard() {
 
               <div className="mt-4 h-auto">
                 <ChartContainer className="p-4" config={{ income: { color: "#2563EB" }, expenses: { color: "#F97316" } }}>
-                  <BarChart data={incomeExpenses} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
+                  <BarChart data={DashboardData.incomeExpenses} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#E6E6E6" />
                     <XAxis dataKey="month" />
                     <YAxis />
@@ -235,7 +187,7 @@ export default function Dashboard() {
                     <ResponsiveContainer width="100%" height="100%">
                       <PieChart>
                         <Pie
-                          data={incomeBreakdown}
+                          data={DashboardData.incomeBreakdown}
                           dataKey="value"
                           nameKey="name"
                           innerRadius={40}
@@ -244,7 +196,7 @@ export default function Dashboard() {
                           cx="50%"
                           cy="50%"
                         >
-                          {incomeBreakdown.map((entry, index) => (
+                          {DashboardData.incomeBreakdown.map((entry, index) => (
                             <Cell key={`cell-${index}`} fill={entry.color} />
                           ))}
                         </Pie>
@@ -256,10 +208,10 @@ export default function Dashboard() {
 
               <div className="mt-4">
                 <div className="grid gap-2">
-                  {incomeBreakdown.map((item) => (
+                  {DashboardData.incomeBreakdown.map((item) => (
                     <div key={item.name} className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <span
+                        <Span
                           className="w-3 h-3 rounded-full block"
                           style={{ backgroundColor: item.color }}
                         />

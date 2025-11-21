@@ -10,6 +10,7 @@ import {
   TableBody,
   TableCell,
 } from "@/components/ui/table";
+import { Span } from "@/components/ui/typography/Text";
 
 type Align = "left" | "center" | "right";
 
@@ -156,6 +157,7 @@ export default function Table<T extends Record<string, any>>({
   const controlled = Array.isArray(selectedRowKeys);
   const selectedKeys = controlled ? selectedRowKeys! : internalSelected;
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const visibleRowKeys = useMemo(() => sortedData.map((r, i) => getRowKey(r, i)), [sortedData]);
   const allVisibleSelected = visibleRowKeys.length > 0 && visibleRowKeys.every((k) => selectedKeys.includes(k));
   const someVisibleSelected = visibleRowKeys.some((k) => selectedKeys.includes(k));
@@ -227,11 +229,14 @@ export default function Table<T extends Record<string, any>>({
                     onClick={() => toggleSort(col)}
                   >
                     <div className="flex items-center gap-2">
-                      <span className="truncate max-w-[18rem]">{col.header}</span>
+                      <span className="truncate max-w-[18rem]">
+                        {col.header}
+                      </span>
                       {col.sortable && (
-                        <span className="opacity-60 text-xs">
-                          {sort.key === col.key ? (sort.direction === "asc" ? "▲" : sort.direction === "desc" ? "▼" : "") : ""}
-                        </span>
+                        <Span
+                          text={sort.key === col.key ? (sort.direction === "asc" ? "▲" : sort.direction === "desc" ? "▼" : "") : ""}
+                          className="opacity-60 text-xs"
+                        />
                       )}
                     </div>
                   </TableHead>
