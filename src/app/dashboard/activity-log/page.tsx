@@ -27,14 +27,14 @@ export default function ActivityLogPage() {
       return ActivityLogData;
     }
 
-    const q = query.toLowerCase();
+    const lowerCaseQuery = query.toLowerCase();
     return ActivityLogData.filter(
-      (r: ActivityRow) =>
-        r.user.name.toLowerCase().includes(q) ||
-        r.action.toLowerCase().includes(q) ||
-        r.module.toLowerCase().includes(q) ||
-        r.details.toLowerCase().includes(q) ||
-        new Date(r.timestamp).toLocaleString().toLowerCase().includes(q)
+      (activityRow: ActivityRow) =>
+        activityRow.user.name.toLowerCase().includes(lowerCaseQuery) ||
+        activityRow.action.toLowerCase().includes(lowerCaseQuery) ||
+        activityRow.module.toLowerCase().includes(lowerCaseQuery) ||
+        activityRow.details.toLowerCase().includes(lowerCaseQuery) ||
+        new Date(activityRow.timestamp).toLocaleString().toLowerCase().includes(lowerCaseQuery)
     );
   }, [query]);
 
