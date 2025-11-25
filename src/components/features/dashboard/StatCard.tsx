@@ -1,6 +1,10 @@
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { TrendingUp, TrendingDown, ChevronDown } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
+import Heading from '@/components/ui/typography/Heading';
+import { Span } from '@/components/ui/typography/Text';
 
 export const StatCard = ({
   title,
@@ -8,44 +12,50 @@ export const StatCard = ({
   growth,
   growthText,
   statFilter,
+  compact,
+  className,
 }: {
   title: string;
   count: string;
   growth: string;
   growthText?: string;
   statFilter?: string;
+  compact?: boolean;
+  className?: string;
 }) => {
   const isPositiveGrowth = growth.startsWith('+');
   const Icon = isPositiveGrowth ? TrendingUp : TrendingDown;
 
+  const sizeClasses = compact
+    ? 'min-w-[220px] flex-shrink-0 h-[120px]'
+    : 'min-w-[260px] flex-shrink-0 h-[150px]';
+
   return (
-    <Card className="w-[260px] h-[150px] bg-[#E7EFF7] shadow-none rounded-3xl overflow-hidden">
-      <CardContent className="p-6">
-        <div className="space-y-6">
+    <Card className={cn(sizeClasses, 'bg-[#E7EFF7] shadow-none rounded-3xl overflow-hidden', className)}>
+      <CardContent className="p-4">
+        <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <h3 className="text-lg leading-tight">
-              {title}
-            </h3>
-            {statFilter &&
-              <div className='flex items-center justify-center gap-1 cursor-pointer'>
-                <p className="text-sm">{statFilter}</p>
+            <Heading level={5} text={title} />
+            {statFilter && (
+              <Button variant="ghost" className="hidden sm:flex items-center gap-2 hover:bg-transparent outline-0">
+                {statFilter}
                 <ChevronDown className="w-4 h-4" />
-              </div>
-            }
+              </Button>
+            )}
           </div>
 
           <div className="flex items-center justify-between">
-            <p className="text-3xl font-bold tracking-tight">
-              {count}
-            </p>
+            <Heading level={1} text={count} />
 
-            <div className="text-sm flex items-end justify-between flex-col gap-1">
-              {growthText && <p>{growthText}</p>}
-              <p>{growth}</p>
-            </div>
+            <div className="flex items-center justify-end gap-2">
+              <div className="text-sm flex items-end justify-between flex-col gap-1">
+                {growthText && <Span text={growthText} />}
+                <Span text={growth} />
+              </div>
 
-            <div className={`${isPositiveGrowth ? "bg-success-500" : "bg-destructive-500"} rounded-xl p-2 flex items-center justify-center`}>
-              <Icon className="w-5 h-5" color='#ffffff' strokeWidth={2.5} />
+              <div className={`${isPositiveGrowth ? 'bg-success-500' : 'bg-destructive-500'} rounded-xl p-2 flex items-center justify-center`}>
+                <Icon className="w-4 h-4" color="#ffffff" strokeWidth={2.5} />
+              </div>
             </div>
           </div>
         </div>

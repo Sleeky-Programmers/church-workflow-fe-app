@@ -10,7 +10,7 @@ const raleway = Raleway({
 });
 
 export const metadata: Metadata = {
-  title: "Church on Cloud",
+  title: process.env.NEXT_PUBLIC_APP_NAME,
   description: "Your Church workflow processes all in one place.",
 };
 
@@ -21,13 +21,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${raleway.className}`}>
+      <body className={`${raleway.className} overflow-x-hidden`}>
         <SidebarProvider>
           <AppSidebar />
 
           <SidebarInset>
             <Navbar />
-            <div className="p-4 md:p-6">{children}</div>
+            <main className="p-4 md:p-6">{children}</main>
           </SidebarInset>
         </SidebarProvider>
       </body>

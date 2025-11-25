@@ -1,3 +1,6 @@
+"use client"
+
+import React, { useMemo } from "react";
 import { Bell, Search, User } from "lucide-react";
 import {
   Breadcrumb,
@@ -7,13 +10,33 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "../ui/breadcrumb";
+import { usePathname } from "next/navigation";
 import { Input } from "../ui/input";
 import { Separator } from "../ui/separator";
 import { SidebarTrigger } from "../ui/sidebar";
 import { Button } from "../ui/button";
 import { Avatar, AvatarFallback } from "../ui/avatar";
+import Link from "next/link";
 
 export function Navbar() {
+  const pathname = usePathname() || "/dashboard";
+
+  const pageLabel = useMemo(() => {
+    const path = pathname.replace(/\/+$/, "");
+
+    if (!path.startsWith("/dashboard")) return "Overview";
+
+    const rest = path.replace(/^\/dashboard\/?/, "");
+    if (!rest) return "Overview";
+
+    const first = rest.split("/")[0];
+    return first
+      .replace(/[-_]+/g, " ")
+      .split(" ")
+      .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+      .join(" ");
+  }, [pathname]);
+
   return (
     <header className="w-full flex items-center h-16 gap-2 px-3 md:px-6 border-b">
       <div className="flex items-center gap-2 min-w-0">
@@ -28,11 +51,13 @@ export function Navbar() {
           <Breadcrumb>
             <BreadcrumbList>
               <BreadcrumbItem className="hidden md:block">
-                <BreadcrumbLink href="#">Dashboard</BreadcrumbLink>
+                <BreadcrumbLink asChild>
+                  <Link href="/dashboard">Dashboard</Link>
+                </BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator className="hidden md:block" />
               <BreadcrumbItem>
-                <BreadcrumbPage>Overview</BreadcrumbPage>
+                <BreadcrumbPage>{pageLabel}</BreadcrumbPage>
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
@@ -57,9 +82,11 @@ export function Navbar() {
           />
         </div>
 
-        <Button size="icon" variant="ghost" aria-label="Notifications">
-          <Bell className="w-4 h-4" />
-        </Button>
+        <Link href="/dashboard/notification">
+          <Button size="icon" variant="ghost" aria-label="Notifications">
+            <Bell className="w-4 h-4" />
+          </Button>
+        </Link>
 
         <div className="flex items-center gap-2">
           <Avatar>

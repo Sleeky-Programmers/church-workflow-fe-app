@@ -2,6 +2,7 @@ import * as React from "react"
 import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 import { Button, ButtonProps } from "./button"
+import Heading from "./typography/Heading"
 
 interface AlertActionProps extends ButtonProps {
   hasDescription?: boolean
@@ -40,7 +41,8 @@ const AlertTitle = React.forwardRef<
   HTMLHeadingElement,
   React.HTMLAttributes<HTMLHeadingElement>
 >(({ className, ...props }, ref) => (
-  <h5
+  <Heading
+    level={5}
     ref={ref}
     className={cn("font-medium leading-none tracking-tight", className)}
     {...props}

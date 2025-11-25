@@ -10,6 +10,7 @@ import {
   TableBody,
   TableCell,
 } from "@/components/ui/table";
+import { Span } from "@/components/ui/typography/Text";
 
 type Align = "left" | "center" | "right";
 
@@ -62,25 +63,46 @@ export default function Table<T extends Record<string, any>>({
   const [internalSelected, setInternalSelected] = useState<string[]>([]);
 
   const getRowKey = (row: T, idx: number) => {
-    if (!rowKey) return String(idx);
-    if (typeof rowKey === "function") return rowKey(row);
+    if (!rowKey) {
+      return String(idx);
+    }
+
+    if (typeof rowKey === "function") {
+      return rowKey(row);
+    }
+
     return String(row[rowKey]);
   };
 
   const getCellValue = (col: Column<T>, row: T) => {
-    if (col.render) return col.render(row);
-    if (typeof col.accessor === "function") return col.accessor(row);
-    if (typeof col.accessor === "string") return row[col.accessor as string];
+    if (col.render) {
+      return col.render(row);
+    }
+
+    if (typeof col.accessor === "function") {
+      return col.accessor(row);
+    }
+
+    if (typeof col.accessor === "string") {
+      return row[col.accessor as string];
+    }
+
     return null;
   };
 
   const sortedData = useMemo(() => {
-    if (!enableSorting || !sort.key || !sort.direction) return data.slice();
+    if (!enableSorting || !sort.key || !sort.direction) {
+      return data.slice();
+    }
 
     const col = columns.find((c) => c.key === sort.key);
-    if (!col) return data.slice();
+    if (!col) {
+      return data.slice();
+    }
 
-    if (typeof col.accessor !== "string") return data.slice();
+    if (typeof col.accessor !== "string") {
+      return data.slice();
+    }
 
     const key = col.accessor as string;
 
@@ -89,9 +111,17 @@ export default function Table<T extends Record<string, any>>({
       const va = a[key];
       const vb = b[key];
 
-      if (va == null && vb == null) return 0;
-      if (va == null) return sort.direction === "asc" ? -1 : 1;
-      if (vb == null) return sort.direction === "asc" ? 1 : -1;
+      if (va == null && vb == null) {
+        return 0;
+      }
+
+      if (va == null) {
+        return sort.direction === "asc" ? -1 : 1;
+      }
+
+      if (vb == null) {
+        return sort.direction === "asc" ? 1 : -1;
+      }
 
       if (typeof va === "number" && typeof vb === "number") {
         return sort.direction === "asc" ? va - vb : vb - va;
@@ -112,8 +142,14 @@ export default function Table<T extends Record<string, any>>({
   const toggleSort = (col: Column<T>) => {
     if (!enableSorting || !col.sortable) return;
     setSort((prev) => {
-      if (prev.key !== col.key) return { key: col.key, direction: "asc" };
-      if (prev.direction === "asc") return { key: col.key, direction: "desc" };
+      if (prev.key !== col.key) {
+        return { key: col.key, direction: "asc" };
+      }
+
+      if (prev.direction === "asc") {
+        return { key: col.key, direction: "desc" };
+      }
+
       return { key: null, direction: null };
     });
   };
@@ -121,12 +157,15 @@ export default function Table<T extends Record<string, any>>({
   const controlled = Array.isArray(selectedRowKeys);
   const selectedKeys = controlled ? selectedRowKeys! : internalSelected;
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const visibleRowKeys = useMemo(() => sortedData.map((r, i) => getRowKey(r, i)), [sortedData]);
   const allVisibleSelected = visibleRowKeys.length > 0 && visibleRowKeys.every((k) => selectedKeys.includes(k));
   const someVisibleSelected = visibleRowKeys.some((k) => selectedKeys.includes(k));
 
   const updateSelection = (next: string[]) => {
-    if (!controlled) setInternalSelected(next);
+    if (!controlled) {
+      setInternalSelected(next);
+    }
     onSelectedRowKeysChange?.(next);
   };
 
@@ -151,7 +190,8 @@ export default function Table<T extends Record<string, any>>({
   return (
     <Card className={className}>
       <CardContent className="p-0">
-        <div className="w-full overflow-auto">
+        {/* Horizontal scrolling should be confined to this container */}
+        <div className="overflow-x-auto w-full">
           <TableComponent>
             <TableHeader>
               <TableRow>
@@ -189,11 +229,14 @@ export default function Table<T extends Record<string, any>>({
                     onClick={() => toggleSort(col)}
                   >
                     <div className="flex items-center gap-2">
-                      <span className="truncate max-w-[18rem]">{col.header}</span>
+                      <span className="truncate max-w-[18rem]">
+                        {col.header}
+                      </span>
                       {col.sortable && (
-                        <span className="opacity-60 text-xs">
-                          {sort.key === col.key ? (sort.direction === "asc" ? "▲" : sort.direction === "desc" ? "▼" : "") : ""}
-                        </span>
+                        <Span
+                          text={sort.key === col.key ? (sort.direction === "asc" ? "▲" : sort.direction === "desc" ? "▼" : "") : ""}
+                          className="opacity-60 text-xs"
+                        />
                       )}
                     </div>
                   </TableHead>
@@ -245,7 +288,9 @@ export default function Table<T extends Record<string, any>>({
                           key={col.key}
                           className={`${col.align === "center" ? "text-center" : col.align === "right" ? "text-right" : "text-left"} align-top ${col.width ?? ""} px-4`}
                         >
-                          {getCellValue(col, row)}
+                          <div className="truncate whitespace-nowrap">
+                            {getCellValue(col, row)}
+                          </div>
                         </TableCell>
                       ))}
                     </TableRow>
