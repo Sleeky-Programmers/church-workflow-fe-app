@@ -24,10 +24,14 @@ export function Navbar() {
   const pageLabel = useMemo(() => {
     const path = pathname.replace(/\/+$/, "");
 
-    if (!path.startsWith("/dashboard")) return "Overview";
+    if (!path.startsWith("/dashboard")) {
+      return "Overview";
+    }
 
     const rest = path.replace(/^\/dashboard\/?/, "");
-    if (!rest) return "Overview";
+    if (!rest) {
+      return "Overview";
+    }
 
     const first = rest.split("/")[0];
     return first
