@@ -10,7 +10,7 @@ import Table, { Column } from "@/components/features/dashboard/Table";
 import { Badge } from "@/components/ui/badge";
 import { departmentData, departmentEvents, departmentMembers, departmentRequisitions } from "@/lib/data";
 import Heading from "@/components/ui/typography/Heading";
-import { DepartmentTabs } from "@/lib/enums";
+import { DepartmentTabs, RequisitionStatus } from "@/lib/enums";
 import DepartmentSidebar from "@/components/features/dashboard/DepartmentSidebar";
 import { Input } from "@/components/ui/input";
 import { ChevronDown, Search } from "lucide-react";
@@ -64,7 +64,7 @@ export default function DepartmentDetailPage() {
         <Badge
           variant="outline"
           className={
-            row.status === "Pending"
+            row.status === RequisitionStatus.PENDING
               ? "border-orange-300 text-orange-600 bg-transparent"
               : "border-emerald-300 text-emerald-600 bg-transparent"
           }

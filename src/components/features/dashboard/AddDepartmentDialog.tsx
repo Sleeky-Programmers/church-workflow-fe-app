@@ -12,6 +12,7 @@ import {
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
 import { DepartmentRow } from "@/types";
 import { InputField } from "@/components/form/InputField";
+import { HtmlInputElementTypes } from "@/lib/enums";
 
 interface Props {
   data: DepartmentRow[];
@@ -66,7 +67,7 @@ export default function AddDepartmentDialog({ data, onSave }: Props) {
             <div className="space-y-4">
               <InputField
                 label="Department name"
-                as="input"
+                as={HtmlInputElementTypes.INPUT}
                 type="text"
                 placeholder="Department name"
                 value={departmentName}
@@ -76,7 +77,7 @@ export default function AddDepartmentDialog({ data, onSave }: Props) {
               <div className="grid grid-cols-2 gap-4">
                 <InputField
                   label="Assign HOD"
-                  as="select"
+                  as={HtmlInputElementTypes.SELECT}
                   value={hod}
                   onValueChange={(v) => setHod(v)}
                   options={hodOptions.map((hodOption) => ({ value: hodOption, label: hodOption }))}
@@ -85,7 +86,7 @@ export default function AddDepartmentDialog({ data, onSave }: Props) {
 
                 <InputField
                   label="Status"
-                  as="select"
+                  as={HtmlInputElementTypes.SELECT}
                   value={status}
                   onValueChange={(value) => setStatus(value)}
                   options={[
@@ -98,7 +99,7 @@ export default function AddDepartmentDialog({ data, onSave }: Props) {
 
               <InputField
                 label="Add a description"
-                as="textarea"
+                as={HtmlInputElementTypes.TEXTAREA}
                 placeholder="Description..."
                 value={description}
                 onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setDescription(e.target.value)}

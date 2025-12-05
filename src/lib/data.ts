@@ -1,4 +1,5 @@
 import { ActivityRow, DepartmentRow } from "@/types";
+import { RequisitionStatus } from "./enums";
 import {
   Activity,
   Calendar1,
@@ -247,7 +248,7 @@ export const departmentEvents = [
 ];
 
 export const departmentRequisitions = [
-  { id: "rq1", date: "May 12", title: "New Microphones", amount: "₦80,000", status: "Pending" },
-  { id: "rq2", date: "Apr 10", title: "Mixer Replacement", amount: "₦120,000", status: "Approved" },
-  { id: "rq3", date: "March 14", title: "HDMI Cables Replacement", amount: "₦60,000", status: "Approved" },
+  { id: "rq1", date: "May 12", title: "New Microphones", amount: "₦80,000", status: RequisitionStatus.PENDING },
+  { id: "rq2", date: "Apr 10", title: "Mixer Replacement", amount: "₦120,000", status: RequisitionStatus.APPROVED },
+  { id: "rq3", date: "March 14", title: "HDMI Cables Replacement", amount: "₦60,000", status: RequisitionStatus.APPROVED },
 ];

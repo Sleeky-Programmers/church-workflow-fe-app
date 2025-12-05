@@ -9,6 +9,7 @@ import {
   SelectValue,
 } from "../ui/select";
 import { Textarea } from "../ui/textarea";
+import { HtmlInputElementTypes } from "@/lib/enums";
 
 type Option = { value: string; label: string };
 
@@ -19,7 +20,7 @@ type SharedOnChange =
 export const InputField = ({
   id,
   label,
-  as = "input",
+  as = HtmlInputElementTypes.INPUT,
   type = "text",
   placeholder,
   value,
@@ -32,7 +33,7 @@ export const InputField = ({
 }: {
   id?: string;
   label: string;
-  as?: "input" | "select" | "textarea";
+  as?: HtmlInputElementTypes;
   type?: string;
   placeholder?: string;
   value?: string;
@@ -61,7 +62,7 @@ export const InputField = ({
     <div className="flex flex-col space-y-2 mb-3">
       <Label htmlFor={id}>{label}</Label>
 
-      {as === "textarea" ? (
+      {as === HtmlInputElementTypes.TEXTAREA ? (
         <Textarea
           id={id}
           placeholder={placeholder}
@@ -70,7 +71,7 @@ export const InputField = ({
             (onChange as (e: React.ChangeEvent<HTMLTextAreaElement>) => void)?.(e)
           }
         />
-      ) : as === "select" ? (
+      ) : as === HtmlInputElementTypes.SELECT ? (
         <Select value={value} onValueChange={(v) => callOnChangeWithValue(v)}>
           <SelectTrigger>
             <SelectValue placeholder={selectPlaceholder ?? placeholder ?? "Select"} />
