@@ -191,8 +191,9 @@ export default function Table<T extends Record<string, any>>({
     <Card className={className}>
       <CardContent className="p-0">
         {/* Horizontal scrolling should be confined to this container */}
-        <div className="overflow-x-auto w-full">
-          <TableComponent>
+        <div className="overflow-x-auto w-full max-w-full">
+          <div className="min-w-max">
+            <TableComponent>
             <TableHeader>
               <TableRow>
                 {showCheckbox && (
@@ -298,7 +299,8 @@ export default function Table<T extends Record<string, any>>({
                 })
               )}
             </TableBody>
-          </TableComponent>
+            </TableComponent>
+          </div>
         </div>
       </CardContent>
     </Card>

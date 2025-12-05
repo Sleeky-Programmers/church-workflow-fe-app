@@ -31,7 +31,7 @@ import { DashboardData } from "@/lib/data";
 export default function Dashboard() {
   return (
     <>
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex md:items-center justify-between md:flex-row flex-col items-start mb-6">
         <Heading level={1} text="Hello, Super Admin" />
         <Text text="Overview" />
       </div>

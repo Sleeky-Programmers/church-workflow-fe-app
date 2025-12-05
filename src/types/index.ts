@@ -16,3 +16,11 @@ export type NotificationTypes = {
   iconBg: string;
   iconColor: string;
 }
+
+export type DepartmentRow = {
+  id: string;
+  name: string;
+  hod: { name: string; initials?: string } | null;
+  members: number;
+  status: "Active" | "Inactive";
+};
