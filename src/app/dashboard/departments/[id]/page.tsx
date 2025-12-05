@@ -63,13 +63,9 @@ export default function DepartmentDetailPage() {
       render: (row) => (
         <Badge
           variant="outline"
-          className={
-            row.status === RequisitionStatus.PENDING
-              ? "border-orange-300 text-orange-600 bg-transparent"
-              : "border-emerald-300 text-emerald-600 bg-transparent"
-          }
+          className={`capitalize ${row.status === RequisitionStatus.PENDING ? "border-orange-300 text-orange-600 bg-transparent" : "border-emerald-300 text-emerald-600 bg-transparent"}`}
         >
-          {row.status}
+          {row.status.toLowerCase()}
         </Badge>
       ),
       width: "w-1/6",
