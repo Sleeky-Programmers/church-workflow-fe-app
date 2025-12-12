@@ -172,22 +172,6 @@ export default function ResetPasswordForm({ onSuccess }: ResetPasswordFormProps)
         </Button>
       </form>
 
-      <style jsx>{`
-        @keyframes slide-up {
-          from { 
-            opacity: 0;
-            transform: translateY(20px);
-          }
-          to { 
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-        
-        .animate-slide-up {
-          animation: slide-up 0.6s ease-out;
-        }
-      `}</style>
     </div>
   );
 }

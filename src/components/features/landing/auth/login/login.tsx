@@ -94,7 +94,7 @@ export default function LoginForm({ onForgotPassword }: LoginFormProps) {
         {/* Sign Up Link */}
         <div className="text-center">
           <p className="text-sm text-gray-600">
-            Don't have an account yet?{' '}
+            Don&apos;t have an account yet?{' '}
             <Link
               href="/auth/signup"
               className="text-cyan-500 hover:text-cyan-600 font-medium transition-colors"
@@ -105,22 +105,6 @@ export default function LoginForm({ onForgotPassword }: LoginFormProps) {
         </div>
       </form>
 
-      <style jsx>{`
-        @keyframes slide-up {
-          from { 
-            opacity: 0;
-            transform: translateY(20px);
-          }
-          to { 
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-        
-        .animate-slide-up {
-          animation: slide-up 0.6s ease-out;
-        }
-      `}</style>
     </div>
   );
 }

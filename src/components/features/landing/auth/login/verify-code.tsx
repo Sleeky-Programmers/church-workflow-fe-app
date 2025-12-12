@@ -61,7 +61,7 @@ export default function VerifyCodeForm({ email, onVerify }: VerifyCodeFormProps)
           Forgot Password
         </h1>
         <p className="text-gray-600">
-          Please check your email, we've sent a code to{' '}
+          Please check your email, we&apos;ve sent a code to{' '}
           <span className="font-medium text-gray-900">{email}</span>
         </p>
       </div>
@@ -106,7 +106,7 @@ export default function VerifyCodeForm({ email, onVerify }: VerifyCodeFormProps)
         {/* Resend Link */}
         <div className="text-center">
           <p className="text-sm text-gray-600">
-            Didn't receive a code?{' '}
+            Didn&apos;t receive a code?{' '}
             {countdown > 0 ? (
               <span className="text-cyan-500 font-medium">
                 Resend in {formatTime(countdown)}
@@ -142,22 +142,6 @@ export default function VerifyCodeForm({ email, onVerify }: VerifyCodeFormProps)
         </Button>
       </div>
 
-      <style jsx>{`
-        @keyframes slide-up {
-          from { 
-            opacity: 0;
-            transform: translateY(20px);
-          }
-          to { 
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-        
-        .animate-slide-up {
-          animation: slide-up 0.6s ease-out;
-        }
-      `}</style>
     </div>
   );
 }
