@@ -1,0 +1,138 @@
+'use client';
+
+import { useCallback, useEffect, useState } from 'react';
+import { Button } from '@/components/ui/button';
+import {
+  InputOTP,
+  InputOTPGroup,
+  InputOTPSlot,
+  InputOTPSeparator,
+} from '@/components/ui/input-otp';
+import { maskEmail } from '@/lib/mask-email';
+import { cn } from '@/lib/utils';
+
+interface Props {
+  email: string;
+  onVerify: (otp: string) => Promise<boolean>; 
+}
+
+export default function VerifyOtpForm({ email, onVerify }: Props) {
+  const [otp, setOtp] = useState('');
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [error, setError] = useState(false);
+  const [resendTimer, setResendTimer] = useState(82);
+
+  const handleVerify = useCallback(async (code: string) => {
+    if (isVerifying) return;
+
+    setIsVerifying(true);
+    setError(false);
+
+    const success = await onVerify(code);
+
+    if (!success) {
+      setError(true);
+      setOtp('');
+      setIsVerifying(false);
+      return;
+    }
+  }, [isVerifying, onVerify]);
+
+ useEffect(() => {
+  if (otp.length === 6) {
+    handleVerify(otp);
+  }
+}, [otp, handleVerify]);
+
+
+  useEffect(() => {
+    if (resendTimer <= 0) return;
+    const timer = setInterval(() => {
+      setResendTimer((t) => t - 1);
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [resendTimer]);
+
+  const handleResend = () => {
+    setResendTimer(82);
+  };
+
+  return (
+    <div className="space-y-8">
+  
+      <div className="space-y-2">
+        <h1 className="text-3xl font-bold">Enter the code</h1>
+        <p className="text-sm text-muted-foreground leading-relaxed">
+          Enter the code that we sent to your email{' '}
+          <strong> {maskEmail(email)} </strong> and be careful not to share
+          the code with anyone.
+        </p>
+      </div>
+
+      {/* OTP */}
+      <div
+        className={cn(
+          "flex justify-center",
+          error && "animate-shake"
+        )}
+      >
+        <InputOTP
+          maxLength={6}
+          value={otp}
+          onChange={setOtp}
+          autoFocus
+          inputMode="numeric"
+          autoComplete="one-time-code"
+          containerClassName="justify-center"
+        >
+          <InputOTPGroup className="space-x-2">
+            <InputOTPSlot index={0} />
+            <InputOTPSlot index={1} />
+            <InputOTPSlot index={2} />
+          </InputOTPGroup>
+
+          <InputOTPSeparator />
+
+          <InputOTPGroup className="space-x-2">
+            <InputOTPSlot index={3} />
+            <InputOTPSlot index={4} />
+            <InputOTPSlot index={5} />
+          </InputOTPGroup>
+        </InputOTP>
+      </div>
+
+      {error && (
+        <p className="text-sm text-destructive text-center">
+          Incorrect code. Please try again.
+        </p>
+      )}
+
+      {/* Fallback Button */}
+      <Button
+        className="w-full h-11"
+        disabled={otp.length !== 6 || isVerifying}
+        onClick={() => handleVerify(otp)}
+      >
+        {isVerifying ? 'Verifying…' : 'Verify'}
+      </Button>
+
+      {/* Resend */}
+      <p className="text-sm text-center text-muted-foreground">
+        Didn’t receive a code?{' '}
+        {resendTimer > 0 ? (
+          <span className="text-primary font-medium">
+            Resend in {Math.floor(resendTimer / 60)}:
+            {(resendTimer % 60).toString().padStart(2, '0')}
+          </span>
+        ) : (
+          <button
+            onClick={handleResend}
+            className="text-primary font-medium hover:underline"
+          >
+            Resend
+          </button>
+        )}
+      </p>
+    </div>
+  );
+}

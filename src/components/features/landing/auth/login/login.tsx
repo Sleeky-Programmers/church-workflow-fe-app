@@ -1,10 +1,9 @@
-'use client'
-import * as React from 'react'
-import Link from 'next/link'
-import { useForm } from 'react-hook-form'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import Heading from '@/components/ui/typography/Heading'
+'use client';
+
+import { useForm } from 'react-hook-form';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import Heading from '@/components/ui/typography/Heading';
 import {
   Form,
   FormField,
@@ -12,37 +11,56 @@ import {
   FormLabel,
   FormControl,
   FormMessage,
-} from '@/components/ui/form'
+} from '@/components/ui/form';
+import { useRouter } from 'next/navigation';
+import React, { useState } from 'react';
+import { LoginFormValues } from '@/types/type';
+import GoogleSignupButton from '../oauth/google-signup-button';
+import { Eye, EyeOff } from 'lucide-react';
 
 interface LoginFormProps {
-  onForgotPassword: () => void
-}
-
-type LoginFormValues = {
-  email: string
-  password: string
+  onForgotPassword: () => void;
 }
 
 export default function LoginForm({ onForgotPassword }: LoginFormProps) {
-  const [isLoading, setIsLoading] = React.useState(false)
+  const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const router = useRouter();
 
   const form = useForm<LoginFormValues>({
     defaultValues: {
       email: '',
       password: '',
     },
-  })
+  });
 
-  const onSubmit = async () => {
-    setIsLoading(true)
+const onSubmit = async () => {
+  setIsLoading(true);
 
-    setTimeout(() => setIsLoading(false), 1000)
+  try {
+
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+
+    router.push('/dashboard');
+  } catch  {
+    
+    alert('Login failed. Please try again.');
+  } finally {
+    setIsLoading(false);
   }
+};
+
+
+  const onSignUp = () => router.push('/auth/signup');
 
   return (
-    <div className="bg-gray-50 rounded-2xl p-8 animate-slide-up">
-      <div className="text-center mb-8">
-        <Heading level={1}>Log in to Church on Cloud</Heading>
+    <div className="space-y-8 animate-fade-in">
+      {/* Header */}
+      <div className="text-left space-y-2 text-xl">
+        <Heading className="text-3xl text-bold">Welcome back</Heading>
+        <p className="text-md text-muted-foreground">
+          Welcome back! It only takes a moment to access your account.
+        </p>
       </div>
 
       <Form {...form}>
@@ -51,12 +69,10 @@ export default function LoginForm({ onForgotPassword }: LoginFormProps) {
           <FormField
             control={form.control}
             name="email"
-            rules={{
-              required: 'Email is required',
-            }}
+            rules={{ required: 'Email is required' }}
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Email Address</FormLabel>
+                <FormLabel>Email</FormLabel>
                 <FormControl>
                   <Input
                     type="email"
@@ -73,29 +89,41 @@ export default function LoginForm({ onForgotPassword }: LoginFormProps) {
           <FormField
             control={form.control}
             name="password"
-            rules={{
-              required: 'Password is required',
-            }}
+            rules={{ required: 'Password is required' }}
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Password</FormLabel>
                 <FormControl>
-                  <Input
-                    type="password"
-                    placeholder="Enter your password"
-                    {...field}
-                  />
+                  <div className="relative">
+                    <Input
+                      type={showPassword ? 'text' : 'password'}
+                      placeholder="Enter your password"
+                      {...field}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword((prev) => !prev)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition"
+                    >
+                      {showPassword ? (
+                        <EyeOff className="h-5 w-5" />
+                      ) : (
+                        <Eye className="h-5 w-5" />
+                      )}
+                    </button>
+                  </div>
                 </FormControl>
+
                 <div className="flex justify-end">
                   <Button
-                    type="button"
                     variant="link"
                     onClick={onForgotPassword}
-                    className="px-0"
+
                   >
-                    Forgot Password?
+                    Forgot password?
                   </Button>
                 </div>
+
                 <FormMessage />
               </FormItem>
             )}
@@ -105,25 +133,35 @@ export default function LoginForm({ onForgotPassword }: LoginFormProps) {
           <Button
             type="submit"
             disabled={isLoading}
-            className="w-full disabled:cursor-not-allowed"
+            className="w-full"
           >
             {isLoading ? 'Logging in…' : 'Login'}
           </Button>
 
-          {/* Sign up */}
+          {/* Divider */}
+          <div className="relative my-8 flex items-center">
+            <div className="flex-grow border-t border-gray-200" />
+            <span className="mx-4 rounded-full px-4 py-1 text-xs font-medium text-gray-500">
+              OR
+            </span>
+            <div className="flex-grow border-t border-gray-200" />
+          </div>
+
+          {/* Google */}
+          <GoogleSignupButton onClick={() => alert('Google Signup')} />
+
+        
+        </form>
+      </Form>
+        {/* Sign up */}
           <div className="text-center">
             <p className="text-sm text-gray-600">
               Don&apos;t have an account yet?{' '}
-              <Link
-                href="/auth/signup"
-                className="font-medium text-blue-500 hover:text-blue-600 transition-colors"
-              >
+              <Button onClick={onSignUp} variant="link">
                 Create account
-              </Link>
+              </Button>
             </p>
           </div>
-        </form>
-      </Form>
     </div>
-  )
+  );
 }
