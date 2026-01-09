@@ -1,20 +1,26 @@
-type TextProp = {
+import React from 'react';
+
+type TextProps = {
   text?: string;
   className?: string;
   style?: React.CSSProperties;
+  variant?: 'default' | 'muted';
+  children?: React.ReactNode;
 };
 
-const Text = ({ text, className }: TextProp) => {
+const Text: React.FC<TextProps> = ({ text, className, variant = 'default', children }) => {
+  const variantClass = variant === 'muted' ? 'text-gray-600' : '';
+  
   return (
     <p
-      className={`${className} text-sm font-semibold whitespace-nowrap flex-shrink-0`}
+      className={`${variantClass} ${className} text-sm font-semibold whitespace-nowrap flex-shrink-0`}
     >
-      {text}
+      {children || text}
     </p>
   );
 };
 
-const Span = ({ text, className, style }: TextProp) => {
+const Span: React.FC<TextProps> = ({ text, className, style }) => {
   return (
     <span
       className={`${className} text-xs truncate`}
@@ -23,7 +29,7 @@ const Span = ({ text, className, style }: TextProp) => {
       {text}
     </span>
   );
-}
+};
 
 export {
   Text,

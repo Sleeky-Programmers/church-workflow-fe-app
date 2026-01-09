@@ -14,7 +14,10 @@ import {
   FormControl,
   FormMessage,
   FormDescription,
-} from '@/components/ui/form'
+} from '@/components/ui/form';
+import { Text } from '@/components/ui/typography/Text';
+import Heading from '@/components/ui/typography/Heading';
+import { Loader } from '@/components/ui/loader';
 
 interface ResetPasswordFormProps {
   onSuccess: () => void
@@ -42,7 +45,7 @@ export default function ResetPasswordForm({
   const onSubmit = async () => {
     setIsLoading(true)
 
-    // 👇 replace with real API call
+    // to be replaced with real API call
     setTimeout(() => {
       setIsLoading(false)
       onSuccess()
@@ -51,13 +54,15 @@ export default function ResetPasswordForm({
 
   return (
     <div className="bg-gray-50 rounded-2xl p-8 animate-slide-up">
-      <div className="text-center mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">
+      <div className="text-left mb-8">
+        <Heading level={1} className="text-3xl font-bold text-gray-900 mb-2">
           Reset Password
-        </h1>
-        <p className="text-gray-600 text-xs">
-          Kindly set a new password. It must be different from your previous one.
-        </p>
+        </Heading>
+        <Text variant="muted" className="text-gray-600 text-xs text-left">
+          Kindly set a new password. Your new password <br/> 
+          must be different from your previously <br/> 
+          used password.
+        </Text>
       </div>
 
       <Form {...form}>
@@ -65,7 +70,6 @@ export default function ResetPasswordForm({
           onSubmit={form.handleSubmit(onSubmit)}
           className="space-y-6"
         >
-          {/* New password */}
           <FormField
             control={form.control}
             name="newPassword"
@@ -87,19 +91,21 @@ export default function ResetPasswordForm({
                       {...field}
                       className="pr-12"
                     />
-                    <button
-                      type="button"
+                    <Button
+                       type="button"
+                      variant="ghost"
+                      size="icon"
                       onClick={() =>
                         setShowNewPassword((prev) => !prev)
                       }
-                      className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors focus:ring-0 focus:ring-offset-0 bg-transparent hover:bg-transparent"
                     >
                       {showNewPassword ? (
                         <EyeOff className="w-5 h-5" />
                       ) : (
                         <Eye className="w-5 h-5" />
                       )}
-                    </button>
+                    </Button>
                   </div>
                 </FormControl>
                 <FormDescription>
@@ -131,19 +137,21 @@ export default function ResetPasswordForm({
                       {...field}
                       className="pr-12"
                     />
-                    <button
+                    <Button
                       type="button"
+                      variant="ghost"
+                      size="icon"
                       onClick={() =>
                         setShowConfirmPassword((prev) => !prev)
                       }
-                      className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors focus:ring-0 focus:ring-offset-0 bg-transparent hover:bg-transparent"
                     >
                       {showConfirmPassword ? (
                         <EyeOff className="w-5 h-5" />
                       ) : (
                         <Eye className="w-5 h-5" />
                       )}
-                    </button>
+                    </Button>
                   </div>
                 </FormControl>
                 <FormDescription>
@@ -158,9 +166,16 @@ export default function ResetPasswordForm({
           <Button
             type="submit"
             disabled={isLoading}
-            className="w-full disabled:cursor-not-allowed"
+            className="w-full disabled:cursor-not-allowed focus:ring-0 focus:ring-offset-0"
           >
-            {isLoading ? 'Resetting…' : 'Reset Password'}
+            {isLoading ? (
+    <span className="flex items-center gap-2">
+      <Loader />
+      Resetting...
+    </span>
+  ) : (
+    'Reset Password'
+  )}
           </Button>
         </form>
       </Form>

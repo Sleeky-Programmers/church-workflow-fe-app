@@ -17,6 +17,8 @@ import React, { useState } from 'react';
 import { LoginFormValues } from '@/types/type';
 import GoogleSignupButton from '../oauth/google-signup-button';
 import { Eye, EyeOff } from 'lucide-react';
+import { Text } from '@/components/ui/typography/Text';
+import { Loader } from '@/components/ui/loader';
 
 interface LoginFormProps {
   onForgotPassword: () => void;
@@ -57,10 +59,10 @@ const onSubmit = async () => {
     <div className="space-y-8 animate-fade-in">
       {/* Header */}
       <div className="text-left space-y-2 text-xl">
-        <Heading className="text-3xl text-bold">Welcome back</Heading>
-        <p className="text-md text-muted-foreground">
+        <Heading level={1}>Welcome back</Heading>
+        <Text variant="muted">
           Welcome back! It only takes a moment to access your account.
-        </p>
+        </Text>
       </div>
 
       <Form {...form}>
@@ -100,24 +102,26 @@ const onSubmit = async () => {
                       placeholder="Enter your password"
                       {...field}
                     />
-                    <button
-                      type="button"
+                    <Button
+                     type="button"
+                      variant="ghost"
+                      size="icon"
                       onClick={() => setShowPassword((prev) => !prev)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:ring-0 focus:ring-offset-0"
                     >
                       {showPassword ? (
                         <EyeOff className="h-5 w-5" />
                       ) : (
                         <Eye className="h-5 w-5" />
                       )}
-                    </button>
+                    </Button>
                   </div>
                 </FormControl>
 
                 <div className="flex justify-end">
                   <Button
                     variant="link"
-                    onClick={onForgotPassword}
+                    onClick={onForgotPassword} className="focus:ring-0 focus:ring-offset-0"
 
                   >
                     Forgot password?
@@ -130,14 +134,17 @@ const onSubmit = async () => {
           />
 
           {/* Submit */}
-          <Button
-            type="submit"
-            disabled={isLoading}
-            className="w-full"
-          >
-            {isLoading ? 'Logging in…' : 'Login'}
-          </Button>
-
+          <Button type="submit" disabled={isLoading} className="w-full py-6 focus:ring-0 focus:ring-offset-0">
+  {isLoading ? (
+    <span className="flex items-center gap-2">
+      <Loader />
+     Logging in...
+    </span>
+  ) : (
+    'Login'
+  )}
+</Button>
+        
           {/* Divider */}
           <div className="relative my-8 flex items-center">
             <div className="flex-grow border-t border-gray-200" />
@@ -155,12 +162,12 @@ const onSubmit = async () => {
       </Form>
         {/* Sign up */}
           <div className="text-center">
-            <p className="text-sm text-gray-600">
-              Don&apos;t have an account yet?{' '}
-              <Button onClick={onSignUp} variant="link">
-                Create account
+            <Text className="text-sm text-gray-600">
+              Don&apos;t have an account yet?
+              <Button onClick={onSignUp} variant="link" className='text-blue-700 hover:text-blue-800 focus:ring-0 focus:ring-offset-0'>
+                Create Church Account
               </Button>
-            </p>
+            </Text>
           </div>
     </div>
   );

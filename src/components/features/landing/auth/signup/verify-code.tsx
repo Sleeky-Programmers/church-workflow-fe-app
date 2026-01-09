@@ -10,6 +10,9 @@ import {
 } from '@/components/ui/input-otp';
 import { maskEmail } from '@/lib/mask-email';
 import { cn } from '@/lib/utils';
+import Heading from '@/components/ui/typography/Heading';
+import { Text } from '@/components/ui/typography/Text';
+import { Loader } from '@/components/ui/loader';
 
 interface Props {
   email: string;
@@ -61,12 +64,12 @@ export default function VerifyOtpForm({ email, onVerify }: Props) {
     <div className="space-y-8">
   
       <div className="space-y-2">
-        <h1 className="text-3xl font-bold">Enter the code</h1>
-        <p className="text-sm text-muted-foreground leading-relaxed">
+        <Heading level={1}>Enter the code</Heading>
+        <Text variant="muted" >
           Enter the code that we sent to your email{' '}
           <strong> {maskEmail(email)} </strong> and be careful not to share
           the code with anyone.
-        </p>
+        </Text>
       </div>
 
       {/* OTP */}
@@ -102,9 +105,9 @@ export default function VerifyOtpForm({ email, onVerify }: Props) {
       </div>
 
       {error && (
-        <p className="text-sm text-destructive text-center">
+        <Text className="text-sm text-destructive text-center">
           Incorrect code. Please try again.
-        </p>
+        </Text>
       )}
 
       {/* Fallback Button */}
@@ -113,24 +116,31 @@ export default function VerifyOtpForm({ email, onVerify }: Props) {
         disabled={otp.length !== 6 || isVerifying}
         onClick={() => handleVerify(otp)}
       >
-        {isVerifying ? 'Verifying…' : 'Verify'}
+        {isVerifying ? (
+            <span className="flex items-center gap-2">
+              <Loader />
+             Verifying…
+            </span>
+          ) : (
+            'Verify'
+          )}
       </Button>
 
       {/* Resend */}
       <p className="text-sm text-center text-muted-foreground">
-        Didn’t receive a code?{' '}
+        Didn&apos;t receive a code?{' '}
         {resendTimer > 0 ? (
           <span className="text-primary font-medium">
             Resend in {Math.floor(resendTimer / 60)}:
             {(resendTimer % 60).toString().padStart(2, '0')}
           </span>
         ) : (
-          <button
+          <Button
             onClick={handleResend}
             className="text-primary font-medium hover:underline"
           >
             Resend
-          </button>
+          </Button>
         )}
       </p>
     </div>

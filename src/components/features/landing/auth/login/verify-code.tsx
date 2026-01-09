@@ -17,6 +17,9 @@ import {
   FormControl,
   FormMessage,
 } from '@/components/ui/form'
+import { Loader } from '@/components/ui/loader'
+import Heading from '@/components/ui/typography/Heading'
+import { Text } from '@/components/ui/typography/Text';
 
 interface VerifyCodeFormProps {
   email: string
@@ -42,7 +45,7 @@ export default function VerifyCodeForm({
 
   /* Countdown */
   useEffect(() => {
-    setCountdown(202)
+    setCountdown(60)
 
     const timer = setInterval(() => {
       setCountdown((prev) => {
@@ -68,7 +71,6 @@ export default function VerifyCodeForm({
 
     setIsLoading(true)
 
-    // 👇 replace with real verification
     setTimeout(() => {
       setIsLoading(false)
       onVerify()
@@ -76,20 +78,19 @@ export default function VerifyCodeForm({
   }
 
   const handleResend = () => {
-    setCountdown(202)
-    // resend logic here
+    setCountdown(90)
   }
 
   return (
     <div className="bg-gray-50 rounded-2xl p-8 animate-slide-up">
       <div className="text-center mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">
+        <Heading level={1} className="text-3xl font-bold text-gray-900 mb-2">
           Forgot Password
-        </h1>
-        <p className="text-gray-600">
+        </Heading>
+        <Text variant="muted" className="text-gray-600">
           Please check your email, we&apos;ve sent a code to{' '}
           <span className="font-medium text-gray-900">{email}</span>
-        </p>
+        </Text>
       </div>
 
       <Form {...form}>
@@ -132,34 +133,44 @@ export default function VerifyCodeForm({
             )}
           />
 
-          {/* Resend */}
-          <div className="text-center">
-            <p className="text-sm text-gray-600">
-              Didn&apos;t receive a code?{' '}
-              {countdown > 0 ? (
-                <span className="text-cyan-500 font-medium">
-                  Resend in {formatTime(countdown)}
-                </span>
-              ) : (
-                <button
-                  type="button"
-                  onClick={handleResend}
-                  className="text-cyan-500 hover:text-cyan-600 font-medium transition-colors"
-                >
-                  Resend
-                </button>
-              )}
-            </p>
-          </div>
+         
 
           {/* Continue */}
           <Button
             type="submit"
             disabled={isLoading || form.watch('code').length !== 6}
-            className="w-full disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full disabled:opacity-50 disabled:cursor-not-allowed focus:ring-0 focus:ring-offset-0"
           >
-            {isLoading ? 'Verifying…' : 'Continue'}
+            {isLoading ? (
+    <span className="flex items-center gap-2">
+      <Loader />
+     Verifying...
+    </span>
+  ) : (
+    'Continue'
+  )}
           </Button>
+
+           {/* Resend */}
+          <div className="text-center">
+            <Text className="text-sm text-gray-600">
+              Didn&apos;t receive a code?{' '}
+              {countdown > 0 ? (
+                <span className="text-blue-600 font-medium">
+                  Resend in {formatTime(countdown)}
+                </span>
+              ) : (
+                <Button
+                  type="submit"
+                  onClick={handleResend}
+                   disabled={isLoading} variant="link"
+            className="disabled:cursor-not-allowed focus:ring-0 focus:ring-offset-0"
+                >
+                  Resend
+                </Button>
+              )}
+            </Text>
+          </div>
         </form>
       </Form>
     </div>

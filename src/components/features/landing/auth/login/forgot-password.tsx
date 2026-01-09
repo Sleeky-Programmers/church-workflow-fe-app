@@ -1,11 +1,12 @@
-'use client'
+'use client';
 
-import * as React from 'react'
-import { useForm } from 'react-hook-form'
+import * as React from 'react';
+import { useForm } from 'react-hook-form';
 
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import Heading from '@/components/ui/typography/Heading'
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import Heading from '@/components/ui/typography/Heading';
+import { Text } from '@/components/ui/typography/Text';
 import {
   Form,
   FormField,
@@ -13,7 +14,8 @@ import {
   FormLabel,
   FormControl,
   FormMessage,
-} from '@/components/ui/form'
+} from '@/components/ui/form';
+import { Loader } from '@/components/ui/loader'
 
 interface ForgotPasswordFormProps {
   onSubmit: (email: string) => void
@@ -50,9 +52,9 @@ export default function ForgotPasswordForm({
     <div className="bg-gray-50 rounded-2xl p-8 animate-slide-up">
       <div className="text-center mb-8">
         <Heading level={1}>Forgot Password</Heading>
-        <p className="text-gray-600 mt-2">
+        <Text className="text-gray-600 mt-2">
           Enter your email to reset password
-        </p>
+        </Text>
       </div>
 
       <Form {...form}>
@@ -86,9 +88,16 @@ export default function ForgotPasswordForm({
           <Button
             type="submit"
             disabled={isLoading}
-            className="w-full disabled:cursor-not-allowed"
+            className="w-full disabled:cursor-not-allowed focus:ring-0 focus:ring-offset-0"
           >
-            {isLoading ? 'Sending…' : 'Continue'}
+            {isLoading ? (
+    <span className="flex items-center gap-2">
+      <Loader />
+      Sending…
+    </span>
+  ) : (
+    'Continue'
+  )}
           </Button>
 
           {/* Back to login */}

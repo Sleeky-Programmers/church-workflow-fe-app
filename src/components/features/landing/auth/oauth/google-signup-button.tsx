@@ -11,7 +11,7 @@ export default function GoogleSignupButton({
       type="button"
       variant="outline"
       onClick={onClick}
-      className="w-full py-6 border-gray-300 hover:bg-gray-50 flex items-center gap-2"
+      className="w-full py-6 border-gray-300 hover:bg-gray-50 flex items-center gap-2 focus:ring-0 focus:ring-offset-0"
     >
      <FcGoogle />
       Continue with Google

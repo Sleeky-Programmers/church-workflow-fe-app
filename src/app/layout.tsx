@@ -1,10 +1,8 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import Header from "@/components/features/landing/layout/header";
-import Footer from "@/components/features/landing/layout/footer";
 
 export const metadata: Metadata = {
-  title: "Church Workflow",
+   title: process.env.NEXT_PUBLIC_APP_NAME,
   description: "Your Church workflow processes all in one place.",
 };
 
@@ -16,9 +14,9 @@ export default function RootLayout({
   return (
     <html lang="en" className="overflow-x-hidden">
       <body>
-        <Header />
+    
         {children}
-        <Footer />
+
       </body>
     </html>
   );

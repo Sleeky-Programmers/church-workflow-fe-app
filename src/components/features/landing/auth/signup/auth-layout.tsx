@@ -1,5 +1,6 @@
 import { AUTH_CONTENT, AuthVariant } from '@/lib/auth-content';
 import { ReactNode } from 'react';
+import AuthLogo from '../auth-logo';
 
 interface Props {
   children: ReactNode;
@@ -20,13 +21,17 @@ export default function AuthLayout({ children, variant }: Props) {
 
       {/* Right */}
       <div
-        className="hidden lg:flex relative items-end bg-cover bg-center"
+        className="hidden lg:flex relative items-end bg-cover bg-center p-4 my-4 rounded-l-lg overflow-hidden mr-2"
         style={{ backgroundImage: `url(${imageUrl})` }}
       >
+         <div className="absolute top-6 left-6 z-10">
+          <AuthLogo />
+        </div>
+
         <div className="absolute inset-0 bg-black/40" />
 
        <div className="relative p-8 max-w-lg text-white-600 text-center animate-fade-in">
-  <blockquote className="bg-linear-to-bl from-black-300 to-black-400 backdrop-blur-sm p-8 rounded-lg">
+  <blockquote className="bg-linear-to-bl from-zinc-950 to-slate-950 backdrop-blur-sm p-8 rounded-lg">
     <p className="text-base md:text-lg leading-relaxed font-light mb-6">
       &quot;{verse}&quot;
     </p>
