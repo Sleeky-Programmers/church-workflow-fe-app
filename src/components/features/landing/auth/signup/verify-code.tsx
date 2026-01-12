@@ -11,7 +11,7 @@ import {
 import { maskEmail } from '@/lib/mask-email';
 import { cn } from '@/lib/utils';
 import Heading from '@/components/ui/typography/Heading';
-import { Text } from '@/components/ui/typography/Text';
+import { Span, Text } from '@/components/ui/typography/Text';
 import { Loader } from '@/components/ui/loader';
 
 interface Props {
@@ -41,11 +41,6 @@ export default function VerifyOtpForm({ email, onVerify }: Props) {
     }
   }, [isVerifying, onVerify]);
 
- useEffect(() => {
-  if (otp.length === 6) {
-    handleVerify(otp);
-  }
-}, [otp, handleVerify]);
 
 
   useEffect(() => {
@@ -72,7 +67,6 @@ export default function VerifyOtpForm({ email, onVerify }: Props) {
         </Text>
       </div>
 
-      {/* OTP */}
       <div
         className={cn(
           "flex justify-center",
@@ -110,34 +104,32 @@ export default function VerifyOtpForm({ email, onVerify }: Props) {
         </Text>
       )}
 
-      {/* Fallback Button */}
       <Button
         className="w-full h-11"
         disabled={otp.length !== 6 || isVerifying}
         onClick={() => handleVerify(otp)}
       >
         {isVerifying ? (
-            <span className="flex items-center gap-2">
+            <Span className="flex items-center gap-2">
               <Loader />
              Verifying…
-            </span>
+            </Span>
           ) : (
             'Verify'
           )}
       </Button>
 
-      {/* Resend */}
       <p className="text-sm text-center text-muted-foreground">
         Didn&apos;t receive a code?{' '}
         {resendTimer > 0 ? (
-          <span className="text-primary font-medium">
+          <Span className="text-primary font-medium">
             Resend in {Math.floor(resendTimer / 60)}:
             {(resendTimer % 60).toString().padStart(2, '0')}
-          </span>
+          </Span>
         ) : (
           <Button
             onClick={handleResend}
-            className="text-primary font-medium hover:underline"
+            className="text-primary font-medium hover:underline" variant="link"
           >
             Resend
           </Button>

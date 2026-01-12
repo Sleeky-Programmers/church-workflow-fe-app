@@ -1,37 +1,45 @@
-import React from 'react';
+import React from 'react'
+import { cn } from '@/lib/utils'
 
 type TextProps = {
-  text?: string;
-  className?: string;
-  style?: React.CSSProperties;
-  variant?: 'default' | 'muted';
-  children?: React.ReactNode;
-};
+  text?: string
+  className?: string
+  style?: React.CSSProperties
+  variant?: 'default' | 'muted' | 'error'
+  children?: React.ReactNode
+}
 
-const Text: React.FC<TextProps> = ({ text, className, variant = 'default', children }) => {
-  const variantClass = variant === 'muted' ? 'text-gray-600' : '';
-  
+export function Text({
+  text,
+  className,
+  variant = 'default',
+  children,
+}: TextProps) {
+  const variantClass = {
+    default: 'text-foreground',
+    muted: 'text-muted-foreground',
+    error: 'text-destructive',
+  }[variant]
+
   return (
-    <p
-      className={`${variantClass} ${className} text-sm font-semibold whitespace-nowrap flex-shrink-0`}
-    >
-      {children || text}
+    <p className={cn('text-sm', variantClass, className)}>
+      {children ?? text}
     </p>
-  );
-};
+  )
+}
 
-const Span: React.FC<TextProps> = ({ text, className, style }) => {
+export function Span({
+  text,
+  className,
+  style,
+  children,
+}: TextProps) {
   return (
     <span
-      className={`${className} text-xs truncate`}
+      className={cn('text-xs', className)}
       style={style}
     >
-      {text}
+      {children ?? text}
     </span>
-  );
-};
-
-export {
-  Text,
-  Span,
-};
+  )
+}

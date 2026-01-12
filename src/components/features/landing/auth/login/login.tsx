@@ -17,7 +17,7 @@ import React, { useState } from 'react';
 import { LoginFormValues } from '@/types/type';
 import GoogleSignupButton from '../oauth/google-signup-button';
 import { Eye, EyeOff } from 'lucide-react';
-import { Text } from '@/components/ui/typography/Text';
+import { Span, Text } from '@/components/ui/typography/Text';
 import { Loader } from '@/components/ui/loader';
 
 interface LoginFormProps {
@@ -136,10 +136,10 @@ const onSubmit = async () => {
           {/* Submit */}
           <Button type="submit" disabled={isLoading} className="w-full py-6 focus:ring-0 focus:ring-offset-0">
   {isLoading ? (
-    <span className="flex items-center gap-2">
+    <Span className="flex items-center gap-2">
       <Loader />
      Logging in...
-    </span>
+    </Span>
   ) : (
     'Login'
   )}
@@ -148,9 +148,9 @@ const onSubmit = async () => {
           {/* Divider */}
           <div className="relative my-8 flex items-center">
             <div className="flex-grow border-t border-gray-200" />
-            <span className="mx-4 rounded-full px-4 py-1 text-xs font-medium text-gray-500">
+            <Span className="mx-4 rounded-full px-4 py-1 text-xs font-medium text-gray-500">
               OR
-            </span>
+            </Span>
             <div className="flex-grow border-t border-gray-200" />
           </div>
 

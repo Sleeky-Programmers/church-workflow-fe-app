@@ -20,7 +20,7 @@ import {
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import GoogleSignupButton from '../oauth/google-signup-button';
 import Heading from '@/components/ui/typography/Heading';
-import { Text } from '@/components/ui/typography/Text';
+import { Span, Text } from '@/components/ui/typography/Text';
 import { Loader } from '@/components/ui/loader';
 import { useRouter } from 'next/navigation';
 
@@ -70,8 +70,7 @@ export default function SignupForm({ onSubmit }: SignupFormProps) {
 
   const handleSubmit = async (data: SignupFormValues) => {
     setIsLoading(true);
-    
-    // Simulate API call
+  
     setTimeout(() => {
       setIsLoading(false);
       onSubmit(data.email);
@@ -95,7 +94,6 @@ export default function SignupForm({ onSubmit }: SignupFormProps) {
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
-          {/* First Name & Last Name */}
           <div className="grid grid-cols-2 gap-4">
             <FormField
               control={form.control}
@@ -125,7 +123,6 @@ export default function SignupForm({ onSubmit }: SignupFormProps) {
             />
           </div>
 
-          {/* Role & Phone Number */}
           <div className="grid grid-cols-2 gap-4">
             <FormField
   control={form.control}
@@ -170,7 +167,6 @@ export default function SignupForm({ onSubmit }: SignupFormProps) {
             />
           </div>
 
-          {/* Church Name */}
           <FormField
             control={form.control}
             name="churchName"
@@ -185,7 +181,6 @@ export default function SignupForm({ onSubmit }: SignupFormProps) {
             )}
           />
 
-          {/* Email */}
           <FormField
             control={form.control}
             name="email"
@@ -199,7 +194,6 @@ export default function SignupForm({ onSubmit }: SignupFormProps) {
               </FormItem>
             )}
           />
-          {/* Password */}
           <FormField
             control={form.control}
             name="password"
@@ -218,7 +212,7 @@ export default function SignupForm({ onSubmit }: SignupFormProps) {
   variant="ghost"
   size="icon"
   onClick={() => setShowPassword(!showPassword)}
-  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:ring-0 focus:ring-offset-0"
+  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
 >
   {showPassword ? <EyeOff /> : <Eye />}
 </Button>
@@ -229,7 +223,6 @@ export default function SignupForm({ onSubmit }: SignupFormProps) {
             )}
           />
 
-          {/* Confirm Password */}
           <FormField
             control={form.control}
             name="confirmPassword"
@@ -248,7 +241,7 @@ export default function SignupForm({ onSubmit }: SignupFormProps) {
                       variant="ghost"
                       size="icon"
                       onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                     className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:ring-0 focus:ring-offset-0"
+                     className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 "
                     >
                       {showConfirmPassword ? (
                         <EyeOff className="w-5 h-5" />
@@ -263,7 +256,6 @@ export default function SignupForm({ onSubmit }: SignupFormProps) {
             )}
           />
 
-          {/* Terms Checkbox */}
           <FormField
             control={form.control}
             name="agreeToTerms"
@@ -288,36 +280,32 @@ export default function SignupForm({ onSubmit }: SignupFormProps) {
             )}
           />
 
-          {/* Submit Button */}
-         <Button type="submit" disabled={isLoading} className="w-full py-6 focus:ring-0 focus:ring-offset-0">
+         <Button type="submit" disabled={isLoading} className="w-full py-6">
   {isLoading ? (
-    <span className="flex items-center gap-2">
+    <Span className="flex items-center gap-2">
       <Loader />
       Creating account…
-    </span>
+    </Span>
   ) : (
     'Continue'
   )}
 </Button>
 
-
- {/* Divider */}
 <div className="relative my-8 flex items-center">
   <div className="flex-grow border-t border-gray-200" />
-  <span className="mx-4 rounded-full px-4 py-1 text-xs font-medium text-gray-500">
+  <Span className="mx-4 rounded-full px-4 py-1 text-xs font-medium text-gray-500">
     OR
-  </span>
+  </Span>
   <div className="flex-grow border-t border-gray-200" />
 </div>
 <GoogleSignupButton onClick={handleGoogleSignup} />
 
         </form>
       </Form>
- {/* Sign In Link */}
           <div className="text-center mt-6">
             <Text className="text-sm text-gray-600">
               Already have an account? 
-              <Button onClick={onLogin} variant="link" className='text-blue-700 hover:text-blue-800 focus:ring-0 focus:ring-offset-0'>
+              <Button onClick={onLogin} variant="link" className='text-blue-700 hover:text-blue-800 '>
                               Sign in
                   </Button>
             </Text>

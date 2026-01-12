@@ -6,7 +6,7 @@ import { useForm } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import Heading from '@/components/ui/typography/Heading';
-import { Text } from '@/components/ui/typography/Text';
+import { Span, Text } from '@/components/ui/typography/Text';
 import {
   Form,
   FormField,
@@ -91,10 +91,10 @@ export default function ForgotPasswordForm({
             className="w-full disabled:cursor-not-allowed focus:ring-0 focus:ring-offset-0"
           >
             {isLoading ? (
-    <span className="flex items-center gap-2">
+    <Span className="flex items-center gap-2">
       <Loader />
       Sending…
-    </span>
+    </Span>
   ) : (
     'Continue'
   )}

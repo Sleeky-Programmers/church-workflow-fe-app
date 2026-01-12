@@ -10,6 +10,8 @@ type SignupStep = 'signup' | 'verify-otp';
 export default function SignupPage() {
   const [currentStep, setCurrentStep] = useState<SignupStep>('signup');
   const [email, setEmail] = useState('');
+  const testOtp = 123456;
+  const testEnv = process.env.ENV === "local" || process.env.ENV === "development"
 
   const handleSignupSuccess = (submittedEmail: string) => {
     setEmail(submittedEmail);
@@ -19,7 +21,7 @@ export default function SignupPage() {
   const handleOtpVerified = async (otp: string) => {
 
 
-  if (otp === '123456') {
+  if (otp === testOtp.toString() && testEnv) {
     return true;
   }
 

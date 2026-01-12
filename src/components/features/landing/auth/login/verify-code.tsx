@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import {
   InputOTP,
   InputOTPGroup,
+  InputOTPSeparator,
   InputOTPSlot,
 } from '@/components/ui/input-otp'
 import {
@@ -19,7 +20,7 @@ import {
 } from '@/components/ui/form'
 import { Loader } from '@/components/ui/loader'
 import Heading from '@/components/ui/typography/Heading'
-import { Text } from '@/components/ui/typography/Text';
+import { Span, Text } from '@/components/ui/typography/Text';
 
 interface VerifyCodeFormProps {
   email: string
@@ -43,7 +44,6 @@ export default function VerifyCodeForm({
     },
   })
 
-  /* Countdown */
   useEffect(() => {
     setCountdown(60)
 
@@ -84,12 +84,12 @@ export default function VerifyCodeForm({
   return (
     <div className="bg-gray-50 rounded-2xl p-8 animate-slide-up">
       <div className="text-center mb-8">
-        <Heading level={1} className="text-3xl font-bold text-gray-900 mb-2">
+        <Heading level={1} className=" mb-2">
           Forgot Password
         </Heading>
         <Text variant="muted" className="text-gray-600">
           Please check your email, we&apos;ve sent a code to{' '}
-          <span className="font-medium text-gray-900">{email}</span>
+          <Span className="font-medium text-gray-900">{email}</Span>
         </Text>
       </div>
 
@@ -98,73 +98,77 @@ export default function VerifyCodeForm({
           onSubmit={form.handleSubmit(handleSubmit)}
           className="space-y-6"
         >
-          {/* OTP */}
-          <FormField
-            control={form.control}
-            name="code"
-            rules={{
-              required: 'Verification code is required',
-              minLength: {
-                value: 6,
-                message: 'Enter the 6-digit code',
-              },
-            }}
-            render={({ field }) => (
-              <FormItem className="flex flex-col items-center">
-                <FormControl>
-                  <InputOTP
-                    maxLength={6}
-                    value={field.value}
-                    onChange={field.onChange}
-                  >
-                    <InputOTPGroup className="gap-2">
-                      {Array.from({ length: 6 }).map((_, index) => (
-                        <InputOTPSlot
-                          key={index}
-                          index={index}
-                          className="w-12 h-14 text-xl border-2 border-gray-300 rounded-lg focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500 transition-all"
-                        />
-                      ))}
-                    </InputOTPGroup>
-                  </InputOTP>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+         <FormField
+  control={form.control}
+  name="code"
+  rules={{
+    required: 'Verification code is required',
+    minLength: {
+      value: 6,
+      message: 'Enter the 6-digit code',
+    },
+  }}
+  render={({ field }) => (
+    <FormItem className="flex flex-col items-center">
+      <FormControl>
+        <div className="flex justify-center">
+          <InputOTP
+            maxLength={6}
+            value={field.value}
+            onChange={field.onChange}
+            inputMode="numeric"
+            autoComplete="one-time-code"
+            containerClassName="justify-center"
+          >
+            <InputOTPGroup className="space-x-2">
+              <InputOTPSlot index={0} />
+              <InputOTPSlot index={1} />
+              <InputOTPSlot index={2} />
+            </InputOTPGroup>
 
-         
+            <InputOTPSeparator />
 
-          {/* Continue */}
+            <InputOTPGroup className="space-x-2">
+              <InputOTPSlot index={3} />
+              <InputOTPSlot index={4} />
+              <InputOTPSlot index={5} />
+            </InputOTPGroup>
+          </InputOTP>
+        </div>
+      </FormControl>
+
+      <FormMessage />
+    </FormItem>
+  )}
+/>
+
+
           <Button
             type="submit"
             disabled={isLoading || form.watch('code').length !== 6}
-            className="w-full disabled:opacity-50 disabled:cursor-not-allowed focus:ring-0 focus:ring-offset-0"
+            className="w-full"
           >
             {isLoading ? (
-    <span className="flex items-center gap-2">
+    <Span className="flex items-center gap-2">
       <Loader />
      Verifying...
-    </span>
+    </Span>
   ) : (
     'Continue'
   )}
           </Button>
-
-           {/* Resend */}
           <div className="text-center">
             <Text className="text-sm text-gray-600">
               Didn&apos;t receive a code?{' '}
               {countdown > 0 ? (
-                <span className="text-blue-600 font-medium">
+                <Span className="text-blue-600 font-medium">
                   Resend in {formatTime(countdown)}
-                </span>
+                </Span>
               ) : (
                 <Button
                   type="submit"
                   onClick={handleResend}
                    disabled={isLoading} variant="link"
-            className="disabled:cursor-not-allowed focus:ring-0 focus:ring-offset-0"
                 >
                   Resend
                 </Button>

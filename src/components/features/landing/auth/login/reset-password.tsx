@@ -15,7 +15,7 @@ import {
   FormMessage,
   FormDescription,
 } from '@/components/ui/form';
-import { Text } from '@/components/ui/typography/Text';
+import { Span, Text } from '@/components/ui/typography/Text';
 import Heading from '@/components/ui/typography/Heading';
 import { Loader } from '@/components/ui/loader';
 
@@ -45,7 +45,6 @@ export default function ResetPasswordForm({
   const onSubmit = async () => {
     setIsLoading(true)
 
-    // to be replaced with real API call
     setTimeout(() => {
       setIsLoading(false)
       onSuccess()
@@ -55,10 +54,10 @@ export default function ResetPasswordForm({
   return (
     <div className="bg-gray-50 rounded-2xl p-8 animate-slide-up">
       <div className="text-left mb-8">
-        <Heading level={1} className="text-3xl font-bold text-gray-900 mb-2">
+        <Heading level={1} className="text-3xl mb-2">
           Reset Password
         </Heading>
-        <Text variant="muted" className="text-gray-600 text-xs text-left">
+        <Text variant="muted" className="text-xs">
           Kindly set a new password. Your new password <br/> 
           must be different from your previously <br/> 
           used password.
@@ -98,7 +97,7 @@ export default function ResetPasswordForm({
                       onClick={() =>
                         setShowNewPassword((prev) => !prev)
                       }
-                      className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors focus:ring-0 focus:ring-offset-0 bg-transparent hover:bg-transparent"
+                      className="absolute right-4 top-1/2 -translate-y-1/2"
                     >
                       {showNewPassword ? (
                         <EyeOff className="w-5 h-5" />
@@ -116,7 +115,6 @@ export default function ResetPasswordForm({
             )}
           />
 
-          {/* Confirm password */}
           <FormField
             control={form.control}
             name="confirmPassword"
@@ -144,7 +142,7 @@ export default function ResetPasswordForm({
                       onClick={() =>
                         setShowConfirmPassword((prev) => !prev)
                       }
-                      className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors focus:ring-0 focus:ring-offset-0 bg-transparent hover:bg-transparent"
+                      className="absolute right-4 top-1/2 -translate-y-1/2 "
                     >
                       {showConfirmPassword ? (
                         <EyeOff className="w-5 h-5" />
@@ -162,17 +160,16 @@ export default function ResetPasswordForm({
             )}
           />
 
-          {/* Submit */}
           <Button
             type="submit"
             disabled={isLoading}
-            className="w-full disabled:cursor-not-allowed focus:ring-0 focus:ring-offset-0"
+            className="w-full"
           >
             {isLoading ? (
-    <span className="flex items-center gap-2">
+    <Span className="flex items-center gap-2">
       <Loader />
       Resetting...
-    </span>
+    </Span>
   ) : (
     'Reset Password'
   )}
