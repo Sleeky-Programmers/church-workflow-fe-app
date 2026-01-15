@@ -1,7 +1,7 @@
 import { AUTH_CONTENT, AuthVariant } from '@/lib/auth-content';
 import { ReactNode } from 'react';
-import AuthLogo from '../auth-logo';
-import { Span, Text } from '@/components/ui/typography/Text';
+import AuthLogo from '../auth-logo'; 
+import { QuoteCard } from '@/components/ui/quote-card';
 
 interface Props {
   children: ReactNode;
@@ -10,7 +10,6 @@ interface Props {
 
 export default function AuthLayout({ children, variant }: Props) {
   const { imageUrl, verse, reference } = AUTH_CONTENT[variant];
-
   return (
     <div className="min-h-screen grid grid-cols-1 lg:grid-cols-2">
       <div className="flex items-center justify-center px-6 py-12">
@@ -19,28 +18,17 @@ export default function AuthLayout({ children, variant }: Props) {
         </div>
       </div>
       <div
-        className="hidden lg:flex relative items-end bg-cover bg-center p-4 my-4 rounded-l-lg overflow-hidden mr-2"
+        className="hidden lg:flex relative items-end p-4 my-4 overflow-hidden mr-2" 
         style={{ backgroundImage: `url(${imageUrl})` }}
       >
          <div className="absolute top-6 left-6 z-10">
           <AuthLogo />
         </div>
-
-        <div className="absolute inset-0 bg-black/40" />
-
-       <div className="relative p-8 max-w-lg text-white-600 text-center animate-fade-in">
-  <blockquote className="bg-linear-to-bl from-zinc-950 to-slate-950 backdrop-blur-sm p-8 rounded-lg">
-    <Text className="text-base md:text-lg leading-relaxed font-light text-white-600 mb-6">
-      &quot;{verse}&quot;
-    </Text>
-    <cite className="not-italic">
-      <Span className="block font-semibold text-sm md:text-base tracking-wide">
-        {reference}
-      </Span>
-    </cite>
-  </blockquote>
-</div>
-</div>
+        <div className="absolute inset-0" /> 
+        <div className="relative max-w-lg text-center animate-fade-in"> 
+          <QuoteCard verse={verse} reference={reference} />
+        </div>
+      </div>
     </div>
   );
 }

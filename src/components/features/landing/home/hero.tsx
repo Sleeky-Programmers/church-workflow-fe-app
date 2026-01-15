@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Span } from '@/components/ui/typography/Text';
+import { Span, Text } from '@/components/ui/typography/Text';
+import Heading from '@/components/ui/typography/Heading';
 
 export default function HeroSection() {
   const [mounted, setMounted] = useState(false);
@@ -19,47 +20,43 @@ export default function HeroSection() {
         <div className="absolute bottom-1/4 left-1/3 w-96 h-96 bg-purple-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-4000"></div>
       </div>
 
-      <div className="relative max-w-7xl mx-auto px-6 py-20 grid md:grid-cols-2 gap-12 items-center">
+     <div className="relative max-w-7xl mx-auto px-6 py-20 grid md:grid-cols-2 gap-12 items-center">
         <div
           className={`space-y-8 transition-all duration-1000 ${
             mounted
               ? 'opacity-100 translate-y-0'
               : 'opacity-0 translate-y-10'
-          }`}
+          }`} 
         >
-          <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 leading-tight">
+          <Heading level={1} className="leading-tight"> 
             All Your Church
             <br />
-            <Span className="bg-gradient-to-r from-cyan-500 to-blue-600 bg-clip-text text-transparent">
+            <Span variant="partner"> 
               Workflow Processes
             </Span>
             <br />
             In One Place
-          </h1>
-          
-          <p className="text-lg text-gray-600 leading-relaxed max-w-lg">
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Scelerisque 
+          </Heading>
+          <Text variant="default" className="max-w-lg"> 
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Scelerisque
             orci purus aliquam ultrices at est mauris malesuada malesuada.
-          </p>
-
+          </Text>
           <Button
             size="lg"
-            className="bg-cyan-500 hover:bg-cyan-600 text-white px-8 py-6 text-lg shadow-xl shadow-cyan-500/30 transition-all duration-300 hover:shadow-2xl hover:shadow-cyan-500/40 hover:scale-105 group"
+            variant="primary"
           >
             Get Started
-            <Span className="ml-2 inline-block transition-transform duration-300 group-hover:translate-x-1">
+            <Span className="ml-2"> 
               →
             </Span>
           </Button>
         </div>
-
-
         <div
           className={`relative transition-all duration-1000 delay-300 ${
             mounted
               ? 'opacity-100 translate-x-0'
               : 'opacity-0 translate-x-10'
-          }`}
+          }`} 
         >
           <div className="relative perspective-1000">
             <div className="relative bg-gradient-to-br from-gray-300 to-gray-400 rounded-3xl p-6 shadow-2xl transform hover:scale-105 transition-transform duration-500">

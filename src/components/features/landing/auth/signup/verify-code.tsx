@@ -1,7 +1,6 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { Button } from '@/components/ui/button';
 import {
   InputOTP,
   InputOTPGroup,
@@ -10,9 +9,10 @@ import {
 } from '@/components/ui/input-otp';
 import { maskEmail } from '@/lib/mask-email';
 import { cn } from '@/lib/utils';
-import Heading from '@/components/ui/typography/Heading';
-import { Span, Text } from '@/components/ui/typography/Text';
+import { Text, Span } from '@/components/ui/typography/Text';
 import { Loader } from '@/components/ui/loader';
+import Heading from '@/components/ui/typography/Heading';
+import { Button } from '@/components/ui/button';
 
 interface Props {
   email: string;
@@ -41,8 +41,6 @@ export default function VerifyOtpForm({ email, onVerify }: Props) {
     }
   }, [isVerifying, onVerify]);
 
-
-
   useEffect(() => {
     if (resendTimer <= 0) return;
     const timer = setInterval(() => {
@@ -57,13 +55,14 @@ export default function VerifyOtpForm({ email, onVerify }: Props) {
 
   return (
     <div className="space-y-8">
-  
       <div className="space-y-2">
         <Heading level={1}>Enter the code</Heading>
-        <Text variant="muted" >
+        <Text variant="muted">
           Enter the code that we sent to your email{' '}
-          <strong> {maskEmail(email)} </strong> and be careful not to share
-          the code with anyone.
+          <Span className="font-semibold">
+            {maskEmail(email)}
+          </Span>{' '}
+          and be careful not to share the code with anyone.
         </Text>
       </div>
 
@@ -99,17 +98,17 @@ export default function VerifyOtpForm({ email, onVerify }: Props) {
       </div>
 
       {error && (
-        <Text className="text-sm text-destructive text-center">
+        <Text variant="error" className="text-center">
           Incorrect code. Please try again.
         </Text>
       )}
 
       <Button
-        className="w-full h-11"
+        className="w-full mt-4"
         disabled={otp.length !== 6 || isVerifying}
         onClick={() => handleVerify(otp)}
       >
-        {isVerifying ? (
+       {isVerifying ? (
             <Span className="flex items-center gap-2">
               <Loader />
              Verifying…
@@ -119,22 +118,23 @@ export default function VerifyOtpForm({ email, onVerify }: Props) {
           )}
       </Button>
 
-      <p className="text-sm text-center text-muted-foreground">
+      <Text variant="muted" className="text-center">
         Didn&apos;t receive a code?{' '}
         {resendTimer > 0 ? (
-          <Span className="text-primary font-medium">
+          <Span className="text-green-700 font-medium">
             Resend in {Math.floor(resendTimer / 60)}:
             {(resendTimer % 60).toString().padStart(2, '0')}
           </Span>
         ) : (
           <Button
             onClick={handleResend}
-            className="text-primary font-medium hover:underline" variant="link"
+            variant="link"
+            className="p-0 h-auto"
           >
             Resend
           </Button>
         )}
-      </p>
+      </Text>
     </div>
   );
 }

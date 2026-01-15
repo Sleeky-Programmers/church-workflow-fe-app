@@ -1,7 +1,5 @@
 'use client';
-
 import { useState } from 'react';
-import Link from 'next/link';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -18,11 +16,12 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import GoogleSignupButton from '../oauth/google-signup-button';
+import GoogleSignupButton from '../oauth/google-signup-button'; 
 import Heading from '@/components/ui/typography/Heading';
-import { Span, Text } from '@/components/ui/typography/Text';
+import { Text, Span } from '@/components/ui/typography/Text';
 import { Loader } from '@/components/ui/loader';
 import { useRouter } from 'next/navigation';
+import { Link } from '@/components/ui/link';
 
 const signupSchema = z.object({
   firstName: z.string().min(2, 'First name must be at least 2 characters'),
@@ -51,7 +50,7 @@ export default function SignupForm({ onSubmit }: SignupFormProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-   const router = useRouter();
+  const router = useRouter();
 
   const form = useForm<SignupFormValues>({
     resolver: zodResolver(signupSchema),
@@ -70,7 +69,6 @@ export default function SignupForm({ onSubmit }: SignupFormProps) {
 
   const handleSubmit = async (data: SignupFormValues) => {
     setIsLoading(true);
-  
     setTimeout(() => {
       setIsLoading(false);
       onSubmit(data.email);
@@ -79,9 +77,9 @@ export default function SignupForm({ onSubmit }: SignupFormProps) {
 
   const handleGoogleSignup = () => {
     alert('Google Signup clicked');
-
   };
- const onLogin = () => router.push('/auth/login');
+
+  const onLogin = () => router.push('/auth/login');
 
   return (
     <div className="animate-fade-in">
@@ -91,7 +89,6 @@ export default function SignupForm({ onSubmit }: SignupFormProps) {
           It&apos;s easy! Just take a minute to provide the details.
         </Text>
       </div>
-
       <Form {...form}>
         <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
@@ -122,36 +119,32 @@ export default function SignupForm({ onSubmit }: SignupFormProps) {
               )}
             />
           </div>
-
           <div className="grid grid-cols-2 gap-4">
             <FormField
-  control={form.control}
-  name="role"
-  render={({ field }) => (
-    <FormItem>
-      <FormLabel>Role</FormLabel>
-      <FormControl>
-        <Select
-          value={field.value}
-          onValueChange={field.onChange}
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="Select role" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="general-overseer">General Overseer</SelectItem>
-            <SelectItem value="senior-pastor">Senior Pastor</SelectItem>
-            <SelectItem value="pastor">Pastor</SelectItem>
-            <SelectItem value="admin">Church Administrator</SelectItem>
-            <SelectItem value="cell-leader">Cell Leader</SelectItem>
-            <SelectItem value="fellowship-group-leader">Fellowship Group Leader</SelectItem>
-          </SelectContent>
-        </Select>
-      </FormControl>
-      <FormMessage />
-    </FormItem>
-  )}
-/>
+              control={form.control}
+              name="role"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Role</FormLabel>
+                  <FormControl>
+                    <Select value={field.value} onValueChange={field.onChange}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select role" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="general-overseer">General Overseer</SelectItem>
+                        <SelectItem value="senior-pastor">Senior Pastor</SelectItem>
+                        <SelectItem value="pastor">Pastor</SelectItem>
+                        <SelectItem value="admin">Church Administrator</SelectItem>
+                        <SelectItem value="cell-leader">Cell Leader</SelectItem>
+                        <SelectItem value="fellowship-group-leader">Fellowship Group Leader</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             <FormField
               control={form.control}
               name="phoneNumber"
@@ -166,7 +159,6 @@ export default function SignupForm({ onSubmit }: SignupFormProps) {
               )}
             />
           </div>
-
           <FormField
             control={form.control}
             name="churchName"
@@ -180,7 +172,6 @@ export default function SignupForm({ onSubmit }: SignupFormProps) {
               </FormItem>
             )}
           />
-
           <FormField
             control={form.control}
             name="email"
@@ -207,22 +198,21 @@ export default function SignupForm({ onSubmit }: SignupFormProps) {
                       placeholder="Create a password"
                       {...field}
                     />
-                   <Button
-  type="button"
-  variant="ghost"
-  size="icon"
-  onClick={() => setShowPassword(!showPassword)}
-  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
->
-  {showPassword ? <EyeOff /> : <Eye />}
-</Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2" 
+                    >
+                      {showPassword ? <EyeOff /> : <Eye />}
+                    </Button>
                   </div>
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
-
           <FormField
             control={form.control}
             name="confirmPassword"
@@ -241,13 +231,9 @@ export default function SignupForm({ onSubmit }: SignupFormProps) {
                       variant="ghost"
                       size="icon"
                       onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                     className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 "
+                      className="absolute right-3 top-1/2 -translate-y-1/2"
                     >
-                      {showConfirmPassword ? (
-                        <EyeOff className="w-5 h-5" />
-                      ) : (
-                        <Eye className="w-5 h-5" />
-                      )}
+                      {showConfirmPassword ? <EyeOff /> : <Eye />}
                     </Button>
                   </div>
                 </FormControl>
@@ -255,7 +241,6 @@ export default function SignupForm({ onSubmit }: SignupFormProps) {
               </FormItem>
             )}
           />
-
           <FormField
             control={form.control}
             name="agreeToTerms"
@@ -270,46 +255,41 @@ export default function SignupForm({ onSubmit }: SignupFormProps) {
                 <div className="space-y-1 leading-none">
                   <FormLabel>
                     I agree to the{' '}
-                    <Link href="/terms" className="hover:underline">
-                      Terms & Conditions
-                    </Link>
+                    <Link href="/terms">Terms & Conditions</Link>
                   </FormLabel>
                   <FormMessage />
                 </div>
               </FormItem>
             )}
           />
-
-         <Button type="submit" disabled={isLoading} className="w-full py-6">
-  {isLoading ? (
-    <Span className="flex items-center gap-2">
-      <Loader />
-      Creating account…
-    </Span>
-  ) : (
-    'Continue'
-  )}
-</Button>
-
-<div className="relative my-8 flex items-center">
-  <div className="flex-grow border-t border-gray-200" />
-  <Span className="mx-4 rounded-full px-4 py-1 text-xs font-medium text-gray-500">
-    OR
-  </Span>
-  <div className="flex-grow border-t border-gray-200" />
-</div>
-<GoogleSignupButton onClick={handleGoogleSignup} />
-
+          <Button type="submit" disabled={isLoading} className="w-full py-6">
+            {isLoading ? (
+              <Span variant="default" className="flex items-center gap-2">
+                <Loader />
+                Creating account…
+              </Span>
+            ) : (
+              'Continue'
+            )}
+          </Button>
+          <div className="relative my-8 flex items-center">
+            <div className="flex-grow border-t border-gray-200" />
+            <Span variant="default" className="mx-4 px-4 py-1">
+              OR
+            </Span>
+            <div className="flex-grow border-t border-gray-200" />
+          </div>
+          <GoogleSignupButton onClick={handleGoogleSignup} />
         </form>
       </Form>
-          <div className="text-center mt-6">
-            <Text className="text-sm text-gray-600">
-              Already have an account? 
-              <Button onClick={onLogin} variant="link" className='text-blue-700 hover:text-blue-800 '>
-                              Sign in
-                  </Button>
-            </Text>
-          </div>
+      <div className="text-center mt-6">
+        <Text variant="muted">
+          Already have an account?
+          <Button onClick={onLogin} variant="link">
+            Sign in
+          </Button>
+        </Text>
+      </div>
     </div>
   );
 }

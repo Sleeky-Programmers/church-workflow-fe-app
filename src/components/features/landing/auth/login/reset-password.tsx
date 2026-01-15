@@ -1,11 +1,7 @@
 'use client'
-
 import * as React from 'react'
 import { useForm } from 'react-hook-form'
-import { Eye, EyeOff } from 'lucide-react'
-
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import {
   Form,
   FormField,
@@ -15,9 +11,10 @@ import {
   FormMessage,
   FormDescription,
 } from '@/components/ui/form';
-import { Span, Text } from '@/components/ui/typography/Text';
 import Heading from '@/components/ui/typography/Heading';
 import { Loader } from '@/components/ui/loader';
+import { PasswordInput } from '@/components/ui/passport-input';
+import {Text, Span } from '@/components/ui/typography/Text';
 
 interface ResetPasswordFormProps {
   onSuccess: () => void
@@ -32,38 +29,32 @@ export default function ResetPasswordForm({
   onSuccess,
 }: ResetPasswordFormProps) {
   const [isLoading, setIsLoading] = React.useState(false)
-  const [showNewPassword, setShowNewPassword] = React.useState(false)
-  const [showConfirmPassword, setShowConfirmPassword] = React.useState(false)
-
   const form = useForm<ResetPasswordFormValues>({
     defaultValues: {
       newPassword: '',
       confirmPassword: '',
     },
   })
-
-  const onSubmit = async () => {
+  const onSubmit = async (data: ResetPasswordFormValues) => {
+    if (data.newPassword !== data.confirmPassword) return;
     setIsLoading(true)
-
     setTimeout(() => {
       setIsLoading(false)
       onSuccess()
     }, 1000)
   }
-
   return (
     <div className="bg-gray-50 rounded-2xl p-8 animate-slide-up">
       <div className="text-left mb-8">
-        <Heading level={1} className="text-3xl mb-2">
+        <Heading level={1}>
           Reset Password
         </Heading>
-        <Text variant="muted" className="text-xs">
-          Kindly set a new password. Your new password <br/> 
-          must be different from your previously <br/> 
+        <Text variant="muted"> 
+          Kindly set a new password. Your new password <br/>
+          must be different from your previously <br/>
           used password.
         </Text>
       </div>
-
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
@@ -83,29 +74,7 @@ export default function ResetPasswordForm({
               <FormItem>
                 <FormLabel>Enter New Password</FormLabel>
                 <FormControl>
-                  <div className="relative">
-                    <Input
-                      type={showNewPassword ? 'text' : 'password'}
-                      placeholder="Enter new password"
-                      {...field}
-                      className="pr-12"
-                    />
-                    <Button
-                       type="button"
-                      variant="ghost"
-                      size="icon"
-                      onClick={() =>
-                        setShowNewPassword((prev) => !prev)
-                      }
-                      className="absolute right-4 top-1/2 -translate-y-1/2"
-                    >
-                      {showNewPassword ? (
-                        <EyeOff className="w-5 h-5" />
-                      ) : (
-                        <Eye className="w-5 h-5" />
-                      )}
-                    </Button>
-                  </div>
+                  <PasswordInput placeholder="Enter new password" {...field} />
                 </FormControl>
                 <FormDescription>
                   Password must be at least 8 characters
@@ -114,7 +83,6 @@ export default function ResetPasswordForm({
               </FormItem>
             )}
           />
-
           <FormField
             control={form.control}
             name="confirmPassword"
@@ -128,29 +96,7 @@ export default function ResetPasswordForm({
               <FormItem>
                 <FormLabel>Confirm New Password</FormLabel>
                 <FormControl>
-                  <div className="relative">
-                    <Input
-                      type={showConfirmPassword ? 'text' : 'password'}
-                      placeholder="Confirm new password"
-                      {...field}
-                      className="pr-12"
-                    />
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      onClick={() =>
-                        setShowConfirmPassword((prev) => !prev)
-                      }
-                      className="absolute right-4 top-1/2 -translate-y-1/2 "
-                    >
-                      {showConfirmPassword ? (
-                        <EyeOff className="w-5 h-5" />
-                      ) : (
-                        <Eye className="w-5 h-5" />
-                      )}
-                    </Button>
-                  </div>
+                  <PasswordInput placeholder="Confirm new password" {...field} />
                 </FormControl>
                 <FormDescription>
                   Must be the same characters
@@ -159,20 +105,19 @@ export default function ResetPasswordForm({
               </FormItem>
             )}
           />
-
           <Button
             type="submit"
             disabled={isLoading}
             className="w-full"
           >
             {isLoading ? (
-    <Span className="flex items-center gap-2">
-      <Loader />
-      Resetting...
-    </Span>
-  ) : (
-    'Reset Password'
-  )}
+              <Span className="flex items-center gap-2">
+                <Loader />
+                Resetting...
+              </Span>
+            ) : (
+              'Reset Password'
+            )}
           </Button>
         </form>
       </Form>
