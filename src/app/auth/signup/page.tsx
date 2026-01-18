@@ -1,9 +1,9 @@
 'use client';
-
 import { useState } from 'react';
 import AuthLayout from '@/components/features/landing/auth/signup/auth-layout';
 import SignupForm from '@/components/features/landing/auth/signup/signup-form';
 import VerifyOtpForm from '@/components/features/landing/auth/signup/verify-code';
+import { useRouter } from 'next/navigation';
 
 type SignupStep = 'signup' | 'verify-otp';
 
@@ -11,7 +11,8 @@ export default function SignupPage() {
   const [currentStep, setCurrentStep] = useState<SignupStep>('signup');
   const [email, setEmail] = useState('');
   const testOtp = 123456;
-  const testEnv = process.env.ENV === "local" || process.env.ENV === "development"
+  const testEnv = process.env.ENV === "local" || process.env.ENV === "development";
+  const router = useRouter();
 
   const handleSignupSuccess = (submittedEmail: string) => {
     setEmail(submittedEmail);
@@ -19,15 +20,12 @@ export default function SignupPage() {
   };
 
   const handleOtpVerified = async (otp: string) => {
-
-
-  if (otp === testOtp.toString() && testEnv) {
-    return true;
-  }
-
-  return false;
-};
-
+    if (otp === testOtp.toString() && testEnv) {
+      router.push('/onboarding');
+      return true;
+    }
+    return false;
+  };
 
   return (
     <AuthLayout variant="signup">
@@ -35,11 +33,10 @@ export default function SignupPage() {
         {currentStep === 'signup' && (
           <SignupForm onSubmit={handleSignupSuccess} />
         )}
-
         {currentStep === 'verify-otp' && (
           <VerifyOtpForm
-            email={email} onVerify={handleOtpVerified}
-                       
+            email={email}
+            onVerify={handleOtpVerified}
           />
         )}
       </div>
