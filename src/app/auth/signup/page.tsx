@@ -9,13 +9,14 @@ import { useAdminInvite } from '@/hooks/use-admin-invite';
 import { Loader } from '@/components/ui/loader';
 import { Text } from '@/components/ui/typography/Text';
 import { Button } from '@/components/ui/button';
+import { RouteConfig } from '@/config/routes';
+import { SignUpStep } from '@/lib/enums';
 
-type SignupStep = 'signup' | 'verify-otp';
 
 export default function SignupPage() {
   const router = useRouter();
   const { isAdmin, inviteData, isLoading, error } = useAdminInvite();
-  const [currentStep, setCurrentStep] = useState<SignupStep>('signup');
+  const [currentStep, setCurrentStep] = useState<SignUpStep>(SignUpStep.SIGNUP);
   const [email, setEmail] = useState('');
 
   const testOtp = 123456;
@@ -38,7 +39,7 @@ export default function SignupPage() {
         <div className="flex flex-col items-center justify-center gap-4">
           <Text variant="error" className="text-center">{error}</Text>
           <Button
-            onClick={() => router.push('/auth/login')}
+            onClick={() => router.push(RouteConfig.auth.signIn)}
             variant="link"
           >
             Go to login
@@ -52,16 +53,15 @@ export default function SignupPage() {
     setEmail(submittedEmail);
   
     if (isAdmin) {
-      router.push('/dashboard');
+      router.push(RouteConfig.dashboard.home);
     } else {
-
-      setCurrentStep('verify-otp');
+      setCurrentStep(SignUpStep.VERIFY_OTP);
     }
   };
 
   const handleOtpVerified = async (otp: string) => {
     if (otp === testOtp.toString() && testEnv) {
-      router.push('/onboarding');
+      router.push(RouteConfig.onboarding);
       return true;
     }
     return false;
@@ -72,10 +72,10 @@ export default function SignupPage() {
   return (
     <AuthLayout variant={layoutVariant}>
       <div className="relative">
-        {currentStep === 'signup' && !isAdmin && (
+        {currentStep === SignUpStep.SIGNUP && !isAdmin && (
           <SignupForm onSubmit={handleSignupSuccess} />
         )}
-        {currentStep === 'signup' && isAdmin && inviteData && (
+        {currentStep === SignUpStep.SIGNUP && isAdmin && inviteData && (
           <AdminSignupForm 
             onSubmit={handleSignupSuccess}
             preFilledName={{
@@ -85,7 +85,7 @@ export default function SignupPage() {
             preFilledEmail={inviteData.email}
           />
         )}
-        {currentStep === 'verify-otp' && (
+        {currentStep === SignUpStep.VERIFY_OTP && (
           <VerifyOtpForm
             email={email}
             onVerify={handleOtpVerified}
