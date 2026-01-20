@@ -153,10 +153,10 @@ export function ChurchIdentityStep({ form, onSubmit, onSkip, step = 1, totalStep
                   <FormControl>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <SelectTrigger className="bg-white">
-                        <SelectValue placeholder="N Nigerian Naira" />
+                        <SelectValue placeholder="₦ NGN" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="NGN">N Nigerian Naira</SelectItem>
+                        <SelectItem value="NGN">₦ Nigrian Naira</SelectItem>
                       </SelectContent>
                     </Select>
                   </FormControl>

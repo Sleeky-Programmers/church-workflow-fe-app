@@ -1,5 +1,6 @@
 export type AuthVariant =
   | 'signup'
+  | 'admin-signup'
   | 'otp'
   | 'login'
   | 'verify-otp'
@@ -12,6 +13,11 @@ export const AUTH_CONTENT: Record<AuthVariant, {
   reference: string;
 }> = {
   signup: {
+    imageUrl: '/auth/form.jpg',
+    verse: "For I know the plans I have for you, declares the Lord, plans for welfare and not for evil, to give you a future and a hope. Then you will call upon me and come and pray to me, and I will hear you. You will seek me and find me, when you seek me with all your heart.",
+    reference: 'Jeremiah 29:11–13',
+  },
+  'admin-signup': {
     imageUrl: '/auth/form.jpg',
     verse: "For I know the plans I have for you, declares the Lord, plans for welfare and not for evil, to give you a future and a hope. Then you will call upon me and come and pray to me, and I will hear you. You will seek me and find me, when you seek me with all your heart.",
     reference: 'Jeremiah 29:11–13',
