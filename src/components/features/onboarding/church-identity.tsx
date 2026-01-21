@@ -25,8 +25,8 @@ export function ChurchIdentityStep({ form, onSubmit, onSkip, step = 1, totalStep
   return (
     <div className="space-y-6">
       <div>
-        <Heading level={1} className="text-2xl font-bold mb-2">Church Identity</Heading>
-        <Text variant="muted" className="text-sm">Tell us a little about your church.</Text>
+        <Heading level={1} className="mb-2">Church Identity</Heading>
+        <Text variant="muted">Tell us a little about your church.</Text>
       </div>
 
       <Form {...form}>
@@ -37,7 +37,7 @@ export function ChurchIdentityStep({ form, onSubmit, onSkip, step = 1, totalStep
               name="churchName" 
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-sm font-medium">
+                  <FormLabel>
                     Church Name <Span variant="error">*</Span>
                   </FormLabel>
                   <FormControl>
@@ -56,20 +56,19 @@ export function ChurchIdentityStep({ form, onSubmit, onSkip, step = 1, totalStep
               name="churchAlias" 
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-sm font-medium flex items-center gap-1">
+                  <FormLabel className="flex items-center gap-1">
                     Church Alias
                     <div className="relative group">
-                      <Info className="h-3.5 w-3.5 text-blue-500 cursor-help" />
-                      <div className="absolute left-0 bottom-full mb-2 hidden group-hover:block w-64 p-2 bg-blue-500 text-white text-xs rounded shadow-lg z-10">
+                      <Info className="h-3.5 w-3.5 text-primary-500 cursor-help" />
+                      <Span className="absolute left-0 bottom-full mb-2 hidden group-hover:block w-64 p-2 bg-primary-500 text-white-600 rounded shadow-lg z-10">
                         A short or alternative name your church is commonly known by
-                      </div>
+                      </Span>
                     </div>
                   </FormLabel>
                   <FormControl>
                     <Input 
                       {...field} 
-                      placeholder=""
-                      className="bg-white"
+                      placeholder="Living Grace"
                     />
                   </FormControl>
                   <FormMessage />
@@ -107,7 +106,7 @@ export function ChurchIdentityStep({ form, onSubmit, onSkip, step = 1, totalStep
                   </FormLabel>
                   <FormControl>
                     <Select onValueChange={field.onChange} value={field.value}>
-                      <SelectTrigger className="bg-white">
+                      <SelectTrigger >
                         <SelectValue placeholder="Nigeria" />
                       </SelectTrigger>
                       <SelectContent>
@@ -125,14 +124,13 @@ export function ChurchIdentityStep({ form, onSubmit, onSkip, step = 1, totalStep
               name="stateProvince" 
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-sm font-medium">
+                  <FormLabel>
                     State / Province <Span variant="error">*</Span>
                   </FormLabel>
                   <FormControl>
                     <Input 
                       {...field} 
                       placeholder="State"
-                      className="bg-white"
                     />
                   </FormControl>
                   <FormMessage />
@@ -147,12 +145,12 @@ export function ChurchIdentityStep({ form, onSubmit, onSkip, step = 1, totalStep
               name="defaultCurrency" 
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-sm font-medium">
+                  <FormLabel>
                     Default Currency <Span variant="error">*</Span>
                   </FormLabel>
                   <FormControl>
                     <Select onValueChange={field.onChange} value={field.value}>
-                      <SelectTrigger className="bg-white">
+                      <SelectTrigger>
                         <SelectValue placeholder="₦ NGN" />
                       </SelectTrigger>
                       <SelectContent>
@@ -170,12 +168,12 @@ export function ChurchIdentityStep({ form, onSubmit, onSkip, step = 1, totalStep
               name="timeZone" 
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-sm font-medium">
+                  <FormLabel>
                     Time Zone <Span variant="error">*</Span>
                   </FormLabel>
                   <FormControl>
                     <Select onValueChange={field.onChange} value={field.value}>
-                      <SelectTrigger className="bg-white">
+                      <SelectTrigger>
                         <SelectValue placeholder="(GMT+1) West Africa Time" />
                       </SelectTrigger>
                       <SelectContent>
@@ -194,7 +192,7 @@ export function ChurchIdentityStep({ form, onSubmit, onSkip, step = 1, totalStep
             name="churchLogo" 
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-sm font-medium">Church Logo</FormLabel>
+                <FormLabel>Church Logo</FormLabel>
                 <FormControl>
                   <div className="border-2 border-dashed border-gray-200 rounded-lg p-8 bg-white hover:border-gray-300 transition-colors cursor-pointer">
                     <div className="text-center">
@@ -214,8 +212,8 @@ export function ChurchIdentityStep({ form, onSubmit, onSkip, step = 1, totalStep
           />
 
           <div className="text-center mb-4">
-            <Text variant="muted" className="text-sm">
-              Step <Span className="font-semibold">{step}</Span> of {totalSteps}
+            <Text variant="muted">
+              Step <Span variant="default">{step}</Span> of {totalSteps}
             </Text>
           </div>
 

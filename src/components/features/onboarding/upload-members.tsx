@@ -113,12 +113,12 @@ const simulateUpload = (fileName: string) => {
     <Form {...form}>
       <div className="space-y-6 max-w-2xl">
         <div className="space-y-1">
-          <Heading level={1} className="text-3xl font-semibold">Upload Church Members</Heading>
-          <Text variant="muted" className="text-base">Upload your members in bulk using a CSV</Text>
+          <Heading level={1}>Upload Church Members</Heading>
+          <Text variant="muted" >Upload your members in bulk using a CSV</Text>
         </div>
 
         <div className="space-y-3">
-          <Text className="text-sm font-medium">Use this template</Text>
+          <Text variant="default">Use this template</Text>
           <Button 
             type="button"
             variant="ghost" 
@@ -131,7 +131,7 @@ const simulateUpload = (fileName: string) => {
 
         <FormField control={form.control} name="csvFile" render={({ field }) => (
           <FormItem>
-            <FormLabel className="text-sm font-medium">Upload file</FormLabel>
+            <FormLabel>Upload file</FormLabel>
             <FormControl>
  <div className="border-2 border-dashed border-gray-200 rounded-lg p-8 bg-white hover:border-gray-300 transition-colors cursor-pointer">
                     <div className="text-center">
@@ -153,13 +153,13 @@ const simulateUpload = (fileName: string) => {
 
         {uploadedFiles.length > 0 && (
           <div className="space-y-4">
-            <FormLabel className="text-sm font-medium">Uploaded files</FormLabel>
+            <FormLabel>Uploaded files</FormLabel>
             <div className="space-y-4">
               {uploadedFiles.map((file, index) => (
                 <div key={index} className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <Text className="text-sm font-medium">{file.name}</Text>
-                    <Text className="text-sm font-medium">{file.progress}%</Text>
+                    <Text variant="default">{file.name}</Text>
+                    <Text variant="muted">{file.progress}%</Text>
                   </div>
                   <div className="flex items-center gap-2">
                     <div className="flex-1 bg-gray-200 rounded-full h-2 overflow-hidden">
@@ -171,8 +171,8 @@ const simulateUpload = (fileName: string) => {
                     <Button
                       type="button"
                       variant="ghost"
-                      size="sm"
-                      className="h-8 w-8 p-0 "
+                      size="icon"
+                      className="p-0 "
                       disabled={file.status === 'success'}
                     >
                       <Pause className="w-4 h-4" />
@@ -180,14 +180,14 @@ const simulateUpload = (fileName: string) => {
                     <Button
                       type="button"
                       variant="ghost"
-                      size="sm"
-                      className="h-8 w-8 p-0 hover:bg-gray-100"
+                      size="icon"
+                      className="p-0"
                       onClick={() => handleRemoveFile(index)}
                     >
                       <X className="w-4 h-4" />
                     </Button>
                   </div>
-                  <Text className={`text-xs ${getUploadStatusConfig(file.status, file.message).statusColor}`}>
+                  <Text variant="default" className={`${getUploadStatusConfig(file.status, file.message).statusColor}`}>
                     {getUploadStatusConfig(file.status, file.message).statusText}
                   </Text>
                 </div>
@@ -197,8 +197,8 @@ const simulateUpload = (fileName: string) => {
         )}
 
         <div className="text-center pt-2">
-          <Text variant="muted" className="text-sm">
-            Step <Span className="font-semibold">{step}</Span> of {totalSteps}
+          <Text variant="muted">
+            Step <Span variant='default'>{step}</Span> of {totalSteps}
           </Text>
         </div>
 

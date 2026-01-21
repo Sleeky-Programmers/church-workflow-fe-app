@@ -59,7 +59,7 @@ export default function VerifyOtpForm({ email, onVerify }: Props) {
         <Heading level={1}>Enter the code</Heading>
         <Text variant="muted">
           Enter the code that we sent to your email{' '}
-          <Span className="font-semibold">
+          <Span variant="default">
             {maskEmail(email)}
           </Span>{' '}
           and be careful not to share the code with anyone.

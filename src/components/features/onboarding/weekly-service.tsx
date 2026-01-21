@@ -98,7 +98,7 @@ export function WeeklyServicesStep({
 
       <div className="space-y-4">
         <div>
-          <Label className="font-medium">Service Name <Span variant="error">*</Span></Label>
+          <Label>Service Name <Span variant="error">*</Span></Label>
           <Input 
             placeholder="e.g. Sunday Worship Service"
             value={newService.serviceName}
@@ -107,7 +107,7 @@ export function WeeklyServicesStep({
         </div>
 
         <div className="space-y-2">
-          <Label className="font-medium">Days</Label>
+          <Label>Days</Label>
           <div className="flex gap-2">
             {daysOfWeek.map((day) => (
               <Button
@@ -125,7 +125,7 @@ export function WeeklyServicesStep({
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <Label className="font-medium">Start Time <Span variant="error">*</Span></Label>
+            <Label>Start Time <Span variant="error">*</Span></Label>
             <Input 
               type="time"
               placeholder="--:-- --"
@@ -135,7 +135,7 @@ export function WeeklyServicesStep({
           </div>
           
           <div>
-            <Label className="font-medium">End Time</Label>
+            <Label>End Time</Label>
             <Input 
               type="time"
               placeholder="--:-- --"
@@ -146,7 +146,7 @@ export function WeeklyServicesStep({
         </div>
 
         <div>
-          <Label className="font-medium">Location</Label>
+          <Label>Location</Label>
           <Input 
             placeholder="e.g. Main Auditorium"
             value={newService.location}
