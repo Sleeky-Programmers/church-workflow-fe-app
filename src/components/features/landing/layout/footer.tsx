@@ -1,4 +1,5 @@
 'use client'
+import { Span } from '@/components/ui/typography/Text';
 
 export default function Footer() {
   const partners = [
@@ -9,23 +10,19 @@ export default function Footer() {
     'Subbly',
     'Demio',
   ]
-
   return (
-    <footer className="w-full bg-white">
+    <footer className="w-full"> 
       <div className="max-w-7xl mx-auto px-6 py-12">
-        {/* Partners */}
         <div className="grid grid-cols-2 md:grid-cols-6 gap-8 place-items-center">
-          {partners.map((partner, index) => (
-            <span
+          {partners.map((partner) => (
+            <Span
               key={partner}
-              className="text-gray-400 text-lg font-medium tracking-wide transition-opacity hover:opacity-70"
-              style={{ opacity: 0.4, animationDelay: `${index * 100}ms` }}
+              variant="partner" 
             >
               {partner}
-            </span>
+            </Span>
           ))}
         </div>
-
       </div>
     </footer>
   )

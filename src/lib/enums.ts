@@ -14,3 +14,8 @@ export enum HtmlInputElementTypes {
   SELECT = "SELECT",
   TEXTAREA = "TEXTAREA",
 }
+
+export enum SignUpStep {
+  SIGNUP = 'SIGNUP',
+  VERIFY_OTP = 'VERIFY_OTP',
+}

@@ -1,73 +1,82 @@
 'use client';
 
-import ForgotPasswordForm from '@/components/features/landing/auth/login/forgot-password';
-import LoginForm from '@/components/features/landing/auth/login/login';
-import ResetPasswordForm from '@/components/features/landing/auth/login/reset-password';
-import VerifyCodeForm from '@/components/features/landing/auth/login/verify-code';
 import { useState } from 'react';
+import LoginForm from '@/components/features/landing/auth/login/login';
+import ForgotPasswordForm from '@/components/features/landing/auth/login/forgot-password';
+import VerifyCodeForm from '@/components/features/landing/auth/login/verify-code';
+import ResetPasswordForm from '@/components/features/landing/auth/login/reset-password';
+import { AnimatePresence, motion } from 'framer-motion';
+import AuthLayout from '@/components/features/landing/auth/signup/auth-layout';
+import { AuthVariant } from '@/lib/auth-content';
 
-type AuthStep = 'login' | 'forgot-password' | 'verify-code' | 'reset-password';
+type AuthStep =
+  | 'login'
+  | 'forgot-password'
+  | 'verify-code'
+  | 'reset-password';
 
-export default function AuthPage() {
-  const [currentStep, setCurrentStep] = useState<AuthStep>('login');
+export default function LoginPage() {
+  const [step, setStep] = useState<AuthStep>('login');
   const [email, setEmail] = useState('');
 
-  const handleForgotPassword = () => {
-    setCurrentStep('forgot-password');
-  };
-
-  const handleForgotPasswordSubmit = (submittedEmail: string) => {
-    setEmail(submittedEmail);
-    setCurrentStep('verify-code');
-  };
-
-  const handleVerifyCode = () => {
-    setCurrentStep('reset-password');
-  };
-
-  const handleResetPassword = () => {
-    setCurrentStep('login');
-  };
-
-  const handleBackToLogin = () => {
-    setCurrentStep('login');
+  const getVariant = (): AuthVariant => {
+    switch (step) {
+      case 'login':
+        return 'login';
+      case 'forgot-password':
+        return 'forgot-password';
+      case 'verify-code':
+        return 'verify-otp';
+      case 'reset-password':
+        return 'reset-password';
+      default:
+        return 'login';
+    }
   };
 
   return (
-    <div className="min-h-screen mt-20 flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200 px-4 py-8">
-
-
-      <div className="w-full max-w-md relative">
-
-        {/* Forms */}
-        <div className="relative">
-          {currentStep === 'login' && (
-            <LoginForm onForgotPassword={handleForgotPassword} />
-          )}
-          
-          {currentStep === 'forgot-password' && (
-            <ForgotPasswordForm 
-              onSubmit={handleForgotPasswordSubmit}
-              onBackToLogin={handleBackToLogin}
+    <AuthLayout variant={getVariant()}>
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={step}
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -16 }}
+          transition={{ duration: 0.25, ease: 'easeOut' }}
+        >
+          {step === 'login' && (
+            <LoginForm
+              onForgotPassword={() => setStep('forgot-password')}
             />
           )}
-          
-          {currentStep === 'verify-code' && (
-            <VerifyCodeForm 
+
+          {step === 'forgot-password' && (
+            <ForgotPasswordForm
+              onSubmit={(email) => {
+                setEmail(email);
+                setStep('verify-code');
+              }}
+              onBackToLogin={() => setStep('login')}
+            />
+          )}
+
+          {step === 'verify-code' && (
+            <VerifyCodeForm
               email={email}
-              onVerify={handleVerifyCode}
+              onVerify={async () => {
+                setStep('reset-password');
+                return true;
+              }}
             />
           )}
-          
-          {currentStep === 'reset-password' && (
-            <ResetPasswordForm 
-              onSuccess={handleResetPassword}
+
+          {step === 'reset-password' && (
+            <ResetPasswordForm
+              onSuccess={() => setStep('login')}
             />
           )}
-        </div>
-
-      </div>
-
-    </div>
+        </motion.div>
+      </AnimatePresence>
+    </AuthLayout>
   );
 }

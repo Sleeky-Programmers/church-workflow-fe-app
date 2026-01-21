@@ -1,10 +1,7 @@
-'use client'
-import * as React from 'react'
-import Link from 'next/link'
-import { useForm } from 'react-hook-form'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import Heading from '@/components/ui/typography/Heading'
+'use client';
+import { useForm } from 'react-hook-form';
+import { Button } from '@/components/ui/button';
+import Heading from '@/components/ui/typography/Heading';
 import {
   Form,
   FormField,
@@ -12,51 +9,63 @@ import {
   FormLabel,
   FormControl,
   FormMessage,
-} from '@/components/ui/form'
+} from '@/components/ui/form';
+import { useRouter } from 'next/navigation';
+import React, { useState } from 'react';
+import { LoginFormValues } from '@/types/type';
+import GoogleSignupButton from '../oauth/google-signup-button'; 
+import {Text, Span } from '@/components/ui/typography/Text';
+import { Loader } from '@/components/ui/loader';
+import { PasswordInput } from '@/components/ui/passport-input';
+import { Input } from '@/components/ui/input';
+
 
 interface LoginFormProps {
-  onForgotPassword: () => void
-}
-
-type LoginFormValues = {
-  email: string
-  password: string
+  onForgotPassword: () => void;
 }
 
 export default function LoginForm({ onForgotPassword }: LoginFormProps) {
-  const [isLoading, setIsLoading] = React.useState(false)
-
+  const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
   const form = useForm<LoginFormValues>({
     defaultValues: {
       email: '',
       password: '',
     },
-  })
+  });
 
   const onSubmit = async () => {
-    setIsLoading(true)
+    setIsLoading(true);
+    try {
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      router.push('/dashboard');
+    } catch {
+      alert('Login failed. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-    setTimeout(() => setIsLoading(false), 1000)
-  }
+  const onSignUp = () => router.push('/auth/signup');
 
   return (
-    <div className="bg-gray-50 rounded-2xl p-8 animate-slide-up">
-      <div className="text-center mb-8">
-        <Heading level={1}>Log in to Church on Cloud</Heading>
+    <div className="space-y-8 animate-fade-in">
+      <div className="text-left space-y-2">
+        <Heading level={1}>Welcome back</Heading>
+        <Text variant="muted">
+          Welcome back! It only takes a moment to access your account.
+        </Text>
       </div>
-
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          {/* Email */}
+         
           <FormField
             control={form.control}
             name="email"
-            rules={{
-              required: 'Email is required',
-            }}
+            rules={{ required: 'Email is required' }}
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Email Address</FormLabel>
+                <FormLabel>Email</FormLabel>
                 <FormControl>
                   <Input
                     type="email"
@@ -68,62 +77,62 @@ export default function LoginForm({ onForgotPassword }: LoginFormProps) {
               </FormItem>
             )}
           />
-
-          {/* Password */}
+       
           <FormField
             control={form.control}
             name="password"
-            rules={{
-              required: 'Password is required',
-            }}
+            rules={{ required: 'Password is required' }}
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Password</FormLabel>
                 <FormControl>
-                  <Input
-                    type="password"
+                  <PasswordInput
                     placeholder="Enter your password"
                     {...field}
                   />
                 </FormControl>
                 <div className="flex justify-end">
                   <Button
-                    type="button"
                     variant="link"
                     onClick={onForgotPassword}
-                    className="px-0"
                   >
-                    Forgot Password?
+                    Forgot password?
                   </Button>
                 </div>
                 <FormMessage />
               </FormItem>
             )}
           />
-
-          {/* Submit */}
-          <Button
-            type="submit"
-            disabled={isLoading}
-            className="w-full disabled:cursor-not-allowed"
-          >
-            {isLoading ? 'Logging in…' : 'Login'}
+         
+          <Button type="submit" disabled={isLoading} className="w-full py-6">
+            {isLoading ? (
+              <Span className="flex items-center gap-2">
+                <Loader />
+                Logging in...
+              </Span>
+            ) : (
+              'Login'
+            )}
           </Button>
-
-          {/* Sign up */}
-          <div className="text-center">
-            <p className="text-sm text-gray-600">
-              Don&apos;t have an account yet?{' '}
-              <Link
-                href="/auth/signup"
-                className="font-medium text-blue-500 hover:text-blue-600 transition-colors"
-              >
-                Create account
-              </Link>
-            </p>
+       
+          <div className="relative my-8 flex items-center">
+            <div className="flex-grow border-t border-gray-200" />
+            <Span variant="default" className="mx-4 px-4 py-1">
+              OR
+            </Span>
+            <div className="flex-grow border-t border-gray-200" />
           </div>
+          <GoogleSignupButton onClick={() => alert('Google Signup')} />
         </form>
       </Form>
+      <div className="text-center">
+        <Text variant="muted">
+          Don&apos;t have an account yet?
+          <Button onClick={onSignUp} variant="link">
+            Create Church Account
+          </Button>
+        </Text>
+      </div>
     </div>
-  )
+  );
 }

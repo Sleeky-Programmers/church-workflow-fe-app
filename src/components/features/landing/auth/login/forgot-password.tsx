@@ -1,11 +1,9 @@
-'use client'
-
-import * as React from 'react'
-import { useForm } from 'react-hook-form'
-
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import Heading from '@/components/ui/typography/Heading'
+'use client';
+import { useForm } from 'react-hook-form';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import Heading from '@/components/ui/typography/Heading';
+import { Text, Span } from '@/components/ui/typography/Text';
 import {
   Form,
   FormField,
@@ -13,7 +11,9 @@ import {
   FormLabel,
   FormControl,
   FormMessage,
-} from '@/components/ui/form'
+} from '@/components/ui/form';
+import { Loader } from '@/components/ui/loader';
+import React from 'react';
 
 interface ForgotPasswordFormProps {
   onSubmit: (email: string) => void
@@ -29,38 +29,31 @@ export default function ForgotPasswordForm({
   onBackToLogin,
 }: ForgotPasswordFormProps) {
   const [isLoading, setIsLoading] = React.useState(false)
-
   const form = useForm<ForgotPasswordFormValues>({
     defaultValues: {
       email: '',
     },
   })
-
   const handleSubmit = async (data: ForgotPasswordFormValues) => {
     setIsLoading(true)
-
-    // 👇 simulate API call
     setTimeout(() => {
       setIsLoading(false)
       onSubmit(data.email)
     }, 1000)
   }
-
   return (
     <div className="bg-gray-50 rounded-2xl p-8 animate-slide-up">
       <div className="text-center mb-8">
         <Heading level={1}>Forgot Password</Heading>
-        <p className="text-gray-600 mt-2">
+        <Text variant="muted" className="mt-2">
           Enter your email to reset password
-        </p>
+        </Text>
       </div>
-
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(handleSubmit)}
           className="space-y-6"
         >
-          {/* Email */}
           <FormField
             control={form.control}
             name="email"
@@ -81,17 +74,20 @@ export default function ForgotPasswordForm({
               </FormItem>
             )}
           />
-
-          {/* Continue */}
           <Button
             type="submit"
             disabled={isLoading}
-            className="w-full disabled:cursor-not-allowed"
+            className="w-full"
           >
-            {isLoading ? 'Sending…' : 'Continue'}
+            {isLoading ? (
+              <Span className="flex items-center gap-2">
+                <Loader />
+                Sending…
+              </Span>
+            ) : (
+              'Continue'
+            )}
           </Button>
-
-          {/* Back to login */}
           <div className="text-center">
             <Button
               type="button"
