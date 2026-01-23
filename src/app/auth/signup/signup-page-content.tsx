@@ -17,10 +17,10 @@ export function SignupPageContent() {
   const { isAdmin, inviteData, isLoading, error } = useAdminInvite();
   const [currentStep, setCurrentStep] = useState<SignUpStep>(SignUpStep.SIGNUP);
   const [email, setEmail] = useState("");
+  const [signupData, setSignupData] = useState<any>(null);
 
   const testOtp = 123456;
-  const testEnv =
-    process.env.ENV === "local" || process.env.ENV === "development";
+  const testEnv = process.env.NODE_ENV === "development";
 
   if (isLoading) {
     return (
@@ -51,8 +51,15 @@ export function SignupPageContent() {
     );
   }
 
-  const handleSignupSuccess = (submittedEmail: string) => {
+  const handleSignupSuccess = (submittedEmail: string, data?: any) => {
     setEmail(submittedEmail);
+    if (data) {
+      setSignupData(data);
+      // Store in sessionStorage for later retrieval
+      if (typeof window !== "undefined") {
+        sessionStorage.setItem("signupData", JSON.stringify(data));
+      }
+    }
 
     if (isAdmin) {
       router.push(RouteConfig.dashboard.home);
@@ -62,7 +69,12 @@ export function SignupPageContent() {
   };
 
   const handleOtpVerified = async (otp: string) => {
-    if (otp === testOtp.toString() && testEnv) {
+    // In development, accept the test OTP (123456) or any valid 6-digit code
+    if (testEnv && (otp === testOtp.toString() || /^\d{6}$/.test(otp))) {
+      // Ensure signup data is stored before navigating
+      if (signupData && typeof window !== "undefined") {
+        sessionStorage.setItem("signupData", JSON.stringify(signupData));
+      }
       router.push(RouteConfig.onboarding);
       return true;
     }
@@ -85,6 +97,7 @@ export function SignupPageContent() {
               lastName: inviteData.lastName,
             }}
             preFilledEmail={inviteData.email}
+            invitedRole={inviteData.role}
           />
         )}
         {currentStep === SignUpStep.VERIFY_OTP && (

@@ -16,7 +16,7 @@ export default function AuthLayout({ children, variant }: Props) {
         <div className="w-full max-w-md animate-fade-in-up">{children}</div>
       </div>
       <div
-        className="hidden lg:flex relative items-end p-4 my-4 overflow-visible mr-2"
+        className="hidden lg:flex relative items-end p-4 my-4 overflow-visible mr-2 rounded-lg bg-cover bg-center bg-no-repeat"
         style={{ backgroundImage: `url(${imageUrl})` }}
       >
         <div className="relative max-w-lg text-center animate-fade-in">

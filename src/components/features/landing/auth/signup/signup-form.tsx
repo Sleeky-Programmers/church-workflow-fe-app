@@ -1,12 +1,12 @@
-'use client';
-import { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
-import { Eye, EyeOff } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Checkbox } from '@/components/ui/checkbox';
+"use client";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { Eye, EyeOff } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Form,
   FormControl,
@@ -14,36 +14,44 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import GoogleSignupButton from '../oauth/google-signup-button'; 
-import Heading from '@/components/ui/typography/Heading';
-import { Text, Span } from '@/components/ui/typography/Text';
-import { Loader } from '@/components/ui/loader';
-import { useRouter } from 'next/navigation';
-import { Link } from '@/components/ui/link';
+} from "@/components/ui/form";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import GoogleSignupButton from "../oauth/google-signup-button";
+import Heading from "@/components/ui/typography/Heading";
+import { Text, Span } from "@/components/ui/typography/Text";
+import { Loader } from "@/components/ui/loader";
+import { useRouter } from "next/navigation";
+import { Link } from "@/components/ui/link";
 
-const signupSchema = z.object({
-  firstName: z.string().min(2, 'First name must be at least 2 characters'),
-  lastName: z.string().min(2, 'Last name must be at least 2 characters'),
-  role: z.string().min(1, 'Role is required'),
-  phoneNumber: z.string().min(10, 'Valid phone number is required'),
-  churchName: z.string().min(2, 'Church name is required'),
-  email: z.string().email('Invalid email format'),
-  password: z.string().min(8, 'Password must be at least 8 characters'),
-  confirmPassword: z.string(),
-  agreeToTerms: z.boolean().refine((val) => val === true, {
-    message: 'You must accept the Terms and Conditions',
-  }),
-}).refine((data) => data.password === data.confirmPassword, {
-  message: "Passwords do not match",
-  path: ['confirmPassword'],
-});
+const signupSchema = z
+  .object({
+    firstName: z.string().min(2, "First name must be at least 2 characters"),
+    lastName: z.string().min(2, "Last name must be at least 2 characters"),
+    role: z.string().min(1, "Role is required"),
+    phoneNumber: z.string().min(10, "Valid phone number is required"),
+    churchName: z.string().min(2, "Church name is required"),
+    email: z.string().email("Invalid email format"),
+    password: z.string().min(8, "Password must be at least 8 characters"),
+    confirmPassword: z.string(),
+    agreeToTerms: z.boolean().refine((val) => val === true, {
+      message: "You must accept the Terms and Conditions",
+    }),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords do not match",
+    path: ["confirmPassword"],
+  });
 
 type SignupFormValues = z.infer<typeof signupSchema>;
 
 interface SignupFormProps {
-  onSubmit: (email: string) => void;
+  onSubmit: (email: string, data?: SignupFormValues) => void;
 }
 
 export default function SignupForm({ onSubmit }: SignupFormProps) {
@@ -55,14 +63,14 @@ export default function SignupForm({ onSubmit }: SignupFormProps) {
   const form = useForm<SignupFormValues>({
     resolver: zodResolver(signupSchema),
     defaultValues: {
-      firstName: '',
-      lastName: '',
-      role: 'general-overseer',
-      phoneNumber: '',
-      churchName: '',
-      email: '',
-      password: '',
-      confirmPassword: '',
+      firstName: "",
+      lastName: "",
+      role: "general-overseer",
+      phoneNumber: "",
+      churchName: "",
+      email: "",
+      password: "",
+      confirmPassword: "",
       agreeToTerms: false,
     },
   });
@@ -71,15 +79,15 @@ export default function SignupForm({ onSubmit }: SignupFormProps) {
     setIsLoading(true);
     setTimeout(() => {
       setIsLoading(false);
-      onSubmit(data.email);
+      onSubmit(data.email, data);
     }, 1000);
   };
 
   const handleGoogleSignup = () => {
-    alert('Google Signup clicked');
+    alert("Google Signup clicked");
   };
 
-  const onLogin = () => router.push('/auth/login');
+  const onLogin = () => router.push("/auth/login");
 
   return (
     <div className="animate-fade-in">
@@ -132,12 +140,20 @@ export default function SignupForm({ onSubmit }: SignupFormProps) {
                         <SelectValue placeholder="Select role" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="general-overseer">General Overseer</SelectItem>
-                        <SelectItem value="senior-pastor">Senior Pastor</SelectItem>
+                        <SelectItem value="general-overseer">
+                          General Overseer
+                        </SelectItem>
+                        <SelectItem value="senior-pastor">
+                          Senior Pastor
+                        </SelectItem>
                         <SelectItem value="pastor">Pastor</SelectItem>
-                        <SelectItem value="admin">Church Administrator</SelectItem>
+                        <SelectItem value="admin">
+                          Church Administrator
+                        </SelectItem>
                         <SelectItem value="cell-leader">Cell Leader</SelectItem>
-                        <SelectItem value="fellowship-group-leader">Fellowship Group Leader</SelectItem>
+                        <SelectItem value="fellowship-group-leader">
+                          Fellowship Group Leader
+                        </SelectItem>
                       </SelectContent>
                     </Select>
                   </FormControl>
@@ -166,7 +182,10 @@ export default function SignupForm({ onSubmit }: SignupFormProps) {
               <FormItem>
                 <FormLabel>Church Name</FormLabel>
                 <FormControl>
-                  <Input placeholder="E.g., Living Grace Ministries" {...field} />
+                  <Input
+                    placeholder="E.g., Living Grace Ministries"
+                    {...field}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -179,7 +198,11 @@ export default function SignupForm({ onSubmit }: SignupFormProps) {
               <FormItem>
                 <FormLabel>Email</FormLabel>
                 <FormControl>
-                  <Input type="email" placeholder="example@gmail.com" {...field} />
+                  <Input
+                    type="email"
+                    placeholder="example@gmail.com"
+                    {...field}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -194,7 +217,7 @@ export default function SignupForm({ onSubmit }: SignupFormProps) {
                 <FormControl>
                   <div className="relative">
                     <Input
-                      type={showPassword ? 'text' : 'password'}
+                      type={showPassword ? "text" : "password"}
                       placeholder="Create a password"
                       {...field}
                     />
@@ -203,7 +226,7 @@ export default function SignupForm({ onSubmit }: SignupFormProps) {
                       variant="ghost"
                       size="icon"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2" 
+                      className="absolute right-3 top-1/2 -translate-y-1/2"
                     >
                       {showPassword ? <EyeOff /> : <Eye />}
                     </Button>
@@ -222,7 +245,7 @@ export default function SignupForm({ onSubmit }: SignupFormProps) {
                 <FormControl>
                   <div className="relative">
                     <Input
-                      type={showConfirmPassword ? 'text' : 'password'}
+                      type={showConfirmPassword ? "text" : "password"}
                       placeholder="Confirm password"
                       {...field}
                     />
@@ -230,7 +253,9 @@ export default function SignupForm({ onSubmit }: SignupFormProps) {
                       type="button"
                       variant="ghost"
                       size="icon"
-                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      onClick={() =>
+                        setShowConfirmPassword(!showConfirmPassword)
+                      }
                       className="absolute right-3 top-1/2 -translate-y-1/2"
                     >
                       {showConfirmPassword ? <EyeOff /> : <Eye />}
@@ -254,8 +279,7 @@ export default function SignupForm({ onSubmit }: SignupFormProps) {
                 </FormControl>
                 <div className="space-y-1 leading-none">
                   <FormLabel>
-                    I agree to the{' '}
-                    <Link href="/terms">Terms & Conditions</Link>
+                    I agree to the <Link href="/terms">Terms & Conditions</Link>
                   </FormLabel>
                   <FormMessage />
                 </div>
@@ -269,7 +293,7 @@ export default function SignupForm({ onSubmit }: SignupFormProps) {
                 Creating account…
               </Span>
             ) : (
-              'Continue'
+              "Continue"
             )}
           </Button>
           <div className="relative my-8 flex items-center">

@@ -1,26 +1,25 @@
-'use client'
-import Image from 'next/image'
-import { useEffect, useState } from 'react'
-import { Button } from '@/components/ui/button'
-import { Link } from '@/components/ui/link';
-import { StickyHeader } from './sticky-header';
+"use client";
+import Image from "next/image";
+import { useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Link } from "@/components/ui/link";
+import { StickyHeader } from "./sticky-header";
 
 export default function Header() {
-  const [scrolled, setScrolled] = useState(false)
+  const [scrolled, setScrolled] = useState(false);
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 20)
-    window.addEventListener('scroll', onScroll)
-    return () => window.removeEventListener('scroll', onScroll)
-  }, [])
+    const onScroll = () => setScrolled(window.scrollY > 20);
+    window.addEventListener("scroll", onScroll);
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
   return (
-    <StickyHeader> 
+    <StickyHeader>
       <div className="max-w-7xl mx-auto px-10">
         <div
           className={`flex items-center justify-between transition-all duration-300 ${
-            scrolled ? 'py-4' : 'py-6'
-          }`} 
+            scrolled ? "py-4" : "py-6"
+          }`}
         >
-         
           <Link href="/">
             <Image
               src="/assets/logo/horizontal/main.png"
@@ -31,10 +30,10 @@ export default function Header() {
             />
           </Link>
           <nav className="hidden md:flex items-center space-x-8">
-            {['Home', 'Features', 'Pricing', 'Contact'].map((item) => (
+            {["Home", "Features", "Pricing", "Contact"].map((item) => (
               <Link
                 key={item}
-                href={item === 'Home' ? '/' : `#${item.toLowerCase()}`}
+                href={item === "Home" ? "/" : `#${item.toLowerCase()}`}
               >
                 {item}
               </Link>
@@ -42,21 +41,16 @@ export default function Header() {
           </nav>
           <div className="flex items-center space-x-4">
             <Link href="/auth/login">
-              <Button
-                variant="ghost"
-                className="hidden sm:inline-flex"
-              >
+              <Button variant="ghost" className="hidden sm:inline-flex">
                 Log in
               </Button>
             </Link>
             <Link href="/auth/signup">
-              <Button variant="primary"> 
-                Get Started
-              </Button>
+              <Button variant="default">Get Started</Button>
             </Link>
           </div>
         </div>
       </div>
     </StickyHeader>
-  )
+  );
 }
