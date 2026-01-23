@@ -1,28 +1,36 @@
-'use client';
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { Card } from '@/components/ui/card';
-import { ChurchIdentityStep } from './church-identity';
-import { UploadMembersStep } from './upload-members';
-import { WeeklyServicesStep } from './weekly-service';
-import { WeeklyServicesValues, ChurchIdentityValues, churchIdentitySchema, UploadMembersValues, uploadMembersSchema } from '@/types/type';
+"use client";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Card } from "@/components/ui/card";
+import { ChurchIdentityStep } from "./church-identity";
+import { UploadMembersStep } from "./upload-members";
+import { WeeklyServicesStep } from "./weekly-service";
+import {
+  WeeklyServicesValues,
+  ChurchIdentityValues,
+  churchIdentitySchema,
+  UploadMembersValues,
+  uploadMembersSchema,
+} from "@/types/type";
+import { useSignupData } from "@/hooks/use-signup-data";
 
 export default function ChurchOnboarding() {
   const [step, setStep] = useState(1);
   const [services, setServices] = useState<WeeklyServicesValues>([]);
   const router = useRouter();
+  const signupData = useSignupData();
 
   const identityForm = useForm<ChurchIdentityValues>({
     resolver: zodResolver(churchIdentitySchema),
     defaultValues: {
-      churchName: '',
-      churchAddress: '',
-      country: '',
-      stateProvince: '',
-      defaultCurrency: '',
-      timeZone: '',
+      churchName: "",
+      churchAddress: "",
+      country: "",
+      stateProvince: "",
+      defaultCurrency: "",
+      timeZone: "",
     },
   });
 
@@ -31,21 +39,33 @@ export default function ChurchOnboarding() {
     defaultValues: { csvFile: undefined },
   });
 
- const onIdentitySubmit = (data: ChurchIdentityValues) => {
-  void data;
-  setStep(2);
-};
+  useEffect(() => {
+    if (signupData && identityForm) {
+      identityForm.reset({
+        churchName: signupData.churchName || "",
+        churchAddress: "",
+        country: "",
+        stateProvince: "",
+        defaultCurrency: "",
+        timeZone: "",
+      });
+    }
+  }, [signupData, identityForm]);
 
-const onServicesSubmit = (data: WeeklyServicesValues) => {
-  void data;
-  setStep(3);
-};
+  const onIdentitySubmit = (data: ChurchIdentityValues) => {
+    void data;
+    setStep(2);
+  };
 
-const onUploadSubmit = (data: UploadMembersValues) => {
-  void data;
-  router.push('/dashboard');
-};
+  const onServicesSubmit = (data: WeeklyServicesValues) => {
+    void data;
+    setStep(3);
+  };
 
+  const onUploadSubmit = (data: UploadMembersValues) => {
+    void data;
+    router.push("/dashboard");
+  };
 
   const handleBack = () => {
     if (step > 1) setStep(step - 1);
@@ -56,12 +76,14 @@ const onUploadSubmit = (data: UploadMembersValues) => {
   };
 
   const addService = (service: WeeklyServicesValues[number]) => {
-  setServices(prev => [...prev, service]);
-};
+    setServices((prev) => [...prev, service]);
+  };
 
-
-
-  const updateService = (index: number, field: keyof WeeklyServicesValues[0], value: any) => {
+  const updateService = (
+    index: number,
+    field: keyof WeeklyServicesValues[0],
+    value: any,
+  ) => {
     const updated = [...services];
     updated[index][field] = value;
     setServices(updated);
@@ -111,10 +133,5 @@ const onUploadSubmit = (data: UploadMembersValues) => {
     }
   };
 
-  return (
-    <Card className="max-w-2xl mx-auto p-8">
-      
-      {renderStep()}
-    </Card>
-  );
+  return <Card className="max-w-2xl mx-auto p-8">{renderStep()}</Card>;
 }
