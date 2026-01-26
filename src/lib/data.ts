@@ -1,5 +1,5 @@
 import { ActivityRow, DepartmentRow } from "@/types";
-import { RequisitionStatus } from "./enums";
+import { EventCategory, RequisitionStatus } from "./enums";
 import {
   Activity,
   Calendar1,
@@ -78,9 +78,9 @@ export const SidebarData = {
       title: "Logout",
       url: "/auth/login",
       icon: LogOut,
-    }
+    },
   ],
-}
+};
 
 export const DashboardData = {
   stats: {
@@ -115,18 +115,39 @@ export const DashboardData = {
     { name: "Donations", value: 11.2, color: "#EF4444" },
   ],
   upcomingEvents: [
-    { title: "Sunday Service", when: "Tomorrow" },
-    { title: "Leaders Meeting", when: "Tomorrow" },
-    { title: "Morning Devotion", when: "Monday" },
-    { title: "Bible Study", when: "Monday" },
-    { title: "Prayer Meeting", when: "Thursday" },
+    {
+      title: "Sunday Service",
+      date: "2026-01-25",
+      category: EventCategory.GENERAL,
+    },
+    {
+      title: "Leaders Meeting",
+      date: "2026-01-26",
+      category: EventCategory.LEADERSHIP,
+    },
+    {
+      title: "Morning Devotion",
+      date: "2026-01-27",
+      category: EventCategory.LEADERSHIP,
+    },
+    {
+      title: "Bible Study",
+      date: "2026-01-22",
+      category: EventCategory.GENERAL,
+    },
+    {
+      title: "Youth Convention",
+      date: "2026-01-23",
+      category: EventCategory.SPECIAL,
+    },
   ],
+
   birthdays: [
-    { name: "Pastor John", when: "Tomorrow" },
-    { name: "John Doe", when: "Thursday" },
-    { name: "Pastor Peter", when: "Saturday" },
+    { name: "Pastor John", date: "2026-01-24" },
+    { name: "John Doe", date: "2026-02-02" },
+    { name: "Pastor Peter", date: "2026-02-12" },
   ],
-}
+};
 
 export const NotificationData = [
   {
@@ -140,7 +161,7 @@ export const NotificationData = [
   },
   {
     icon: FileText,
-    title: "Offering Report Ready - March 2025",
+    title: "Offering Report Ready - March 2026",
     description: "Total ₦380,000 collected across 3 branches",
     date: "30 mins ago",
     isRead: false,
@@ -188,7 +209,7 @@ export const NotificationData = [
 export const ActivityLogData: ActivityRow[] = [
   {
     id: "1",
-    timestamp: "2025-05-15T10:34:00",
+    timestamp: "2025-11-15T10:34:00",
     user: { name: "John Doe", initials: "JD" },
     action: "Submitted a requisition",
     module: "Requisition",
@@ -196,7 +217,7 @@ export const ActivityLogData: ActivityRow[] = [
   },
   {
     id: "2",
-    timestamp: "2025-05-14T19:15:00",
+    timestamp: "2025-10-14T19:15:00",
     user: { name: "Admin", initials: "AD" },
     action: "Approved requisition",
     module: "Requisition",
@@ -204,7 +225,7 @@ export const ActivityLogData: ActivityRow[] = [
   },
   {
     id: "3",
-    timestamp: "2025-05-14T17:42:00",
+    timestamp: "2026-10-14T17:42:00",
     user: { name: "Gloria A.", initials: "GA" },
     action: "Added new church member",
     module: "Membership",
@@ -212,7 +233,7 @@ export const ActivityLogData: ActivityRow[] = [
   },
   {
     id: "4",
-    timestamp: "2025-05-13T14:05:00",
+    timestamp: "2025-10-13T14:05:00",
     user: { name: "Ruth B.", initials: "RB" },
     action: "Logged in",
     module: "Authentication",
@@ -220,7 +241,7 @@ export const ActivityLogData: ActivityRow[] = [
   },
   {
     id: "5",
-    timestamp: "2025-05-14T17:42:00",
+    timestamp: "2025-11-14T17:42:00",
     user: { name: "David O.", initials: "DO" },
     action: "Sent out event reminders",
     module: "Events",
@@ -229,26 +250,104 @@ export const ActivityLogData: ActivityRow[] = [
 ];
 
 export const departmentData: DepartmentRow[] = [
-  { id: "1", name: "Media Team", hod: { name: "John Doe", initials: "JD" }, members: 6, status: "Active" },
-  { id: "2", name: "Ushering", hod: { name: "Sister Mary", initials: "SM" }, members: 10, status: "Active" },
-  { id: "3", name: "Choir", hod: { name: "Mr. Caleb", initials: "MC" }, members: 19, status: "Active" },
-  { id: "4", name: "Evangelism", hod: { name: "Pastor", initials: "P" }, members: 15, status: "Active" },
+  {
+    id: "1",
+    name: "Media Team",
+    hod: { name: "John Doe", initials: "JD" },
+    members: 6,
+    status: "Active",
+  },
+  {
+    id: "2",
+    name: "Ushering",
+    hod: { name: "Sister Mary", initials: "SM" },
+    members: 10,
+    status: "Active",
+  },
+  {
+    id: "3",
+    name: "Choir",
+    hod: { name: "Mr. Caleb", initials: "MC" },
+    members: 19,
+    status: "Active",
+  },
+  {
+    id: "4",
+    name: "Evangelism",
+    hod: { name: "Pastor", initials: "P" },
+    members: 15,
+    status: "Active",
+  },
 ];
 
 export const departmentMembers = [
-  { id: "m1", name: "Jane Smith", role: "Assistant HOD", joined: "Jan 2023", contact: "+234 801 234 5678" },
-  { id: "m2", name: "Michael James", role: "Camera Operator", joined: "Feb 2024", contact: "+234 801 234 5678" },
-  { id: "m3", name: "Deborah Ajayi", role: "Sound Tech", joined: "March 2022", contact: "+234 801 234 5678" },
+  {
+    id: "m1",
+    name: "Jane Smith",
+    role: "Assistant HOD",
+    joined: "Jan 2023",
+    contact: "+234 801 234 5678",
+  },
+  {
+    id: "m2",
+    name: "Michael James",
+    role: "Camera Operator",
+    joined: "Feb 2024",
+    contact: "+234 801 234 5678",
+  },
+  {
+    id: "m3",
+    name: "Deborah Ajayi",
+    role: "Sound Tech",
+    joined: "March 2022",
+    contact: "+234 801 234 5678",
+  },
 ];
 
 export const departmentEvents = [
-  { id: "e1", event: "Sunday Worship", date: "May 26, 2025", status: "Completed", assigned: "Yes" },
-  { id: "e2", event: "Leadership Retreat", date: "June 10, 2025", status: "Completed", assigned: "Yes" },
-  { id: "e3", event: "Community Service", date: "July 15, 2025", status: "Upcoming", assigned: "No" },
+  {
+    id: "e1",
+    event: "Sunday Worship",
+    date: "May 26, 2026",
+    status: "Completed",
+    assigned: "Yes",
+  },
+  {
+    id: "e2",
+    event: "Leadership Retreat",
+    date: "June 10, 2026",
+    status: "Completed",
+    assigned: "Yes",
+  },
+  {
+    id: "e3",
+    event: "Community Service",
+    date: "July 15, 2026",
+    status: "Upcoming",
+    assigned: "No",
+  },
 ];
 
 export const departmentRequisitions = [
-  { id: "rq1", date: "May 12", title: "New Microphones", amount: "₦80,000", status: RequisitionStatus.PENDING },
-  { id: "rq2", date: "Apr 10", title: "Mixer Replacement", amount: "₦120,000", status: RequisitionStatus.APPROVED },
-  { id: "rq3", date: "March 14", title: "HDMI Cables Replacement", amount: "₦60,000", status: RequisitionStatus.APPROVED },
+  {
+    id: "rq1",
+    date: "May 12",
+    title: "New Microphones",
+    amount: "₦80,000",
+    status: RequisitionStatus.PENDING,
+  },
+  {
+    id: "rq2",
+    date: "Apr 10",
+    title: "Mixer Replacement",
+    amount: "₦120,000",
+    status: RequisitionStatus.APPROVED,
+  },
+  {
+    id: "rq3",
+    date: "March 14",
+    title: "HDMI Cables Replacement",
+    amount: "₦60,000",
+    status: RequisitionStatus.APPROVED,
+  },
 ];

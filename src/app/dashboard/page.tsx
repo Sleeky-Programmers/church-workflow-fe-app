@@ -1,18 +1,12 @@
-"use client"
+"use client";
 
-import React from "react";
 import { CalendarDays, User } from "lucide-react";
 import { Span, Text } from "@/components/ui/typography/Text";
 import { StatCard } from "@/components/features/dashboard/StatCard";
 import { Card, CardContent } from "@/components/ui/card";
-import {
-  ChartContainer,
-  ChartTooltipContent,
-} from "@/components/ui/chart";
+import { ChartContainer, ChartTooltipContent } from "@/components/ui/chart";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
-  LineChart,
-  Line,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -27,6 +21,18 @@ import {
 import { Button } from "@/components/ui/button";
 import Heading from "@/components/ui/typography/Heading";
 import { DashboardData } from "@/lib/data";
+import { EVENT_CATEGORY_CONFIG } from "@/config/event-category";
+import {
+  cn,
+  formatEventDate,
+  formatUpcomingBirthday,
+  isInFuture,
+  sortBirthdaysByNearest,
+} from "@/lib/utils";
+import Link from "next/link";
+import { TrendChart } from "@/components/features/dashboard/trend-chart";
+import { IncomeVsExpenses } from "@/components/features/dashboard/income-expense";
+import { IncomeBreakdown } from "@/components/features/dashboard/income-breakdown";
 
 export default function Dashboard() {
   return (
@@ -63,37 +69,15 @@ export default function Dashboard() {
             />
           </div>
 
-          <div className="lg:col-span-3">
-            <Card className="rounded-3xl p-3">
-              <CardContent>
-                <div className="flex items-start justify-between">
-                  <div>
-                    <Heading level={4} text="Attendance Trend" />
-                    <Text text="This month &bull; Last month" />
-                  </div>
-                  <Span text="Overview" />
-                </div>
-
-                <div className="mt-4">
-                  <ChartContainer
-                    className="p-4"
-                    config={{
-                      thisMonth: { color: "#2563EB" },
-                      lastMonth: { color: "#93C5FD" },
-                    }}
-                  >
-                    <LineChart data={DashboardData.attendanceData} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#E6E6E6" />
-                      <XAxis dataKey="month" />
-                      <YAxis />
-                      <Tooltip content={<ChartTooltipContent />} />
-                      <Line type="monotone" dataKey="thisMonth" stroke="var(--color-thisMonth)" strokeWidth={2.5} dot={false} />
-                      <Line type="monotone" dataKey="lastMonth" stroke="var(--color-lastMonth)" strokeWidth={2} strokeDasharray="4 4" dot={false} />
-                    </LineChart>
-                  </ChartContainer>
-                </div>
-              </CardContent>
-            </Card>
+          <div>
+            <TrendChart
+              attendanceData={DashboardData.attendanceData}
+              incomeData={DashboardData.incomeExpenses.map((item) => ({
+                month: item.month,
+                thisMonth: item.income,
+                lastMonth: item.expenses,
+              }))}
+            />
           </div>
         </div>
 
@@ -101,32 +85,63 @@ export default function Dashboard() {
           <Card className="rounded-3xl">
             <CardContent className="w-full">
               <div className="flex items-center justify-between py-3">
-                <Heading level={3} text="Upcoming Events" className="text-blue-600" />
+                <Heading
+                  level={3}
+                  text="Upcoming Events"
+                  className="text-blue-600"
+                />
                 <CalendarDays className="w-5 h-5 text-blue-600" />
               </div>
 
               <Text text="Services" className="text-blue-500" />
-              <div className="mt-2 space-y-3">
-                {DashboardData.upcomingEvents.map((e: any, i: any) => (
-                  <div key={i} className="flex items-center justify-between gap-3">
-                    <div className="flex items-center gap-3">
-                      <Span className="w-2 h-2 rounded-full bg-sky-600 block" />
-                      <div>
-                        <Heading level={5} text={e.title} />
-                        <Span text="Services" />
+              <div className="mt-3 space-y-3">
+                {DashboardData.upcomingEvents
+                  .filter((event) => isInFuture(event.date))
+                  .sort(
+                    (a, b) =>
+                      new Date(a.date).getTime() - new Date(b.date).getTime(),
+                  )
+                  .map((event, i) => {
+                    const categoryConfig =
+                      EVENT_CATEGORY_CONFIG[event.category];
+                    const displayDate = formatEventDate(event.date);
+                    if (!displayDate) return null;
+
+                    return (
+                      <div
+                        key={i}
+                        className="flex items-center justify-between gap-3"
+                      >
+                        <div className="flex items-center gap-3">
+                          <Span
+                            className={cn(
+                              "w-3 h-3 rounded-full block",
+                              categoryConfig.dotClass,
+                            )}
+                          />
+                          <div>
+                            <Heading level={5} text={event.title} />
+                          </div>
+                        </div>
+
+                        <Span
+                          text={displayDate}
+                          className="text-muted-foreground text-sm"
+                        />
                       </div>
-                    </div>
-                    <Span text={e.when} />
-                  </div>
-                ))}
+                    );
+                  })}
               </div>
 
               <div className="border-t my-4" />
 
               <Text text="Birthdays" className="text-blue-500" />
               <div className="mt-3 space-y-2">
-                {DashboardData.birthdays.map((b, i) => (
-                  <div key={i} className="flex items-center justify-between gap-3">
+                {sortBirthdaysByNearest(DashboardData.birthdays).map((b, i) => (
+                  <div
+                    key={i}
+                    className="flex items-center justify-between gap-3"
+                  >
                     <div className="flex items-center gap-2">
                       <Avatar>
                         <AvatarFallback>
@@ -135,96 +150,26 @@ export default function Dashboard() {
                       </Avatar>
                       <Text text={b.name} />
                     </div>
-                    <Span text={b.when} />
+                    <Span
+                      text={formatUpcomingBirthday(b.date)}
+                      className="text-muted-foreground text-sm"
+                    />
                   </div>
                 ))}
               </div>
 
-              <Button className="!text-white w-full mt-4">
-                View more
+              <Button asChild className="!text-white w-full mt-4">
+                <Link href="/dashboard/membership">View more</Link>
               </Button>
             </CardContent>
           </Card>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
-        <div className="lg:col-span-2">
-          <Card className="rounded-3xl p-3">
-            <CardContent>
-              <div className="flex items-center justify-between">
-                <Heading level={4} text="Income vs Expenses" />
-                <Span text="January - June 2025" />
-              </div>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+        <IncomeVsExpenses />
 
-              <div className="mt-4 h-auto">
-                <ChartContainer className="p-4" config={{ income: { color: "#2563EB" }, expenses: { color: "#F97316" } }}>
-                  <BarChart data={DashboardData.incomeExpenses} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#E6E6E6" />
-                    <XAxis dataKey="month" />
-                    <YAxis />
-                    <Tooltip content={<ChartTooltipContent />} />
-                    <Bar dataKey="income" fill="var(--color-income)" barSize={14} />
-                    <Bar dataKey="expenses" fill="var(--color-expenses)" barSize={14} />
-                  </BarChart>
-                </ChartContainer>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        <div>
-          <Card className="rounded-3xl p-3">
-            <CardContent>
-              <div className="flex items-center justify-between">
-                <Heading level={4} text="Income Breakdown" />
-                <Span text="Overview" />
-              </div>
-
-              <div className="mt-4 flex items-center justify-center">
-                <ChartContainer className="p-[1px] w-full" config={{ tithes: { color: "#2563EB" } }}>
-                  <div className="w-full h-full">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <PieChart>
-                        <Pie
-                          data={DashboardData.incomeBreakdown}
-                          dataKey="value"
-                          nameKey="name"
-                          innerRadius={40}
-                          outerRadius={70}
-                          paddingAngle={2}
-                          cx="50%"
-                          cy="50%"
-                        >
-                          {DashboardData.incomeBreakdown.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={entry.color} />
-                          ))}
-                        </Pie>
-                      </PieChart>
-                    </ResponsiveContainer>
-                  </div>
-                </ChartContainer>
-              </div>
-
-              <div className="mt-4">
-                <div className="grid gap-2">
-                  {DashboardData.incomeBreakdown.map((item) => (
-                    <div key={item.name} className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <Span
-                          className="w-3 h-3 rounded-full block"
-                          style={{ backgroundColor: item.color }}
-                        />
-                        <div className="text-sm">{item.name}</div>
-                      </div>
-                      <div className="text-sm font-mono">{item.value}%</div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+        <IncomeBreakdown />
       </div>
     </>
   );

@@ -9,10 +9,6 @@ export interface SignupDataType {
   email?: string;
 }
 
-/**
- * Custom hook to retrieve signup data stored in sessionStorage
- * This data is passed from the signup page to the onboarding flow
- */
 export function useSignupData(): SignupDataType | null {
   const [signupData, setSignupData] = useState<SignupDataType | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -38,9 +34,6 @@ export function useSignupData(): SignupDataType | null {
   return !isLoading ? signupData : null;
 }
 
-/**
- * Clear signup data from sessionStorage
- */
 export function clearSignupData(): void {
   if (typeof window !== "undefined") {
     sessionStorage.removeItem("signupData");

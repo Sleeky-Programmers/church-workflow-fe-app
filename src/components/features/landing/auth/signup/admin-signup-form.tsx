@@ -73,14 +73,13 @@ export default function AdminSignupForm({
       confirmPassword: "",
       agreeToTerms: false,
     },
-    mode: "onChange", // Real-time validation for better UX
+    mode: "onChange",
   });
 
   const handleSubmit = async (data: AdminSignupFormValues) => {
     setIsLoading(true);
     setTimeout(() => {
       setIsLoading(false);
-      // Include the invited role in the submitted data
       onSubmit(data.email, { ...data, role: invitedRole } as any);
     }, 1000);
   };

@@ -1,7 +1,7 @@
-"use client"
+"use client";
 
-import React, { useMemo } from "react";
-import { Bell, Search, User } from "lucide-react";
+import React, { useMemo, useState, useEffect } from "react";
+import { Bell, Search, Star, User } from "lucide-react";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -10,56 +10,98 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "../ui/breadcrumb";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { Input } from "../ui/input";
-import { Separator } from "../ui/separator";
 import { SidebarTrigger } from "../ui/sidebar";
 import { Button } from "../ui/button";
 import { Avatar, AvatarFallback } from "../ui/avatar";
 import Link from "next/link";
+import { Text } from "../ui/typography/Text";
+import clsx from "clsx";
+import { useFavoritesStore } from "@/stores/useFavoritesStore";
+
+const STARRED_PAGES_KEY = "starred-pages";
 
 export function Navbar() {
   const pathname = usePathname() || "/dashboard";
+  const router = useRouter();
+
+  const [search, setSearch] = useState("");
+  const [starredPages, setStarredPages] = useState<string[]>([]);
+
+  const { toggleFavorite, isFavorite } = useFavoritesStore();
+
+  const starred = isFavorite(pathname);
 
   const pageLabel = useMemo(() => {
     const path = pathname.replace(/\/+$/, "");
 
-    if (!path.startsWith("/dashboard")) {
-      return "Overview";
-    }
+    if (!path.startsWith("/dashboard")) return "Overview";
 
     const rest = path.replace(/^\/dashboard\/?/, "");
-    if (!rest) {
-      return "Overview";
-    }
+    if (!rest) return "Overview";
 
-    const first = rest.split("/")[0];
-    return first
+    return rest
+      .split("/")[0]
       .replace(/[-_]+/g, " ")
-      .split(" ")
-      .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-      .join(" ");
+      .replace(/\b\w/g, (c) => c.toUpperCase());
   }, [pathname]);
+
+  useEffect(() => {
+    const stored = localStorage.getItem(STARRED_PAGES_KEY);
+    if (stored) setStarredPages(JSON.parse(stored));
+  }, []);
+
+  const isStarred = starredPages.includes(pathname);
+
+  const toggleStar = () => {
+    const updated = isStarred
+      ? starredPages.filter((p) => p !== pathname)
+      : [...starredPages, pathname];
+
+    setStarredPages(updated);
+    localStorage.setItem(STARRED_PAGES_KEY, JSON.stringify(updated));
+  };
+
+  const handleSearch = () => {
+    if (!search.trim()) return;
+    router.push(`/dashboard/search?q=${encodeURIComponent(search)}`);
+    setSearch("");
+  };
 
   return (
     <header className="w-full flex items-center h-16 gap-2 px-3 md:px-6 border-b">
       <div className="flex items-center gap-2 min-w-0">
         <SidebarTrigger className="-ml-1" />
 
-        <Separator
-          orientation="vertical"
-          className="hidden sm:block mr-2 data-[orientation=vertical]:h-4"
-        />
+        <Button
+          size="icon"
+          variant="ghost"
+          aria-label="Star this page"
+          onClick={() =>
+            toggleFavorite({
+              path: pathname,
+              label: pageLabel,
+            })
+          }
+          className={clsx(
+            starred
+              ? "bg-primary/15 text-primary hover:bg-primary/20"
+              : "hover:bg-muted",
+          )}
+        >
+          <Star className={clsx("w-4 h-4", starred && "fill-primary")} />
+        </Button>
 
         <div className="hidden md:block min-w-0">
           <Breadcrumb>
             <BreadcrumbList>
-              <BreadcrumbItem className="hidden md:block">
+              <BreadcrumbItem>
                 <BreadcrumbLink asChild>
                   <Link href="/dashboard">Dashboard</Link>
                 </BreadcrumbLink>
               </BreadcrumbItem>
-              <BreadcrumbSeparator className="hidden md:block" />
+              <BreadcrumbSeparator />
               <BreadcrumbItem>
                 <BreadcrumbPage>{pageLabel}</BreadcrumbPage>
               </BreadcrumbItem>
@@ -74,6 +116,7 @@ export function Navbar() {
           variant="ghost"
           className="sm:hidden"
           aria-label="Open search"
+          onClick={handleSearch}
         >
           <Search className="w-4 h-4" />
         </Button>
@@ -82,6 +125,9 @@ export function Navbar() {
           <Input
             leftIcon={<Search className="w-4 h-4" />}
             placeholder="Search"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && handleSearch()}
             className="w-48 md:w-64"
           />
         </div>
@@ -92,14 +138,18 @@ export function Navbar() {
           </Button>
         </Link>
 
-        <div className="flex items-center gap-2">
-          <Avatar>
-            <AvatarFallback>
-              <User className="w-4 h-4 text-primary" />
-            </AvatarFallback>
-          </Avatar>
-          <p className="hidden sm:block">John Doe</p>
-        </div>
+        <Link href="/dashboard/settings">
+          <div className="flex items-center gap-2 cursor-pointer">
+            <Avatar>
+              <AvatarFallback>
+                <User className="w-4 h-4 text-primary" />
+              </AvatarFallback>
+            </Avatar>
+            <Text variant="default" className="hidden sm:block">
+              John Doe
+            </Text>
+          </div>
+        </Link>
       </div>
     </header>
   );

@@ -16,6 +16,12 @@ export enum HtmlInputElementTypes {
 }
 
 export enum SignUpStep {
-  SIGNUP = 'SIGNUP',
-  VERIFY_OTP = 'VERIFY_OTP',
+  SIGNUP = "SIGNUP",
+  VERIFY_OTP = "VERIFY_OTP",
+}
+
+export enum EventCategory {
+  GENERAL = "GENERAL",
+  LEADERSHIP = "LEADERSHIP",
+  SPECIAL = "SPECIAL",
 }

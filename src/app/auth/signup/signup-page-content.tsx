@@ -55,7 +55,6 @@ export function SignupPageContent() {
     setEmail(submittedEmail);
     if (data) {
       setSignupData(data);
-      // Store in sessionStorage for later retrieval
       if (typeof window !== "undefined") {
         sessionStorage.setItem("signupData", JSON.stringify(data));
       }
@@ -69,9 +68,7 @@ export function SignupPageContent() {
   };
 
   const handleOtpVerified = async (otp: string) => {
-    // In development, accept the test OTP (123456) or any valid 6-digit code
     if (testEnv && (otp === testOtp.toString() || /^\d{6}$/.test(otp))) {
-      // Ensure signup data is stored before navigating
       if (signupData && typeof window !== "undefined") {
         sessionStorage.setItem("signupData", JSON.stringify(signupData));
       }
