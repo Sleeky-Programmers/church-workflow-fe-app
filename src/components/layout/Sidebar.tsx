@@ -20,23 +20,17 @@ import { Span, Text } from "../ui/typography/Text";
 import { useFavoritesStore } from "@/stores/useFavoritesStore";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
+import { ActiveTab } from "@/lib/enums";
 
 export function AppSidebar() {
   const pathname = usePathname();
-  const [activeTab, setActiveTab] = useState<"favorites" | "recent">(
-    "favorites",
-  );
+  const [activeTab, setActiveTab] = useState<ActiveTab>(ActiveTab.FAVOURITES);
   const { favorites } = useFavoritesStore();
 
   const isActive = (url: string) => {
-    if (!url) {
-      return false;
-    }
-
-    const normalize = (p: string | null | undefined) => {
-      return p ? p.replace(/\/+$|^$/, "") : "";
-    };
-
+    if (!url) return false;
+    const normalize = (p: string | null | undefined) =>
+      p ? p.replace(/\/+$/, "").replace(/^$/, "") : "";
     const current = normalize(pathname);
     const target = normalize(url);
     return current === target;
@@ -59,11 +53,13 @@ export function AppSidebar() {
           <SidebarMenu className="grid grid-cols-2 gap-2 sm:gap-3">
             <SidebarMenuItem>
               <SidebarMenuButton
-                isActive={activeTab === "favorites"}
-                onClick={() => setActiveTab("favorites")}
+                isActive={activeTab === ActiveTab.FAVOURITES}
+                onClick={() => setActiveTab(ActiveTab.FAVOURITES)}
               >
                 <Text
-                  variant={activeTab === "favorites" ? "tab" : "tabInactive"}
+                  variant={
+                    activeTab === ActiveTab.FAVOURITES ? "tab" : "tabInactive"
+                  }
                 >
                   Favourites
                 </Text>
@@ -72,23 +68,27 @@ export function AppSidebar() {
 
             <SidebarMenuItem>
               <SidebarMenuButton
-                isActive={activeTab === "recent"}
-                onClick={() => setActiveTab("recent")}
+                isActive={activeTab === ActiveTab.RECENT}
+                onClick={() => setActiveTab(ActiveTab.RECENT)}
               >
-                <Text variant={activeTab === "recent" ? "tab" : "tabInactive"}>
+                <Text
+                  variant={
+                    activeTab === ActiveTab.RECENT ? "tab" : "tabInactive"
+                  }
+                >
                   Recent
                 </Text>
               </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>
         </SidebarHeader>
-        {activeTab === "favorites" && (
+        {activeTab === ActiveTab.FAVOURITES && (
           <SidebarGroup>
             <SidebarGroupLabel>Favourites</SidebarGroupLabel>
 
             <SidebarGroupContent>
               {favorites.length === 0 ? (
-                <Text className="px-3 py-2 text-muted-foreground">
+                <Text variant="muted" className="px-3 py-2">
                   No starred pages yet
                 </Text>
               ) : (

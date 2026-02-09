@@ -4,20 +4,7 @@ import { CalendarDays, User } from "lucide-react";
 import { Span, Text } from "@/components/ui/typography/Text";
 import { StatCard } from "@/components/features/dashboard/StatCard";
 import { Card, CardContent } from "@/components/ui/card";
-import { ChartContainer, ChartTooltipContent } from "@/components/ui/chart";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import {
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  BarChart,
-  Bar,
-  PieChart,
-  Pie,
-  Cell,
-  ResponsiveContainer,
-} from "recharts";
 import { Button } from "@/components/ui/button";
 import Heading from "@/components/ui/typography/Heading";
 import { DashboardData } from "@/lib/data";
@@ -85,15 +72,12 @@ export default function Dashboard() {
           <Card className="rounded-3xl">
             <CardContent className="w-full">
               <div className="flex items-center justify-between py-3">
-                <Heading
-                  level={3}
-                  text="Upcoming Events"
-                  className="text-blue-600"
-                />
+                <Heading level={3} text="Upcoming Events" variant="primary" />
+
                 <CalendarDays className="w-5 h-5 text-blue-600" />
               </div>
 
-              <Text text="Services" className="text-blue-500" />
+              <Text text="Services" variant="blue" />
               <div className="mt-3 space-y-3">
                 {DashboardData.upcomingEvents
                   .filter((event) => isInFuture(event.date))
@@ -124,10 +108,7 @@ export default function Dashboard() {
                           </div>
                         </div>
 
-                        <Span
-                          text={displayDate}
-                          className="text-muted-foreground text-sm"
-                        />
+                        <Span text={displayDate} variant="default" />
                       </div>
                     );
                   })}
@@ -135,7 +116,7 @@ export default function Dashboard() {
 
               <div className="border-t my-4" />
 
-              <Text text="Birthdays" className="text-blue-500" />
+              <Text text="Birthdays" variant="blue" />
               <div className="mt-3 space-y-2">
                 {sortBirthdaysByNearest(DashboardData.birthdays).map((b, i) => (
                   <div
@@ -152,13 +133,13 @@ export default function Dashboard() {
                     </div>
                     <Span
                       text={formatUpcomingBirthday(b.date)}
-                      className="text-muted-foreground text-sm"
+                      variant="default"
                     />
                   </div>
                 ))}
               </div>
 
-              <Button asChild className="!text-white w-full mt-4">
+              <Button asChild className="w-full mt-4">
                 <Link href="/dashboard/membership">View more</Link>
               </Button>
             </CardContent>

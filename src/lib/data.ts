@@ -117,34 +117,34 @@ export const DashboardData = {
   upcomingEvents: [
     {
       title: "Sunday Service",
-      date: "2026-01-25",
+      date: "2026-02-25",
       category: EventCategory.GENERAL,
     },
     {
       title: "Leaders Meeting",
-      date: "2026-01-26",
+      date: "2026-02-26",
       category: EventCategory.LEADERSHIP,
     },
     {
       title: "Morning Devotion",
-      date: "2026-01-27",
+      date: "2026-02-27",
       category: EventCategory.LEADERSHIP,
     },
     {
       title: "Bible Study",
-      date: "2026-01-22",
+      date: "2026-02-22",
       category: EventCategory.GENERAL,
     },
     {
       title: "Youth Convention",
-      date: "2026-01-23",
+      date: "2026-02-23",
       category: EventCategory.SPECIAL,
     },
   ],
 
   birthdays: [
-    { name: "Pastor John", date: "2026-01-24" },
-    { name: "John Doe", date: "2026-02-02" },
+    { name: "Pastor John", date: "2026-03-24" },
+    { name: "John Doe", date: "2026-02-18" },
     { name: "Pastor Peter", date: "2026-02-12" },
   ],
 };

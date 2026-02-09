@@ -20,13 +20,11 @@ export function IncomeVsExpenses() {
   return (
     <Card className="rounded-3xl p-3 h-full">
       <CardContent>
-        {/* Header */}
         <div className="flex items-center justify-between">
           <Heading level={4} text="Income vs Expenses" />
-          <Span text={range} className="text-muted-foreground text-sm" />
+          <Span text={range} variant="default" />
         </div>
 
-        {/* Chart */}
         <div className="mt-4">
           <ChartContainer
             className="p-4"

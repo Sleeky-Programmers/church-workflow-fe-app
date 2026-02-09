@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useState, useEffect } from "react";
+import React, { useMemo, useState } from "react";
 import { Bell, Search, Star, User } from "lucide-react";
 import {
   Breadcrumb,
@@ -17,55 +17,35 @@ import { Button } from "../ui/button";
 import { Avatar, AvatarFallback } from "../ui/avatar";
 import Link from "next/link";
 import { Text } from "../ui/typography/Text";
-import clsx from "clsx";
+import { RouteConfig } from "@/config/routes";
 import { useFavoritesStore } from "@/stores/useFavoritesStore";
-
-const STARRED_PAGES_KEY = "starred-pages";
+import { useAuthStore } from "@/stores/useAuthStore";
 
 export function Navbar() {
-  const pathname = usePathname() || "/dashboard";
+  const pathname = usePathname() || RouteConfig.dashboard.home;
   const router = useRouter();
 
   const [search, setSearch] = useState("");
-  const [starredPages, setStarredPages] = useState<string[]>([]);
-
   const { toggleFavorite, isFavorite } = useFavoritesStore();
-
+  const { user } = useAuthStore();
   const starred = isFavorite(pathname);
 
   const pageLabel = useMemo(() => {
     const path = pathname.replace(/\/+$/, "");
-
     if (!path.startsWith("/dashboard")) return "Overview";
-
     const rest = path.replace(/^\/dashboard\/?/, "");
     if (!rest) return "Overview";
-
     return rest
       .split("/")[0]
       .replace(/[-_]+/g, " ")
-      .replace(/\b\w/g, (c) => c.toUpperCase());
+      .replace(/\b\w/g, (c: string) => c.toUpperCase());
   }, [pathname]);
-
-  useEffect(() => {
-    const stored = localStorage.getItem(STARRED_PAGES_KEY);
-    if (stored) setStarredPages(JSON.parse(stored));
-  }, []);
-
-  const isStarred = starredPages.includes(pathname);
-
-  const toggleStar = () => {
-    const updated = isStarred
-      ? starredPages.filter((p) => p !== pathname)
-      : [...starredPages, pathname];
-
-    setStarredPages(updated);
-    localStorage.setItem(STARRED_PAGES_KEY, JSON.stringify(updated));
-  };
 
   const handleSearch = () => {
     if (!search.trim()) return;
-    router.push(`/dashboard/search?q=${encodeURIComponent(search)}`);
+    router.push(
+      `${RouteConfig.dashboard.search}?q=${encodeURIComponent(search)}`,
+    );
     setSearch("");
   };
 
@@ -73,10 +53,9 @@ export function Navbar() {
     <header className="w-full flex items-center h-16 gap-2 px-3 md:px-6 border-b">
       <div className="flex items-center gap-2 min-w-0">
         <SidebarTrigger className="-ml-1" />
-
         <Button
           size="icon"
-          variant="ghost"
+          variant={starred ? "starred" : "ghost"}
           aria-label="Star this page"
           onClick={() =>
             toggleFavorite({
@@ -84,21 +63,15 @@ export function Navbar() {
               label: pageLabel,
             })
           }
-          className={clsx(
-            starred
-              ? "bg-primary/15 text-primary hover:bg-primary/20"
-              : "hover:bg-muted",
-          )}
         >
-          <Star className={clsx("w-4 h-4", starred && "fill-primary")} />
+          <Star className="w-4 h-4" fill={starred ? "currentColor" : "none"} />
         </Button>
-
         <div className="hidden md:block min-w-0">
           <Breadcrumb>
             <BreadcrumbList>
               <BreadcrumbItem>
                 <BreadcrumbLink asChild>
-                  <Link href="/dashboard">Dashboard</Link>
+                  <Link href={RouteConfig.dashboard.home}>Dashboard</Link>
                 </BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator />
@@ -132,23 +105,23 @@ export function Navbar() {
           />
         </div>
 
-        <Link href="/dashboard/notification">
+        <Link href={RouteConfig.dashboard.notifications}>
           <Button size="icon" variant="ghost" aria-label="Notifications">
             <Bell className="w-4 h-4" />
           </Button>
         </Link>
 
-        <Link href="/dashboard/settings">
-          <div className="flex items-center gap-2 cursor-pointer">
+        <Link href={RouteConfig.dashboard.profile}>
+          <Button variant="ghost" className="flex items-center gap-2 p-0">
             <Avatar>
               <AvatarFallback>
-                <User className="w-4 h-4 text-primary" />
+                <User className="w-4 h-4" />
               </AvatarFallback>
             </Avatar>
             <Text variant="default" className="hidden sm:block">
-              John Doe
+              {user?.name || "John Doe"}
             </Text>
-          </div>
+          </Button>
         </Link>
       </div>
     </header>

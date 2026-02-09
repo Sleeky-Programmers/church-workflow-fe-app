@@ -34,3 +34,8 @@ export enum EventCategory {
   LEADERSHIP = "LEADERSHIP",
   SPECIAL = "SPECIAL",
 }
+
+export enum ActiveTab {
+  FAVOURITES = "favourites",
+  RECENT = "recent",
+}

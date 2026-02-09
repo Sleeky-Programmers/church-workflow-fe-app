@@ -8,7 +8,9 @@ import { DashboardData } from "@/lib/data";
 import { Span } from "@/components/ui/typography/Text";
 
 const getTopIncome = () =>
-  [...DashboardData.incomeBreakdown].sort((a, b) => b.value - a.value)[0];
+  [...DashboardData.incomeBreakdown].sort(
+    (incomeA, incomeB) => incomeB.value - incomeA.value,
+  )[0];
 
 export function IncomeBreakdown() {
   const top = getTopIncome();

@@ -17,6 +17,8 @@ type TextProps = {
     | "menuActive"
     | "indicator"
     | "label"
+    | "blue"
+    | "dot"
     | "menuInactive";
   children?: React.ReactNode;
 };
@@ -41,6 +43,8 @@ export function Text({
     menuInactive: "text-primary/60 font-medium",
     indicator: "inline-block w-2 h-2 rounded-full bg-sky-600",
     label: "font-semibold text-foreground text-md",
+    blue: "text-blue-600 font-medium",
+    dot: "inline-block w-3 h-3 rounded-full",
   }[variant];
 
   return (
@@ -69,6 +73,8 @@ export function Span({
     menuInactive: "text-blue-400/70 font-medium",
     indicator: "inline-block w-2 h-2 rounded-full bg-sky-600",
     label: "font-medium text-foreground",
+    blue: "text-blue-600 font-medium",
+    dot: "inline-block w-3 h-3 rounded-full",
   }[variant];
 
   return (

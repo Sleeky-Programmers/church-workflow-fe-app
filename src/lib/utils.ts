@@ -1,6 +1,14 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 
+const MILLISECONDS_IN_SECOND = 1000;
+const SECONDS_IN_MINUTE = 60;
+const MINUTES_IN_HOUR = 60;
+const HOURS_IN_DAY = 24;
+
+const MILLISECONDS_IN_DAY =
+  MILLISECONDS_IN_SECOND * SECONDS_IN_MINUTE * MINUTES_IN_HOUR * HOURS_IN_DAY;
+
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
@@ -16,24 +24,38 @@ export function isInFuture(dateStr: string) {
 export function formatEventDate(dateStr: string) {
   const date = new Date(dateStr);
   const now = new Date();
-  const diff = Math.ceil(
-    (date.getTime() - now.getTime()) / (1000 * 60 * 60 * 24),
+
+  const diffDays = Math.ceil(
+    (date.getTime() - now.getTime()) / MILLISECONDS_IN_DAY,
   );
 
-  if (diff < 0) return null;
-
-  if (diff === 0) return "Today";
-  if (diff === 1) return "Tomorrow";
-  if (diff <= 7) {
-    return date.toLocaleDateString("en-US", { weekday: "long" });
+  if (diffDays < 0) {
+    return null;
   }
 
-  const day = date.toLocaleDateString("en-US", { weekday: "short" });
-  const monthDate = date.toLocaleDateString("en-US", {
+  if (diffDays === 0) {
+    return "Today";
+  }
+
+  if (diffDays === 1) {
+    return "Tomorrow";
+  }
+
+  const ONE_WEEK_IN_DAYS = 7;
+
+  if (diffDays <= ONE_WEEK_IN_DAYS) {
+    return date.toLocaleDateString("en-US", {
+      weekday: "long",
+    });
+  }
+
+  const weekday = date.toLocaleDateString("en-US", { weekday: "short" });
+  const monthDay = date.toLocaleDateString("en-US", {
     month: "short",
     day: "numeric",
   });
-  return `${monthDate} • ${day}`;
+
+  return `${monthDay} • ${weekday}`;
 }
 
 export function getNextBirthdayDate(dateStr: string) {
@@ -48,23 +70,35 @@ export function getNextBirthdayDate(dateStr: string) {
 export function formatUpcomingBirthday(dateStr: string) {
   const date = getNextBirthdayDate(dateStr);
   const today = new Date();
+
   const diffDays = Math.ceil(
-    (date.getTime() - today.getTime()) / (1000 * 60 * 60 * 24),
+    (date.getTime() - today.getTime()) / MILLISECONDS_IN_DAY,
   );
 
-  if (diffDays === 0) return "Today";
-  if (diffDays === 1) return "Tomorrow";
-  if (diffDays <= 7)
-    return date.toLocaleDateString("en-US", { weekday: "long" });
+  if (diffDays === 0) {
+    return "Today";
+  }
 
-  const day = date.toLocaleDateString("en-US", { weekday: "short" });
+  if (diffDays === 1) {
+    return "Tomorrow";
+  }
+
+  const ONE_WEEK_IN_DAYS = 7;
+
+  if (diffDays <= ONE_WEEK_IN_DAYS) {
+    return date.toLocaleDateString("en-US", {
+      weekday: "long",
+    });
+  }
+
+  const weekday = date.toLocaleDateString("en-US", { weekday: "short" });
   const monthDay = date.toLocaleDateString("en-US", {
     month: "short",
     day: "numeric",
   });
-  return `${monthDay} • ${day}`;
-}
 
+  return `${monthDay} • ${weekday}`;
+}
 export function sortBirthdaysByNearest<T extends { date: string }>(
   birthdays: T[],
 ) {
