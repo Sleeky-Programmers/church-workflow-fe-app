@@ -1,8 +1,11 @@
 import { Dialog, DialogClose, DialogContent } from "@/components/ui/dialog";
-import { Check } from "lucide-react";
+import { Check, Trash2, X } from "lucide-react";
 import { ActivityRow } from "@/types";
 import Heading from "@/components/ui/typography/Heading";
-import { Span } from "@/components/ui/typography/Text";
+import { Span, Text } from "@/components/ui/typography/Text";
+import { Button } from "@/components/ui/button";
+import { activityDetailsConfig } from "@/config/activity-log";
+import { formatDateTime12h } from "@/lib/utils";
 
 export default function ActivityLogPopup({
   selectedRow,
@@ -11,21 +14,23 @@ export default function ActivityLogPopup({
   selectedRow: ActivityRow | null;
   setSelectedRow: (row: ActivityRow | null) => void;
 }) {
+  const handleDelete = () => {
+    setSelectedRow(null);
+  };
+
   return (
     <Dialog
       open={!!selectedRow}
       onOpenChange={(open) => {
-        if (!open) {
-          setSelectedRow(null);
-        }
+        if (!open) setSelectedRow(null);
       }}
     >
-      <DialogContent>
+      <DialogContent showClose={false}>
         {selectedRow && (
           <div>
             <div className="flex items-start justify-between gap-4">
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-md bg-emerald-600 text-white flex items-center justify-center">
+                <div className="w-6 h-6 rounded-md bg-emerald-600 text-white flex items-center justify-center">
                   <Check className="w-4 h-4" />
                 </div>
                 <div>
@@ -34,13 +39,32 @@ export default function ActivityLogPopup({
                     text={`${selectedRow.action} by ${selectedRow.user.name}`}
                     className="text-lg font-semibold"
                   />
-                  <div className="text-sm text-gray-500 mt-1">{`${new Date(selectedRow.timestamp).toLocaleDateString()} • ${new Date(selectedRow.timestamp).toLocaleTimeString()} • Module: ${selectedRow.module}`}</div>
+                  <Text variant="default" className=" mt-1">
+                    {`${formatDateTime12h(selectedRow.timestamp).toUpperCase()} • Module: ${selectedRow.module}`}
+                  </Text>
                 </div>
               </div>
+
               <div className="flex items-center gap-2">
-                <button className="p-2 rounded-md hover:bg-muted">🗑️</button>
+                <Button
+                  className="p-2 rounded-md"
+                  size="icon"
+                  variant="ghost"
+                  onClick={handleDelete}
+                  aria-label="Delete activity"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </Button>
+
                 <DialogClose asChild>
-                  <button className="p-2 rounded-md hover:bg-muted">✕</button>
+                  <Button
+                    className="p-2 rounded-md"
+                    size="icon"
+                    variant="outline"
+                    aria-label="Close dialog"
+                  >
+                    <X className="w-4 h-4" />
+                  </Button>
                 </DialogClose>
               </div>
             </div>
@@ -54,47 +78,17 @@ export default function ActivityLogPopup({
             />
 
             <div className="divide-y">
-              <div className="flex items-center gap-4 py-3">
-                <Span className="w-2 h-2 rounded-full bg-sky-600 block mt-1" />
-                <div className="w-40 font-medium">Action:</div>
-                <div className="flex-1">{selectedRow.action}</div>
-              </div>
-
-              <div className="flex items-center gap-4 py-3">
-                <Span className="w-2 h-2 rounded-full bg-sky-600 block mt-1" />
-                <div className="w-40 font-medium">By:</div>
-                <div className="flex-1">{selectedRow.user.name}</div>
-              </div>
-
-              <div className="flex items-center gap-4 py-3">
-                <Span className="w-2 h-2 rounded-full bg-sky-600 block mt-1" />
-                <div className="w-40 font-medium">Module:</div>
-                <div className="flex-1">{selectedRow.module}</div>
-              </div>
-
-              <div className="flex items-center gap-4 py-3">
-                <Span className="w-2 h-2 rounded-full bg-sky-600 block mt-1" />
-                <div className="w-40 font-medium">Affected Record:</div>
-                <div className="flex-1">{selectedRow.details}</div>
-              </div>
-
-              <div className="flex items-center gap-4 py-3">
-                <Span className="w-2 h-2 rounded-full bg-sky-600 block mt-1" />
-                <div className="w-40 font-medium">Status:</div>
-                <div className="flex-1">Approved</div>
-              </div>
-
-              <div className="flex items-center gap-4 py-3">
-                <Span className="w-2 h-2 rounded-full bg-sky-600 block mt-1" />
-                <div className="w-40 font-medium">Triggered From:</div>
-                <div className="flex-1">Requisition Form &gt; Pending List</div>
-              </div>
-
-              <div className="flex items-start gap-4 py-3">
-                <Span className="w-2 h-2 rounded-full bg-sky-600 block mt-1" />
-                <div className="w-40 font-medium">Details:</div>
-                <div className="flex-1">“{selectedRow.details}”</div>
-              </div>
+              {activityDetailsConfig.map(({ key, getValue }) => (
+                <div key={key} className="flex items-start gap-4 py-3">
+                  <Span variant="indicator" className="mt-1" />
+                  <Text variant="label" className="w-40">
+                    {key}:
+                  </Text>
+                  <div className="flex-1 text-right">
+                    {getValue(selectedRow)}
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         )}

@@ -8,6 +8,15 @@ export enum RequisitionStatus {
   PENDING = "PENDING",
   APPROVED = "APPROVED",
 }
+export enum ActivityDetailLabel {
+  ACTION = "Action",
+  BY = "By",
+  MODULE = "Module",
+  AFFECTED_RECORD = "Affected Record",
+  STATUS = "Status",
+  TRIGGERED_FROM = "Triggered From",
+  DETAILS = "Details",
+}
 
 export enum HtmlInputElementTypes {
   INPUT = "INPUT",

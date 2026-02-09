@@ -72,3 +72,13 @@ export function sortBirthdaysByNearest<T extends { date: string }>(
     .map((b) => ({ ...b, nextDate: getNextBirthdayDate(b.date) }))
     .sort((a, b) => a.nextDate.getTime() - b.nextDate.getTime());
 }
+
+export const formatDateTime12h = (value: string | number | Date) =>
+  new Date(value).toLocaleString([], {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  });

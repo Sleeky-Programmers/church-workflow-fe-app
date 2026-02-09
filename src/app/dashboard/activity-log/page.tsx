@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import React, { useMemo, useState } from "react";
 import Table, { Column } from "@/components/features/dashboard/Table";
@@ -10,10 +10,13 @@ import { Text } from "@/components/ui/typography/Text";
 import ActivityLogPopup from "@/components/features/dashboard/ActivityLogPopup";
 import { ActivityRow } from "@/types";
 import { ActivityLogData } from "@/lib/data";
+import { formatDateTime12h } from "@/lib/utils";
 
 export default function ActivityLogPage() {
   const [query, setQuery] = useState("");
   const avatarColors = ["#E7EFF7", "#FFF1E6", "#E6F2E6"];
+  const [showFilter, setShowFilter] = useState(false);
+  const [moduleFilter, setModuleFilter] = useState<string | null>(null);
 
   const avatarTextColors = [
     "rgba(11,59,97,1)",
@@ -23,27 +26,54 @@ export default function ActivityLogPage() {
   const [selectedRow, setSelectedRow] = useState<ActivityRow | null>(null);
 
   const filtered = useMemo(() => {
-    if (!query) {
-      return ActivityLogData;
-    }
+    const q = query.toLowerCase();
 
-    const lowerCaseQuery = query.toLowerCase();
-    return ActivityLogData.filter(
-      (activityRow: ActivityRow) =>
-        activityRow.user.name.toLowerCase().includes(lowerCaseQuery) ||
-        activityRow.action.toLowerCase().includes(lowerCaseQuery) ||
-        activityRow.module.toLowerCase().includes(lowerCaseQuery) ||
-        activityRow.details.toLowerCase().includes(lowerCaseQuery) ||
-        new Date(activityRow.timestamp).toLocaleString().toLowerCase().includes(lowerCaseQuery)
-    );
-  }, [query]);
+    return ActivityLogData.filter((row) => {
+      if (moduleFilter && row.module !== moduleFilter) return false;
+      if (!q) return true;
+
+      return (
+        row.user.name.toLowerCase().includes(q) ||
+        row.action.toLowerCase().includes(q) ||
+        row.module.toLowerCase().includes(q) ||
+        row.details.toLowerCase().includes(q) ||
+        formatDateTime12h(row.timestamp).toUpperCase().includes(q)
+      );
+    });
+  }, [query, moduleFilter]);
+
+  const exportToCSV = () => {
+    const headers = ["Timestamp", "User", "Action", "Module", "Details"];
+
+    const rows = filtered.map((r) => [
+      formatDateTime12h(r.timestamp),
+      r.user.name,
+      r.action,
+      r.module,
+      r.details,
+    ]);
+
+    const csv = [headers, ...rows]
+      .map((row) => row.map((v) => `"${v}"`).join(","))
+      .join("\n");
+
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "activity-log.csv";
+    link.click();
+  };
 
   const columns: Column<ActivityRow>[] = [
     {
       key: "timestamp",
       header: "Timestamp",
-      accessor: (row) => new Date(row.timestamp).toLocaleString(),
-      width: "w-56",
+      sortable: true,
+      accessor: "timestamp",
+      sortAccessor: (row) => Date.parse(row.timestamp),
+      render: (row) => formatDateTime12h(row.timestamp).toUpperCase(),
     },
     {
       key: "user",
@@ -85,7 +115,7 @@ export default function ActivityLogPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row gap-4 sm:items-center sm:justify-between">
         <div className="flex items-center justify-start gap-3">
           <Text text="Activity Log" />
           <Input
@@ -97,12 +127,41 @@ export default function ActivityLogPage() {
         </div>
 
         <div className="flex items-center gap-3">
-          <Button variant="ghost" className="hidden sm:flex items-center gap-2">
+          {showFilter && (
+            <div className="absolute right-0 mt-2 w-56 rounded-xl border bg-background shadow-lg p-3 z-20">
+              <Text text="Filter by module" className="text-sm mb-2" />
+              {["Requisition", "Membership", "Events", "Authentication"].map(
+                (m) => (
+                  <Button
+                    key={m}
+                    variant={moduleFilter === m ? "secondary" : "ghost"}
+                    className="w-full justify-start text-sm"
+                    onClick={() => setModuleFilter(m)}
+                  >
+                    {m}
+                  </Button>
+                ),
+              )}
+              <Button
+                variant="ghost"
+                className="w-full text-xs mt-2"
+                onClick={() => setModuleFilter(null)}
+              >
+                Clear filter
+              </Button>
+            </div>
+          )}
+
+          <Button
+            variant="ghost"
+            className="hidden sm:flex items-center gap-2"
+            onClick={() => setShowFilter((p) => !p)}
+          >
             Filter
             <ChevronDown className="w-4 h-4" />
           </Button>
 
-          <Button className="flex items-center gap-2">
+          <Button className="flex items-center gap-2" onClick={exportToCSV}>
             <Download className="w-4 h-4" />
             Export to CSV/PDF
           </Button>
@@ -121,7 +180,7 @@ export default function ActivityLogPage() {
             columns={columns}
             data={rowsWithColor}
             rowKey={(r) => r.id}
-            showCheckbox
+            showCheckbox={false}
             onRowClick={(r) => setSelectedRow(r as ActivityRow)}
           />
         );

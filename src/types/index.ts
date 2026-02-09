@@ -1,3 +1,5 @@
+import { LucideIcon } from "lucide-react";
+
 export type ActivityRow = {
   id: string;
   timestamp: string;
@@ -8,14 +10,14 @@ export type ActivityRow = {
 };
 
 export type NotificationTypes = {
-  icon: any;
+  icon: LucideIcon;
   title: string;
   description: string;
   date: string;
   isRead: boolean;
   iconBg: string;
   iconColor: string;
-}
+};
 
 export type DepartmentRow = {
   id: string;
