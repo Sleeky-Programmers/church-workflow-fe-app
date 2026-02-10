@@ -209,7 +209,7 @@ export const NotificationData = [
 export const ActivityLogData: ActivityRow[] = [
   {
     id: "1",
-    timestamp: "2025-11-15T10:34:00",
+    timestamp: "2025-12-15T10:34:00",
     user: { name: "John Doe", initials: "JD" },
     action: "Submitted a requisition",
     module: "Requisition",
@@ -217,7 +217,7 @@ export const ActivityLogData: ActivityRow[] = [
   },
   {
     id: "2",
-    timestamp: "2025-10-14T19:15:00",
+    timestamp: "2025-12-14T19:15:00",
     user: { name: "Admin", initials: "AD" },
     action: "Approved requisition",
     module: "Requisition",
@@ -225,7 +225,7 @@ export const ActivityLogData: ActivityRow[] = [
   },
   {
     id: "3",
-    timestamp: "2026-10-14T17:42:00",
+    timestamp: "2026-01-14T17:42:00",
     user: { name: "Gloria A.", initials: "GA" },
     action: "Added new church member",
     module: "Membership",
@@ -233,7 +233,7 @@ export const ActivityLogData: ActivityRow[] = [
   },
   {
     id: "4",
-    timestamp: "2025-10-13T14:05:00",
+    timestamp: "2026-01-13T14:05:00",
     user: { name: "Ruth B.", initials: "RB" },
     action: "Logged in",
     module: "Authentication",
@@ -241,11 +241,51 @@ export const ActivityLogData: ActivityRow[] = [
   },
   {
     id: "5",
-    timestamp: "2025-11-14T17:42:00",
+    timestamp: "2026-01-14T17:42:00",
     user: { name: "David O.", initials: "DO" },
     action: "Sent out event reminders",
     module: "Events",
     details: "For Sunday Thanksgiving Service",
+  },
+  {
+    id: "6",
+    timestamp: "2026-01-15T10:34:00",
+    user: { name: "John Doe", initials: "JD" },
+    action: "Submitted a requisition",
+    module: "Requisition",
+    details: "For media projector (₦150,000)",
+  },
+  {
+    id: "7",
+    timestamp: "2026-02-06T19:15:00",
+    user: { name: "Admin", initials: "AD" },
+    action: "Approved requisition",
+    module: "Requisition",
+    details: "For generator diesel",
+  },
+  {
+    id: "8",
+    timestamp: "2026-02-08T17:42:00",
+    user: { name: "Gloria A.", initials: "GA" },
+    action: "Added new church member",
+    module: "Membership",
+    details: "Member: Peter Samuel",
+  },
+  {
+    id: "9",
+    timestamp: "2025-12-29T14:05:00",
+    user: { name: "Ruth B.", initials: "RB" },
+    action: "Logged in",
+    module: "Authentication",
+    details: "IP: 102.67.34.98",
+  },
+  {
+    id: "10",
+    timestamp: "2025-12-30T17:42:00",
+    user: { name: "David O.", initials: "DO" },
+    action: "Sent out event reminders",
+    module: "Events",
+    details: "New Year's Cross Over Service",
   },
 ];
 

@@ -1,5 +1,5 @@
 "use client";
-
+import { useEffect } from "react";
 import React, { useMemo, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -11,6 +11,14 @@ import {
   TableCell,
 } from "@/components/ui/table";
 import { Span } from "@/components/ui/typography/Text";
+import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 type Align = "left" | "center" | "right";
 
@@ -51,6 +59,9 @@ export default function Table<T extends Record<string, any>>({
   columns,
   data,
   rowKey,
+  enablePagination = false,
+  defaultPageSize = 5,
+  pageSizeOptions = [5, 10, 20, 50],
   enableSorting = true,
   isLoading = false,
   emptyState,
@@ -65,6 +76,12 @@ export default function Table<T extends Record<string, any>>({
     direction: "desc",
   });
   const [internalSelected, setInternalSelected] = useState<string[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(defaultPageSize);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [data, pageSize]);
 
   const getRowKey = (row: T, idx: number) => {
     if (!rowKey) {
@@ -131,6 +148,19 @@ export default function Table<T extends Record<string, any>>({
     return copy;
   }, [data, sort, enableSorting, columns]);
 
+  const paginatedData = useMemo(() => {
+    if (!enablePagination) {
+      return sortedData;
+    }
+    const startIndex = (currentPage - 1) * pageSize;
+    const endIndex = startIndex + pageSize;
+    return sortedData.slice(startIndex, endIndex);
+  }, [sortedData, enablePagination, currentPage, pageSize]);
+
+  const totalPages = enablePagination
+    ? Math.ceil(sortedData.length / pageSize)
+    : 1;
+
   const toggleSort = (col: Column<T>) => {
     if (!enableSorting || !col.sortable) return;
     setSort((prev) => {
@@ -151,33 +181,18 @@ export default function Table<T extends Record<string, any>>({
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const visibleRowKeys = useMemo(
-    () => sortedData.map((r, i) => getRowKey(r, i)),
-    [sortedData],
+    () => paginatedData.map((r, i) => getRowKey(r, i)),
+    [paginatedData],
   );
   const allVisibleSelected =
     visibleRowKeys.length > 0 &&
     visibleRowKeys.every((k) => selectedKeys.includes(k));
-  const someVisibleSelected = visibleRowKeys.some((k) =>
-    selectedKeys.includes(k),
-  );
 
   const updateSelection = (next: string[]) => {
     if (!controlled) {
       setInternalSelected(next);
     }
     onSelectedRowKeysChange?.(next);
-  };
-
-  const toggleAllVisible = () => {
-    if (allVisibleSelected) {
-      const next = selectedKeys.filter((k) => !visibleRowKeys.includes(k));
-      updateSelection(next);
-    } else {
-      const nextKeys = Array.from(
-        new Set([...selectedKeys, ...visibleRowKeys]),
-      );
-      updateSelection(nextKeys);
-    }
   };
 
   const visibleColumnCount = columns.length + (showCheckbox ? 1 : 0);
@@ -198,23 +213,9 @@ export default function Table<T extends Record<string, any>>({
                       onClick={() => toggleSort(col)}
                     >
                       <div className="flex items-center gap-2">
-                        <span className="truncate max-w-[18rem]">
+                        <Span className="truncate max-w-[18rem]">
                           {col.header}
-                        </span>
-                        {col.sortable && (
-                          <Span
-                            text={
-                              sort.key === col.key
-                                ? sort.direction === "asc"
-                                  ? "▲"
-                                  : sort.direction === "desc"
-                                    ? "▼"
-                                    : ""
-                                : ""
-                            }
-                            className="opacity-60 text-xs"
-                          />
-                        )}
+                        </Span>
                       </div>
                     </TableHead>
                   ))}
@@ -228,7 +229,7 @@ export default function Table<T extends Record<string, any>>({
                       <div className="py-6 text-center">Loading...</div>
                     </TableCell>
                   </TableRow>
-                ) : sortedData.length === 0 ? (
+                ) : paginatedData.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={Math.max(1, visibleColumnCount)}>
                       <div className="py-8 text-center text-sm text-muted-foreground">
@@ -237,7 +238,7 @@ export default function Table<T extends Record<string, any>>({
                     </TableCell>
                   </TableRow>
                 ) : (
-                  sortedData.map((row: T, rIdx: number) => {
+                  paginatedData.map((row: T, rIdx: number) => {
                     const key = getRowKey(row, rIdx);
                     return (
                       <TableRow
@@ -261,6 +262,51 @@ export default function Table<T extends Record<string, any>>({
                 )}
               </TableBody>
             </TableComponent>
+            {enablePagination && totalPages > 1 && (
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-4 py-3 border-t">
+                <Span variant="default">
+                  Page {currentPage} of {totalPages}
+                </Span>
+                <Select
+                  value={String(pageSize)}
+                  onValueChange={(value) => setPageSize(Number(value))}
+                >
+                  <SelectTrigger className="w-[110px]">
+                    <SelectValue placeholder="Page size" />
+                  </SelectTrigger>
+
+                  <SelectContent>
+                    {pageSizeOptions.map((size) => (
+                      <SelectItem key={size} value={String(size)}>
+                        {size} / page
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+
+                <div className="flex items-center gap-2">
+                  <Button
+                    className="px-3 py-1 text-sm rounded-md border disabled:opacity-50"
+                    variant="outline"
+                    disabled={currentPage === 1}
+                    onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                  >
+                    Previous
+                  </Button>
+
+                  <Button
+                    className="px-3 py-1 text-sm rounded-md border disabled:opacity-50"
+                    variant="outline"
+                    disabled={currentPage === totalPages}
+                    onClick={() =>
+                      setCurrentPage((p) => Math.min(totalPages, p + 1))
+                    }
+                  >
+                    Next
+                  </Button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </CardContent>
