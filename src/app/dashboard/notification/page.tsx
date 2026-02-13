@@ -26,7 +26,7 @@ export default function Notification() {
   };
 
   return (
-    <>
+    <div className="space-y-6">
       <div className="flex md:items-center justify-between md:flex-row flex-col items-start mb-6">
         <Heading level={1} text="Notifications" />
 
@@ -105,6 +105,6 @@ export default function Notification() {
           },
         )}
       </div>
-    </>
+    </div>
   );
 }

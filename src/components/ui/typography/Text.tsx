@@ -19,7 +19,8 @@ type TextProps = {
     | "label"
     | "blue"
     | "dot"
-    | "menuInactive";
+    | "menuInactive"
+    | "pending";
   children?: React.ReactNode;
 };
 
@@ -45,6 +46,8 @@ export function Text({
     label: "font-semibold text-foreground text-md",
     blue: "text-blue-600 font-medium",
     dot: "inline-block w-3 h-3 rounded-full",
+    pending:
+      "text-xs font-medium text-orange-600 bg-orange-50 border border-orange-200",
   }[variant];
 
   return (
@@ -75,6 +78,8 @@ export function Span({
     label: "font-medium text-foreground",
     blue: "text-blue-600 font-medium",
     dot: "inline-block w-3 h-3 rounded-full",
+    pending:
+      "text-xs font-medium text-orange-600 bg-orange-50 border border-orange-200",
   }[variant];
 
   return (

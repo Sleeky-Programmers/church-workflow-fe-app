@@ -7,7 +7,6 @@ import Heading from "@/components/ui/typography/Heading";
 import { Span, Text } from "@/components/ui/typography/Text";
 import { ChartContainer, ChartTooltipContent } from "@/components/ui/chart";
 import { DashboardData } from "@/lib/data";
-import { cn } from "@/lib/utils";
 
 function getDateRange(data: { month: string }[]) {
   if (!data.length) return "";
@@ -58,22 +57,19 @@ export function IncomeVsExpenses() {
           </ChartContainer>
         </div>
 
-        {/* Footer */}
         <div className="mt-4 flex items-center justify-between">
-          {/* Legend */}
           <div className="flex items-center gap-4 text-sm">
             <div className="flex items-center gap-2">
-              <span className="w-3 h-3 rounded-sm bg-primary-600" />
+              <Span className="w-3 h-3 rounded-sm bg-primary-600" />
               <Text text="Income" />
             </div>
 
             <div className="flex items-center gap-2">
-              <span className="w-3 h-3 rounded-sm bg-orange-500" />
+              <Span className="w-3 h-3 rounded-sm bg-orange-500" />
               <Text text="Expenses" />
             </div>
           </div>
 
-          {/* View all */}
           <Link
             href="/dashboard/finance"
             className="text-sm text-primary-600 hover:underline"

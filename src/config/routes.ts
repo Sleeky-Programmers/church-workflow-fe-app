@@ -1,4 +1,4 @@
-import { Search } from "lucide-react";
+import { User } from "lucide-react";
 
 export enum Routes {
   SignUp = "/auth/signup",
@@ -9,11 +9,18 @@ export enum Routes {
   Dashboard = "/dashboard",
   ActivityLog = "/dashboard/activity-log",
   Departments = "/dashboard/departments",
-  Notifications = "/dashboard/notifications",
+  Notifications = "/dashboard/notification",
   Onboarding = "/onboarding",
   Profile = "/dashboard/settings",
   Search = "/dashboard/search",
   Home = "/",
+
+  Admin = "/dashboard/settings/users",
+  UserManagement = "/dashboard/settings/users",
+  RolesPermissions = "/dashboard/settings/roles",
+  Preferences = "/dashboard/settings/preferences",
+  AccountSettings = "/dashboard/settings/account",
+  UserDetails = `/dashboard/settings/users/[id]`,
 }
 
 export const RouteConfig = {
@@ -28,8 +35,16 @@ export const RouteConfig = {
     activityLog: Routes.ActivityLog,
     departments: Routes.Departments,
     notifications: Routes.Notifications,
-    profile: Routes.Profile,
     search: Routes.Search,
+    admin: {
+      root: Routes.Admin,
+      users: Routes.UserManagement,
+      roles: Routes.RolesPermissions,
+      preferences: Routes.Preferences,
+      account: Routes.AccountSettings,
+      userDetails: (userId: string) =>
+        Routes.UserDetails.replace("[id]", userId),
+    },
   },
   onboarding: Routes.Onboarding,
   home: Routes.Home,
