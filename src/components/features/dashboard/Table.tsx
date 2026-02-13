@@ -1,5 +1,5 @@
 "use client";
-
+import { useEffect } from "react";
 import React, { useMemo, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -11,6 +11,14 @@ import {
   TableCell,
 } from "@/components/ui/table";
 import { Span } from "@/components/ui/typography/Text";
+import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 type Align = "left" | "center" | "right";
 
@@ -18,6 +26,7 @@ export type Column<T> = {
   key: string;
   header?: React.ReactNode;
   accessor?: keyof T | ((row: T) => React.ReactNode);
+  sortAccessor?: (row: T) => string | number;
   render?: (row: T) => React.ReactNode;
   sortable?: boolean;
   width?: string;
@@ -50,6 +59,9 @@ export default function Table<T extends Record<string, any>>({
   columns,
   data,
   rowKey,
+  enablePagination = false,
+  defaultPageSize = 5,
+  pageSizeOptions = [5, 10, 20, 50],
   enableSorting = true,
   isLoading = false,
   emptyState,
@@ -59,8 +71,17 @@ export default function Table<T extends Record<string, any>>({
   selectedRowKeys,
   onSelectedRowKeysChange,
 }: CustomTableProps<T>) {
-  const [sort, setSort] = useState<SortState>({ key: null, direction: null });
+  const [sort, setSort] = useState<SortState>({
+    key: "timestamp",
+    direction: "desc",
+  });
   const [internalSelected, setInternalSelected] = useState<string[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(defaultPageSize);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [data, pageSize]);
 
   const getRowKey = (row: T, idx: number) => {
     if (!rowKey) {
@@ -108,27 +129,15 @@ export default function Table<T extends Record<string, any>>({
 
     const copy = data.slice();
     copy.sort((a, b) => {
-      const va = a[key];
-      const vb = b[key];
+      const va = col.sortAccessor ? col.sortAccessor(a) : a[key];
+      const vb = col.sortAccessor ? col.sortAccessor(b) : b[key];
 
-      if (va == null && vb == null) {
-        return 0;
-      }
-
-      if (va == null) {
-        return sort.direction === "asc" ? -1 : 1;
-      }
-
-      if (vb == null) {
-        return sort.direction === "asc" ? 1 : -1;
-      }
+      if (va == null && vb == null) return 0;
+      if (va == null) return sort.direction === "asc" ? -1 : 1;
+      if (vb == null) return sort.direction === "asc" ? 1 : -1;
 
       if (typeof va === "number" && typeof vb === "number") {
         return sort.direction === "asc" ? va - vb : vb - va;
-      }
-
-      if (va instanceof Date && vb instanceof Date) {
-        return sort.direction === "asc" ? +va - +vb : +vb - +va;
       }
 
       return sort.direction === "asc"
@@ -138,6 +147,19 @@ export default function Table<T extends Record<string, any>>({
 
     return copy;
   }, [data, sort, enableSorting, columns]);
+
+  const paginatedData = useMemo(() => {
+    if (!enablePagination) {
+      return sortedData;
+    }
+    const startIndex = (currentPage - 1) * pageSize;
+    const endIndex = startIndex + pageSize;
+    return sortedData.slice(startIndex, endIndex);
+  }, [sortedData, enablePagination, currentPage, pageSize]);
+
+  const totalPages = enablePagination
+    ? Math.ceil(sortedData.length / pageSize)
+    : 1;
 
   const toggleSort = (col: Column<T>) => {
     if (!enableSorting || !col.sortable) return;
@@ -158,31 +180,19 @@ export default function Table<T extends Record<string, any>>({
   const selectedKeys = controlled ? selectedRowKeys! : internalSelected;
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  const visibleRowKeys = useMemo(() => sortedData.map((r, i) => getRowKey(r, i)), [sortedData]);
-  const allVisibleSelected = visibleRowKeys.length > 0 && visibleRowKeys.every((k) => selectedKeys.includes(k));
-  const someVisibleSelected = visibleRowKeys.some((k) => selectedKeys.includes(k));
+  const visibleRowKeys = useMemo(
+    () => paginatedData.map((r, i) => getRowKey(r, i)),
+    [paginatedData],
+  );
+  const allVisibleSelected =
+    visibleRowKeys.length > 0 &&
+    visibleRowKeys.every((k) => selectedKeys.includes(k));
 
   const updateSelection = (next: string[]) => {
     if (!controlled) {
       setInternalSelected(next);
     }
     onSelectedRowKeysChange?.(next);
-  };
-
-  const toggleKey = (key: string) => {
-    const exists = selectedKeys.includes(key);
-    const next = exists ? selectedKeys.filter((k) => k !== key) : [...selectedKeys, key];
-    updateSelection(next);
-  };
-
-  const toggleAllVisible = () => {
-    if (allVisibleSelected) {
-      const next = selectedKeys.filter((k) => !visibleRowKeys.includes(k));
-      updateSelection(next);
-    } else {
-      const nextKeys = Array.from(new Set([...selectedKeys, ...visibleRowKeys]));
-      updateSelection(nextKeys);
-    }
   };
 
   const visibleColumnCount = columns.length + (showCheckbox ? 1 : 0);
@@ -194,112 +204,109 @@ export default function Table<T extends Record<string, any>>({
         <div className="overflow-x-auto w-full max-w-full">
           <div className="min-w-max">
             <TableComponent>
-            <TableHeader>
-              <TableRow>
-                {showCheckbox && (
-                  <TableHead
-                    key="__select__"
-                    className={`w-12 cursor-pointer select-none text-black font-bold px-4`}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      toggleAllVisible();
-                    }}
-                  >
-                    <div className="flex items-center justify-start">
-                      <input
-                        type="checkbox"
-                        checked={allVisibleSelected}
-                        ref={(el) => {
-                          if (!el) return;
-                          el.indeterminate = !allVisibleSelected && someVisibleSelected;
-                        }}
-                        onChange={(e) => {
-                          e.stopPropagation();
-                          toggleAllVisible();
-                        }}
-                        aria-label="Select all rows"
-                      />
-                    </div>
-                  </TableHead>
-                )}
-
-                {columns.map((col) => (
-                  <TableHead
-                    key={col.key}
-                    className={`${col.width ?? ""} ${col.align === "center" ? "text-center" : col.align === "right" ? "text-right" : "text-left"} cursor-pointer select-none text-black font-bold px-4`}
-                    onClick={() => toggleSort(col)}
-                  >
-                    <div className="flex items-center gap-2">
-                      <span className="truncate max-w-[18rem]">
-                        {col.header}
-                      </span>
-                      {col.sortable && (
-                        <Span
-                          text={sort.key === col.key ? (sort.direction === "asc" ? "▲" : sort.direction === "desc" ? "▼" : "") : ""}
-                          className="opacity-60 text-xs"
-                        />
-                      )}
-                    </div>
-                  </TableHead>
-                ))}
-              </TableRow>
-            </TableHeader>
-
-            <TableBody>
-              {isLoading ? (
+              <TableHeader>
                 <TableRow>
-                  <TableCell colSpan={Math.max(1, visibleColumnCount)}>
-                    <div className="py-6 text-center">Loading...</div>
-                  </TableCell>
-                </TableRow>
-              ) : sortedData.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={Math.max(1, visibleColumnCount)}>
-                    <div className="py-8 text-center text-sm text-muted-foreground">
-                      {emptyState ?? "No records found."}
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ) : (
-                sortedData.map((row: T, rIdx: number) => {
-                  const key = getRowKey(row, rIdx);
-                  return (
-                    <TableRow
-                      key={key}
-                      className={`${onRowClick ? "hover:bg-surface/60 cursor-pointer" : ""}`}
-                      onClick={() => onRowClick?.(row)}
+                  {columns.map((col) => (
+                    <TableHead
+                      key={col.key}
+                      className={`${col.width ?? ""} ${col.align === "center" ? "text-center" : col.align === "right" ? "text-right" : "text-left"} cursor-pointer select-none text-black font-bold px-4`}
+                      onClick={() => toggleSort(col)}
                     >
-                      {showCheckbox && (
-                        <TableCell className="w-12 align-top px-4">
-                          <input
-                            type="checkbox"
-                            checked={selectedKeys.includes(key)}
-                            onChange={(e) => {
-                              e.stopPropagation();
-                              toggleKey(key);
-                            }}
-                            onClick={(e) => e.stopPropagation()}
-                            aria-label={`Select row ${key}`}
-                          />
-                        </TableCell>
-                      )}
+                      <div className="flex items-center gap-2">
+                        <Span className="truncate max-w-[18rem]">
+                          {col.header}
+                        </Span>
+                      </div>
+                    </TableHead>
+                  ))}
+                </TableRow>
+              </TableHeader>
 
-                      {columns.map((col) => (
-                        <TableCell
-                          key={col.key}
-                          className={`${col.align === "center" ? "text-center" : col.align === "right" ? "text-right" : "text-left"} align-top ${col.width ?? ""} px-4`}
-                        >
-                          <div className="truncate whitespace-nowrap">
-                            {getCellValue(col, row)}
-                          </div>
-                        </TableCell>
-                      ))}
-                    </TableRow>
-                  );
-                })
-              )}
-            </TableBody>
+              <TableBody>
+                {isLoading ? (
+                  <TableRow>
+                    <TableCell colSpan={Math.max(1, visibleColumnCount)}>
+                      <div className="py-6 text-center">Loading...</div>
+                    </TableCell>
+                  </TableRow>
+                ) : paginatedData.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={Math.max(1, visibleColumnCount)}>
+                      <div className="py-8 text-center text-sm text-muted-foreground">
+                        {emptyState ?? "No records found."}
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  paginatedData.map((row: T, rIdx: number) => {
+                    const key = getRowKey(row, rIdx);
+                    return (
+                      <TableRow
+                        key={key}
+                        className={`${onRowClick ? "hover:bg-surface/60 cursor-pointer" : ""}`}
+                        onClick={() => onRowClick?.(row)}
+                      >
+                        {columns.map((col) => (
+                          <TableCell
+                            key={col.key}
+                            className={`${col.align === "center" ? "text-center" : col.align === "right" ? "text-right" : "text-left"} align-top ${col.width ?? ""} px-4`}
+                          >
+                            <div className="truncate sm:whitespace-normal">
+                              {getCellValue(col, row)}
+                            </div>
+                          </TableCell>
+                        ))}
+                      </TableRow>
+                    );
+                  })
+                )}
+              </TableBody>
             </TableComponent>
+            {enablePagination && totalPages > 1 && (
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-4 py-3 border-t">
+                <Span variant="default">
+                  Page {currentPage} of {totalPages}
+                </Span>
+                <Select
+                  value={String(pageSize)}
+                  onValueChange={(value) => setPageSize(Number(value))}
+                >
+                  <SelectTrigger className="w-[110px]">
+                    <SelectValue placeholder="Page size" />
+                  </SelectTrigger>
+
+                  <SelectContent>
+                    {pageSizeOptions.map((size) => (
+                      <SelectItem key={size} value={String(size)}>
+                        {size} / page
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+
+                <div className="flex items-center gap-2">
+                  <Button
+                    className="px-3 py-1 text-sm rounded-md border disabled:opacity-50"
+                    variant="outline"
+                    disabled={currentPage === 1}
+                    onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                  >
+                    Previous
+                  </Button>
+
+                  <Button
+                    className="px-3 py-1 text-sm rounded-md border disabled:opacity-50"
+                    variant="outline"
+                    disabled={currentPage === totalPages}
+                    onClick={() =>
+                      setCurrentPage((p) => Math.min(totalPages, p + 1))
+                    }
+                  >
+                    Next
+                  </Button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </CardContent>

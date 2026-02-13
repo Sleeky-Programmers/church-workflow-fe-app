@@ -1,18 +1,19 @@
+import { Search } from "lucide-react";
 
 export enum Routes {
-  SignUp = '/auth/signup',
-  SignIn = '/auth/login',
-  ForgotPassword = '/auth/forgot-password',
-  ResetPassword = '/auth/reset-password',
+  SignUp = "/auth/signup",
+  SignIn = "/auth/login",
+  ForgotPassword = "/auth/forgot-password",
+  ResetPassword = "/auth/reset-password",
 
-  Dashboard = '/dashboard',
-  ActivityLog = '/dashboard/activity-log',
-  Departments = '/dashboard/departments',
-  Notifications = '/dashboard/notification',
-
-  Onboarding = '/onboarding',
-
-  Home = '/',
+  Dashboard = "/dashboard",
+  ActivityLog = "/dashboard/activity-log",
+  Departments = "/dashboard/departments",
+  Notifications = "/dashboard/notifications",
+  Onboarding = "/onboarding",
+  Profile = "/dashboard/settings",
+  Search = "/dashboard/search",
+  Home = "/",
 }
 
 export const RouteConfig = {
@@ -27,6 +28,8 @@ export const RouteConfig = {
     activityLog: Routes.ActivityLog,
     departments: Routes.Departments,
     notifications: Routes.Notifications,
+    profile: Routes.Profile,
+    search: Routes.Search,
   },
   onboarding: Routes.Onboarding,
   home: Routes.Home,
@@ -34,7 +37,7 @@ export const RouteConfig = {
 
 export const getRouteWithParams = (
   route: Routes,
-  params?: Record<string, string | number>
+  params?: Record<string, string | number>,
 ): string => {
   let finalRoute: string = route;
 

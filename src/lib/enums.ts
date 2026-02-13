@@ -8,6 +8,15 @@ export enum RequisitionStatus {
   PENDING = "PENDING",
   APPROVED = "APPROVED",
 }
+export enum ActivityDetailLabel {
+  ACTION = "Action",
+  BY = "By",
+  MODULE = "Module",
+  AFFECTED_RECORD = "Affected Record",
+  STATUS = "Status",
+  TRIGGERED_FROM = "Triggered From",
+  DETAILS = "Details",
+}
 
 export enum HtmlInputElementTypes {
   INPUT = "INPUT",
@@ -16,6 +25,17 @@ export enum HtmlInputElementTypes {
 }
 
 export enum SignUpStep {
-  SIGNUP = 'SIGNUP',
-  VERIFY_OTP = 'VERIFY_OTP',
+  SIGNUP = "SIGNUP",
+  VERIFY_OTP = "VERIFY_OTP",
+}
+
+export enum EventCategory {
+  GENERAL = "GENERAL",
+  LEADERSHIP = "LEADERSHIP",
+  SPECIAL = "SPECIAL",
+}
+
+export enum ActiveTab {
+  FAVOURITES = "favourites",
+  RECENT = "recent",
 }
