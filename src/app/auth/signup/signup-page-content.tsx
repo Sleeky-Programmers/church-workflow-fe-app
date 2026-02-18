@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { RouteConfig } from "@/config/routes";
 import { SignUpStep } from "@/lib/enums";
 import AuthLayout from "@/components/features/landing/auth/signup/auth-layout";
+import { resendOtp, verifyOtp } from "@/lib/api";
 
 export function SignupPageContent() {
   const router = useRouter();
@@ -18,9 +19,6 @@ export function SignupPageContent() {
   const [currentStep, setCurrentStep] = useState<SignUpStep>(SignUpStep.SIGNUP);
   const [email, setEmail] = useState("");
   const [signupData, setSignupData] = useState<any>(null);
-
-  const testOtp = 123456;
-  const testEnv = process.env.NODE_ENV === "development";
 
   if (isLoading) {
     return (
@@ -68,14 +66,32 @@ export function SignupPageContent() {
   };
 
   const handleOtpVerified = async (otp: string) => {
-    if (testEnv && (otp === testOtp.toString() || /^\d{6}$/.test(otp))) {
+    try {
+      const response = await verifyOtp({ email, otp });
+
+      if (typeof window !== "undefined" && response.accessToken) {
+        localStorage.setItem("accessToken", response.accessToken);
+      }
+
       if (signupData && typeof window !== "undefined") {
         sessionStorage.setItem("signupData", JSON.stringify(signupData));
       }
+
       router.push(RouteConfig.onboarding);
       return true;
+    } catch (error) {
+      console.error("OTP verification failed:", error);
+      return false;
     }
-    return false;
+  };
+
+  const handleResendOtp = async () => {
+    try {
+      await resendOtp(email);
+    } catch (error) {
+      console.error("Resend failed:", error);
+      throw error;
+    }
   };
 
   const layoutVariant = isAdmin ? "admin-signup" : "signup";
@@ -98,7 +114,11 @@ export function SignupPageContent() {
           />
         )}
         {currentStep === SignUpStep.VERIFY_OTP && (
-          <VerifyOtpForm email={email} onVerify={handleOtpVerified} />
+          <VerifyOtpForm
+            email={email}
+            onVerify={handleOtpVerified}
+            onResend={handleResendOtp}
+          />
         )}
       </div>
     </AuthLayout>

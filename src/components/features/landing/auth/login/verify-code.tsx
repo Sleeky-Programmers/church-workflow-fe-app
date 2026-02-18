@@ -1,99 +1,109 @@
-'use client'
-import * as React from 'react'
-import { useEffect, useState } from 'react'
-import { useForm } from 'react-hook-form'
-import { Button } from '@/components/ui/button'
+"use client";
+import * as React from "react";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { Button } from "@/components/ui/button";
 import {
   InputOTP,
   InputOTPGroup,
   InputOTPSeparator,
   InputOTPSlot,
-} from '@/components/ui/input-otp'
+} from "@/components/ui/input-otp";
 import {
   Form,
   FormField,
   FormItem,
   FormControl,
   FormMessage,
-} from '@/components/ui/form'
-import { Loader } from '@/components/ui/loader'
-import Heading from '@/components/ui/typography/Heading'
-import { Text, Span } from '@/components/ui/typography/Text'
-
+} from "@/components/ui/form";
+import { Loader } from "@/components/ui/loader";
+import Heading from "@/components/ui/typography/Heading";
+import { Text, Span } from "@/components/ui/typography/Text";
 
 interface VerifyCodeFormProps {
-  email: string
-  onVerify: () => void
+  email: string;
+  onVerify: (code: string) => Promise<boolean>;
+  onResend: () => Promise<any>;
 }
 
 type VerifyCodeFormValues = {
-  code: string
-}
+  code: string;
+};
 
 export default function VerifyCodeForm({
   email,
   onVerify,
+  onResend,
 }: VerifyCodeFormProps) {
-  const [isLoading, setIsLoading] = useState(false)
-  const [countdown, setCountdown] = useState(0)
+  const [isLoading, setIsLoading] = useState(false);
+  const [countdown, setCountdown] = useState(0);
   const form = useForm<VerifyCodeFormValues>({
     defaultValues: {
-      code: '',
+      code: "",
     },
-  })
+  });
   useEffect(() => {
-    setCountdown(60)
+    setCountdown(60);
     const timer = setInterval(() => {
       setCountdown((prev) => {
         if (prev <= 1) {
-          clearInterval(timer)
-          return 0
+          clearInterval(timer);
+          return 0;
         }
-        return prev - 1
-      })
-    }, 1000)
-    return () => clearInterval(timer)
-  }, [])
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
   const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60)
-    const secs = seconds % 60
-    return `${mins}:${secs.toString().padStart(2, '0')}`
-  }
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, "0")}`;
+  };
   const handleSubmit = async ({ code }: VerifyCodeFormValues) => {
-    if (code.length !== 6) return
-    setIsLoading(true)
-    setTimeout(() => {
-      setIsLoading(false)
-      onVerify()
-    }, 1000)
-  }
-  const handleResend = () => {
-    setCountdown(90)
-  }
+    if (code.length !== 6) return;
+
+    setIsLoading(true);
+
+    try {
+      const success = await onVerify(code);
+      setIsLoading(false);
+
+      if (!success) {
+        form.setError("code", {
+          type: "manual",
+          message: "Invalid or expired code",
+        });
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleResend = async () => {
+    await onResend();
+    setCountdown(90);
+  };
+
   return (
     <div className="bg-gray-50 rounded-2xl p-8 animate-slide-up">
       <div className="text-center mb-8">
-        <Heading level={1}>
-          Forgot Password
-        </Heading>
+        <Heading level={1}>Forgot Password</Heading>
         <Text variant="muted">
-          Please check your email, we&apos;ve sent a code to{' '}
+          Please check your email, we&apos;ve sent a code to{" "}
           <Span variant="default">{email}</Span>
         </Text>
       </div>
       <Form {...form}>
-        <form
-          onSubmit={form.handleSubmit(handleSubmit)}
-          className="space-y-6"
-        >
+        <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
           <FormField
             control={form.control}
             name="code"
             rules={{
-              required: 'Verification code is required',
+              required: "Verification code is required",
               minLength: {
                 value: 6,
-                message: 'Enter the 6-digit code',
+                message: "Enter the 6-digit code",
               },
             }}
             render={({ field }) => (
@@ -128,7 +138,7 @@ export default function VerifyCodeForm({
           />
           <Button
             type="submit"
-            disabled={isLoading || form.watch('code').length !== 6}
+            disabled={isLoading || form.watch("code").length !== 6}
             className="w-full"
           >
             {isLoading ? (
@@ -137,12 +147,12 @@ export default function VerifyCodeForm({
                 Verifying...
               </Span>
             ) : (
-              'Continue'
+              "Continue"
             )}
           </Button>
           <div className="text-center">
             <Text variant="muted">
-              Didn&apos;t receive a code?{' '}
+              Didn&apos;t receive a code?{" "}
               {countdown > 0 ? (
                 <Span variant="default" className="cursor-default">
                   Resend in {formatTime(countdown)}
@@ -162,5 +172,5 @@ export default function VerifyCodeForm({
         </form>
       </Form>
     </div>
-  )
+  );
 }

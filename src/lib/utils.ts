@@ -155,3 +155,14 @@ export function getActionItemClasses(
 export function capitalize(str: string): string {
   return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
 }
+
+export function convertTo12Hour(time: string) {
+  const [hourStr, minute] = time.split(":");
+  let hour = parseInt(hourStr);
+  const amPm = hour >= 12 ? "PM" : "AM";
+
+  hour = hour % 12;
+  hour = hour === 0 ? 12 : hour;
+
+  return `${hour}:${minute} ${amPm}`;
+}

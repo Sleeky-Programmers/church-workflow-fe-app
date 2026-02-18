@@ -14,21 +14,25 @@ import {
   UploadMembersValues,
   uploadMembersSchema,
 } from "@/types/type";
-import { useSignupData } from "@/hooks/use-signup-data";
+import { createChurch, createWeeklyService, uploadMembersCsv } from "@/lib/api";
+import { RouteConfig } from "@/config/routes";
 
 export default function ChurchOnboarding() {
   const [step, setStep] = useState(1);
   const [services, setServices] = useState<WeeklyServicesValues>([]);
+  const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [csvFileFromForm, setCsvFileFromForm] = useState<File | null>(null);
+
   const router = useRouter();
-  const signupData = useSignupData();
 
   const identityForm = useForm<ChurchIdentityValues>({
     resolver: zodResolver(churchIdentitySchema),
     defaultValues: {
-      churchName: "",
-      churchAddress: "",
+      name: "",
+      alias: "",
+      address: "",
       country: "",
-      stateProvince: "",
+      state: "",
       defaultCurrency: "",
       timeZone: "",
     },
@@ -39,41 +43,59 @@ export default function ChurchOnboarding() {
     defaultValues: { csvFile: undefined },
   });
 
-  useEffect(() => {
-    if (signupData && identityForm) {
-      identityForm.reset({
-        churchName: signupData.churchName || "",
-        churchAddress: "",
-        country: "",
-        stateProvince: "",
-        defaultCurrency: "",
-        timeZone: "",
-      });
+  const onIdentitySubmit = async (data: ChurchIdentityValues) => {
+    if (!logoFile) {
+      alert("Please upload a church logo");
+      return;
     }
-  }, [signupData, identityForm]);
-
-  const onIdentitySubmit = (data: ChurchIdentityValues) => {
-    void data;
-    setStep(2);
+    try {
+      await createChurch(
+        {
+          name: data.name,
+          alias: data.alias || "",
+          address: data.address,
+          country: data.country,
+          state: data.state || "",
+          defaultCurrency: data.defaultCurrency,
+          timeZone: data.timeZone,
+        },
+        logoFile,
+      );
+      setStep(2);
+    } catch (error: any) {
+      console.error("Church creation failed:", error);
+      alert(error.message || "Failed to create church");
+    }
   };
 
-  const onServicesSubmit = (data: WeeklyServicesValues) => {
-    void data;
-    setStep(3);
+  const onServicesSubmit = async () => {
+    try {
+      for (const service of services) {
+        await createWeeklyService(service);
+      }
+      setStep(3);
+    } catch (error: any) {
+      console.error("Weekly service creation failed:", error);
+      alert(error.message || "Failed to save services");
+    }
   };
 
-  const onUploadSubmit = (data: UploadMembersValues) => {
-    void data;
-    router.push("/dashboard");
+  const onUploadSubmit = async (data: UploadMembersValues) => {
+    if (!data.csvFile) {
+      alert("Please upload a CSV file");
+      return;
+    }
+    try {
+      await uploadMembersCsv(data.csvFile as File);
+      router.push(RouteConfig.dashboard.home);
+    } catch (error: any) {
+      console.error("Members upload failed:", error);
+      alert(error.message || "Failed to upload members");
+    }
   };
 
-  const handleBack = () => {
-    if (step > 1) setStep(step - 1);
-  };
-
-  const handleSkip = () => {
-    setStep(step + 1);
-  };
+  const handleBack = () => step > 1 && setStep(step - 1);
+  const handleSkip = () => setStep(step + 1);
 
   const addService = (service: WeeklyServicesValues[number]) => {
     setServices((prev) => [...prev, service]);
@@ -103,6 +125,7 @@ export default function ChurchOnboarding() {
             onSkip={handleSkip}
             step={step}
             totalSteps={3}
+            onLogoSelect={setLogoFile}
           />
         );
       case 2:
@@ -112,7 +135,7 @@ export default function ChurchOnboarding() {
             onAddService={addService}
             onUpdateService={updateService}
             onRemoveService={removeService}
-            onSubmit={() => onServicesSubmit(services)}
+            onSubmit={onServicesSubmit}
             onBack={handleBack}
             onSkip={handleSkip}
             step={step}

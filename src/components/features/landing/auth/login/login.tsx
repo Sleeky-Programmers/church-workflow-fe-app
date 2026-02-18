@@ -1,7 +1,7 @@
-'use client';
-import { useForm } from 'react-hook-form';
-import { Button } from '@/components/ui/button';
-import Heading from '@/components/ui/typography/Heading';
+"use client";
+import { useForm } from "react-hook-form";
+import { Button } from "@/components/ui/button";
+import Heading from "@/components/ui/typography/Heading";
 import {
   Form,
   FormField,
@@ -9,16 +9,17 @@ import {
   FormLabel,
   FormControl,
   FormMessage,
-} from '@/components/ui/form';
-import { useRouter } from 'next/navigation';
-import React, { useState } from 'react';
-import { LoginFormValues } from '@/types/type';
-import GoogleSignupButton from '../oauth/google-signup-button'; 
-import {Text, Span } from '@/components/ui/typography/Text';
-import { Loader } from '@/components/ui/loader';
-import { PasswordInput } from '@/components/ui/passport-input';
-import { Input } from '@/components/ui/input';
-
+} from "@/components/ui/form";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { LoginFormValues } from "@/types/type";
+import GoogleSignupButton from "../oauth/google-signup-button";
+import { Text, Span } from "@/components/ui/typography/Text";
+import { Loader } from "@/components/ui/loader";
+import { PasswordInput } from "@/components/ui/passport-input";
+import { Input } from "@/components/ui/input";
+import { RouteConfig } from "@/config/routes";
+import { getCurrentUser, login } from "@/lib/api";
 
 interface LoginFormProps {
   onForgotPassword: () => void;
@@ -29,24 +30,36 @@ export default function LoginForm({ onForgotPassword }: LoginFormProps) {
   const router = useRouter();
   const form = useForm<LoginFormValues>({
     defaultValues: {
-      email: '',
-      password: '',
+      email: "",
+      password: "",
     },
   });
 
-  const onSubmit = async () => {
+  const onSubmit = async (values: LoginFormValues) => {
     setIsLoading(true);
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      router.push('/dashboard');
-    } catch {
-      alert('Login failed. Please try again.');
+      const data = await login(values);
+      if (typeof window !== "undefined") {
+        localStorage.setItem("accessToken", data.accessToken);
+      }
+      const onboardingCompleted =
+        localStorage.getItem("onboardingCompleted") === "true";
+
+      if (!onboardingCompleted) {
+        router.push(RouteConfig.onboarding);
+      } else {
+        router.push(RouteConfig.dashboard.home);
+      }
+    } catch (error: any) {
+      form.setError("password", {
+        message: error.message || "Invalid credentials",
+      });
     } finally {
       setIsLoading(false);
     }
   };
 
-  const onSignUp = () => router.push('/auth/signup');
+  const onSignUp = () => router.push(RouteConfig.auth.signUp);
 
   return (
     <div className="space-y-8 animate-fade-in">
@@ -58,11 +71,10 @@ export default function LoginForm({ onForgotPassword }: LoginFormProps) {
       </div>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-         
           <FormField
             control={form.control}
             name="email"
-            rules={{ required: 'Email is required' }}
+            rules={{ required: "Email is required" }}
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Email</FormLabel>
@@ -77,25 +89,19 @@ export default function LoginForm({ onForgotPassword }: LoginFormProps) {
               </FormItem>
             )}
           />
-       
+
           <FormField
             control={form.control}
             name="password"
-            rules={{ required: 'Password is required' }}
+            rules={{ required: "Password is required" }}
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Password</FormLabel>
                 <FormControl>
-                  <PasswordInput
-                    placeholder="Enter your password"
-                    {...field}
-                  />
+                  <PasswordInput placeholder="Enter your password" {...field} />
                 </FormControl>
                 <div className="flex justify-end">
-                  <Button
-                    variant="link"
-                    onClick={onForgotPassword}
-                  >
+                  <Button variant="link" onClick={onForgotPassword}>
                     Forgot password?
                   </Button>
                 </div>
@@ -103,7 +109,7 @@ export default function LoginForm({ onForgotPassword }: LoginFormProps) {
               </FormItem>
             )}
           />
-         
+
           <Button type="submit" disabled={isLoading} className="w-full py-6">
             {isLoading ? (
               <Span className="flex items-center gap-2">
@@ -111,10 +117,10 @@ export default function LoginForm({ onForgotPassword }: LoginFormProps) {
                 Logging in...
               </Span>
             ) : (
-              'Login'
+              "Login"
             )}
           </Button>
-       
+
           <div className="relative my-8 flex items-center">
             <div className="flex-grow border-t border-gray-200" />
             <Span variant="default" className="mx-4 px-4 py-1">
@@ -122,7 +128,7 @@ export default function LoginForm({ onForgotPassword }: LoginFormProps) {
             </Span>
             <div className="flex-grow border-t border-gray-200" />
           </div>
-          <GoogleSignupButton onClick={() => alert('Google Signup')} />
+          <GoogleSignupButton onClick={() => alert("Google Signup")} />
         </form>
       </Form>
       <div className="text-center">

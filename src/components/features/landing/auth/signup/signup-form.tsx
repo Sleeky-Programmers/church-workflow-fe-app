@@ -15,38 +15,15 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import GoogleSignupButton from "../oauth/google-signup-button";
 import Heading from "@/components/ui/typography/Heading";
 import { Text, Span } from "@/components/ui/typography/Text";
 import { Loader } from "@/components/ui/loader";
 import { useRouter } from "next/navigation";
 import { Link } from "@/components/ui/link";
-
-const signupSchema = z
-  .object({
-    firstName: z.string().min(2, "First name must be at least 2 characters"),
-    lastName: z.string().min(2, "Last name must be at least 2 characters"),
-    role: z.string().min(1, "Role is required"),
-    phoneNumber: z.string().min(10, "Valid phone number is required"),
-    churchName: z.string().min(2, "Church name is required"),
-    email: z.string().email("Invalid email format"),
-    password: z.string().min(8, "Password must be at least 8 characters"),
-    confirmPassword: z.string(),
-    agreeToTerms: z.boolean().refine((val) => val === true, {
-      message: "You must accept the Terms and Conditions",
-    }),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords do not match",
-    path: ["confirmPassword"],
-  });
+import { signupSchema } from "@/types/schema";
+import { signup } from "@/lib/api";
+import { RouteConfig } from "@/config/routes";
 
 type SignupFormValues = z.infer<typeof signupSchema>;
 
@@ -65,9 +42,6 @@ export default function SignupForm({ onSubmit }: SignupFormProps) {
     defaultValues: {
       firstName: "",
       lastName: "",
-      role: "general-overseer",
-      phoneNumber: "",
-      churchName: "",
       email: "",
       password: "",
       confirmPassword: "",
@@ -76,18 +50,32 @@ export default function SignupForm({ onSubmit }: SignupFormProps) {
   });
 
   const handleSubmit = async (data: SignupFormValues) => {
-    setIsLoading(true);
-    setTimeout(() => {
-      setIsLoading(false);
+    try {
+      setIsLoading(true);
+
+      await signup({
+        firstName: data.firstName,
+        lastName: data.lastName,
+        email: data.email,
+        password: data.password,
+      });
+
       onSubmit(data.email, data);
-    }, 1000);
+    } catch (error: any) {
+      console.error(error);
+      form.setError("email", {
+        message: error.message || "Signup failed",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleGoogleSignup = () => {
     alert("Google Signup clicked");
   };
 
-  const onLogin = () => router.push("/auth/login");
+  const onLogin = () => router.push(RouteConfig.auth.signIn);
 
   return (
     <div className="animate-fade-in">
@@ -127,70 +115,7 @@ export default function SignupForm({ onSubmit }: SignupFormProps) {
               )}
             />
           </div>
-          <div className="grid grid-cols-2 gap-4">
-            <FormField
-              control={form.control}
-              name="role"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Role</FormLabel>
-                  <FormControl>
-                    <Select value={field.value} onValueChange={field.onChange}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select role" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="general-overseer">
-                          General Overseer
-                        </SelectItem>
-                        <SelectItem value="senior-pastor">
-                          Senior Pastor
-                        </SelectItem>
-                        <SelectItem value="pastor">Pastor</SelectItem>
-                        <SelectItem value="admin">
-                          Church Administrator
-                        </SelectItem>
-                        <SelectItem value="cell-leader">Cell Leader</SelectItem>
-                        <SelectItem value="fellowship-group-leader">
-                          Fellowship Group Leader
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="phoneNumber"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Phone Number</FormLabel>
-                  <FormControl>
-                    <Input placeholder="" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-          <FormField
-            control={form.control}
-            name="churchName"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Church Name</FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="E.g., Living Grace Ministries"
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+
           <FormField
             control={form.control}
             name="email"
