@@ -157,7 +157,7 @@ export async function uploadMembersCsv(file: File) {
   }
 
   const formData = new FormData();
-  formData.append("file", file); // MUST match FileInterceptor('file')
+  formData.append("file", file);
 
   const response = await fetch(`${BASE_URL}/members/csv/create`, {
     method: "POST",

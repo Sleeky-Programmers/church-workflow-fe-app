@@ -22,7 +22,6 @@ export default function ChurchOnboarding() {
   const [step, setStep] = useState(1);
   const [services, setServices] = useState<WeeklyServicesValues>([]);
   const [logoFile, setLogoFile] = useState<File | null>(null);
-  const [csvFileFromForm, setCsvFileFromForm] = useState<File | null>(null);
 
   const router = useRouter();
 
