@@ -28,8 +28,8 @@ export const weeklyServiceSchema = z.object({
   serviceName: z.string().min(1, "Service name is required"),
   days: z.array(z.string()).min(1, "At least one day is required"),
   startTime: z.string().min(1, "Start time is required"),
-  endTime: z.string().optional(),
-  location: z.string().optional(),
+  endTime: z.string().min(1, "End time is required"),
+  location: z.string().min(1, "Location is required"),
 });
 
 export type WeeklyServiceValues = z.infer<typeof weeklyServiceSchema>;

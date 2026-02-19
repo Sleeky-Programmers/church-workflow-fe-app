@@ -44,3 +44,11 @@ export interface CreateChurchPayload {
   defaultCurrency: string;
   timeZone: string;
 }
+
+export interface CreateWeeklyServicePayload {
+  serviceName: string;
+  day: string;
+  startTime: string;
+  endTime: string;
+  location: string;
+}

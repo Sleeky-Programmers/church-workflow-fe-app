@@ -9,6 +9,7 @@ import {
   ResetPasswordPayload,
   ResetPasswordResponse,
   CreateChurchPayload,
+  CreateWeeklyServicePayload,
 } from "@/types/payload";
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -141,21 +142,36 @@ export async function createChurch(
   });
 }
 
-export async function createWeeklyService(serviceData: any) {
-  return authenticatedFetch("/events/weekly-service/create", {
+export async function createWeeklyService(payload: CreateWeeklyServicePayload) {
+  return apiFetch("/events/weekly-service/create", {
     method: "POST",
-    body: JSON.stringify(serviceData),
+    body: JSON.stringify(payload),
   });
 }
 
-export async function uploadMembersCsv(csvFile: File) {
-  const formData = new FormData();
-  formData.append("file", csvFile);
+export async function uploadMembersCsv(file: File) {
+  const token = localStorage.getItem("accessToken");
 
-  return authenticatedFetch("/members/csv/create", {
+  if (!token) {
+    throw new Error("Unauthorized");
+  }
+
+  const formData = new FormData();
+  formData.append("file", file); // MUST match FileInterceptor('file')
+
+  const response = await fetch(`${BASE_URL}/members/csv/create`, {
     method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
     body: formData,
   });
+
+  if (!response.ok) {
+    throw new Error(await response.text());
+  }
+
+  return response.json();
 }
 
 export async function fetchUsers(): Promise<User[]> {

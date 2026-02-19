@@ -157,12 +157,13 @@ export function capitalize(str: string): string {
 }
 
 export function convertTo12Hour(time: string) {
-  const [hourStr, minute] = time.split(":");
-  let hour = parseInt(hourStr);
-  const amPm = hour >= 12 ? "PM" : "AM";
+  if (!time) return "";
 
-  hour = hour % 12;
-  hour = hour === 0 ? 12 : hour;
+  const [hour, minute] = time.split(":");
+  const hours = Number(hour);
 
-  return `${hour}:${minute} ${amPm}`;
+  const ampm = hours >= 12 ? "PM" : "AM";
+  const convertedHour = hours % 12 || 12;
+
+  return `${convertedHour}:${minute} ${ampm}`;
 }

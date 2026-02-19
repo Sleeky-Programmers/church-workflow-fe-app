@@ -16,6 +16,7 @@ import {
 } from "@/types/type";
 import { createChurch, createWeeklyService, uploadMembersCsv } from "@/lib/api";
 import { RouteConfig } from "@/config/routes";
+import { convertTo12Hour } from "@/lib/utils";
 
 export default function ChurchOnboarding() {
   const [step, setStep] = useState(1);
@@ -68,29 +69,37 @@ export default function ChurchOnboarding() {
     }
   };
 
-  const onServicesSubmit = async () => {
+  const onServiceSubmit = async () => {
     try {
       for (const service of services) {
-        await createWeeklyService(service);
+        for (const day of service.days) {
+          await createWeeklyService({
+            serviceName: service.serviceName,
+            day,
+            startTime: convertTo12Hour(service.startTime),
+            endTime: convertTo12Hour(service.endTime),
+            location: service.location,
+          });
+        }
       }
       setStep(3);
-    } catch (error: any) {
-      console.error("Weekly service creation failed:", error);
-      alert(error.message || "Failed to save services");
+    } catch (error) {
+      console.error("Failed to create weekly services", error);
     }
   };
 
   const onUploadSubmit = async (data: UploadMembersValues) => {
     if (!data.csvFile) {
-      alert("Please upload a CSV file");
+      alert("Please select a CSV file");
       return;
     }
+
     try {
-      await uploadMembersCsv(data.csvFile as File);
+      await uploadMembersCsv(data.csvFile);
+
       router.push(RouteConfig.dashboard.home);
     } catch (error: any) {
-      console.error("Members upload failed:", error);
-      alert(error.message || "Failed to upload members");
+      console.error("Upload failed:", error.message);
     }
   };
 
@@ -135,7 +144,7 @@ export default function ChurchOnboarding() {
             onAddService={addService}
             onUpdateService={updateService}
             onRemoveService={removeService}
-            onSubmit={onServicesSubmit}
+            onSubmit={onServiceSubmit}
             onBack={handleBack}
             onSkip={handleSkip}
             step={step}
