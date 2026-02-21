@@ -2,6 +2,20 @@ import { UserStatus } from "@/types/user";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { USER_ACTION_ITEMS } from "./user-data";
+import { CalendarDay, RegularService } from "@/types";
+import {
+  startOfMonth,
+  endOfMonth,
+  startOfWeek,
+  endOfWeek,
+  eachDayOfInterval,
+  format,
+  isSameDay,
+  isToday,
+  isSameMonth,
+  addMonths,
+  subMonths,
+} from "date-fns";
 
 const MILLISECONDS_IN_SECOND = 1000;
 const SECONDS_IN_MINUTE = 60;
@@ -166,4 +180,76 @@ export function convertTo12Hour(time: string) {
   const convertedHour = hours % 12 || 12;
 
   return `${convertedHour}:${minute} ${ampm}`;
+}
+
+export function generateCalendarDays(date: Date): CalendarDay[] {
+  const start = startOfWeek(startOfMonth(date));
+  const end = endOfWeek(endOfMonth(date));
+
+  const days = eachDayOfInterval({ start, end });
+
+  return days.map((day) => ({
+    date: day,
+    dateString: format(day, "yyyy-MM-dd"),
+    isToday: isToday(day),
+    isCurrentMonth: isSameMonth(day, date),
+    services: [],
+  }));
+}
+
+export function getServicesForDate(
+  date: Date,
+  services: RegularService[],
+): RegularService[] {
+  const dayName = format(date, "EEEE");
+
+  return services.filter((service) => service.days.includes(dayName));
+}
+
+export function mapServicesToCalendar(
+  calendarDays: CalendarDay[],
+  services: RegularService[],
+): CalendarDay[] {
+  return calendarDays.map((day) => ({
+    ...day,
+    services: getServicesForDate(day.date, services),
+  }));
+}
+
+export function getAttendanceCount(
+  service: RegularService,
+  date: string,
+): number | null {
+  const record = service.attendanceRecords?.find((r) => r.date === date);
+  return record ? record.presentMembers.length : null;
+}
+
+export function hasAttendance(service: RegularService, date: string): boolean {
+  return service.attendanceRecords?.some((r) => r.date === date) || false;
+}
+
+export function formatTimeRange(startTime: string, endTime?: string): string {
+  if (endTime) {
+    return `${startTime} - ${endTime}`;
+  }
+  return startTime;
+}
+
+export function getInitials(name: string): string {
+  const parts = name.split(" ");
+  if (parts.length >= 2) {
+    return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
+  }
+  return name.slice(0, 2).toUpperCase();
+}
+
+export function calculateGenderSplit(memberIds: string[]): {
+  males: number;
+  females: number;
+} {
+  const total = memberIds.length;
+  const males = Math.floor(total * 0.64);
+  const females = total - males;
+
+  return { males, females };
 }

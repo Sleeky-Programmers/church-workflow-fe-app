@@ -1,4 +1,10 @@
-import { ActivityRow, DepartmentRow, Role } from "@/types";
+import {
+  ActivityRow,
+  DepartmentRow,
+  Member,
+  RegularService,
+  Role,
+} from "@/types";
 import { EventCategory, RequisitionStatus } from "./enums";
 import {
   Activity,
@@ -457,3 +463,99 @@ export const MOCK_ROLES: Role[] = [
     })),
   },
 ];
+
+export const MOCK_SERVICES: RegularService[] = [
+  {
+    id: "service-1",
+    serviceName: "Sunday Service",
+    days: ["Sunday"],
+    startTime: "08:00",
+    endTime: "11:00",
+    location: "Main Auditorium",
+    frequency: "weekly",
+    attendanceRecords: [],
+  },
+  {
+    id: "service-2",
+    serviceName: "Sunday First Service",
+    days: ["Sunday"],
+    startTime: "07:00",
+    endTime: "09:00",
+    location: "Church Auditorium",
+    frequency: "weekly",
+    attendanceRecords: [],
+  },
+  {
+    id: "service-3",
+    serviceName: "Sunday Second Service",
+    days: ["Sunday"],
+    startTime: "09:00",
+    endTime: "11:00",
+    location: "Church Auditorium",
+    frequency: "weekly",
+    attendanceRecords: [],
+  },
+  {
+    id: "service-4",
+    serviceName: "Wednesday Service",
+    days: ["Wednesday"],
+    startTime: "18:00",
+    endTime: "20:00",
+    location: "Prayer Room",
+    frequency: "weekly",
+    attendanceRecords: [],
+  },
+  {
+    id: "service-5",
+    serviceName: "Friday Service",
+    days: ["Friday"],
+    startTime: "17:30",
+    location: "Main Auditorium",
+    frequency: "weekly",
+    attendanceRecords: [],
+  },
+];
+
+export const MOCK_MEMBERS: Member[] = Array.from({ length: 100 }, (_, i) => {
+  const firstNames = [
+    "Taylor",
+    "Alex",
+    "Jordan",
+    "Morgan",
+    "Casey",
+    "Avery",
+    "Riley",
+    "Peyton",
+    "Quinn",
+    "Sage",
+  ];
+  const lastNames = [
+    "Elizabeth Morgan",
+    "Benjamin Carter-Smith",
+    "Edward Whitmore",
+    "Michael Anderson",
+    "Sarah Johnson",
+    "David Williams",
+    "Emily Brown",
+    "James Davis",
+    "Jessica Miller",
+    "Christopher Wilson",
+  ];
+
+  const firstName = firstNames[i % firstNames.length];
+  const lastName = lastNames[i % lastNames.length];
+  const name = `${firstName} ${lastName}`;
+  const email = `${firstName.toLowerCase()}${i + 1}@gmail.com`;
+
+  return {
+    id: `member-${i + 1}`,
+    name,
+    email,
+    initials: `${firstName[0]}${lastName.split(" ")[0][0]}`.toUpperCase(),
+  };
+});
+
+export const MOCK_ADMIN = {
+  id: "admin-1",
+  name: "Admin_003",
+};
