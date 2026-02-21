@@ -111,7 +111,7 @@ export function Navbar() {
           </Button>
         </Link>
 
-        <Link href={RouteConfig.dashboard.profile}>
+        <Link href={RouteConfig.dashboard.admin.root}>
           <Button variant="ghost" className="flex items-center gap-2 p-0">
             <Avatar>
               <AvatarFallback>

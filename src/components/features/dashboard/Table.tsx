@@ -69,7 +69,6 @@ export default function Table<T extends Record<string, any>>({
   className = "",
   showCheckbox = false,
   selectedRowKeys,
-  onSelectedRowKeysChange,
 }: CustomTableProps<T>) {
   const [sort, setSort] = useState<SortState>({
     key: "timestamp",
@@ -184,16 +183,6 @@ export default function Table<T extends Record<string, any>>({
     () => paginatedData.map((r, i) => getRowKey(r, i)),
     [paginatedData],
   );
-  const allVisibleSelected =
-    visibleRowKeys.length > 0 &&
-    visibleRowKeys.every((k) => selectedKeys.includes(k));
-
-  const updateSelection = (next: string[]) => {
-    if (!controlled) {
-      setInternalSelected(next);
-    }
-    onSelectedRowKeysChange?.(next);
-  };
 
   const visibleColumnCount = columns.length + (showCheckbox ? 1 : 0);
 
@@ -286,7 +275,7 @@ export default function Table<T extends Record<string, any>>({
 
                 <div className="flex items-center gap-2">
                   <Button
-                    className="px-3 py-1 text-sm rounded-md border disabled:opacity-50"
+                    className="px-3 py-1 rounded-md border disabled:opacity-50"
                     variant="outline"
                     disabled={currentPage === 1}
                     onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
@@ -295,7 +284,7 @@ export default function Table<T extends Record<string, any>>({
                   </Button>
 
                   <Button
-                    className="px-3 py-1 text-sm rounded-md border disabled:opacity-50"
+                    className="px-3 py-1 rounded-md border disabled:opacity-50"
                     variant="outline"
                     disabled={currentPage === totalPages}
                     onClick={() =>

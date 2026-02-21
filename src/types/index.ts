@@ -1,3 +1,4 @@
+import { UserRole, UserStatus } from "@/lib/enums";
 import { LucideIcon } from "lucide-react";
 
 export type ActivityRow = {
@@ -25,4 +26,108 @@ export type DepartmentRow = {
   hod: { name: string; initials?: string } | null;
   members: number;
   status: "Active" | "Inactive";
+};
+
+export interface BasePerson {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email?: string;
+  phone?: string;
+  dateOfBirth?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface User extends BasePerson {
+  status: UserStatus;
+  roles: Role[];
+  invitedAt?: string;
+  lastLogin?: string;
+}
+
+export type MemberStatus = "Active" | "Inactive";
+
+export interface Member extends BasePerson {
+  membershipId: string;
+  departmentIds?: string[];
+  status: MemberStatus;
+  joinedAt: string;
+}
+
+export type Permission =
+  | "users.view"
+  | "users.invite"
+  | "users.edit"
+  | "users.suspend"
+  | "users.remove"
+  | "roles.manage"
+  | "members.view"
+  | "members.edit"
+  | "finance.view"
+  | "finance.manage"
+  | "departments.manage";
+
+export interface User {
+  id: string;
+  name: string;
+  email: string;
+  role: UserRole;
+  status: UserStatus;
+  dateInvited: string | null;
+}
+
+export type RoleType = "system" | "custom";
+
+export type RoleStatus = "active" | "disabled";
+
+export type PermissionLevel = "no_access" | "view" | "manage" | "full_access";
+
+export type ModulePermission = {
+  module: string;
+  level: PermissionLevel;
+  options: {
+    label: string;
+    value: PermissionLevel;
+    description: string;
+  }[];
+};
+
+export type Role = {
+  id: string;
+  name: string;
+  type: RoleType;
+  users: number;
+  status: RoleStatus;
+  description?: string;
+  permissions: ModulePermission[];
+};
+
+export type CreateRoleFormData = {
+  name: string;
+  description?: string;
+  permissions: Record<string, PermissionLevel>;
+};
+
+export type RoleAction = "view_permissions" | "edit" | "disable" | "enable";
+
+export type PrivacySettings = {
+  birthdayCalendar: boolean;
+  birthdayReminders: boolean;
+  emailAlerts: boolean;
+};
+
+export type AccountDeletionStatus = "none" | "scheduled" | "pending";
+
+export type AccountSettings = {
+  privacy: PrivacySettings;
+  deletionStatus: AccountDeletionStatus;
+  deletionDate?: string;
+  waitingPeriodDays?: number;
+};
+
+export type NotificationSettings = {
+  requisitionApprovals: boolean;
+  events: boolean;
+  birthdays: boolean;
 };

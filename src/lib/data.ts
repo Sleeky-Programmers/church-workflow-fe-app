@@ -1,4 +1,4 @@
-import { ActivityRow, DepartmentRow } from "@/types";
+import { ActivityRow, DepartmentRow, Role } from "@/types";
 import { EventCategory, RequisitionStatus } from "./enums";
 import {
   Activity,
@@ -19,6 +19,7 @@ import {
   UserPlus,
   Wallet,
 } from "lucide-react";
+import { MODULE_PERMISSIONS } from "./role-constants";
 
 export const SidebarData = {
   pages: [
@@ -389,5 +390,70 @@ export const departmentRequisitions = [
     title: "HDMI Cables Replacement",
     amount: "₦60,000",
     status: RequisitionStatus.APPROVED,
+  },
+];
+
+export const MOCK_ROLES: Role[] = [
+  {
+    id: "1",
+    name: "Admin",
+    type: "system",
+    users: 2,
+    status: "active",
+    description: "Admin can do everything apart from inviting a new user.",
+    permissions: MODULE_PERMISSIONS.map((m) => ({
+      ...m,
+      level: "full_access",
+    })),
+  },
+  {
+    id: "2",
+    name: "Finance",
+    type: "system",
+    users: 3,
+    status: "active",
+    description: "Finance role has access to financial data and reports.",
+    permissions: MODULE_PERMISSIONS.map((m) => {
+      if (m.module.includes("Finance")) return { ...m, level: "full_access" };
+      if (m.module.includes("Members")) return { ...m, level: "view" };
+      return { ...m, level: "no_access" };
+    }),
+  },
+  {
+    id: "3",
+    name: "Pastor",
+    type: "system",
+    users: 4,
+    status: "active",
+    description: "Pastor role has access to member management.",
+    permissions: MODULE_PERMISSIONS.map((m) => ({
+      ...m,
+      level: "manage",
+    })),
+  },
+  {
+    id: "4",
+    name: "Media Lead",
+    type: "custom",
+    users: 1,
+    status: "active",
+    description: "Manages media and events",
+    permissions: MODULE_PERMISSIONS.map((m) => {
+      if (m.module.includes("Events")) return { ...m, level: "full_access" };
+      if (m.module.includes("Members")) return { ...m, level: "view" };
+      return { ...m, level: "no_access" };
+    }),
+  },
+  {
+    id: "5",
+    name: "Welfare Lead",
+    type: "custom",
+    users: 0,
+    status: "disabled",
+    description: "Manages welfare activities",
+    permissions: MODULE_PERMISSIONS.map((m) => ({
+      ...m,
+      level: "no_access",
+    })),
   },
 ];

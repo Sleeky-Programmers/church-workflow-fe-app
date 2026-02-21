@@ -39,3 +39,16 @@ export enum ActiveTab {
   FAVOURITES = "favourites",
   RECENT = "recent",
 }
+
+export enum UserStatus {
+  ACTIVE = "active",
+  PENDING = "pending",
+  SUSPENDED = "suspended",
+}
+
+export enum UserRole {
+  ADMIN = "Admin",
+  FINANCE = "Finance",
+  PASTOR = "Pastor",
+  MEMBER = "Member",
+}
