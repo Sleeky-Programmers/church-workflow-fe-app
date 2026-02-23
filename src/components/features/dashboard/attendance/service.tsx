@@ -39,6 +39,7 @@ export function ServiceItem({
         </Button>
       ) : (
         <Button
+          variant="ghost"
           onClick={onAddAttendance}
           className="flex items-center gap-1 text-secondary-600 hover:text-secondary-700 w-full mb-1"
         >
@@ -49,6 +50,7 @@ export function ServiceItem({
       )}
 
       <Button
+        variant="ghost"
         onClick={onAddGivingRecord}
         className="flex items-center gap-1 text-success-600 hover:text-success-700 w-full"
       >

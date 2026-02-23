@@ -62,7 +62,7 @@ export function CalendarGrid({
             variant="outline"
             size="sm"
             onClick={handleToday}
-            className="h-8"
+            className="h-8 text-primary-500 border-primary-500"
           >
             Today
           </Button>
