@@ -28,33 +28,6 @@ export type DepartmentRow = {
   status: "Active" | "Inactive";
 };
 
-export interface BasePerson {
-  id: string;
-  firstName: string;
-  lastName: string;
-  email?: string;
-  phone?: string;
-  dateOfBirth?: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface User extends BasePerson {
-  status: UserStatus;
-  roles: Role[];
-  invitedAt?: string;
-  lastLogin?: string;
-}
-
-export type MemberStatus = "Active" | "Inactive";
-
-export interface Member extends BasePerson {
-  membershipId: string;
-  departmentIds?: string[];
-  status: MemberStatus;
-  joinedAt: string;
-}
-
 export type Permission =
   | "users.view"
   | "users.invite"
@@ -130,4 +103,59 @@ export type NotificationSettings = {
   requisitionApprovals: boolean;
   events: boolean;
   birthdays: boolean;
+};
+
+export type ServiceType = "regular" | "special";
+
+export type ServiceFrequency = "weekly" | "monthly" | "one-time";
+
+export type Member = {
+  id: string;
+  name: string;
+  email: string;
+  avatar?: string;
+  initials: string;
+};
+
+export type AttendanceRecord = {
+  serviceId: string;
+  date: string;
+  presentMembers: string[];
+  absentMembers: string[];
+  recordedBy: string;
+  location?: string;
+  startTime: string;
+  endTime?: string;
+};
+
+export type RegularService = {
+  id: string;
+  serviceName: string;
+  days: string[];
+  startTime: string;
+  endTime?: string;
+  location?: string;
+  frequency: "weekly";
+  attendanceRecords?: AttendanceRecord[];
+};
+
+export type SpecialService = {
+  id: string;
+  serviceName: string;
+  date: string;
+  startTime: string;
+  endTime?: string;
+  location?: string;
+  type: string;
+  attendanceRecord?: AttendanceRecord;
+};
+
+export type Service = RegularService | SpecialService;
+
+export type CalendarDay = {
+  date: Date;
+  dateString: string;
+  isToday: boolean;
+  isCurrentMonth: boolean;
+  services: RegularService[];
 };

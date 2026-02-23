@@ -1,0 +1,65 @@
+"use client";
+
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Checkbox } from "@/components/ui/checkbox";
+import { X } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Member } from "@/types";
+import { Text } from "@/components/ui/typography/Text";
+
+type MemberListItemProps = {
+  member: Member;
+  mode: "select" | "view-present" | "view-absent";
+  isSelected?: boolean;
+  onSelect?: (memberId: string, selected: boolean) => void;
+  onRemove?: (memberId: string) => void;
+};
+
+export function MemberListItem({
+  member,
+  mode,
+  isSelected = false,
+  onSelect,
+  onRemove,
+}: MemberListItemProps) {
+  return (
+    <div className="flex items-center justify-between py-3 border-b last:border-0">
+      <div className="flex items-center gap-3 flex-1">
+        {(mode === "select" || mode === "view-absent") && (
+          <Checkbox
+            checked={isSelected}
+            onCheckedChange={(checked) =>
+              onSelect?.(member.id, checked as boolean)
+            }
+          />
+        )}
+
+        <Avatar className="h-8 w-8">
+          <AvatarFallback className="bg-gray-200 text-gray-700 text-xs">
+            {member.initials}
+          </AvatarFallback>
+        </Avatar>
+
+        <div className="flex-1 min-w-0">
+          <Text variant="default" className=" truncate">
+            {member.name}
+          </Text>
+          <Text variant="default" className=" truncate">
+            {member.email}
+          </Text>
+        </div>
+      </div>
+
+      {mode === "view-present" && (
+        <Button
+          variant="ghost"
+          size="icon"
+          className="text-destructive-600 hover:text-destructive-700 hover:bg-destructive-50 h-8 w-8 flex-shrink-0"
+          onClick={() => onRemove?.(member.id)}
+        >
+          <X className="h-4 w-4" />
+        </Button>
+      )}
+    </div>
+  );
+}

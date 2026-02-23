@@ -1,5 +1,5 @@
 "use client";
-
+import { useEffect } from "react";
 import { CalendarDays, User } from "lucide-react";
 import { Span, Text } from "@/components/ui/typography/Text";
 import { StatCard } from "@/components/features/dashboard/StatCard";
@@ -20,6 +20,7 @@ import Link from "next/link";
 import { TrendChart } from "@/components/features/dashboard/trend-chart";
 import { IncomeVsExpenses } from "@/components/features/dashboard/income-expense";
 import { IncomeBreakdown } from "@/components/features/dashboard/income-breakdown";
+import { getCurrentAdmin } from "@/lib/api";
 
 export default function Dashboard() {
   return (

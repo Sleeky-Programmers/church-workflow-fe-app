@@ -11,6 +11,8 @@ import {
   CreateChurchPayload,
   CreateWeeklyServicePayload,
 } from "@/types/payload";
+import { MOCK_ADMIN, MOCK_MEMBERS, MOCK_SERVICES } from "../data";
+import { AttendanceRecord, Member, RegularService } from "@/types";
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -247,4 +249,121 @@ export async function sendInvitation(
       });
     }, 500);
   });
+}
+
+export async function fetchServices(month: string): Promise<RegularService[]> {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve(MOCK_SERVICES);
+    }, 300);
+  });
+}
+
+export async function fetchMembers(
+  page: number = 1,
+  limit: number = 10,
+  search: string = "",
+): Promise<{
+  members: Member[];
+  total: number;
+  pages: number;
+}> {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      let filtered = MOCK_MEMBERS;
+
+      if (search) {
+        filtered = MOCK_MEMBERS.filter(
+          (m) =>
+            m.name.toLowerCase().includes(search.toLowerCase()) ||
+            m.email.toLowerCase().includes(search.toLowerCase()),
+        );
+      }
+
+      const start = (page - 1) * limit;
+      const end = start + limit;
+      const paginated = filtered.slice(start, end);
+
+      resolve({
+        members: paginated,
+        total: filtered.length,
+        pages: Math.ceil(filtered.length / limit),
+      });
+    }, 300);
+  });
+}
+
+export async function getAttendanceRecord(
+  serviceId: string,
+  date: string,
+): Promise<AttendanceRecord | null> {
+  const service = MOCK_SERVICES.find((s) => s.id === serviceId);
+  const record = service?.attendanceRecords?.find((r) => r.date === date);
+
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve(record || null);
+    }, 300);
+  });
+}
+
+export async function saveAttendance(
+  data: Omit<AttendanceRecord, "absentMembers">,
+): Promise<{
+  success: boolean;
+  recordId: string;
+}> {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      const allMemberIds = MOCK_MEMBERS.map((m) => m.id);
+      const absentMembers = allMemberIds.filter(
+        (id) => !data.presentMembers.includes(id),
+      );
+
+      const service = MOCK_SERVICES.find((s) => s.id === data.serviceId);
+      if (service) {
+        if (!service.attendanceRecords) {
+          service.attendanceRecords = [];
+        }
+
+        const existingIndex = service.attendanceRecords.findIndex(
+          (r) => r.date === data.date,
+        );
+
+        const record: AttendanceRecord = {
+          ...data,
+          absentMembers,
+        };
+
+        if (existingIndex >= 0) {
+          service.attendanceRecords[existingIndex] = record;
+        } else {
+          service.attendanceRecords.push(record);
+        }
+      }
+
+      resolve({
+        success: true,
+        recordId: `record-${Date.now()}`,
+      });
+    }, 500);
+  });
+}
+
+export async function updateAttendance(
+  recordId: string,
+  updates: {
+    addToPresent?: string[];
+    removeFromPresent?: string[];
+  },
+): Promise<{ success: boolean }> {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve({ success: true });
+    }, 500);
+  });
+}
+
+export function getCurrentAdmin() {
+  return MOCK_ADMIN;
 }

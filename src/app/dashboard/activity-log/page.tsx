@@ -11,6 +11,7 @@ import ActivityLogPopup from "@/components/features/dashboard/ActivityLogPopup";
 import { ActivityRow } from "@/types";
 import { ActivityLogData } from "@/lib/data";
 import { formatDateTime12h } from "@/lib/utils";
+import { Span } from "@/components/ui/typography/Text";
 
 export default function ActivityLogPage() {
   const [query, setQuery] = useState("");
@@ -88,7 +89,7 @@ export default function ActivityLogPage() {
               <User2 className="w-4 h-4" />
             </AvatarFallback>
           </Avatar>
-          <span className="text-sm">{row.user.name}</span>
+          <Span variant="default">{row.user.name}</Span>
         </div>
       ),
     },

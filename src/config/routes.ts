@@ -15,6 +15,7 @@ export enum Routes {
   Profile = "/dashboard/settings",
   Search = "/dashboard/search",
   Home = "/",
+  Attendance = "/dashboard/attendance",
 
   Admin = "/dashboard/settings/users",
   UserManagement = "/dashboard/settings/users",
@@ -37,6 +38,7 @@ export const RouteConfig = {
     activityLog: Routes.ActivityLog,
     departments: Routes.Departments,
     notifications: Routes.Notifications,
+    attendance: Routes.Attendance,
     search: Routes.Search,
     admin: {
       root: Routes.Admin,

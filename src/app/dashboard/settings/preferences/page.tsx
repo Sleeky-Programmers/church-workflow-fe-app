@@ -55,9 +55,7 @@ export default function PersonalPreferencePage() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-semibold text-gray-900">
-          Personal Preference
-        </h2>
+        <Heading level={2}>Personal Preference</Heading>
       </div>
 
       <div className="bg-white rounded-lg border p-6 space-y-6">
