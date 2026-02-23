@@ -34,7 +34,7 @@ export function CalendarDayCell({
               day.isToday
                 ? "flex items-center justify-center w-6 h-6 bg-primary-600 text-white rounded-full"
                 : day.isCurrentMonth
-                  ? "text-gray-900"
+                  ? "text-gray-500"
                   : "text-gray-400"
             }
           `}
