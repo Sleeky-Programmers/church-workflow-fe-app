@@ -1,5 +1,4 @@
 "use client";
-
 import { useCallback, useEffect, useState } from "react";
 import {
   InputOTP,
@@ -17,43 +16,64 @@ import { Button } from "@/components/ui/button";
 interface Props {
   email: string;
   onVerify: (otp: string) => Promise<boolean>;
+  onResend: () => Promise<void>;
 }
 
-export default function VerifyOtpForm({ email, onVerify }: Props) {
+export default function VerifyOtpForm({ email, onVerify, onResend }: Props) {
   const [otp, setOtp] = useState("");
   const [isVerifying, setIsVerifying] = useState(false);
+  const [isResending, setIsResending] = useState(false);
   const [error, setError] = useState(false);
-  const [resendTimer, setResendTimer] = useState(82);
+  const [resendSuccess, setResendSuccess] = useState(false);
+  const [resendTimer, setResendTimer] = useState(60);
+
+  useEffect(() => {
+    if (otp.length === 6) handleVerify(otp);
+  }, [otp]);
+
+  useEffect(() => {
+    if (otp.length > 0 && error) setError(false);
+  }, [otp, error]);
+
+  useEffect(() => {
+    if (resendTimer <= 0) return;
+    const timer = setTimeout(() => setResendTimer((t) => t - 1), 1000);
+    return () => clearTimeout(timer);
+  }, [resendTimer]);
 
   const handleVerify = useCallback(
     async (code: string) => {
       if (isVerifying) return;
-
       setIsVerifying(true);
       setError(false);
 
       const success = await onVerify(code);
-
       if (!success) {
         setError(true);
         setOtp("");
-        setIsVerifying(false);
-        return;
       }
+      setIsVerifying(false);
     },
     [isVerifying, onVerify],
   );
 
-  useEffect(() => {
-    if (resendTimer <= 0) return;
-    const timer = setInterval(() => {
-      setResendTimer((t) => t - 1);
-    }, 1000);
-    return () => clearInterval(timer);
-  }, [resendTimer]);
+  const handleResend = async () => {
+    setIsResending(true);
+    setError(false);
+    setResendSuccess(false);
+    setOtp("");
 
-  const handleResend = () => {
-    setResendTimer(82);
+    try {
+      await onResend();
+      setResendSuccess(true);
+      setResendTimer(60);
+      setTimeout(() => setResendSuccess(false), 4000);
+    } catch (err: any) {
+      console.error("Resend failed:", err);
+      setError(true);
+    } finally {
+      setIsResending(false);
+    }
   };
 
   return (
@@ -61,9 +81,8 @@ export default function VerifyOtpForm({ email, onVerify }: Props) {
       <div className="space-y-2">
         <Heading level={1}>Enter the code</Heading>
         <Text variant="muted">
-          Enter the code that we sent to your email{" "}
-          <Span variant="default">{maskEmail(email)}</Span> and be careful not
-          to share the code with anyone.
+          Enter the code sent to{" "}
+          <Span variant="default">{maskEmail(email)}</Span>
         </Text>
       </div>
 
@@ -73,8 +92,7 @@ export default function VerifyOtpForm({ email, onVerify }: Props) {
           value={otp}
           onChange={setOtp}
           autoFocus
-          inputMode="numeric"
-          autoComplete="one-time-code"
+          disabled={isVerifying}
           containerClassName="justify-center"
         >
           <InputOTPGroup className="space-x-2">
@@ -82,9 +100,7 @@ export default function VerifyOtpForm({ email, onVerify }: Props) {
             <InputOTPSlot index={1} />
             <InputOTPSlot index={2} />
           </InputOTPGroup>
-
           <InputOTPSeparator />
-
           <InputOTPGroup className="space-x-2">
             <InputOTPSlot index={3} />
             <InputOTPSlot index={4} />
@@ -98,6 +114,12 @@ export default function VerifyOtpForm({ email, onVerify }: Props) {
           Incorrect code. Please try again.
         </Text>
       )}
+      {resendSuccess && (
+        <Text variant="success" className="text-center">
+          {" "}
+          Code resent successfully!
+        </Text>
+      )}
 
       <Button
         className="w-full mt-4"
@@ -106,8 +128,7 @@ export default function VerifyOtpForm({ email, onVerify }: Props) {
       >
         {isVerifying ? (
           <Span className="flex items-center gap-2">
-            <Loader />
-            Verifying…
+            <Loader /> Verifying…
           </Span>
         ) : (
           "Verify"
@@ -122,8 +143,13 @@ export default function VerifyOtpForm({ email, onVerify }: Props) {
             {(resendTimer % 60).toString().padStart(2, "0")}
           </Span>
         ) : (
-          <Button onClick={handleResend} variant="link" className="p-0 h-auto">
-            Resend
+          <Button
+            onClick={handleResend}
+            variant="link"
+            className="p-0 h-auto"
+            disabled={isResending}
+          >
+            {isResending ? "Resending…" : "Resend"}
           </Button>
         )}
       </Text>

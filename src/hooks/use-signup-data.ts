@@ -3,9 +3,6 @@ import { useEffect, useState } from "react";
 export interface SignupDataType {
   firstName?: string;
   lastName?: string;
-  role?: string;
-  phoneNumber?: string;
-  churchName?: string;
   email?: string;
 }
 

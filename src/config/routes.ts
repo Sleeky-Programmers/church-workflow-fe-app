@@ -1,3 +1,4 @@
+import { create } from "domain";
 import { User } from "lucide-react";
 
 export enum Routes {
@@ -18,6 +19,7 @@ export enum Routes {
   Admin = "/dashboard/settings/users",
   UserManagement = "/dashboard/settings/users",
   RolesPermissions = "/dashboard/settings/roles",
+  CreateRole = "/dashboard/settings/roles/create-role",
   Preferences = "/dashboard/settings/preferences",
   AccountSettings = "/dashboard/settings/account",
   UserDetails = `/dashboard/settings/users/[id]`,
@@ -44,6 +46,7 @@ export const RouteConfig = {
       account: Routes.AccountSettings,
       userDetails: (userId: string) =>
         Routes.UserDetails.replace("[id]", userId),
+      createRole: Routes.CreateRole,
     },
   },
   onboarding: Routes.Onboarding,

@@ -5,6 +5,7 @@ import { User } from "@/types/user";
 import { performUserAction } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
 import { UserDetailsPage } from "./user-details";
+import { RouteConfig } from "@/config/routes";
 
 type UserDetailsPageClientProps = {
   user: User;
@@ -15,7 +16,7 @@ export function UserDetailsPageClient({ user }: UserDetailsPageClientProps) {
   const { toast } = useToast();
 
   const handleBack = () => {
-    router.push("/dashboard/settings/users");
+    router.push(RouteConfig.dashboard.admin.users);
   };
 
   const handleRoleChange = async (userId: string, newRole: string) => {
@@ -59,7 +60,7 @@ export function UserDetailsPageClient({ user }: UserDetailsPageClientProps) {
         title: "Success",
         description: "User has been removed",
       });
-      router.push("/dashboard/settings/users");
+      router.push(RouteConfig.dashboard.admin.users);
     } catch (error) {
       toast({
         title: "Error",
@@ -92,7 +93,7 @@ export function UserDetailsPageClient({ user }: UserDetailsPageClientProps) {
         title: "Success",
         description: "Invitation has been deleted",
       });
-      router.push("/dashboard/settings/users");
+      router.push(RouteConfig.dashboard.admin.users);
     } catch (error) {
       toast({
         title: "Error",

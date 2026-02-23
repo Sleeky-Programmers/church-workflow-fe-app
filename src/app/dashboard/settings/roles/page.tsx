@@ -10,6 +10,7 @@ import { MOCK_ROLES } from "@/lib/data";
 import { RolesTable } from "@/components/features/dashboard/admin/role-table";
 import { DeactivateRoleDialog } from "@/components/features/dashboard/admin/mini-components/deactivate-role-dialog";
 import Heading from "@/components/ui/typography/Heading";
+import { RouteConfig } from "@/config/routes";
 
 export default function RolesPermissionsPage() {
   const router = useRouter();
@@ -118,7 +119,7 @@ export default function RolesPermissionsPage() {
   };
 
   const handleCreateRole = () => {
-    router.push("/dashboard/settings/roles/create-role");
+    router.push(RouteConfig.dashboard.admin.createRole);
   };
 
   if (isLoading) {

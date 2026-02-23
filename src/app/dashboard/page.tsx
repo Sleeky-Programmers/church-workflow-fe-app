@@ -74,7 +74,7 @@ export default function Dashboard() {
               <div className="flex items-center justify-between py-3">
                 <Heading level={3} text="Upcoming Events" variant="primary" />
 
-                <CalendarDays className="w-5 h-5 text-blue-600" />
+                <CalendarDays className="w-5 h-5 text-primary-600" />
               </div>
 
               <Text text="Services" variant="blue" />

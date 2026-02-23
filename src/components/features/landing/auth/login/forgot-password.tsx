@@ -1,9 +1,9 @@
-'use client';
-import { useForm } from 'react-hook-form';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import Heading from '@/components/ui/typography/Heading';
-import { Text, Span } from '@/components/ui/typography/Text';
+"use client";
+import { useForm } from "react-hook-form";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import Heading from "@/components/ui/typography/Heading";
+import { Text, Span } from "@/components/ui/typography/Text";
 import {
   Form,
   FormField,
@@ -11,36 +11,37 @@ import {
   FormLabel,
   FormControl,
   FormMessage,
-} from '@/components/ui/form';
-import { Loader } from '@/components/ui/loader';
-import React from 'react';
+} from "@/components/ui/form";
+import { Loader } from "@/components/ui/loader";
+import React from "react";
 
 interface ForgotPasswordFormProps {
-  onSubmit: (email: string) => void
-  onBackToLogin: () => void
+  onSubmit: (email: string) => void;
+  onBackToLogin: () => void;
 }
 
 type ForgotPasswordFormValues = {
-  email: string
-}
+  email: string;
+};
 
 export default function ForgotPasswordForm({
   onSubmit,
   onBackToLogin,
 }: ForgotPasswordFormProps) {
-  const [isLoading, setIsLoading] = React.useState(false)
+  const [isLoading, setIsLoading] = React.useState(false);
   const form = useForm<ForgotPasswordFormValues>({
     defaultValues: {
-      email: '',
+      email: "",
     },
-  })
+  });
   const handleSubmit = async (data: ForgotPasswordFormValues) => {
-    setIsLoading(true)
+    setIsLoading(true);
     setTimeout(() => {
-      setIsLoading(false)
-      onSubmit(data.email)
-    }, 1000)
-  }
+      setIsLoading(false);
+      onSubmit(data.email);
+    }, 1000);
+  };
+
   return (
     <div className="bg-gray-50 rounded-2xl p-8 animate-slide-up">
       <div className="text-center mb-8">
@@ -50,15 +51,12 @@ export default function ForgotPasswordForm({
         </Text>
       </div>
       <Form {...form}>
-        <form
-          onSubmit={form.handleSubmit(handleSubmit)}
-          className="space-y-6"
-        >
+        <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
           <FormField
             control={form.control}
             name="email"
             rules={{
-              required: 'Email is required',
+              required: "Email is required",
             }}
             render={({ field }) => (
               <FormItem>
@@ -74,31 +72,23 @@ export default function ForgotPasswordForm({
               </FormItem>
             )}
           />
-          <Button
-            type="submit"
-            disabled={isLoading}
-            className="w-full"
-          >
+          <Button type="submit" disabled={isLoading} className="w-full">
             {isLoading ? (
               <Span className="flex items-center gap-2">
                 <Loader />
                 Sending…
               </Span>
             ) : (
-              'Continue'
+              "Continue"
             )}
           </Button>
           <div className="text-center">
-            <Button
-              type="button"
-              variant="link"
-              onClick={onBackToLogin}
-            >
+            <Button type="button" variant="link" onClick={onBackToLogin}>
               ← Back to login
             </Button>
           </div>
         </form>
       </Form>
     </div>
-  )
+  );
 }

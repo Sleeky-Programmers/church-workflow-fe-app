@@ -13,6 +13,7 @@ import { MODULE_PERMISSIONS } from "@/lib/role-constants";
 import { PermissionLevel } from "@/types";
 import Heading from "@/components/ui/typography/Heading";
 import { Text, Span } from "@/components/ui/typography/Text";
+import { RouteConfig } from "@/config/routes";
 
 type CreateRolePageProps = {
   mode?: "create" | "edit";
@@ -85,7 +86,7 @@ export default function CreateRolePage({
             : "Role updated successfully",
       });
 
-      router.push("/dashboard/settings/roles");
+      router.push(RouteConfig.dashboard.admin.roles);
     } catch (error) {
       toast({
         title: "Error",
@@ -98,7 +99,7 @@ export default function CreateRolePage({
   };
 
   const handleCancel = () => {
-    router.push("/dashboard/settings/roles");
+    router.push(RouteConfig.dashboard.admin.roles);
   };
 
   return (

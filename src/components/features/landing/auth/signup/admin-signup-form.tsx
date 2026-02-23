@@ -21,27 +21,8 @@ import { Text, Span } from "@/components/ui/typography/Text";
 import { Loader } from "@/components/ui/loader";
 import { useRouter } from "next/navigation";
 import { Link } from "@/components/ui/link";
-
-const adminSignupSchema = z
-  .object({
-    firstName: z.string().min(2, "First name must be at least 2 characters"),
-    lastName: z.string().min(2, "Last name must be at least 2 characters"),
-    email: z.string().email("Invalid email format"),
-    password: z
-      .string()
-      .min(8, "Password must be at least 8 characters")
-      .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
-      .regex(/[a-z]/, "Password must contain at least one lowercase letter")
-      .regex(/[0-9]/, "Password must contain at least one number"),
-    confirmPassword: z.string(),
-    agreeToTerms: z.boolean().refine((val) => val === true, {
-      message: "You must accept the Terms and Conditions",
-    }),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords do not match",
-    path: ["confirmPassword"],
-  });
+import { adminSignupSchema } from "@/types/schema";
+import { RouteConfig } from "@/config/routes";
 
 type AdminSignupFormValues = z.infer<typeof adminSignupSchema>;
 
@@ -88,7 +69,7 @@ export default function AdminSignupForm({
     alert("Google Signup clicked");
   };
 
-  const onLogin = () => router.push("/auth/login");
+  const onLogin = () => router.push(RouteConfig.auth.signIn);
 
   return (
     <div className="animate-fade-in">
