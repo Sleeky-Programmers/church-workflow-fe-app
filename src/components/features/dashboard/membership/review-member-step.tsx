@@ -25,7 +25,7 @@ function ReviewSection({
       <Heading level={4} className="mb-3">
         {title}
       </Heading>
-      <Card className="p-4 bg-gray-50">{children}</Card>
+      <Card className="bg-gray-50 p-4">{children}</Card>
     </div>
   );
 }
@@ -38,7 +38,7 @@ function ReviewField({
   value: string | boolean | undefined;
 }) {
   return (
-    <div className="py-2 flex justify-between items-center border-b last:border-0">
+    <div className="flex items-center justify-between border-b py-2 last:border-0">
       <Text variant="muted" className="text-sm">
         {label}
       </Text>
@@ -78,21 +78,36 @@ export function ReviewMemberStep({
         <ReviewField label="Email" value={data.email} />
         <ReviewField label="Phone" value={data.phone} />
         <ReviewField label="Address" value={data.address} />
+        <ReviewField label="Occupation" value={data.occupation} />
+        <ReviewField label="Educational Background" value={data.education} />
       </ReviewSection>
 
       <ReviewSection title="Church Activity">
         <ReviewField label="Membership Status" value={data.membershipStatus} />
         <ReviewField label="Date Joined" value={data.dateJoined} />
+        <ReviewField
+          label="Previous Church Membership"
+          value={data.previousChurchMembership}
+        />
         <ReviewField label="Baptized" value={data.baptized} />
+        <ReviewField
+          label="Ministries Involved in"
+          value={data.ministriesInvolved}
+        />
         <ReviewField
           label="Volunteers Preference"
           value={data.volunteersPreference}
         />
+        <ReviewField
+          label="In a Small Group/Cell Group"
+          value={data.smallGroupMember}
+        />
+        <ReviewField label="Small Group Name" value={data.smallGroupName} />
       </ReviewSection>
 
       <div className="flex justify-between pt-4">
         <Button variant="outline" onClick={onBack} disabled={isSaving}>
-          ← Back
+          Back
         </Button>
         <Button onClick={onSave} variant="secondary" disabled={isSaving}>
           {isSaving ? "Saving..." : "Save Member"}

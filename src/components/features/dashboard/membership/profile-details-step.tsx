@@ -53,10 +53,12 @@ export function ProfileDetailsStep({
   };
 
   return (
-    <div className=" flex justify-center py-8 px-4">
-      <div className=" max-w-2xl rounded-xl p-4 space-y-8">
+    <div className="flex justify-center">
+      <div className=" max-w-2xl rounded-xl ">
         <div>
-          <Heading level={2}>Add a New Member Profile</Heading>
+          <Heading level={2} variant="primary">
+            Add a New Member Profile
+          </Heading>
           <Text variant="default" className="mt-1">
             Provide the member's information to include them in the church
             community
@@ -117,13 +119,13 @@ export function ProfileDetailsStep({
                 onValueChange={(value) =>
                   setFormData({ ...formData, gender: value as Gender })
                 }
-                className="flex items-center gap-6 mt-2"
+                className="mt-2 space-y-3"
               >
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-3">
                   <RadioGroupItem value="Male" id="male" />
                   <Label htmlFor="male">Male</Label>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-3">
                   <RadioGroupItem value="Female" id="female" />
                   <Label htmlFor="female">Female</Label>
                 </div>
@@ -135,7 +137,7 @@ export function ProfileDetailsStep({
               )}
             </div>
 
-            <div className="">
+            <div className="md:col-span-2">
               <Label>
                 Birthday <Span variant="error">*</Span>
               </Label>

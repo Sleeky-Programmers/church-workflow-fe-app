@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Text, Span } from "@/components/ui/typography/Text";
+import Heading from "@/components/ui/typography/Heading";
 
 type ChurchActivityStepProps = {
   onNext: (data: AddMemberStep3Data) => void;
@@ -55,9 +56,9 @@ export function ChurchActivityStep({
   return (
     <div className="space-y-6">
       <div>
-        <Text variant="default" className="font-medium">
+        <Heading variant="primary" level={2}>
           Church Involvement
-        </Text>
+        </Heading>
         <Text variant="muted">
           Share details about the member&apos;s participation and church journey
         </Text>

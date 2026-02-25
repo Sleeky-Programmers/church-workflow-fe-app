@@ -2,11 +2,12 @@
 
 import { useState } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { User, Phone, PlusCircle } from "lucide-react";
-import { NewMemberData } from "@/types";
+import { User, Phone, CrossIcon } from "lucide-react";
+import { AddMemberStep2Data, NewMemberData } from "@/types";
 import { ProfileDetailsStep } from "./profile-details-step";
 import { ContactDetailsStep } from "./contact-details-step";
 import { ChurchActivityStep } from "./church-activity-step";
+import { ReviewMemberStep } from "./review-member-step";
 import { useToast } from "@/hooks/use-toast";
 import { Text } from "@/components/ui/typography/Text";
 
@@ -32,9 +33,63 @@ const STEP_CONFIG = [
   {
     number: 3,
     label: "Church activity",
-    icon: PlusCircle,
+    icon: CrossIcon,
   },
 ];
+
+function MembershipStepIndicator({ step }: { step: 1 | 2 | 3 }) {
+  return (
+    <div className="flex-shrink-0">
+      <div className="flex items-center rounded-2xl border border-gray-300 px-4 py-3">
+        {STEP_CONFIG.map((config, index) => {
+          const Icon = config.icon;
+          const isActive = step === config.number;
+          const isCompleted = step > config.number;
+
+          return (
+            <div
+              key={config.number}
+              className={`flex items-center ${isActive ? "flex-[1.6]" : "flex-1"}`}
+            >
+              <div className="flex items-center gap-4">
+                <div
+                  className={`h-14 w-14 rounded-full flex items-center justify-center flex-shrink-0 ${
+                    isActive
+                      ? "bg-primary-600"
+                      : isCompleted
+                        ? "bg-primary-100"
+                        : "bg-gray-100"
+                  }`}
+                >
+                  <Icon
+                    className={`h-7 w-7 ${
+                      isActive
+                        ? "text-white"
+                        : isCompleted
+                          ? "text-primary-600"
+                          : "text-gray-400"
+                    }`}
+                  />
+                </div>
+
+                {isActive && (
+                  <div className="hidden md:block">
+                    <Text variant="muted">Step {config.number}/3</Text>
+                    <Text variant="menuActive">{config.label}</Text>
+                  </div>
+                )}
+              </div>
+
+              {index < STEP_CONFIG.length - 1 && (
+                <div className="mx-6 h-12 w-px bg-gray-200" />
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
 
 export function AddMemberModal({
   open,
@@ -42,7 +97,7 @@ export function AddMemberModal({
   onMemberAdded,
 }: AddMemberModalProps) {
   const { toast } = useToast();
-  const [step, setStep] = useState<1 | 2 | 3>(1);
+  const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
   const [formData, setFormData] = useState<Partial<NewMemberData>>({});
 
   const handleStep1Next = (data: any) => {
@@ -55,8 +110,15 @@ export function AddMemberModal({
     setStep(3);
   };
 
-  const handleStep3Next = (data: any) => {
-    const finalData = { ...formData, ...data } as NewMemberData;
+  const handleSaveImmediately = (data: AddMemberStep2Data) => {
+    const finalData: NewMemberData = {
+      ...(formData as Partial<NewMemberData>),
+      ...data,
+      membershipStatus: formData.membershipStatus || "Member",
+      dateJoined: formData.dateJoined || new Date().toISOString().slice(0, 10),
+      baptized: formData.baptized ?? false,
+      volunteersPreference: formData.volunteersPreference || "Not Interested",
+    } as NewMemberData;
 
     onMemberAdded?.(finalData);
     toast({
@@ -67,9 +129,24 @@ export function AddMemberModal({
     handleClose();
   };
 
+  const handleStep3Next = (data: any) => {
+    setFormData((prev) => ({ ...prev, ...data }));
+    setStep(4);
+  };
+
+  const handleSaveMember = () => {
+    const finalData = formData as NewMemberData;
+    onMemberAdded?.(finalData);
+    toast({
+      title: "Success",
+      description: "Member added successfully",
+    });
+    handleClose();
+  };
+
   const handleBack = () => {
     if (step > 1) {
-      setStep((prev) => (prev - 1) as 1 | 2 | 3);
+      setStep((prev) => (prev - 1) as 1 | 2 | 3 | 4);
     }
   };
 
@@ -81,50 +158,8 @@ export function AddMemberModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent showClose={true}>
-        <div className="flex-shrink-0 px-6 pt-6 pb-4">
-          <div className="flex items-center gap-2 p-6 rounded-lg border ">
-            {STEP_CONFIG.map((config, index) => {
-              const Icon = config.icon;
-              const isActive = step === config.number;
-              const isCompleted = step > config.number;
-
-              return (
-                <div
-                  key={config.number}
-                  className="flex justify-between items-center flex-1"
-                >
-                  <div className="flex items-center justify-between gap-3 flex-1">
-                    <div
-                      className={`
-                        h-6 w-6 rounded-full flex items-center justify-center flex-shrink-0
-                        ${isActive ? "bg-primary-600" : isCompleted ? "bg-primary-100" : "bg-gray-100"}
-                      `}
-                    >
-                      <Icon
-                        className={`
-                          h-6 w-6
-                          ${isActive ? "text-white" : isCompleted ? "text-primary-600" : "text-gray-400"}
-                        `}
-                      />
-                    </div>
-
-                    {isActive && (
-                      <div className="hidden md:block">
-                        <Text variant="muted">Step {config.number}/3</Text>
-                        <Text variant="menuActive">{config.label}</Text>
-                      </div>
-                    )}
-                  </div>
-
-                  {index < STEP_CONFIG.length - 1 && (
-                    <div className="h-px flex-1 bg-gray-200 mx-2" />
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        </div>
+      <DialogContent showClose={false}>
+        <MembershipStepIndicator step={step === 4 ? 3 : step} />
 
         <div className="flex-1 px-6 py-6">
           {step === 1 && (
@@ -136,6 +171,7 @@ export function AddMemberModal({
           {step === 2 && (
             <ContactDetailsStep
               onNext={handleStep2Next}
+              onSaveImmediately={handleSaveImmediately}
               onBack={handleBack}
               initialData={formData}
             />
@@ -145,6 +181,13 @@ export function AddMemberModal({
               onNext={handleStep3Next}
               onBack={handleBack}
               initialData={formData}
+            />
+          )}
+          {step === 4 && (
+            <ReviewMemberStep
+              data={formData}
+              onBack={handleBack}
+              onSave={handleSaveMember}
             />
           )}
         </div>
