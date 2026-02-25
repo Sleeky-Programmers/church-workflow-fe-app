@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Member } from "@/types";
 import { calculateGenderSplit } from "@/lib/utils";
 import Heading from "@/components/ui/typography/Heading";
+import { Text } from "@/components/ui/typography/Text";
 
 type AttendanceStatsViewProps = {
   presentMembers: Member[];
@@ -48,55 +49,37 @@ export function AttendanceStatsView({
             </Button>
           </div>
         ) : (
-          <>
-            <Button
-              onClick={onViewPresent}
-              className="w-full p-4 rounded-lg border-2 border-primary-200 bg-primary-50 hover:bg-primary-100 transition-colors text-left"
-            >
+          <div className="grid-rows-2">
+            <Button onClick={onViewPresent} variant="outline" className="p-4">
               <div className="flex items-start gap-3">
-                <div className="p-2 bg-primary-100 rounded-full">
+                <div className="p-2 rounded-full">
                   <CheckCircle2 className="h-5 w-5 text-primary-600" />
                 </div>
                 <div className="flex-1">
-                  <div className="font-semibold text-gray-900 mb-1">
-                    Present Members
-                  </div>
-                  <div className="text-sm text-gray-600">
+                  <Text className="mb-1">Present Members</Text>
+                  <Text variant="muted">
                     {presentSplit.males} Males - {presentSplit.females} Females
-                  </div>
-                </div>
-                <div className="text-right">
-                  <div className="text-2xl font-bold text-primary-600">
-                    {presentMembers.length}
-                  </div>
+                  </Text>
                 </div>
               </div>
             </Button>
 
-            <Button
-              onClick={onViewAbsent}
-              className="w-full p-4 rounded-lg border-2 border-destructive-200 bg-destructive-50 hover:bg-destructive-100 transition-colors text-left"
-            >
+            <Button onClick={onViewAbsent} variant="outline" className=" p-4">
               <div className="flex items-start gap-3">
-                <div className="p-2 bg-destructive-100 rounded-full">
+                <div className="p-2 rounded-full">
                   <XCircle className="h-5 w-5 text-destructive-600" />
                 </div>
                 <div className="flex-1">
                   <div className="font-semibold text-gray-900 mb-1">
                     Absent Members
                   </div>
-                  <div className="text-sm text-gray-600">
+                  <Text variant="muted">
                     {absentSplit.males} Males - {absentSplit.females} Females
-                  </div>
-                </div>
-                <div className="text-right">
-                  <div className="text-2xl font-bold text-destructive-600">
-                    {absentMembers.length}
-                  </div>
+                  </Text>
                 </div>
               </div>
             </Button>
-          </>
+          </div>
         )}
       </div>
     </div>

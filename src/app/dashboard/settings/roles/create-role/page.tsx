@@ -141,7 +141,9 @@ export default function CreateRolePage({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="description">Description (Optional)</Label>
+              <Label htmlFor="description">
+                Description <Span variant="muted">(Optional)</Span>
+              </Label>
               <Textarea
                 id="description"
                 placeholder="Type your message here."

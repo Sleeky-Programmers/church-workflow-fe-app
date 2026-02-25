@@ -11,7 +11,7 @@ import {
   CreateChurchPayload,
   CreateWeeklyServicePayload,
 } from "@/types/payload";
-import { MOCK_ADMIN, MOCK_MEMBERS, MOCK_SERVICES } from "../data";
+import { MOCK_ADMIN, MOCK_MEMBERS_FULL, MOCK_SERVICES } from "../data";
 import { AttendanceRecord, Member, RegularService } from "@/types";
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -270,12 +270,12 @@ export async function fetchMembers(
 }> {
   return new Promise((resolve) => {
     setTimeout(() => {
-      let filtered = MOCK_MEMBERS;
+      let filtered = MOCK_MEMBERS_FULL;
 
       if (search) {
-        filtered = MOCK_MEMBERS.filter(
+        filtered = MOCK_MEMBERS_FULL.filter(
           (m) =>
-            m.name.toLowerCase().includes(search.toLowerCase()) ||
+            m.fullName.toLowerCase().includes(search.toLowerCase()) ||
             m.email.toLowerCase().includes(search.toLowerCase()),
         );
       }
@@ -284,8 +284,15 @@ export async function fetchMembers(
       const end = start + limit;
       const paginated = filtered.slice(start, end);
 
+      const members = paginated.map((m) => ({
+        id: m.id,
+        name: m.fullName,
+        email: m.email,
+        initials: m.initials,
+      }));
+
       resolve({
-        members: paginated,
+        members,
         total: filtered.length,
         pages: Math.ceil(filtered.length / limit),
       });
@@ -315,7 +322,7 @@ export async function saveAttendance(
 }> {
   return new Promise((resolve) => {
     setTimeout(() => {
-      const allMemberIds = MOCK_MEMBERS.map((m) => m.id);
+      const allMemberIds = MOCK_MEMBERS_FULL.map((m) => m.id);
       const absentMembers = allMemberIds.filter(
         (id) => !data.presentMembers.includes(id),
       );

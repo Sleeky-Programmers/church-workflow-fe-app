@@ -9,7 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { ScheduleDeletionDialog } from "@/components/features/dashboard/admin/schedule-deletion-modal";
 import { PrivacySettings, AccountDeletionStatus } from "@/types";
 import Heading from "@/components/ui/typography/Heading";
-import { Text } from "@/components/ui/typography/Text";
+import { Text, Span } from "@/components/ui/typography/Text";
 
 export default function AccountSettingsPage() {
   const { toast } = useToast();
@@ -122,7 +122,7 @@ export default function AccountSettingsPage() {
 
           <div className="flex items-center justify-between py-2">
             <div className="flex items-center gap-3">
-              <div className="h-2 w-2 rounded-full bg-primary-600 flex-shrink-0" />
+              <Span className="h-2 w-2 rounded-full bg-primary-600 flex-shrink-0" />
               <Label
                 htmlFor="birthday-reminders"
                 className="text-base font-normal text-gray-700 cursor-pointer"
@@ -138,7 +138,7 @@ export default function AccountSettingsPage() {
           </div>
           <div className="flex items-center justify-between py-2">
             <div className="flex items-center gap-3">
-              <div className="h-2 w-2 rounded-full bg-primary-600 flex-shrink-0" />
+              <Span className="h-2 w-2 rounded-full bg-primary-600 flex-shrink-0" />
               <Label
                 htmlFor="email-alerts"
                 className="text-base font-normal text-gray-700 cursor-pointer"
@@ -161,7 +161,7 @@ export default function AccountSettingsPage() {
         {deletionStatus === "none" ? (
           <div className="flex items-start gap-3 grid-cols-1">
             <div className="flex items-start gap-3">
-              <div className="h-2 w-2 rounded-full bg-primary-600 flex-shrink-0 mt-2" />
+              <Span className="h-2 w-2 rounded-full bg-primary-600 flex-shrink-0 mt-2" />
               <Button
                 variant="outline"
                 onClick={() => setIsScheduleDialogOpen(true)}

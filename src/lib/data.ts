@@ -1,9 +1,14 @@
 import {
   ActivityRow,
   DepartmentRow,
+  Gender,
+  MaritalStatus,
   Member,
+  MemberAttendanceRecord,
+  MemberProfile,
   RegularService,
   Role,
+  Title,
 } from "@/types";
 import { EventCategory, RequisitionStatus } from "./enums";
 import {
@@ -464,6 +469,187 @@ export const MOCK_ROLES: Role[] = [
   },
 ];
 
+function generateMockAttendanceRecords(): MemberAttendanceRecord[] {
+  const services = [
+    "Sunday First Service",
+    "Sunday Second Service",
+    "Midweek Service",
+    "Friday Service",
+  ];
+
+  const records: MemberAttendanceRecord[] = [];
+  const startDate = new Date(2026, 0, 1);
+
+  for (let i = 0; i < 60; i++) {
+    const date = new Date(startDate);
+    date.setDate(date.getDate() + i);
+
+    const service = services[Math.floor(Math.random() * services.length)];
+    const status = Math.random() > 0.2 ? "Present" : "Absent";
+
+    records.push({
+      id: `record-${i + 1}`,
+      service,
+      date: date.toISOString().split("T")[0],
+      status: status as "Present" | "Absent",
+      recordedBy: "Admin",
+      time: `${Math.floor(Math.random() * 12) + 7}:${Math.floor(
+        Math.random() * 60,
+      )
+        .toString()
+        .padStart(2, "0")} ${Math.random() > 0.5 ? "AM" : "PM"}`,
+    });
+  }
+
+  return records.sort(
+    (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
+  );
+}
+
+export const MOCK_MEMBERS_FULL: MemberProfile[] = Array.from(
+  { length: 100 },
+  (_, i) => {
+    const firstNames = [
+      "Taylor",
+      "Alex",
+      "Jordan",
+      "Morgan",
+      "Casey",
+      "Avery",
+      "Riley",
+      "Peyton",
+      "Quinn",
+      "Sage",
+      "Johnson",
+      "Michael",
+      "Sarah",
+      "David",
+      "Emily",
+      "James",
+      "Jessica",
+      "Christopher",
+      "Jennifer",
+      "Matthew",
+    ];
+
+    const lastNames = [
+      "Davidson",
+      "Johnson",
+      "Williams",
+      "Brown",
+      "Davis",
+      "Miller",
+      "Wilson",
+      "Moore",
+      "Taylor",
+      "Anderson",
+      "Thomas",
+      "Jackson",
+      "White",
+      "Harris",
+      "Martin",
+    ];
+
+    const titles: Title[] = ["Mr.", "Mrs.", "Miss", "Dr.", "Pastor"];
+    const genders: Gender[] = ["Male", "Female"];
+    const maritalStatuses: MaritalStatus[] = [
+      "Single",
+      "Married",
+      "Divorced",
+      "Widowed",
+    ];
+
+    const firstName = firstNames[i % firstNames.length];
+    const lastName = lastNames[Math.floor(i / 5) % lastNames.length];
+    const fullName = `${firstName} ${lastName}`;
+    const email = `${firstName.toLowerCase()}${i + 1}@gmail.com`;
+    const phone = `+234 ${Math.floor(800 + Math.random() * 100)} ${Math.floor(100 + Math.random() * 900)} ${Math.floor(1000 + Math.random() * 9000)}`;
+
+    const title = titles[i % titles.length];
+    const gender = genders[i % 2];
+    const maritalStatus = maritalStatuses[i % 4];
+
+    const year = 1960 + Math.floor(Math.random() * 40);
+    const month = Math.floor(Math.random() * 12);
+    const day = Math.floor(Math.random() * 28) + 1;
+    const birthday = `${day}${getDaySuffix(day)} ${getMonthName(month)}, ${year}`;
+    const attendanceRecords = generateMockAttendanceRecords();
+    const servicesAttended = attendanceRecords.filter(
+      (r) => r.status === "Present",
+    ).length;
+    const servicesMissed = attendanceRecords.filter(
+      (r) => r.status === "Absent",
+    ).length;
+    const attendanceRate = Math.round(
+      (servicesAttended / (servicesAttended + servicesMissed)) * 100,
+    );
+
+    return {
+      id: `member-${i + 1}`,
+      title,
+      fullName,
+      firstName,
+      lastName,
+      email,
+      phone,
+      gender,
+      birthday,
+      address: "Abuja, Nigeria",
+      maritalStatus,
+      dateOfMarriage:
+        maritalStatus === "Married" ? "1st of March, 1999" : undefined,
+      spouseFirstName: maritalStatus === "Married" ? "Jane" : undefined,
+      spouseLastName: maritalStatus === "Married" ? "Doe" : undefined,
+
+      membershipStatus: "Member",
+      dateJoined: "14th of March, 2026",
+      baptized: Math.random() > 0.3,
+      volunteersPreference: "Interested",
+
+      servicesAttended,
+      servicesMissed,
+      attendanceRate,
+
+      attendanceRecords,
+
+      initials: `${firstName[0]}${lastName[0]}`.toUpperCase(),
+      avatar: undefined,
+    };
+  },
+);
+
+function getDaySuffix(day: number): string {
+  if (day >= 11 && day <= 13) return "th";
+  switch (day % 10) {
+    case 1:
+      return "st";
+    case 2:
+      return "nd";
+    case 3:
+      return "rd";
+    default:
+      return "th";
+  }
+}
+
+function getMonthName(month: number): string {
+  const months = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
+  ];
+  return months[month];
+}
+
 export const MOCK_SERVICES: RegularService[] = [
   {
     id: "service-1",
@@ -515,45 +701,7 @@ export const MOCK_SERVICES: RegularService[] = [
     attendanceRecords: [],
   },
 ];
-
-export const MOCK_MEMBERS: Member[] = Array.from({ length: 100 }, (_, i) => {
-  const firstNames = [
-    "Taylor",
-    "Alex",
-    "Jordan",
-    "Morgan",
-    "Casey",
-    "Avery",
-    "Riley",
-    "Peyton",
-    "Quinn",
-    "Sage",
-  ];
-  const lastNames = [
-    "Elizabeth Morgan",
-    "Benjamin Carter-Smith",
-    "Edward Whitmore",
-    "Michael Anderson",
-    "Sarah Johnson",
-    "David Williams",
-    "Emily Brown",
-    "James Davis",
-    "Jessica Miller",
-    "Christopher Wilson",
-  ];
-
-  const firstName = firstNames[i % firstNames.length];
-  const lastName = lastNames[i % lastNames.length];
-  const name = `${firstName} ${lastName}`;
-  const email = `${firstName.toLowerCase()}${i + 1}@gmail.com`;
-
-  return {
-    id: `member-${i + 1}`,
-    name,
-    email,
-    initials: `${firstName[0]}${lastName.split(" ")[0][0]}`.toUpperCase(),
-  };
-});
+export const MOCK_SINGLE_MEMBER = MOCK_MEMBERS_FULL[0];
 
 export const MOCK_ADMIN = {
   id: "admin-1",
