@@ -67,7 +67,7 @@ export function SignupPageContent() {
 
   const handleOtpVerified = async (otp: string) => {
     try {
-      const response = await verifyOtp({ email, otp });
+      const response = await verifyOtp({ email, otp: Number(otp) });
 
       if (typeof window !== "undefined" && response.accessToken) {
         localStorage.setItem("accessToken", response.accessToken);

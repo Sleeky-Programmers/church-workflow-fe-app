@@ -145,7 +145,7 @@ export async function createChurch(
 }
 
 export async function createWeeklyService(payload: CreateWeeklyServicePayload) {
-  return apiFetch("/events/weekly-service/create", {
+  return apiFetch("/church-services", {
     method: "POST",
     body: JSON.stringify(payload),
   });

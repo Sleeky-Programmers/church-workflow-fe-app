@@ -7,7 +7,7 @@ export interface SignupPayload {
 
 export interface VerifyOtpPayload {
   email: string;
-  otp: string;
+  otp: number;
 }
 
 export interface VerifyOtpResponse {
@@ -47,6 +47,7 @@ export interface CreateChurchPayload {
 
 export interface CreateWeeklyServicePayload {
   serviceName: string;
+  type: "REGULAR" | "SPECIAL";
   day: string;
   startTime: string;
   endTime: string;
