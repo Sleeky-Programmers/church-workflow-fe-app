@@ -72,18 +72,21 @@ export default function ChurchOnboarding() {
     try {
       for (const service of services) {
         for (const day of service.days) {
+          const normalizedDay = day.toUpperCase();
           await createWeeklyService({
             serviceName: service.serviceName,
-            day,
+            type: "REGULAR",
+            day: normalizedDay,
             startTime: convertTo12Hour(service.startTime),
-            endTime: convertTo12Hour(service.endTime),
+            endTime: convertTo12Hour(service.endTime || service.startTime),
             location: service.location,
           });
         }
       }
       setStep(3);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Failed to create weekly services", error);
+      alert(error?.message || "Failed to create weekly services");
     }
   };
 
@@ -99,6 +102,7 @@ export default function ChurchOnboarding() {
       router.push(RouteConfig.dashboard.home);
     } catch (error: any) {
       console.error("Upload failed:", error.message);
+      alert(error?.message || "Members upload failed");
     }
   };
 

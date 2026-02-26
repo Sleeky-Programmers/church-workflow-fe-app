@@ -43,7 +43,7 @@ export default function LoginPage() {
 
   const handleVerifyOtp = async (code: string) => {
     try {
-      const data = await verifyOtp({ email, otp: code });
+      const data = await verifyOtp({ email, otp: Number(code) });
       localStorage.setItem("accessToken", data.accessToken);
 
       setStep("reset-password");

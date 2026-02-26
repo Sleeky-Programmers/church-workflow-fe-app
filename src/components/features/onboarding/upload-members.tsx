@@ -40,6 +40,9 @@ export function UploadMembersStep({
   totalSteps = 3,
 }: UploadMembersStepProps) {
   const [uploadedFiles, setUploadedFiles] = useState<UploadFile[]>([]);
+  const csvTemplate = `title,fullName,gender,birthday,maritalStatus,dateOfMarriage,spouseFirstName,spouseLastName,phoneNumber,email,occupation,educationalBackground,membershipStatus,dateJoined,previousChurchMembership,isBaptized,ministries,volunteerPreferences,cellGroupName
+MR.,John Mensah,MALE,1985-03-15,MARRIED,2010-07-20,Ama,Mensah,+233-24-123-4567,john.mensah@email.com,Teacher,Masters in Education,MEMBER,2020-01-15,St. Peter's Church,true,Worship Team,Music Ministry,Christ Embassy
+MRS.,Sarah Adjei,FEMALE,1990-08-22,SINGLE,,,,+233-20-234-5678,sarah.adjei@email.com,Nurse,Bachelors in Nursing,VOLUNTEER,2019-11-10,Healing Streams Church,true,Children's Ministry,Teaching,Victory Chapel`;
 
   const getUploadStatusConfig = (status: string, message?: string) => {
     const configs = {
@@ -123,6 +126,18 @@ export function UploadMembersStep({
     simulateUpload(file.name);
   };
 
+  const handleDownloadTemplate = () => {
+    const blob = new Blob([csvTemplate], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", "members-template.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <Form {...form}>
       <div className="space-y-6 max-w-2xl">
@@ -137,6 +152,7 @@ export function UploadMembersStep({
             type="button"
             variant="ghost"
             className="flex items-center gap-2 w-full"
+            onClick={handleDownloadTemplate}
           >
             <Download className="w-4 h-4" />
             Download CSV Template
