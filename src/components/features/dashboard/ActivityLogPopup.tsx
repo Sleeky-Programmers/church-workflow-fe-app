@@ -28,9 +28,9 @@ export default function ActivityLogPopup({
       <DialogContent showClose={false}>
         {selectedRow && (
           <div>
-            <div className="flex items-start justify-between gap-4">
+            <div className="flex items-start  gap-4">
               <div className="flex items-center gap-3">
-                <div className="w-6 h-6 rounded-md bg-emerald-600 text-white flex items-center justify-center">
+                <div className="w-6 h-6 rounded-md bg-success-600 text-white flex items-center justify-center">
                   <Check className="w-4 h-4" />
                 </div>
                 <div>

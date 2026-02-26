@@ -16,6 +16,7 @@ export enum Routes {
   Search = "/dashboard/search",
   Home = "/",
   Attendance = "/dashboard/attendance",
+  Membership = "/dashboard/membership",
 
   Admin = "/dashboard/settings/users",
   UserManagement = "/dashboard/settings/users",
@@ -39,6 +40,7 @@ export const RouteConfig = {
     departments: Routes.Departments,
     notifications: Routes.Notifications,
     attendance: Routes.Attendance,
+    membership: Routes.Membership,
     search: Routes.Search,
     admin: {
       root: Routes.Admin,

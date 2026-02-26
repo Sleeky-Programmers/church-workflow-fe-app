@@ -46,7 +46,7 @@ export function Text({
     indicator: "inline-block w-2 h-2 rounded-full bg-sky-600",
     label: "font-semibold text-foreground text-md",
     blue: "text-primary-600 font-medium",
-    dot: "inline-block w-3 h-3 rounded-full",
+    dot: "h-2 w-2 rounded-full bg-primary-600 flex-shrink-0",
     pending:
       "text-xs font-medium text-orange-600 bg-orange-50 border border-orange-200",
     success: "text-success-600 font-medium bg-success-50",

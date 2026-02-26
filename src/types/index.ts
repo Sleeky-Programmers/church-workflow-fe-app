@@ -159,3 +159,84 @@ export type CalendarDay = {
   isCurrentMonth: boolean;
   services: RegularService[];
 };
+
+export type Gender = "Male" | "Female";
+export type MaritalStatus = "Single" | "Married" | "Divorced" | "Widowed";
+export type MembershipStatus = "Member" | "Visitor" | "New Convert";
+export type Title = "Mr." | "Mrs." | "Miss" | "Dr." | "Pastor" | "Rev.";
+
+export type AttendanceStatus = "Present" | "Absent";
+
+export type MemberAttendanceRecord = {
+  id: string;
+  service: string;
+  date: string;
+  status: AttendanceStatus;
+  recordedBy: string;
+  time: string;
+};
+
+export type MemberProfile = {
+  id: string;
+  title: Title;
+  fullName: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  gender: Gender;
+  birthday: string;
+  address: string;
+  maritalStatus: MaritalStatus;
+  dateOfMarriage?: string;
+  spouseFirstName?: string;
+  spouseLastName?: string;
+
+  membershipStatus: MembershipStatus;
+  dateJoined: string;
+  baptized: boolean;
+  volunteersPreference: string;
+
+  servicesAttended: number;
+  servicesMissed: number;
+  attendanceRate: number;
+
+  attendanceRecords: MemberAttendanceRecord[];
+
+  initials: string;
+  avatar?: string;
+};
+
+export type AddMemberStep1Data = {
+  title: Title;
+  fullName: string;
+  gender: Gender;
+  birthday: string;
+  maritalStatus: MaritalStatus;
+  dateOfMarriage?: string;
+  spouseFirstName?: string;
+  spouseLastName?: string;
+};
+
+export type AddMemberStep2Data = {
+  email: string;
+  phone: string;
+  address: string;
+  occupation: string;
+  education: string;
+};
+
+export type AddMemberStep3Data = {
+  membershipStatus: MembershipStatus;
+  dateJoined: string;
+  previousChurchMembership?: string;
+  baptized: boolean;
+  ministriesInvolved?: string;
+  volunteersPreference: string;
+  smallGroupMember?: "Yes" | "No";
+  smallGroupName?: string;
+};
+
+export type NewMemberData = AddMemberStep1Data &
+  AddMemberStep2Data &
+  AddMemberStep3Data;

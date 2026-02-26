@@ -8,6 +8,7 @@ import { RegularService } from "@/types";
 import { AttendanceEmptyState } from "@/components/features/dashboard/attendance/attendance-empty-state";
 import { ServiceTypeModal } from "@/components/features/dashboard/attendance/service-type";
 import { CreateRegularServiceModal } from "@/components/features/dashboard/attendance/create-regular-service";
+import { AttendanceModal } from "@/components/features/dashboard/attendance/attendance-modal";
 import { MobileAttendanceView } from "@/components/features/dashboard/attendance/mobile-view";
 import { CalendarGrid } from "@/components/features/dashboard/attendance/calendar-grid";
 import Heading from "@/components/ui/typography/Heading";
@@ -36,6 +37,11 @@ export default function AttendancePage() {
   const [isRegularModalOpen, setIsRegularModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [isServiceTypeModalOpen, setIsServiceTypeModalOpen] = useState(false);
+  const [isAttendanceModalOpen, setIsAttendanceModalOpen] = useState(false);
+  const [selectedService, setSelectedService] = useState<RegularService | null>(
+    null,
+  );
+  const [selectedDate, setSelectedDate] = useState<string | null>(null);
 
   const handleCreateServiceClick = () => {
     setIsTypeModalOpen(true);
@@ -65,10 +71,9 @@ export default function AttendancePage() {
   };
 
   const handleAddAttendance = (service: RegularService, date: string) => {
-    toast({
-      title: "Add Attendance",
-      description: `Opening attendance for ${service.serviceName}`,
-    });
+    setSelectedService(service);
+    setSelectedDate(date);
+    setIsAttendanceModalOpen(true);
   };
 
   const handleAddGivingRecord = (service: RegularService, date: string) => {
@@ -153,6 +158,19 @@ export default function AttendancePage() {
         open={isRegularModalOpen}
         onOpenChange={setIsRegularModalOpen}
         onCreateServices={handleCreateServices}
+      />
+
+      <AttendanceModal
+        isOpen={isAttendanceModalOpen}
+        onClose={() => setIsAttendanceModalOpen(false)}
+        service={selectedService}
+        date={selectedDate}
+        onSave={() => {
+          toast({
+            title: "Success",
+            description: "Attendance saved successfully",
+          });
+        }}
       />
     </div>
   );

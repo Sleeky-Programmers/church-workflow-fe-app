@@ -145,13 +145,13 @@ export default function ActivityLogPage() {
 
           {showFilter && (
             <div className="absolute right-0 top-10 w-56 rounded-xl border bg-background shadow-lg p-3 z-20">
-              <Text text="Filter by module" className="text-sm mb-2" />
+              <Text text="Filter by module" className=" mb-2" />
               {["Requisition", "Membership", "Events", "Authentication"].map(
                 (m) => (
                   <Button
                     key={m}
                     variant={moduleFilter === m ? "secondary" : "ghost"}
-                    className="w-full justify-start text-sm"
+                    className="w-full justify-start "
                     onClick={() => {
                       setModuleFilter(m);
                       setShowFilter(false);
@@ -163,7 +163,7 @@ export default function ActivityLogPage() {
               )}
               <Button
                 variant="ghost"
-                className="w-full text-xs mt-2"
+                className="mt-2"
                 onClick={() => {
                   setModuleFilter(null);
                   setShowFilter(false);

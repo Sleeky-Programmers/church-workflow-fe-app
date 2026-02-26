@@ -135,35 +135,30 @@ export function AttendanceModal({
               <DialogTitle className="text-xl font-semibold mb-3">
                 {service.serviceName} attendance
               </DialogTitle>
-
               <div className="grid grid-cols-2 gap-x-6 gap-y-2 text-sm">
-                <div className="flex items-center gap-2 text-gray-600">
+                <div className="flex items-center gap-2">
                   <Calendar className="h-4 w-4" />
-                  <Span>{format(parsedDate, "MMMM d, yyyy")}</Span>
+                  <Span>{format(parsedDate, "MMM. d, yyyy")}</Span>
                 </div>
-
-                <div className="flex items-center gap-2 text-gray-600">
+                <div className="flex items-center gap-2">
                   <User className="h-4 w-4" />
                   <Span>Recorded by: {admin.name}</Span>
                 </div>
-
-                <div className="flex items-center gap-2 text-gray-600">
+                <div className="flex items-center gap-2">
                   <Clock className="h-4 w-4" />
                   <Span>
                     {service.startTime}
                     {service.endTime && ` - ${service.endTime}`}
                   </Span>
                 </div>
-
                 {service.location && (
-                  <div className="flex items-center gap-2 text-gray-600">
+                  <div className="flex items-center gap-2">
                     <MapPin className="h-4 w-4" />
                     <Span className="truncate">{service.location}</Span>
                   </div>
                 )}
               </div>
             </div>
-
             <Button
               variant="ghost"
               size="icon"
@@ -176,18 +171,8 @@ export function AttendanceModal({
         </DialogHeader>
 
         <div className="flex-1 flex min-h-0">
-          <div className="flex-1 flex flex-col border-r min-h-0">
-            {state.view === "select" && (
-              <SelectMembersView
-                selectedMembers={state.presentMembers}
-                onToggleMember={toggleMember}
-                onMarkPresent={handleMarkPresent}
-                searchQuery={state.searchQuery}
-                onSearchChange={setSearch}
-              />
-            )}
-
-            {state.view === "stats" && (
+          <div className="flex-1 flex flex-col min-h-0">
+            {(state.view === "stats" || state.view === "select") && (
               <AttendanceStatsView
                 presentMembers={presentMembers}
                 absentMembers={absentMembers}
@@ -199,7 +184,7 @@ export function AttendanceModal({
 
             {state.view === "present" && (
               <div className="flex-1 flex flex-col">
-                <div className="p-4 border-b flex items-center justify-between">
+                <div className="p-4 flex items-center justify-between">
                   <Heading level={3} className="font-semibold text-base">
                     Present Members
                   </Heading>
@@ -213,8 +198,8 @@ export function AttendanceModal({
                 </div>
 
                 {state.removedMembers.length > 0 && (
-                  <Alert className="mx-4 mt-4 border-destructive-200 bg-destructive-50">
-                    <AlertCircle className="h-4 w-4 text-destructive-600" />
+                  <Alert variant="destructive" className="mx-4 mt-4">
+                    <AlertCircle className="h-4 w-4" />
                     <AlertDescription className="flex items-center justify-between">
                       <Span variant="error">
                         You removed {state.removedMembers.length} member(s)
@@ -223,7 +208,7 @@ export function AttendanceModal({
                         variant="link"
                         size="sm"
                         onClick={undoRemove}
-                        className="text-destructive-600 hover:text-destructive-700 p-0 h-auto"
+                        className="p-0 h-auto"
                       >
                         Undo
                       </Button>
@@ -231,7 +216,7 @@ export function AttendanceModal({
                   </Alert>
                 )}
 
-                <div className="p-4 border-b">
+                <div className="p-4">
                   <div className="relative">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                     <Input
@@ -269,7 +254,7 @@ export function AttendanceModal({
 
             {state.view === "absent" && (
               <div className="flex-1 flex flex-col">
-                <div className="p-4 border-b flex items-center justify-between">
+                <div className="p-4 flex items-center justify-between">
                   <Heading level={3} className="font-semibold text-base">
                     Absent Members
                   </Heading>
@@ -290,7 +275,7 @@ export function AttendanceModal({
                   </Button>
                 </div>
 
-                <div className="p-4 border-b">
+                <div className="p-4">
                   <div className="relative">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                     <Input
@@ -329,15 +314,23 @@ export function AttendanceModal({
           </div>
 
           {state.view === "select" && (
-            <div className="w-96 flex flex-col min-h-0"></div>
+            <div className="w-96 flex flex-col min-h-0 border-l-0">
+              <SelectMembersView
+                selectedMembers={state.presentMembers}
+                onToggleMember={toggleMember}
+                onMarkPresent={handleMarkPresent}
+                searchQuery={state.searchQuery}
+                onSearchChange={setSearch}
+              />
+            </div>
           )}
         </div>
 
-        <div className="px-6 py-4 border-t flex justify-end">
+        <div className="px-6 py-4">
           <Button
             onClick={handleSave}
             disabled={isSaving || state.presentMembers.length === 0}
-            className="min-w-[100px]"
+            className="w-full"
           >
             {isSaving ? "Saving..." : "Save"}
           </Button>
