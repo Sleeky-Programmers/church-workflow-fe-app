@@ -26,6 +26,16 @@ export interface LoginResponse {
   user?: any;
 }
 
+export interface GoogleAuthPayload {
+  idToken: string;
+}
+
+export interface GoogleAuthResponse {
+  message: string;
+  accessToken: string;
+  user?: any;
+}
+
 export interface ResetPasswordPayload {
   newPassword: string;
   confirmNewPassword: string;

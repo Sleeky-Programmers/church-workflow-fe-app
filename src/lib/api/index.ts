@@ -6,6 +6,8 @@ import {
   VerifyOtpResponse,
   LoginPayload,
   LoginResponse,
+  GoogleAuthPayload,
+  GoogleAuthResponse,
   ResetPasswordPayload,
   ResetPasswordResponse,
   CreateChurchPayload,
@@ -83,6 +85,15 @@ export async function resendOtp(email: string) {
 
 export async function login(payload: LoginPayload) {
   return apiFetch<LoginResponse>("/auth/login", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function googleAuth(payload: GoogleAuthPayload, token?: string) {
+  const query = token ? `?token=${encodeURIComponent(token)}` : "";
+
+  return apiFetch<GoogleAuthResponse>(`/auth/google${query}`, {
     method: "POST",
     body: JSON.stringify(payload),
   });
