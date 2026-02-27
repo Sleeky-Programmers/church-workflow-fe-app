@@ -51,7 +51,7 @@ function modalReducer(state: ModalState, action: ModalAction): ModalState {
         absentMembers: isPresent
           ? [...state.absentMembers, action.memberId]
           : state.absentMembers.filter((id) => id !== action.memberId),
-        hasChanges: true,
+        hasChanges: false,
       };
 
     case "MARK_PRESENT":

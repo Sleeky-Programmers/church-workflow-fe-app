@@ -10,16 +10,16 @@ import { Text } from "@/components/ui/typography/Text";
 type AttendanceStatsViewProps = {
   presentMembers: Member[];
   absentMembers: Member[];
-  onViewPresent: () => void;
-  onViewAbsent: () => void;
+  isMembersLoaded: boolean;
+  isAttendanceMarked: boolean;
   onLoadMembers: () => void;
 };
 
 export function AttendanceStatsView({
   presentMembers,
   absentMembers,
-  onViewPresent,
-  onViewAbsent,
+  isMembersLoaded,
+  isAttendanceMarked,
   onLoadMembers,
 }: AttendanceStatsViewProps) {
   const presentIds = presentMembers.map((m) => m.id);
@@ -28,58 +28,59 @@ export function AttendanceStatsView({
   const presentSplit = calculateGenderSplit(presentIds);
   const absentSplit = calculateGenderSplit(absentIds);
 
-  const hasMembers = presentMembers.length > 0 || absentMembers.length > 0;
-
   return (
     <div className="flex-1 flex flex-col">
-      <div className="p-4 border-b">
-        <Heading level={4} className="font-semibold text-base">
-          Members Attendance
-        </Heading>
+      <div className="p-4 flex items-center justify-between gap-3">
+        <Heading level={4}>Members Attendance</Heading>
+
+        {!isMembersLoaded ? (
+          <Button
+            onClick={onLoadMembers}
+            className="bg-orange-600 hover:bg-orange-700 whitespace-nowrap"
+          >
+            Load members
+          </Button>
+        ) : (
+          <Button
+            disabled
+            className="bg-gray-300 text-gray-700 hover:bg-gray-300 whitespace-nowrap"
+          >
+            Members loaded
+          </Button>
+        )}
       </div>
 
-      <div className="flex-1 p-4 space-y-3">
-        {!hasMembers ? (
-          <div className="flex items-center justify-center h-full">
-            <Button
-              onClick={onLoadMembers}
-              className="bg-orange-600 hover:bg-orange-700"
-            >
-              Load members →
-            </Button>
-          </div>
-        ) : (
-          <div className="grid-rows-2">
-            <Button onClick={onViewPresent} variant="outline" className="p-4">
+      <div className="flex-1 p-4">
+        {isAttendanceMarked ? (
+          <div className="space-y-3">
+            <div className="p-4 rounded-lg border bg-primary-50">
               <div className="flex items-start gap-3">
-                <div className="p-2 rounded-full">
-                  <CheckCircle2 className="h-5 w-5 text-primary-600" />
-                </div>
-                <div className="flex-1">
+                <CheckCircle2 className="h-5 w-5 text-primary-600 mt-0.5" />
+                <div>
                   <Text className="mb-1">Present Members</Text>
                   <Text variant="muted">
                     {presentSplit.males} Males - {presentSplit.females} Females
                   </Text>
+                  <Text variant="muted">Total: {presentMembers.length}</Text>
                 </div>
               </div>
-            </Button>
+            </div>
 
-            <Button onClick={onViewAbsent} variant="outline" className=" p-4">
+            <div className="p-4 rounded-lg border bg-destructive-50">
               <div className="flex items-start gap-3">
-                <div className="p-2 rounded-full">
-                  <XCircle className="h-5 w-5 text-destructive-600" />
-                </div>
-                <div className="flex-1">
-                  <div className="font-semibold text-gray-900 mb-1">
-                    Absent Members
-                  </div>
+                <XCircle className="h-5 w-5 text-destructive-600 mt-0.5" />
+                <div>
+                  <Text className="mb-1">Absent Members</Text>
                   <Text variant="muted">
                     {absentSplit.males} Males - {absentSplit.females} Females
                   </Text>
+                  <Text variant="muted">Total: {absentMembers.length}</Text>
                 </div>
               </div>
-            </Button>
+            </div>
           </div>
+        ) : (
+          <div className="h-full" />
         )}
       </div>
     </div>

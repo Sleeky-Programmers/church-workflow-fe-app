@@ -3,7 +3,6 @@ import {
   DepartmentRow,
   Gender,
   MaritalStatus,
-  Member,
   MemberAttendanceRecord,
   MemberProfile,
   RegularService,
