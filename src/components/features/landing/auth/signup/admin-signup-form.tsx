@@ -19,10 +19,12 @@ import GoogleSignupButton from "../oauth/google-signup-button";
 import Heading from "@/components/ui/typography/Heading";
 import { Text, Span } from "@/components/ui/typography/Text";
 import { Loader } from "@/components/ui/loader";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Link } from "@/components/ui/link";
 import { adminSignupSchema } from "@/types/schema";
 import { RouteConfig } from "@/config/routes";
+import { getGoogleIdToken } from "@/lib/google-auth";
+import { googleAuth } from "@/lib/api";
 
 type AdminSignupFormValues = z.infer<typeof adminSignupSchema>;
 
@@ -43,6 +45,7 @@ export default function AdminSignupForm({
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   const form = useForm<AdminSignupFormValues>({
     resolver: zodResolver(adminSignupSchema),
@@ -65,8 +68,25 @@ export default function AdminSignupForm({
     }, 1000);
   };
 
-  const handleGoogleSignup = () => {
-    alert("Google Signup clicked");
+  const handleGoogleSignup = async () => {
+    try {
+      setIsLoading(true);
+      const inviteToken = searchParams.get("invite") || undefined;
+      const idToken = await getGoogleIdToken();
+      const data = await googleAuth({ idToken }, inviteToken);
+
+      if (typeof window !== "undefined") {
+        localStorage.setItem("accessToken", data.accessToken);
+      }
+
+      router.push(RouteConfig.dashboard.home);
+    } catch (error: any) {
+      form.setError("email", {
+        message: error.message || "Google signup failed",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const onLogin = () => router.push(RouteConfig.auth.signIn);

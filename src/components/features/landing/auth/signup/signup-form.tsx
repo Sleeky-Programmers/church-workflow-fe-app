@@ -22,8 +22,9 @@ import { Loader } from "@/components/ui/loader";
 import { useRouter } from "next/navigation";
 import { Link } from "@/components/ui/link";
 import { signupSchema } from "@/types/schema";
-import { signup } from "@/lib/api";
+import { googleAuth, signup } from "@/lib/api";
 import { RouteConfig } from "@/config/routes";
+import { getGoogleIdToken } from "@/lib/google-auth";
 
 type SignupFormValues = z.infer<typeof signupSchema>;
 
@@ -33,7 +34,6 @@ interface SignupFormProps {
 
 export default function SignupForm({ onSubmit }: SignupFormProps) {
   const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
@@ -44,7 +44,6 @@ export default function SignupForm({ onSubmit }: SignupFormProps) {
       lastName: "",
       email: "",
       password: "",
-      confirmPassword: "",
       agreeToTerms: false,
     },
   });
@@ -71,8 +70,24 @@ export default function SignupForm({ onSubmit }: SignupFormProps) {
     }
   };
 
-  const handleGoogleSignup = () => {
-    alert("Google Signup clicked");
+  const handleGoogleSignup = async () => {
+    try {
+      setIsLoading(true);
+      const idToken = await getGoogleIdToken();
+      const data = await googleAuth({ idToken });
+
+      if (typeof window !== "undefined") {
+        localStorage.setItem("accessToken", data.accessToken);
+      }
+
+      router.push(RouteConfig.onboarding);
+    } catch (error: any) {
+      form.setError("email", {
+        message: error.message || "Google signup failed",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const onLogin = () => router.push(RouteConfig.auth.signIn);
@@ -154,36 +169,6 @@ export default function SignupForm({ onSubmit }: SignupFormProps) {
                       className="absolute right-3 top-1/2 -translate-y-1/2"
                     >
                       {showPassword ? <EyeOff /> : <Eye />}
-                    </Button>
-                  </div>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="confirmPassword"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Confirm Password</FormLabel>
-                <FormControl>
-                  <div className="relative">
-                    <Input
-                      type={showConfirmPassword ? "text" : "password"}
-                      placeholder="Confirm password"
-                      {...field}
-                    />
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      onClick={() =>
-                        setShowConfirmPassword(!showConfirmPassword)
-                      }
-                      className="absolute right-3 top-1/2 -translate-y-1/2"
-                    >
-                      {showConfirmPassword ? <EyeOff /> : <Eye />}
                     </Button>
                   </div>
                 </FormControl>
