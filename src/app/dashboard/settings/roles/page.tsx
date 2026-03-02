@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Text } from "@/components/ui/typography/Text";
 import { Role, RoleAction } from "@/types";
-import { MOCK_ROLES } from "@/lib/data";
+import { fetchRoles, updateRoleStatus } from "@/lib/api/admin-settings";
 import { RolesTable } from "@/components/features/dashboard/admin/role-table";
 import { DeactivateRoleDialog } from "@/components/features/dashboard/admin/mini-components/deactivate-role-dialog";
 import Heading from "@/components/ui/typography/Heading";
@@ -27,8 +27,18 @@ export default function RolesPermissionsPage() {
   const loadRoles = async () => {
     setIsLoading(true);
     try {
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      setRoles(MOCK_ROLES);
+      const data = await fetchRoles();
+      console.log({ roleData: data });
+      // Map API roles to component roles format
+      const mappedRoles: Role[] = data.map((role: any) => ({
+        id: role._id,
+        name: role.roleName,
+        type: role.type.toLowerCase() as "system" | "custom",
+        users: 0, // Not provided by the API directly
+        status: role.status.toLowerCase() as "active" | "disabled",
+        description: role.description || "",
+      }));
+      setRoles(mappedRoles);
     } catch (error) {
       toast({
         title: "Error",
@@ -76,7 +86,7 @@ export default function RolesPermissionsPage() {
     if (!idToDeactivate) return;
 
     try {
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      await updateRoleStatus(idToDeactivate, "DISABLED");
 
       setRoles((prev) =>
         prev.map((r) =>
@@ -88,6 +98,7 @@ export default function RolesPermissionsPage() {
         title: "Success",
         description: "Role has been deactivated",
       });
+      setIsDeactivateDialogOpen(false);
     } catch (error) {
       toast({
         title: "Error",
@@ -99,7 +110,7 @@ export default function RolesPermissionsPage() {
 
   const handleEnableRole = async (roleId: string) => {
     try {
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      await updateRoleStatus(roleId, "ACTIVE");
 
       setRoles((prev) =>
         prev.map((r) => (r.id === roleId ? { ...r, status: "active" } : r)),

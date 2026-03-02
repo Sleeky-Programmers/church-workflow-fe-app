@@ -1,23 +1,60 @@
-import { UserRole, UserStatus } from "@/lib/enums";
+import { NotificationType, UserRole, UserStatus } from "@/lib/enums";
 import { LucideIcon } from "lucide-react";
 
 export type ActivityRow = {
-  id: string;
-  timestamp: string;
-  user: { name: string; initials?: string };
+  _id: string;
+  adminId: { firstName: string; lastName: string };
   action: string;
   module: string;
   details: string;
+  createdAt: string;
+  updatedAt: string;
 };
 
 export type NotificationTypes = {
+  _id: string;
   icon: LucideIcon;
   title: string;
   description: string;
-  date: string;
+  type: NotificationType;
   isRead: boolean;
   iconBg: string;
   iconColor: string;
+  date: string;
+};
+
+export type ApiNotification = {
+  _id: string;
+  title: string;
+  body: string;
+  type: NotificationType;
+  isRead: boolean;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type NotificationApiResponse = {
+  data: ApiNotification[];
+  pagination: {
+    page: number;
+    limit: number;
+    itemCount: number;
+    totalPages: number;
+    hasPreviousPage: boolean;
+    hasNextPage: boolean
+  }
+}
+
+export type ActivityLogApiResponse = {
+  data: ActivityRow[];
+  pagination: {
+    page: number;
+    limit: number;
+    itemCount: number;
+    totalPages: number;
+    hasPreviousPage: boolean;
+    hasNextPage: boolean
+  }
 };
 
 export type DepartmentRow = {
@@ -73,7 +110,7 @@ export type Role = {
   users: number;
   status: RoleStatus;
   description?: string;
-  permissions: ModulePermission[];
+  // permissions: ModulePermission[];
 };
 
 export type CreateRoleFormData = {

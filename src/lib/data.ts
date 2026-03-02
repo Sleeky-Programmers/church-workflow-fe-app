@@ -220,81 +220,81 @@ export const NotificationData = [
 
 export const ActivityLogData: ActivityRow[] = [
   {
-    id: "1",
-    timestamp: "2025-12-15T10:34:00",
-    user: { name: "John Doe", initials: "JD" },
+    _id: "1",
+    updatedAt: "", createdAt: "2025-12-15T10:34:00",
+    adminId: { firstName: "John", lastName: "Doe" },
     action: "Submitted a requisition",
     module: "Requisition",
     details: "For media projector (₦150,000)",
   },
   {
-    id: "2",
-    timestamp: "2025-12-14T19:15:00",
-    user: { name: "Admin", initials: "AD" },
+    _id: "2",
+    updatedAt: "", createdAt: "2025-12-14T19:15:00",
+    adminId: { firstName: "Admin", lastName: "" },
     action: "Approved requisition",
     module: "Requisition",
     details: "For generator diesel",
   },
   {
-    id: "3",
-    timestamp: "2026-01-14T17:42:00",
-    user: { name: "Gloria A.", initials: "GA" },
+    _id: "3",
+    updatedAt: "", createdAt: "2026-01-14T17:42:00",
+    adminId: { firstName: "Gloria", lastName: "A." },
     action: "Added new church member",
     module: "Membership",
     details: "Member: Peter Samuel",
   },
   {
-    id: "4",
-    timestamp: "2026-01-13T14:05:00",
-    user: { name: "Ruth B.", initials: "RB" },
+    _id: "4",
+    updatedAt: "", createdAt: "2026-01-13T14:05:00",
+    adminId: { firstName: "Ruth", lastName: "B." },
     action: "Logged in",
     module: "Authentication",
     details: "IP: 102.67.34.98",
   },
   {
-    id: "5",
-    timestamp: "2026-01-14T17:42:00",
-    user: { name: "David O.", initials: "DO" },
+    _id: "5",
+    updatedAt: "", createdAt: "2026-01-14T17:42:00",
+    adminId: { firstName: "David", lastName: "O." },
     action: "Sent out event reminders",
     module: "Events",
     details: "For Sunday Thanksgiving Service",
   },
   {
-    id: "6",
-    timestamp: "2026-01-15T10:34:00",
-    user: { name: "John Doe", initials: "JD" },
+    _id: "6",
+    updatedAt: "", createdAt: "2026-01-15T10:34:00",
+    adminId: { firstName: "John", lastName: "Doe" },
     action: "Submitted a requisition",
     module: "Requisition",
     details: "For media projector (₦150,000)",
   },
   {
-    id: "7",
-    timestamp: "2026-02-06T19:15:00",
-    user: { name: "Admin", initials: "AD" },
+    _id: "7",
+    updatedAt: "", createdAt: "2026-02-06T19:15:00",
+    adminId: { firstName: "Admin", lastName: "" },
     action: "Approved requisition",
     module: "Requisition",
     details: "For generator diesel",
   },
   {
-    id: "8",
-    timestamp: "2026-02-08T17:42:00",
-    user: { name: "Gloria A.", initials: "GA" },
+    _id: "8",
+    updatedAt: "", createdAt: "2026-02-08T17:42:00",
+    adminId: { firstName: "Gloria", lastName: "A." },
     action: "Added new church member",
     module: "Membership",
     details: "Member: Peter Samuel",
   },
   {
-    id: "9",
-    timestamp: "2025-12-29T14:05:00",
-    user: { name: "Ruth B.", initials: "RB" },
+    _id: "9",
+    updatedAt: "", createdAt: "2025-12-29T14:05:00",
+    adminId: { firstName: "Ruth", lastName: "B." },
     action: "Logged in",
     module: "Authentication",
     details: "IP: 102.67.34.98",
   },
   {
-    id: "10",
-    timestamp: "2025-12-30T17:42:00",
-    user: { name: "David O.", initials: "DO" },
+    _id: "10",
+    updatedAt: "", createdAt: "2025-12-30T17:42:00",
+    adminId: { firstName: "David", lastName: "O." },
     action: "Sent out event reminders",
     module: "Events",
     details: "New Year's Cross Over Service",
@@ -412,10 +412,6 @@ export const MOCK_ROLES: Role[] = [
     users: 2,
     status: "active",
     description: "Admin can do everything apart from inviting a new user.",
-    permissions: MODULE_PERMISSIONS.map((m) => ({
-      ...m,
-      level: "full_access",
-    })),
   },
   {
     id: "2",
@@ -424,11 +420,6 @@ export const MOCK_ROLES: Role[] = [
     users: 3,
     status: "active",
     description: "Finance role has access to financial data and reports.",
-    permissions: MODULE_PERMISSIONS.map((m) => {
-      if (m.module.includes("Finance")) return { ...m, level: "full_access" };
-      if (m.module.includes("Members")) return { ...m, level: "view" };
-      return { ...m, level: "no_access" };
-    }),
   },
   {
     id: "3",
@@ -437,10 +428,6 @@ export const MOCK_ROLES: Role[] = [
     users: 4,
     status: "active",
     description: "Pastor role has access to member management.",
-    permissions: MODULE_PERMISSIONS.map((m) => ({
-      ...m,
-      level: "manage",
-    })),
   },
   {
     id: "4",
@@ -449,11 +436,6 @@ export const MOCK_ROLES: Role[] = [
     users: 1,
     status: "active",
     description: "Manages media and events",
-    permissions: MODULE_PERMISSIONS.map((m) => {
-      if (m.module.includes("Events")) return { ...m, level: "full_access" };
-      if (m.module.includes("Members")) return { ...m, level: "view" };
-      return { ...m, level: "no_access" };
-    }),
   },
   {
     id: "5",
@@ -462,10 +444,6 @@ export const MOCK_ROLES: Role[] = [
     users: 0,
     status: "disabled",
     description: "Manages welfare activities",
-    permissions: MODULE_PERMISSIONS.map((m) => ({
-      ...m,
-      level: "no_access",
-    })),
   },
 ];
 

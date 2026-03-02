@@ -14,11 +14,11 @@ import {
   CreateWeeklyServicePayload,
 } from "@/types/payload";
 import { MOCK_ADMIN, MOCK_MEMBERS_FULL, MOCK_SERVICES } from "../data";
-import { AttendanceRecord, Member, RegularService } from "@/types";
+import { ActivityLogApiResponse, AttendanceRecord, Member, NotificationApiResponse, RegularService } from "@/types";
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
-async function authenticatedFetch<T>(
+export async function authenticatedFetch<T>(
   endpoint: string,
   options: RequestInit = {},
 ): Promise<T> {
@@ -36,15 +36,29 @@ async function authenticatedFetch<T>(
     },
   });
 
+  // If unauthorized, clear token and redirect to login
+  if (response.status === 401) {
+    if (typeof window !== "undefined") {
+      try {
+        localStorage.removeItem("accessToken");
+        window.location.href = "/auth/login";
+      } catch (e) {
+        // ignore errors during redirect
+      }
+    }
+    throw new Error("Unauthorized");
+  }
+
   const data = await response.json().catch(() => ({}));
 
   if (!response.ok) {
     throw new Error(data?.message || "Request failed");
   }
+
   return data as T;
 }
 
-async function apiFetch<T>(endpoint: string, options: RequestInit): Promise<T> {
+export async function apiFetch<T>(endpoint: string, options: RequestInit): Promise<T> {
   const token =
     typeof window !== "undefined" ? localStorage.getItem("accessToken") : null;
 
@@ -56,6 +70,19 @@ async function apiFetch<T>(endpoint: string, options: RequestInit): Promise<T> {
       ...options.headers,
     },
   });
+
+  // Redirect to login on 401 so the user can re-authenticate
+  if (response.status === 401) {
+    if (typeof window !== "undefined") {
+      try {
+        localStorage.removeItem("accessToken");
+        window.location.href = "/auth/login";
+      } catch (e) {
+        // ignore redirect errors
+      }
+    }
+    throw new Error("Unauthorized");
+  }
 
   if (!response.ok) {
     throw new Error(await response.text());
@@ -156,7 +183,7 @@ export async function createChurch(
 }
 
 export async function createWeeklyService(payload: CreateWeeklyServicePayload) {
-  return apiFetch("/church-services", {
+  return apiFetch("/church-services/create", {
     method: "POST",
     body: JSON.stringify(payload),
   });
@@ -384,4 +411,28 @@ export async function updateAttendance(
 
 export function getCurrentAdmin() {
   return MOCK_ADMIN;
+}
+
+export async function fetchNotifications(): Promise<NotificationApiResponse> {
+  return await apiFetch("/notifications", {
+    method: "GET",
+  });
+}
+
+export async function markNotificationAsRead(notificationId: string) {
+  return await apiFetch(`/notifications/${notificationId}/read`, {
+    method: "PUT",
+  });
+}
+
+export async function markAllNotificationsAsRead() {
+  return await apiFetch("/notifications/read-all", {
+    method: "PUT",
+  });
+}
+
+export async function fetchActivityLogs(): Promise<ActivityLogApiResponse> {
+  return await apiFetch("/activity-log", {
+    method: "GET",
+  });
 }

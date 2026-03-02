@@ -8,6 +8,17 @@ export enum RequisitionStatus {
   PENDING = "PENDING",
   APPROVED = "APPROVED",
 }
+
+export enum NotificationType {
+  REQUISITION = 'REQUISITION',
+  MESSAGE = 'MESSAGE',
+  ROLE_UPDATE = 'ROLE_UPDATE',
+  BIRTHDAY = 'BIRTHDAY',
+  SUBSCRIPTION = 'SUBSCRIPTION',
+  MEMBER = 'MEMBER',
+  FINANCE = 'FINANCE',
+}
+
 export enum ActivityDetailLabel {
   ACTION = "Action",
   BY = "By",

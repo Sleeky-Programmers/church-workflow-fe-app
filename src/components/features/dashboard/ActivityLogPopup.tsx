@@ -36,11 +36,11 @@ export default function ActivityLogPopup({
                 <div>
                   <Heading
                     level={3}
-                    text={`${selectedRow.action} by ${selectedRow.user.name}`}
+                    text={`${selectedRow.action} by ${selectedRow.adminId?.firstName || 'Unknown'} ${selectedRow.adminId?.lastName || ''}`}
                     className="text-lg font-semibold"
                   />
                   <Text variant="default" className=" mt-1">
-                    {`${formatDateTime12h(selectedRow.timestamp).toUpperCase()} • Module: ${selectedRow.module}`}
+                    {`${formatDateTime12h(selectedRow.createdAt).toUpperCase()} • Module: ${selectedRow.module}`}
                   </Text>
                 </div>
               </div>

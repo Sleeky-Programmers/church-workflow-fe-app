@@ -1,7 +1,12 @@
 "use client";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { fetchUsers, inviteUser, performUserAction } from "@/lib/api";
+import {
+  fetchAdminInvites,
+  createAdminInvite,
+  updateAdminStatus,
+  removeAdminUser,
+} from "@/lib/api/admin-settings";
 import { User, UserAction } from "@/types/user";
 import { UserTable } from "@/components/features/dashboard/admin/users-table";
 import { InviteUserDialog } from "@/components/features/dashboard/admin/invite-user";
@@ -26,8 +31,19 @@ export function UserManagementPage() {
   const loadUsers = async () => {
     setIsLoading(true);
     try {
-      const data = await fetchUsers();
-      setUsers(data);
+      const data = await fetchAdminInvites();
+      const mappedUsers: User[] = data.map((invite: any) => ({
+        id: invite._id,
+        name: invite.email, // Since the API mostly returns emails for pending invites
+        email: invite.email,
+        role: invite.churchRole,
+        status: invite.status.toLowerCase() as
+          | "active"
+          | "pending"
+          | "suspended",
+        dateInvited: new Date(invite.createdAt).toLocaleString(),
+      }));
+      setUsers(mappedUsers);
     } catch (error) {
       toast({
         title: "Error",
@@ -42,11 +58,11 @@ export function UserManagementPage() {
   const handleInviteUser = async (data: { email: string; role: string }) => {
     setIsActionLoading(true);
     try {
-      const result = await inviteUser(data);
-      if (result.success) {
+      const result = await createAdminInvite(data.role, data.email);
+      if (result) {
         toast({
           title: "Success",
-          description: result.message,
+          description: "Invitation sent successfully",
         });
         setIsInviteDialogOpen(false);
         loadUsers();
@@ -74,18 +90,27 @@ export function UserManagementPage() {
 
     setIsActionLoading(true);
     try {
-      const result = await performUserAction(userId, action);
-      if (result.success) {
-        toast({
-          title: "Success",
-          description: result.message,
-        });
-        loadUsers();
+      let result;
+      switch (action) {
+        case "suspend":
+          result = await updateAdminStatus(userId, "SUSPEND");
+          break;
+        case "restore":
+          result = await updateAdminStatus(userId, "RESTORE");
+          break;
+        default:
+          throw new Error("Action not supported locally yet");
       }
-    } catch (error) {
+
+      toast({
+        title: "Success",
+        description: "Action completed successfully",
+      });
+      loadUsers();
+    } catch (error: any) {
       toast({
         title: "Error",
-        description: "Action failed. Please try again.",
+        description: error.message || "Action failed. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -98,16 +123,14 @@ export function UserManagementPage() {
 
     setIsActionLoading(true);
     try {
-      const result = await performUserAction(selectedUser.id, "remove");
-      if (result.success) {
-        toast({
-          title: "Success",
-          description: result.message,
-        });
-        setIsRemoveDialogOpen(false);
-        setSelectedUser(null);
-        loadUsers();
-      }
+      await removeAdminUser(selectedUser.id);
+      toast({
+        title: "Success",
+        description: "User removed successfully",
+      });
+      setIsRemoveDialogOpen(false);
+      setSelectedUser(null);
+      loadUsers();
     } catch (error) {
       toast({
         title: "Error",

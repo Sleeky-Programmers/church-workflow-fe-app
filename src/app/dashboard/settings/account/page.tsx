@@ -8,8 +8,18 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { ScheduleDeletionDialog } from "@/components/features/dashboard/admin/schedule-deletion-modal";
 import { PrivacySettings, AccountDeletionStatus } from "@/types";
+import {
+  fetchAccountSettings,
+  updateAccountSettings,
+  AccountSettings,
+} from "@/lib/api/admin-settings";
 import Heading from "@/components/ui/typography/Heading";
+<<<<<<< Updated upstream
 import { Text, Span } from "@/components/ui/typography/Text";
+=======
+import { Text } from "@/components/ui/typography/Text";
+import { useEffect } from "react";
+>>>>>>> Stashed changes
 
 export default function AccountSettingsPage() {
   const { toast } = useToast();
@@ -27,17 +37,59 @@ export default function AccountSettingsPage() {
   const [waitingPeriodDays, setWaitingPeriodDays] = useState<number | null>(
     null,
   );
+  const [initialSettings, setInitialSettings] =
+    useState<AccountSettings | null>(null);
 
-  const handlePrivacyToggle = (key: keyof PrivacySettings) => {
-    setPrivacy((prev) => ({
-      ...prev,
-      [key]: !prev[key],
-    }));
+  useEffect(() => {
+    async function loadSettings() {
+      try {
+        const settings = await fetchAccountSettings();
+        setInitialSettings(settings);
+        setPrivacy({
+          birthdayCalendar: settings.personalPrivacy.birthdayCalendarDisplay,
+          birthdayReminders: settings.personalPrivacy.birthdayShoutOut,
+          emailAlerts: settings.personalPrivacy.emailAlerts,
+        });
+      } catch (error) {
+        console.error("Failed to load settings:", error);
+      }
+    }
+    loadSettings();
+  }, []);
 
-    toast({
-      title: "Privacy setting updated",
-      description: "Your privacy preferences have been saved",
-    });
+  const handlePrivacyToggle = async (key: keyof PrivacySettings) => {
+    const newPrivacy = {
+      ...privacy,
+      [key]: !privacy[key],
+    };
+    setPrivacy(newPrivacy);
+
+    try {
+      if (initialSettings) {
+        await updateAccountSettings({
+          personalPreferences: initialSettings.personalPreferences,
+          personalPrivacy: {
+            ...initialSettings.personalPrivacy,
+            birthdayCalendarDisplay: newPrivacy.birthdayCalendar,
+            birthdayShoutOut: newPrivacy.birthdayReminders,
+            emailAlerts: newPrivacy.emailAlerts,
+          },
+        });
+      }
+
+      toast({
+        title: "Privacy setting updated",
+        description: "Your privacy preferences have been saved",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update privacy settings.",
+        variant: "destructive",
+      });
+      // Revert state if error
+      setPrivacy(privacy);
+    }
   };
 
   const handleScheduleDeletion = async (days: number) => {

@@ -11,6 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { PermissionModuleSelector } from "@/components/features/dashboard/admin/mini-components/permission-selector";
 import { MODULE_PERMISSIONS } from "@/lib/role-constants";
 import { PermissionLevel } from "@/types";
+import { createRole, updateRole } from "@/lib/api/admin-settings";
 import Heading from "@/components/ui/typography/Heading";
 import { Text, Span } from "@/components/ui/typography/Text";
 import { RouteConfig } from "@/config/routes";
@@ -76,7 +77,26 @@ export default function CreateRolePage({
     setIsLoading(true);
 
     try {
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      const formattedPermissions = Object.entries(permissions)
+        .filter(([_, level]) => level !== "no_access")
+        .map(([moduleName, level]) => ({
+          moduleSection: moduleName,
+          accessLevel: level.toUpperCase(),
+        }));
+
+      if (mode === "create") {
+        await createRole({
+          roleName: name,
+          permissions: formattedPermissions,
+          description: description || undefined,
+        } as any);
+      } else if (roleId) {
+        await updateRole(roleId, {
+          roleName: name,
+          description: description || undefined,
+          permissions: formattedPermissions,
+        });
+      }
 
       toast({
         title: "Success",
