@@ -6,6 +6,8 @@ import {
   VerifyOtpResponse,
   LoginPayload,
   LoginResponse,
+  GoogleAuthPayload,
+  GoogleAuthResponse,
   ResetPasswordPayload,
   ResetPasswordResponse,
   CreateChurchPayload,

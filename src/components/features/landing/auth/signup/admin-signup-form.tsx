@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -20,7 +20,6 @@ import GoogleSignupButton from "../oauth/google-signup-button";
 import Heading from "@/components/ui/typography/Heading";
 import { Text, Span } from "@/components/ui/typography/Text";
 import { Loader } from "@/components/ui/loader";
-import { useRouter } from "next/navigation";
 import { Link } from "@/components/ui/link";
 import { adminSignupSchema } from "@/types/schema";
 import { RouteConfig } from "@/config/routes";

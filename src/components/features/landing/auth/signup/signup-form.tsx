@@ -33,7 +33,6 @@ interface SignupFormProps {
 
 export default function SignupForm({ onSubmit }: SignupFormProps) {
   const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
@@ -44,7 +43,6 @@ export default function SignupForm({ onSubmit }: SignupFormProps) {
       lastName: "",
       email: "",
       password: "",
-      confirmPassword: "",
       agreeToTerms: false,
     },
   });
@@ -167,36 +165,6 @@ export default function SignupForm({ onSubmit }: SignupFormProps) {
                       className="absolute right-3 top-1/2 -translate-y-1/2"
                     >
                       {showPassword ? <EyeOff /> : <Eye />}
-                    </Button>
-                  </div>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="confirmPassword"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Confirm Password</FormLabel>
-                <FormControl>
-                  <div className="relative">
-                    <Input
-                      type={showConfirmPassword ? "text" : "password"}
-                      placeholder="Confirm password"
-                      {...field}
-                    />
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      onClick={() =>
-                        setShowConfirmPassword(!showConfirmPassword)
-                      }
-                      className="absolute right-3 top-1/2 -translate-y-1/2"
-                    >
-                      {showConfirmPassword ? <EyeOff /> : <Eye />}
                     </Button>
                   </div>
                 </FormControl>
