@@ -19,7 +19,7 @@ import { Loader } from "@/components/ui/loader";
 import { PasswordInput } from "@/components/ui/passport-input";
 import { Input } from "@/components/ui/input";
 import { RouteConfig } from "@/config/routes";
-import { getCurrentUser, login } from "@/lib/api";
+import { googleAuth, login } from "@/lib/api";
 
 interface LoginFormProps {
   onForgotPassword: () => void;
@@ -60,6 +60,31 @@ export default function LoginForm({ onForgotPassword }: LoginFormProps) {
   };
 
   const onSignUp = () => router.push(RouteConfig.auth.signUp);
+
+  const handleGoogleLogin = async (idToken: string) => {
+    setIsLoading(true);
+    try {
+      const data = await googleAuth(idToken);
+      if (typeof window !== "undefined") {
+        localStorage.setItem("accessToken", data.accessToken);
+      }
+
+      const onboardingCompleted =
+        localStorage.getItem("onboardingCompleted") === "true";
+
+      if (!onboardingCompleted) {
+        router.push(RouteConfig.onboarding);
+      } else {
+        router.push(RouteConfig.dashboard.home);
+      }
+    } catch (error: any) {
+      form.setError("email", {
+        message: error.message || "Google login failed",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div className="space-y-8 animate-fade-in">
@@ -128,7 +153,11 @@ export default function LoginForm({ onForgotPassword }: LoginFormProps) {
             </Span>
             <div className="flex-grow border-t border-gray-200" />
           </div>
-          <GoogleSignupButton onClick={() => alert("Google Signup")} />
+          <GoogleSignupButton
+            onCredential={handleGoogleLogin}
+            disabled={isLoading}
+            label="Continue with Google"
+          />
         </form>
       </Form>
       <div className="text-center">

@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -23,6 +24,7 @@ import { useRouter } from "next/navigation";
 import { Link } from "@/components/ui/link";
 import { adminSignupSchema } from "@/types/schema";
 import { RouteConfig } from "@/config/routes";
+import { googleAuth } from "@/lib/api";
 
 type AdminSignupFormValues = z.infer<typeof adminSignupSchema>;
 
@@ -43,6 +45,7 @@ export default function AdminSignupForm({
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   const form = useForm<AdminSignupFormValues>({
     resolver: zodResolver(adminSignupSchema),
@@ -65,8 +68,22 @@ export default function AdminSignupForm({
     }, 1000);
   };
 
-  const handleGoogleSignup = () => {
-    alert("Google Signup clicked");
+  const handleGoogleSignup = async (idToken: string) => {
+    const inviteToken = searchParams.get("invite") || undefined;
+    try {
+      setIsLoading(true);
+      const data = await googleAuth(idToken, inviteToken);
+      if (typeof window !== "undefined") {
+        localStorage.setItem("accessToken", data.accessToken);
+      }
+      router.push(RouteConfig.dashboard.home);
+    } catch (error: any) {
+      form.setError("email", {
+        message: error.message || "Google signup failed",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const onLogin = () => router.push(RouteConfig.auth.signIn);
@@ -238,7 +255,10 @@ export default function AdminSignupForm({
             </Span>
             <div className="flex-grow border-t border-gray-200" />
           </div>
-          <GoogleSignupButton onClick={handleGoogleSignup} />
+          <GoogleSignupButton
+            onCredential={handleGoogleSignup}
+            disabled={isLoading}
+          />
         </form>
       </Form>
       <div className="text-center mt-6">

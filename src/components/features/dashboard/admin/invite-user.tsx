@@ -35,6 +35,7 @@ type InviteUserDialogProps = {
   onSubmit: (data: InviteFormData) => void;
   pendingInvites?: PendingInvite[];
   isLoading?: boolean;
+  title?: string;
 };
 
 export function InviteUserDialog({
@@ -43,6 +44,7 @@ export function InviteUserDialog({
   onSubmit,
   pendingInvites = [],
   isLoading = false,
+  title = "Invite User",
 }: InviteUserDialogProps) {
   const [showPermissions, setShowPermissions] = useState(false);
   const [selectedRole, setSelectedRole] = useState("");
@@ -102,7 +104,7 @@ export function InviteUserDialog({
           <>
             <DialogHeader>
               <div className="flex justify-between items-center">
-                <DialogTitle>Invite User</DialogTitle>
+                <DialogTitle>{title}</DialogTitle>
                 <DialogDescription className="sr-only">
                   Send an invitation to a new user to join the platform.
                 </DialogDescription>
@@ -135,9 +137,9 @@ export function InviteUserDialog({
                       <SelectValue placeholder="Title" />
                     </SelectTrigger>
                     <SelectContent>
-                      {TITLE_OPTIONS.map((title) => (
-                        <SelectItem key={title} value={title}>
-                          {title}
+                      {TITLE_OPTIONS.map((t) => (
+                        <SelectItem key={t} value={t}>
+                          {t}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -191,6 +193,7 @@ export function InviteUserDialog({
                   className="h-9"
                 />
               </div>
+
               <div className="space-y-2">
                 <Label htmlFor="role" className="text-xs">
                   Role

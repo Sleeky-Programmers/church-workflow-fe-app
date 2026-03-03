@@ -90,6 +90,24 @@ export async function login(payload: LoginPayload) {
   });
 }
 
+export async function googleAuth(idToken: string, token?: string) {
+  const query = token ? `?token=${encodeURIComponent(token)}` : "";
+
+  return apiFetch<{
+    message: string;
+    accessToken: string;
+    user?: {
+      _id: string;
+      email: string;
+      firstName: string;
+      lastName: string;
+    };
+  }>(`/auth/google${query}`, {
+    method: "POST",
+    body: JSON.stringify({ idToken }),
+  });
+}
+
 export async function requestOtp(email: string) {
   return apiFetch<{ message: string }>("/auth/request-otp", {
     method: "POST",

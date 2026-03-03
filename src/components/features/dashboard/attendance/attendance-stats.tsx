@@ -1,9 +1,9 @@
 "use client";
 
-import { CheckCircle2, XCircle } from "lucide-react";
+import { CheckCircle2, ChevronRight, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Member } from "@/types";
-import { calculateGenderSplit } from "@/lib/utils";
+import { calculateGenderSplit, cn } from "@/lib/utils";
 import Heading from "@/components/ui/typography/Heading";
 import { Text } from "@/components/ui/typography/Text";
 
@@ -13,6 +13,8 @@ type AttendanceStatsViewProps = {
   isMembersLoaded: boolean;
   isAttendanceMarked: boolean;
   onLoadMembers: () => void;
+  onOpenPresentMembers: () => void;
+  onOpenAbsentMembers: () => void;
 };
 
 export function AttendanceStatsView({
@@ -21,6 +23,8 @@ export function AttendanceStatsView({
   isMembersLoaded,
   isAttendanceMarked,
   onLoadMembers,
+  onOpenPresentMembers,
+  onOpenAbsentMembers,
 }: AttendanceStatsViewProps) {
   const presentIds = presentMembers.map((m) => m.id);
   const absentIds = absentMembers.map((m) => m.id);
@@ -53,31 +57,49 @@ export function AttendanceStatsView({
       <div className="flex-1 p-4">
         {isAttendanceMarked ? (
           <div className="space-y-3">
-            <div className="p-4 rounded-lg border bg-primary-50">
-              <div className="flex items-start gap-3">
-                <CheckCircle2 className="h-5 w-5 text-primary-600 mt-0.5" />
-                <div>
-                  <Text className="mb-1">Present Members</Text>
+            <button
+              type="button"
+              onClick={onOpenPresentMembers}
+              className={cn(
+                "w-full p-3 rounded-xl border border-primary-500 bg-gray-50 text-left transition-colors",
+                "hover:bg-gray-100",
+              )}
+            >
+              <div className="flex items-center gap-3">
+                <span className="flex h-10 w-10 items-center justify-center rounded-md bg-blue-100">
+                  <CheckCircle2 className="h-5 w-5 text-primary-600" />
+                </span>
+                <div className="flex-1">
+                  <Text className="mb-1 font-medium">Present Members</Text>
                   <Text variant="muted">
                     {presentSplit.males} Males - {presentSplit.females} Females
                   </Text>
-                  <Text variant="muted">Total: {presentMembers.length}</Text>
                 </div>
+                <ChevronRight className="h-5 w-5 text-gray-700" />
               </div>
-            </div>
+            </button>
 
-            <div className="p-4 rounded-lg border bg-destructive-50">
-              <div className="flex items-start gap-3">
-                <XCircle className="h-5 w-5 text-destructive-600 mt-0.5" />
-                <div>
-                  <Text className="mb-1">Absent Members</Text>
+            <button
+              type="button"
+              onClick={onOpenAbsentMembers}
+              className={cn(
+                "w-full p-3 rounded-xl border border-gray-300 bg-gray-100 text-left transition-colors",
+                "hover:bg-gray-200",
+              )}
+            >
+              <div className="flex items-center gap-3">
+                <span className="flex h-10 w-10 items-center justify-center rounded-md bg-red-100">
+                  <XCircle className="h-5 w-5 text-destructive-600" />
+                </span>
+                <div className="flex-1">
+                  <Text className="mb-1 font-medium">Absent Members</Text>
                   <Text variant="muted">
                     {absentSplit.males} Males - {absentSplit.females} Females
                   </Text>
-                  <Text variant="muted">Total: {absentMembers.length}</Text>
                 </div>
+                <ChevronRight className="h-5 w-5 text-gray-700" />
               </div>
-            </div>
+            </button>
           </div>
         ) : (
           <div className="h-full" />

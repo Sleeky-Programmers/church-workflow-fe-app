@@ -88,9 +88,12 @@ function modalReducer(state: ModalState, action: ModalAction): ModalState {
       };
 
     case "MOVE_TO_PRESENT":
+      const nextPresentMembers = Array.from(
+        new Set([...state.presentMembers, ...action.memberIds]),
+      );
       return {
         ...state,
-        presentMembers: [...state.presentMembers, ...action.memberIds],
+        presentMembers: nextPresentMembers,
         absentMembers: state.absentMembers.filter(
           (id) => !action.memberIds.includes(id),
         ),

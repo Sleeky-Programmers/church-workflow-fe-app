@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -8,9 +8,14 @@ import { RegularService } from "@/types";
 import { AttendanceEmptyState } from "@/components/features/dashboard/attendance/attendance-empty-state";
 import { ServiceTypeModal } from "@/components/features/dashboard/attendance/service-type";
 import { CreateRegularServiceModal } from "@/components/features/dashboard/attendance/create-regular-service";
+import { CreateSpecialServiceModal } from "@/components/features/dashboard/attendance/create-special-service";
 import { AttendanceModal } from "@/components/features/dashboard/attendance/attendance-modal";
 import { MobileAttendanceView } from "@/components/features/dashboard/attendance/mobile-view";
 import { CalendarGrid } from "@/components/features/dashboard/attendance/calendar-grid";
+import { GivingRecordModal } from "@/components/features/dashboard/attendance/giving-record-modal";
+import { ServiceDetailModal } from "@/components/features/dashboard/attendance/service-detail-modal";
+import { GivingValues } from "@/components/features/dashboard/attendance/giving-record-modal";
+import { SpecialServiceEvent } from "@/components/features/dashboard/attendance/types";
 import Heading from "@/components/ui/typography/Heading";
 
 function useIsMobile() {
@@ -35,13 +40,95 @@ export default function AttendancePage() {
   const [services, setServices] = useState<RegularService[]>([]);
   const [isTypeModalOpen, setIsTypeModalOpen] = useState(false);
   const [isRegularModalOpen, setIsRegularModalOpen] = useState(false);
+  const [isSpecialModalOpen, setIsSpecialModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [isServiceTypeModalOpen, setIsServiceTypeModalOpen] = useState(false);
   const [isAttendanceModalOpen, setIsAttendanceModalOpen] = useState(false);
+  const [isGivingRecordModalOpen, setIsGivingRecordModalOpen] = useState(false);
+  const [isServiceDetailModalOpen, setIsServiceDetailModalOpen] =
+    useState(false);
   const [selectedService, setSelectedService] = useState<RegularService | null>(
     null,
   );
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  const [givingRecords, setGivingRecords] = useState<
+    Record<string, GivingValues>
+  >({});
+  const [orderByServiceDate, setOrderByServiceDate] = useState<
+    Record<string, string[]>
+  >({});
+  const [specialServices, setSpecialServices] = useState<SpecialServiceEvent[]>(
+    [],
+  );
+
+  const DEFAULT_ORDER = [
+    "Opening Prayer",
+    "Praise and Worship",
+    "Bible Reading",
+    "Sermon",
+    "Offering",
+    "Closing Prayer",
+  ];
+
+  const setServiceContext = (service: RegularService, date: string) => {
+    setSelectedService(service);
+    setSelectedDate(date);
+  };
+
+  const getServiceDateKey = (serviceId: string, date: string) =>
+    `${serviceId}|${date}`;
+
+  const parseAmount = (value: string) => {
+    const normalized = value.replace(/,/g, "").trim();
+    const amount = Number(normalized);
+    return Number.isNaN(amount) ? 0 : amount;
+  };
+
+  const givingTotals = useMemo(() => {
+    return Object.entries(givingRecords).reduce<Record<string, number>>(
+      (acc, [key, values]) => {
+        const total =
+          parseAmount(values.tithe) +
+          parseAmount(values.offering) +
+          parseAmount(values.specialOffering) +
+          parseAmount(values.thanksgivingOffering);
+        acc[key] = total;
+        return acc;
+      },
+      {},
+    );
+  }, [givingRecords]);
+
+  const selectedKey =
+    selectedService && selectedDate
+      ? getServiceDateKey(selectedService.id, selectedDate)
+      : null;
+
+  const isFutureService = useMemo(() => {
+    if (!selectedService || !selectedDate) return false;
+    const now = new Date();
+    const serviceDate = new Date(selectedDate);
+    serviceDate.setHours(0, 0, 0, 0);
+    const today = new Date(now);
+    today.setHours(0, 0, 0, 0);
+
+    if (serviceDate.getTime() > today.getTime()) return true;
+    if (serviceDate.getTime() < today.getTime()) return false;
+
+    const start = selectedService.startTime.toLowerCase().trim();
+    const timeMatch = start.match(/^(\d{1,2})(?::(\d{2}))?\s*(am|pm)?$/);
+    if (!timeMatch) return false;
+
+    let hour = Number(timeMatch[1]);
+    const suffix = timeMatch[3];
+    if (suffix === "pm" && hour < 12) hour += 12;
+    if (suffix === "am" && hour === 12) hour = 0;
+
+    const minute = Number(timeMatch[2] || 0);
+    return (
+      now.getHours() < hour ||
+      (now.getHours() === hour && now.getMinutes() < minute)
+    );
+  }, [selectedService, selectedDate]);
 
   const handleCreateServiceClick = () => {
     setIsTypeModalOpen(true);
@@ -51,10 +138,7 @@ export default function AttendancePage() {
     if (type === "regular") {
       setIsRegularModalOpen(true);
     } else {
-      toast({
-        title: "Coming Soon",
-        description: "Special service creation will be available soon",
-      });
+      setIsSpecialModalOpen(true);
     }
   };
 
@@ -67,23 +151,33 @@ export default function AttendancePage() {
   };
 
   const handleAddService = () => {
-    setIsServiceTypeModalOpen(true);
+    setIsTypeModalOpen(true);
+  };
+
+  const handleCreateSpecialService = (service: SpecialServiceEvent) => {
+    setSpecialServices((prev) => [...prev, service]);
+    toast({
+      title: "Success",
+      description: "Special service created successfully",
+    });
   };
 
   const handleAddAttendance = (service: RegularService, date: string) => {
-    setSelectedService(service);
-    setSelectedDate(date);
+    setServiceContext(service, date);
     setIsAttendanceModalOpen(true);
   };
 
   const handleAddGivingRecord = (service: RegularService, date: string) => {
-    toast({
-      title: "Add Giving Record",
-      description: `Opening giving record for ${service.serviceName}`,
-    });
+    setServiceContext(service, date);
+    setIsGivingRecordModalOpen(true);
   };
 
-  const hasServices = services.length > 0;
+  const handleViewServiceDetails = (service: RegularService, date: string) => {
+    setServiceContext(service, date);
+    setIsServiceDetailModalOpen(true);
+  };
+
+  const hasServices = services.length > 0 || specialServices.length > 0;
 
   if (isMobile) {
     return (
@@ -97,10 +191,8 @@ export default function AttendancePage() {
             setIsRegularModalOpen(true);
           }}
           onSelectSpecialService={() => {
-            toast({
-              title: "Coming Soon",
-              description: "Special service creation will be available soon",
-            });
+            setIsTypeModalOpen(false);
+            setIsSpecialModalOpen(true);
           }}
         />
 
@@ -108,6 +200,12 @@ export default function AttendancePage() {
           open={isRegularModalOpen}
           onOpenChange={setIsRegularModalOpen}
           onCreateServices={handleCreateServices}
+        />
+
+        <CreateSpecialServiceModal
+          open={isSpecialModalOpen}
+          onOpenChange={setIsSpecialModalOpen}
+          onCreateService={handleCreateSpecialService}
         />
       </>
     );
@@ -140,7 +238,11 @@ export default function AttendancePage() {
           <div>
             <CalendarGrid
               services={services}
+              specialServices={specialServices}
+              searchQuery={searchQuery}
+              givingTotals={givingTotals}
               onAddAttendance={handleAddAttendance}
+              onViewServiceDetails={handleViewServiceDetails}
               onAddGivingRecord={handleAddGivingRecord}
               onAddService={handleAddService}
             />
@@ -160,6 +262,12 @@ export default function AttendancePage() {
         onCreateServices={handleCreateServices}
       />
 
+      <CreateSpecialServiceModal
+        open={isSpecialModalOpen}
+        onOpenChange={setIsSpecialModalOpen}
+        onCreateService={handleCreateSpecialService}
+      />
+
       <AttendanceModal
         isOpen={isAttendanceModalOpen}
         onClose={() => setIsAttendanceModalOpen(false)}
@@ -169,6 +277,52 @@ export default function AttendancePage() {
           toast({
             title: "Success",
             description: "Attendance saved successfully",
+          });
+        }}
+      />
+
+      <GivingRecordModal
+        open={isGivingRecordModalOpen}
+        onOpenChange={setIsGivingRecordModalOpen}
+        service={selectedService}
+        date={selectedDate}
+        initialValues={selectedKey ? givingRecords[selectedKey] : undefined}
+        onSave={(values) => {
+          if (selectedService && selectedDate) {
+            setGivingRecords((prev) => ({
+              ...prev,
+              [getServiceDateKey(selectedService.id, selectedDate)]: values,
+            }));
+          }
+          toast({
+            title: "Success",
+            description: "Giving record saved successfully",
+          });
+        }}
+      />
+
+      <ServiceDetailModal
+        open={isServiceDetailModalOpen}
+        onOpenChange={setIsServiceDetailModalOpen}
+        service={selectedService}
+        date={selectedDate}
+        orderItems={
+          selectedKey
+            ? orderByServiceDate[selectedKey] || DEFAULT_ORDER
+            : DEFAULT_ORDER
+        }
+        canEditOrder={Boolean(
+          selectedService?.frequency === "weekly" && isFutureService,
+        )}
+        onSaveOrder={(items) => {
+          if (!selectedService || !selectedDate) return;
+          setOrderByServiceDate((prev) => ({
+            ...prev,
+            [getServiceDateKey(selectedService.id, selectedDate)]: items,
+          }));
+          toast({
+            title: "Success",
+            description: "Order of service updated",
           });
         }}
       />

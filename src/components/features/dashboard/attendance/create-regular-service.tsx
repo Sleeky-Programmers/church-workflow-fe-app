@@ -71,7 +71,12 @@ export function CreateRegularServiceModal({
       return;
     }
 
-    setServices((prev) => [...prev, { ...formData }]);
+    const generatedId =
+      typeof crypto !== "undefined" && crypto.randomUUID
+        ? crypto.randomUUID()
+        : `service-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+
+    setServices((prev) => [...prev, { ...formData, id: generatedId }]);
 
     setFormData({
       id: "",

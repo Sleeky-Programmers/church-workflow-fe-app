@@ -1,6 +1,3 @@
-import { create } from "domain";
-import { User } from "lucide-react";
-
 export enum Routes {
   SignUp = "/auth/signup",
   SignIn = "/auth/login",
@@ -17,6 +14,8 @@ export enum Routes {
   Home = "/",
   Attendance = "/dashboard/attendance",
   Membership = "/dashboard/membership",
+  DepartmentDetails = "/dashboard/departments/[id]",
+  DepartmentEdit = "/dashboard/departments/[id]/edit",
 
   Admin = "/dashboard/settings/users",
   UserManagement = "/dashboard/settings/users",
@@ -41,6 +40,10 @@ export const RouteConfig = {
     notifications: Routes.Notifications,
     attendance: Routes.Attendance,
     membership: Routes.Membership,
+    departmentDetails: (departmentId: string) =>
+      getRouteWithParams(Routes.DepartmentDetails, { id: departmentId }),
+    departmentEdit: (departmentId: string) =>
+      getRouteWithParams(Routes.DepartmentEdit, { id: departmentId }),
     search: Routes.Search,
     admin: {
       root: Routes.Admin,

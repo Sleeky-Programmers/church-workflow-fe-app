@@ -52,9 +52,10 @@ export function MemberListItem({
 
       {mode === "view-present" && (
         <Button
-          variant="destructive"
+          variant="ghost"
           size="icon"
           onClick={() => onRemove?.(member.id)}
+          className="text-destructive-600 hover:text-destructive-700 hover:bg-destructive-50"
         >
           <X className="h-4 w-4" />
         </Button>
