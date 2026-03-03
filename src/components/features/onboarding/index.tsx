@@ -22,6 +22,7 @@ export default function ChurchOnboarding() {
   const [step, setStep] = useState(1);
   const [services, setServices] = useState<WeeklyServicesValues>([]);
   const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [isSubmittingIdentity, setIsSubmittingIdentity] = useState(false);
 
   const router = useRouter();
 
@@ -43,45 +44,99 @@ export default function ChurchOnboarding() {
     defaultValues: { csvFile: undefined },
   });
 
-  const onIdentitySubmit = async (data: ChurchIdentityValues) => {
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const savedDraft = window.localStorage.getItem(
+      "onboarding:church-identity-draft",
+    );
+
+    if (!savedDraft) return;
+
     try {
-      await createChurch(
-        {
-          name: data.name,
-          alias: data.alias || "",
-          address: data.address,
-          country: data.country,
-          state: data.state || "",
-          defaultCurrency: data.defaultCurrency,
-          timeZone: data.timeZone,
-        },
-        logoFile,
-      );
+      const parsed = JSON.parse(savedDraft) as Partial<ChurchIdentityValues>;
+      identityForm.reset({
+        name: parsed.name || "",
+        alias: parsed.alias || "",
+        address: parsed.address || "",
+        country: parsed.country || "",
+        state: parsed.state || "",
+        defaultCurrency: parsed.defaultCurrency || "",
+        timeZone: parsed.timeZone || "",
+      });
+    } catch (error) {
+      console.error("Failed to parse saved onboarding draft:", error);
+    }
+  }, [identityForm]);
+
+  const onIdentitySubmit = async (data: ChurchIdentityValues) => {
+    if (!logoFile) {
+      alert("Please upload a church logo");
+      return;
+    }
+    try {
+      if (logoFile) {
+        await createChurch(
+          {
+            name: data.name,
+            alias: data.alias || "",
+            address: data.address,
+            country: data.country,
+            state: data.state || "",
+            defaultCurrency: data.defaultCurrency,
+            timeZone: data.timeZone,
+          },
+          logoFile,
+        );
+      }
+
+      if (typeof window !== "undefined") {
+        window.localStorage.setItem(
+          "onboarding:church-identity-draft",
+          JSON.stringify(data),
+        );
+      }
+
       setStep(2);
     } catch (error: any) {
       console.error("Church creation failed:", error);
       alert(error.message || "Failed to create church");
+    } finally {
+      setIsSubmittingIdentity(false);
     }
   };
 
-  const onIdentitySaveAndGoToDashboard = async (data: ChurchIdentityValues) => {
+  const onSaveIdentityAndExit = async (data: ChurchIdentityValues) => {
+    setIsSubmittingIdentity(true);
     try {
-      await createChurch(
-        {
-          name: data.name,
-          alias: data.alias || "",
-          address: data.address,
-          country: data.country,
-          state: data.state || "",
-          defaultCurrency: data.defaultCurrency,
-          timeZone: data.timeZone,
-        },
-        logoFile,
-      );
+      if (logoFile) {
+        await createChurch(
+          {
+            name: data.name,
+            alias: data.alias || "",
+            address: data.address,
+            country: data.country,
+            state: data.state || "",
+            defaultCurrency: data.defaultCurrency,
+            timeZone: data.timeZone,
+          },
+          logoFile,
+        );
+      }
+
+      if (typeof window !== "undefined") {
+        window.localStorage.setItem(
+          "onboarding:church-identity-draft",
+          JSON.stringify(data),
+        );
+      }
+
       router.push(RouteConfig.dashboard.home);
     } catch (error: any) {
-      console.error("Church creation failed:", error);
-      alert(error.message || "Failed to create church");
+      console.error("Save and exit failed:", error);
+      alert(error.message || "Failed to save church identity");
+    } finally {
+      setIsSubmittingIdentity(false);
     }
   };
 
@@ -151,10 +206,11 @@ export default function ChurchOnboarding() {
           <ChurchIdentityStep
             form={identityForm}
             onSubmit={onIdentitySubmit}
-            onSaveAndGoToDashboard={onIdentitySaveAndGoToDashboard}
+            onSaveAndExit={onSaveIdentityAndExit}
             step={step}
             totalSteps={3}
             onLogoSelect={setLogoFile}
+            isSubmitting={isSubmittingIdentity}
           />
         );
       case 2:

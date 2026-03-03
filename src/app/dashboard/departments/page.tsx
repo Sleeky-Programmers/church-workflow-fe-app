@@ -1,80 +1,86 @@
 "use client";
-
-import React, { useMemo, useState } from "react";
-import Table, { Column } from "@/components/features/dashboard/Table";
+import { useMemo, useState } from "react";
+import Table from "@/components/features/dashboard/Table";
 import Heading from "@/components/ui/typography/Heading";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import { Search, ChevronDown, Edit, User } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Search, ChevronDown } from "lucide-react";
 import { useRouter } from "next/navigation";
 import AddDepartmentDialog from "@/components/features/dashboard/AddDepartmentDialog";
 import { DepartmentRow } from "@/types";
-import { departmentData } from "@/lib/data";
+import { departmentData, MOCK_MEMBERS_FULL } from "@/lib/data";
+import { Button } from "@/components/ui/button";
+import { getDepartmentColumns } from "@/components/features/dashboard/departments/department-columns";
+import { RouteConfig } from "@/config/routes";
 
 export default function DepartmentPage() {
   const [query, setQuery] = useState("");
-  const [data] = useState<DepartmentRow[]>(departmentData);
+  const [data, setData] = useState<DepartmentRow[]>(departmentData);
+  const [deleteTarget, setDeleteTarget] = useState<DepartmentRow | null>(null);
   const router = useRouter();
 
   const filtered = useMemo(() => {
-    if (!query) {
-      return data;
-    }
-
-    const lowercaseQuery = query.toLowerCase();
+    if (!query) return data;
+    const q = query.toLowerCase();
     return data.filter(
-      (department) =>
-        department.name.toLowerCase().includes(lowercaseQuery) ||
-        (department.hod?.name ?? "").toLowerCase().includes(lowercaseQuery) ||
-        String(department.members).includes(lowercaseQuery) ||
-        department.status.toLowerCase().includes(lowercaseQuery)
+      (d) =>
+        d.name.toLowerCase().includes(q) ||
+        (d.hod?.name ?? "").toLowerCase().includes(q) ||
+        String(d.members).includes(q) ||
+        d.status.toLowerCase().includes(q),
     );
   }, [data, query]);
 
-  const columns: Column<DepartmentRow>[] = [
-    { key: "name", header: "Department name", accessor: "name", width: "w-72" },
-    {
-      key: "hod",
-      header: "HOD",
-      render: (row) => (
-        <div className="flex items-center gap-3">
-          <Avatar>
-            <AvatarFallback>
-              <User className="w-4 h-4 text-primary" />
-            </AvatarFallback>
-          </Avatar>
-          <div className="text-sm">{row.hod?.name ?? "-"}</div>
-        </div>
-      ),
-      width: "w-48",
-    },
-    { key: "members", header: "Members", accessor: "members", width: "w-24", align: "center" },
-    {
-      key: "status",
-      header: "Status",
-      render: (row) => (
-        <Badge variant="outline" className="border-emerald-300 text-emerald-600 bg-transparent">
-          {row.status}
-        </Badge>
-      ),
-      width: "w-40",
-      align: "center",
-    },
-    {
-      key: "actions",
-      header: "Actions",
-      render: () => (
-        <Button variant="ghost" size="sm" className="flex items-center gap-2">
-          <Edit className="w-4 h-4 text-primary" />
-          Edit
-        </Button>
-      ),
-      width: "w-36",
-      align: "right",
-    },
-  ];
+  const handleEdit = (row: DepartmentRow) => {
+    router.push(RouteConfig.dashboard.departmentEdit(row.id));
+  };
+
+  const handleExport = (row: DepartmentRow) => {
+    console.log("Export", row.id);
+  };
+
+  const handleConfirmDelete = () => {
+    if (!deleteTarget) return;
+    setData((prev) => prev.filter((d) => d.id !== deleteTarget.id));
+    setDeleteTarget(null);
+  };
+
+  const handleAddDepartment = (payload: {
+    name: string;
+    hodId: string;
+    memberIds: string[];
+    status: string;
+    description: string;
+  }) => {
+    const hod = MOCK_MEMBERS_FULL.find((member) => member.id === payload.hodId);
+    const normalizedStatus =
+      payload.status.toLowerCase() === "active" ? "Active" : "Inactive";
+
+    const newDepartment: DepartmentRow = {
+      id: crypto.randomUUID(),
+      name: payload.name.trim(),
+      hod: hod ? { name: hod.fullName } : null,
+      members: payload.memberIds.length,
+      status: normalizedStatus,
+    };
+
+    setData((prev) => [newDepartment, ...prev]);
+  };
+
+  const columns = getDepartmentColumns({
+    onEdit: handleEdit,
+    onExport: handleExport,
+    onDeleteRequest: setDeleteTarget,
+  });
 
   return (
     <div className="space-y-6">
@@ -86,23 +92,56 @@ export default function DepartmentPage() {
             leftIcon={<Search className="w-4 h-4" />}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            className="w-[360px]"
+            className="w-[300px]"
           />
         </div>
-
         <div className="flex items-center gap-3">
-          <Button variant="ghost" className="hidden sm:flex items-center gap-2">
+          <Button
+            variant="ghost"
+            className="hidden sm:flex items-center gap-2 text-gray-600"
+          >
             Filter
             <ChevronDown className="w-4 h-4" />
           </Button>
-
-          <AddDepartmentDialog data={data} />
+          <AddDepartmentDialog onSave={handleAddDepartment} />
         </div>
       </div>
 
-        <div className="max-h-[65vh] overflow-auto">
-        <Table columns={columns} data={filtered} rowKey={(row) => row.id} showCheckbox onRowClick={(row) => router.push(`/dashboard/departments/${row.id}`)} />
+      <div className="max-h-[65vh] overflow-auto">
+        <Table
+          columns={columns}
+          data={filtered}
+          rowKey={(row) => row.id}
+          showCheckbox
+          onRowClick={(row) =>
+            router.push(RouteConfig.dashboard.departmentDetails(row.id))
+          }
+        />
       </div>
+
+      <AlertDialog
+        open={!!deleteTarget}
+        onOpenChange={(open) => !open && setDeleteTarget(null)}
+      >
+        <AlertDialogContent className="max-w-sm rounded-2xl">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-base font-semibold text-gray-900">
+              Delete department?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-sm text-gray-500">
+              Are you sure you want to delete this department?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="gap-2 sm:gap-2">
+            <AlertDialogCancel onClick={() => setDeleteTarget(null)}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmDelete}>
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

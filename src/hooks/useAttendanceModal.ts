@@ -51,7 +51,7 @@ function modalReducer(state: ModalState, action: ModalAction): ModalState {
         absentMembers: isPresent
           ? [...state.absentMembers, action.memberId]
           : state.absentMembers.filter((id) => id !== action.memberId),
-        hasChanges: true,
+        hasChanges: false,
       };
 
     case "MARK_PRESENT":
@@ -88,9 +88,12 @@ function modalReducer(state: ModalState, action: ModalAction): ModalState {
       };
 
     case "MOVE_TO_PRESENT":
+      const nextPresentMembers = Array.from(
+        new Set([...state.presentMembers, ...action.memberIds]),
+      );
       return {
         ...state,
-        presentMembers: [...state.presentMembers, ...action.memberIds],
+        presentMembers: nextPresentMembers,
         absentMembers: state.absentMembers.filter(
           (id) => !action.memberIds.includes(id),
         ),

@@ -3,7 +3,6 @@ import {
   DepartmentRow,
   Gender,
   MaritalStatus,
-  Member,
   MemberAttendanceRecord,
   MemberProfile,
   RegularService,
@@ -707,3 +706,14 @@ export const MOCK_ADMIN = {
   id: "admin-1",
   name: "Admin_003",
 };
+
+export const AVATAR_COLORS: { bg: string; text: string }[] = [
+  { bg: "bg-primary-100", text: "text-primary-600" },
+  { bg: "bg-secondary-100", text: "text-secondary-500" },
+  { bg: "bg-success-100", text: "text-success-600" },
+  { bg: "bg-violet-100", text: "text-violet-600" },
+  { bg: "bg-rose-100", text: "text-rose-500" },
+  { bg: "bg-amber-100", text: "text-amber-600" },
+  { bg: "bg-cyan-100", text: "text-cyan-600" },
+  { bg: "bg-pink-100", text: "text-pink-500" },
+];

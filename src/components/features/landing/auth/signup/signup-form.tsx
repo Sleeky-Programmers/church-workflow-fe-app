@@ -24,7 +24,6 @@ import { Link } from "@/components/ui/link";
 import { signupSchema } from "@/types/schema";
 import { googleAuth, signup } from "@/lib/api";
 import { RouteConfig } from "@/config/routes";
-import { getGoogleIdToken } from "@/lib/google-auth";
 
 type SignupFormValues = z.infer<typeof signupSchema>;
 
@@ -70,16 +69,13 @@ export default function SignupForm({ onSubmit }: SignupFormProps) {
     }
   };
 
-  const handleGoogleSignup = async () => {
+  const handleGoogleSignup = async (idToken: string) => {
     try {
       setIsLoading(true);
-      const idToken = await getGoogleIdToken();
-      const data = await googleAuth({ idToken });
-
+      const data = await googleAuth(idToken);
       if (typeof window !== "undefined") {
         localStorage.setItem("accessToken", data.accessToken);
       }
-
       router.push(RouteConfig.onboarding);
     } catch (error: any) {
       form.setError("email", {
@@ -213,7 +209,10 @@ export default function SignupForm({ onSubmit }: SignupFormProps) {
             </Span>
             <div className="flex-grow border-t border-gray-200" />
           </div>
-          <GoogleSignupButton onClick={handleGoogleSignup} />
+          <GoogleSignupButton
+            onCredential={handleGoogleSignup}
+            disabled={isLoading}
+          />
         </form>
       </Form>
       <div className="text-center mt-6">

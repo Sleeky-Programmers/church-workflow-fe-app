@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, Loader2 } from "lucide-react";
+import { Search } from "lucide-react";
 import {
   Pagination,
   PaginationContent,
@@ -13,134 +13,143 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import { Member } from "@/types";
-import { fetchMembers } from "@/lib/api";
 import { MemberListItem } from "./member-list";
 import Heading from "@/components/ui/typography/Heading";
 import { Text } from "@/components/ui/typography/Text";
 
 type SelectMembersViewProps = {
+  mode: "select" | "present" | "absent";
+  title: string;
+  actionLabel: string;
+  members: Member[];
   selectedMembers: string[];
-  onToggleMember: (memberId: string) => void;
-  onMarkPresent: () => void;
+  onToggleMember: (memberId: string, selected: boolean) => void;
+  onAction: () => void;
   searchQuery: string;
   onSearchChange: (query: string) => void;
+  removedCount?: number;
+  onUndoRemove?: () => void;
+  onRemoveMember?: (memberId: string) => void;
 };
 
 export function SelectMembersView({
+  mode,
+  title,
+  actionLabel,
+  members,
   selectedMembers,
   onToggleMember,
-  onMarkPresent,
+  onAction,
   searchQuery,
   onSearchChange,
+  removedCount = 0,
+  onUndoRemove,
+  onRemoveMember,
 }: SelectMembersViewProps) {
-  const [members, setMembers] = useState<Member[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [hasLoaded, setHasLoaded] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
+  const pageSize = 10;
 
-  const loadMembers = async (page: number = 1) => {
-    setIsLoading(true);
-    try {
-      const data = await fetchMembers(page, 10, searchQuery);
-      setMembers(data.members);
-      setTotalPages(data.pages);
-      setHasLoaded(true);
-    } catch (error) {
-      console.error("Failed to load members:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const filteredMembers = useMemo(() => {
+    if (!searchQuery.trim()) return members;
 
-  const handleLoadMembers = () => {
-    loadMembers(1);
-  };
+    const query = searchQuery.toLowerCase();
+    return members.filter(
+      (member) =>
+        member.name.toLowerCase().includes(query) ||
+        member.email.toLowerCase().includes(query),
+    );
+  }, [members, searchQuery]);
 
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page);
-    loadMembers(page);
-  };
+  const totalPages = Math.max(1, Math.ceil(filteredMembers.length / pageSize));
+  const paginatedMembers = filteredMembers.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize,
+  );
 
   useEffect(() => {
-    if (hasLoaded && searchQuery !== undefined) {
-      const timer = setTimeout(() => {
-        loadMembers(1);
-        setCurrentPage(1);
-      }, 300);
-      return () => clearTimeout(timer);
-    }
-  }, [searchQuery]);
+    setCurrentPage(1);
+  }, [searchQuery, mode, members]);
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(Math.min(Math.max(1, page), totalPages));
+  };
 
   return (
     <div className="flex-1 flex flex-col min-h-0">
-      <div className="p-4 border-b">
-        <Heading level={3} className="mb-1">
-          Select Members
-        </Heading>
-        {selectedMembers.length > 0 && (
-          <Text variant="muted">
-            {selectedMembers.length} member(s) selected
-          </Text>
-        )}
+      <div className="p-4 border-b flex items-start justify-between gap-3">
+        <div>
+          <Heading level={3} className="mb-1">
+            {title}
+          </Heading>
+          {mode === "select" && selectedMembers.length > 0 && (
+            <Text variant="muted">
+              {selectedMembers.length} member(s) selected
+            </Text>
+          )}
+          {mode === "present" && removedCount > 0 && (
+            <div className="flex items-center gap-4">
+              <Text variant="error">You removed {removedCount} members</Text>
+              <Button
+                variant="outline"
+                className=" p-2"
+                onClick={onUndoRemove}
+                disabled={!onUndoRemove}
+              >
+                undo
+              </Button>
+            </div>
+          )}
+        </div>
+
+        <Button
+          onClick={onAction}
+          disabled={mode !== "present" && selectedMembers.length === 0}
+          className="whitespace-nowrap"
+        >
+          {actionLabel}
+        </Button>
       </div>
 
-      {hasLoaded && (
-        <div className="p-4 border-b">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-            <Input
-              placeholder="Select or search"
-              value={searchQuery}
-              onChange={(e) => onSearchChange(e.target.value)}
-              className="pl-9"
-            />
-          </div>
+      <div className="p-4 border-b">
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+          <Input
+            placeholder="Select or search"
+            value={searchQuery}
+            onChange={(e) => onSearchChange(e.target.value)}
+            className="pl-9"
+          />
         </div>
-      )}
+      </div>
 
       <div className="flex-1 overflow-y-auto">
-        {!hasLoaded ? (
-          <div className="flex items-center justify-center h-full">
-            <Button
-              onClick={handleLoadMembers}
-              className="bg-secondary-600 hover:bg-secondary-700"
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Loading...
-                </>
-              ) : (
-                <>Load members →</>
-              )}
-            </Button>
-          </div>
-        ) : isLoading ? (
-          <div className="flex items-center justify-center py-8">
-            <Loader2 className="h-6 w-6 animate-spin text-primary-600" />
-          </div>
-        ) : members.length === 0 ? (
+        {paginatedMembers.length === 0 ? (
           <div className="flex items-center justify-center py-8 text-gray-500">
             <Text variant="default">No members found</Text>
           </div>
         ) : (
           <div className="p-4">
-            {members.map((member) => (
+            {paginatedMembers.map((member) => (
               <MemberListItem
                 key={member.id}
                 member={member}
-                mode="select"
+                mode={
+                  mode === "present"
+                    ? "view-present"
+                    : mode === "absent"
+                      ? "view-absent"
+                      : "select"
+                }
                 isSelected={selectedMembers.includes(member.id)}
                 onSelect={onToggleMember}
+                onRemove={onRemoveMember}
               />
             ))}
           </div>
         )}
       </div>
 
-      {hasLoaded && totalPages > 1 && (
+      {totalPages > 1 && (
         <div className="p-4 border-t">
           <Pagination>
             <PaginationContent>
@@ -184,14 +193,6 @@ export function SelectMembersView({
               </PaginationItem>
             </PaginationContent>
           </Pagination>
-        </div>
-      )}
-
-      {hasLoaded && selectedMembers.length > 0 && (
-        <div className="p-4 border-t">
-          <Button onClick={onMarkPresent} className="w-full">
-            Mark as present
-          </Button>
         </div>
       )}
     </div>
