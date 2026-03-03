@@ -44,10 +44,6 @@ export default function ChurchOnboarding() {
   });
 
   const onIdentitySubmit = async (data: ChurchIdentityValues) => {
-    if (!logoFile) {
-      alert("Please upload a church logo");
-      return;
-    }
     try {
       await createChurch(
         {
@@ -62,6 +58,27 @@ export default function ChurchOnboarding() {
         logoFile,
       );
       setStep(2);
+    } catch (error: any) {
+      console.error("Church creation failed:", error);
+      alert(error.message || "Failed to create church");
+    }
+  };
+
+  const onIdentitySaveAndGoToDashboard = async (data: ChurchIdentityValues) => {
+    try {
+      await createChurch(
+        {
+          name: data.name,
+          alias: data.alias || "",
+          address: data.address,
+          country: data.country,
+          state: data.state || "",
+          defaultCurrency: data.defaultCurrency,
+          timeZone: data.timeZone,
+        },
+        logoFile,
+      );
+      router.push(RouteConfig.dashboard.home);
     } catch (error: any) {
       console.error("Church creation failed:", error);
       alert(error.message || "Failed to create church");
@@ -134,7 +151,7 @@ export default function ChurchOnboarding() {
           <ChurchIdentityStep
             form={identityForm}
             onSubmit={onIdentitySubmit}
-            onSkip={handleSkip}
+            onSaveAndGoToDashboard={onIdentitySaveAndGoToDashboard}
             step={step}
             totalSteps={3}
             onLogoSelect={setLogoFile}

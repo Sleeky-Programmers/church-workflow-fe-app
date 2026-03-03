@@ -20,11 +20,12 @@ import { Span, Text } from "@/components/ui/typography/Text";
 import { UseFormReturn } from "react-hook-form";
 import { ChurchIdentityValues } from "@/types/type";
 import { Info } from "lucide-react";
+import { useEffect, useState } from "react";
 
 type ChurchIdentityStepProps = {
   form: UseFormReturn<ChurchIdentityValues>;
   onSubmit: (data: ChurchIdentityValues) => void;
-  onSkip: () => void;
+  onSaveAndGoToDashboard: (data: ChurchIdentityValues) => void;
   step?: number;
   totalSteps?: number;
   onLogoSelect: (file: File | null) => void;
@@ -34,15 +35,42 @@ type ChurchIdentityStepProps = {
 export function ChurchIdentityStep({
   form,
   onSubmit,
-  onSkip,
+  onSaveAndGoToDashboard,
   step = 1,
   totalSteps = 3,
   onLogoSelect,
   isSubmitting = false,
 }: ChurchIdentityStepProps) {
+  const [selectedLogoName, setSelectedLogoName] = useState<string | null>(null);
+  const [logoPreviewUrl, setLogoPreviewUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (logoPreviewUrl) {
+        URL.revokeObjectURL(logoPreviewUrl);
+      }
+    };
+  }, [logoPreviewUrl]);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     form.handleSubmit(onSubmit)(e);
+  };
+
+  const handleSaveAndGo = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    form.handleSubmit(onSaveAndGoToDashboard)();
+  };
+
+  const handleLogoChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    onChange: (value: any) => void,
+  ) => {
+    const file = e.target.files?.[0] || null;
+    onChange(file);
+    onLogoSelect(file);
+    setSelectedLogoName(file?.name || null);
+    setLogoPreviewUrl(file ? URL.createObjectURL(file) : null);
   };
 
   return (
@@ -206,7 +234,7 @@ export function ChurchIdentityStep({
           <FormField
             control={form.control}
             name="file"
-            render={() => (
+            render={({ field }) => (
               <FormItem>
                 <FormLabel>
                   Church Logo <Span variant="muted">(optional)</Span>
@@ -219,10 +247,19 @@ export function ChurchIdentityStep({
                     }
                   >
                     <div className="text-center">
-                      <Text variant="muted">Click to upload church logo</Text>
-                      <Text variant="muted" className="text-xs mt-1">
-                        PNG or JPG • max 5MB
-                      </Text>
+                      <Text variant="muted">Click to upload logo</Text>
+                      {selectedLogoName && (
+                        <Text className="mt-2 text-sm text-green-700">
+                          Selected: {selectedLogoName}
+                        </Text>
+                      )}
+                      {logoPreviewUrl && (
+                        <img
+                          src={logoPreviewUrl}
+                          alt="Church logo preview"
+                          className="mx-auto mt-3 h-16 w-16 rounded object-cover"
+                        />
+                      )}
                     </div>
                   </div>
                 </FormControl>
@@ -232,7 +269,7 @@ export function ChurchIdentityStep({
                   type="file"
                   className="hidden"
                   accept="image/*"
-                  onChange={(e) => onLogoSelect(e.target.files?.[0] || null)}
+                  onChange={(e) => handleLogoChange(e, field.onChange)}
                   disabled={isSubmitting}
                 />
               </FormItem>
@@ -249,7 +286,7 @@ export function ChurchIdentityStep({
             <Button
               type="button"
               variant="outline"
-              onClick={onSkip}
+              onClick={handleSaveAndGo}
               className="w-full order-2 md:order-1"
               disabled={isSubmitting}
             >

@@ -137,11 +137,13 @@ export async function completeOnboarding() {
 
 export async function createChurch(
   payload: CreateChurchPayload,
-  logoFile: File,
+  logoFile?: File | null,
 ) {
   const formData = new FormData();
 
-  formData.append("file", logoFile);
+  if (logoFile) {
+    formData.append("file", logoFile);
+  }
   formData.append("name", payload.name);
   formData.append("alias", payload.alias || "");
   formData.append("address", payload.address);
