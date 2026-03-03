@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
   Form,
   FormControl,
@@ -157,10 +157,31 @@ export function ChurchIdentityStep({
       form.setValue("timeZone", browserTimeZone);
     }
   }, [form]);
+  const [selectedLogoName, setSelectedLogoName] = useState<string | null>(null);
+  const [logoPreviewUrl, setLogoPreviewUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (logoPreviewUrl) {
+        URL.revokeObjectURL(logoPreviewUrl);
+      }
+    };
+  }, [logoPreviewUrl]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     form.handleSubmit(onSubmit)(e);
+  };
+
+  const handleLogoChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    onChange: (value: any) => void,
+  ) => {
+    const file = e.target.files?.[0] || null;
+    onChange(file);
+    onLogoSelect(file);
+    setSelectedLogoName(file?.name || null);
+    setLogoPreviewUrl(file ? URL.createObjectURL(file) : null);
   };
 
   return (
@@ -361,7 +382,7 @@ export function ChurchIdentityStep({
           <FormField
             control={form.control}
             name="file"
-            render={() => (
+            render={({ field }) => (
               <FormItem>
                 <FormLabel>
                   Church Logo <Span variant="muted">(optional)</Span>
@@ -374,10 +395,19 @@ export function ChurchIdentityStep({
                     }
                   >
                     <div className="text-center">
-                      <Text variant="muted">Click to upload church logo</Text>
-                      <Text variant="muted" className="mt-1">
-                        PNG or JPG - max 5MB
-                      </Text>
+                      <Text variant="muted">Click to upload logo</Text>
+                      {selectedLogoName && (
+                        <Text className="mt-2 text-sm text-green-700">
+                          Selected: {selectedLogoName}
+                        </Text>
+                      )}
+                      {logoPreviewUrl && (
+                        <img
+                          src={logoPreviewUrl}
+                          alt="Church logo preview"
+                          className="mx-auto mt-3 h-16 w-16 rounded object-cover"
+                        />
+                      )}
                     </div>
                   </div>
                 </FormControl>
@@ -387,7 +417,7 @@ export function ChurchIdentityStep({
                   type="file"
                   className="hidden"
                   accept="image/*"
-                  onChange={(e) => onLogoSelect(e.target.files?.[0] || null)}
+                  onChange={(e) => handleLogoChange(e, field.onChange)}
                   disabled={isSubmitting}
                 />
               </FormItem>

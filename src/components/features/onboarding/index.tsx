@@ -70,7 +70,10 @@ export default function ChurchOnboarding() {
   }, [identityForm]);
 
   const onIdentitySubmit = async (data: ChurchIdentityValues) => {
-    setIsSubmittingIdentity(true);
+    if (!logoFile) {
+      alert("Please upload a church logo");
+      return;
+    }
     try {
       if (logoFile) {
         await createChurch(
