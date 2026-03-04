@@ -1,10 +1,10 @@
-import React from 'react';
-import { Card, CardContent } from '@/components/ui/card';
-import { TrendingUp, TrendingDown, ChevronDown } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
-import Heading from '@/components/ui/typography/Heading';
-import { Span } from '@/components/ui/typography/Text';
+import React from "react";
+import { Card, CardContent } from "@/components/ui/card";
+import { TrendingUp, TrendingDown, ChevronDown } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import Heading from "@/components/ui/typography/Heading";
+import { Span } from "@/components/ui/typography/Text";
 
 export const StatCard = ({
   title,
@@ -23,21 +23,30 @@ export const StatCard = ({
   compact?: boolean;
   className?: string;
 }) => {
-  const isPositiveGrowth = growth.startsWith('+');
+  const isPositiveGrowth = growth.startsWith("+");
   const Icon = isPositiveGrowth ? TrendingUp : TrendingDown;
 
   const sizeClasses = compact
-    ? 'min-w-[220px] flex-shrink-0 h-[120px]'
-    : 'min-w-[260px] flex-shrink-0 h-[150px]';
+    ? "w-full min-w-0 sm:min-w-[220px] h-[120px]"
+    : "w-full min-w-0 sm:min-w-[260px] h-[150px]";
 
   return (
-    <Card className={cn(sizeClasses, 'bg-[#E7EFF7] shadow-none rounded-3xl overflow-hidden', className)}>
-      <CardContent className="p-4">
+    <Card
+      className={cn(
+        sizeClasses,
+        "bg-[#E7EFF7] shadow-none rounded-3xl overflow-hidden",
+        className,
+      )}
+    >
+      <CardContent className="p-3 sm:p-4">
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <Heading level={5} text={title} />
             {statFilter && (
-              <Button variant="ghost" className="hidden sm:flex items-center gap-2 hover:bg-transparent outline-0">
+              <Button
+                variant="ghost"
+                className="hidden sm:flex items-center gap-2 hover:bg-transparent outline-0"
+              >
                 {statFilter}
                 <ChevronDown className="w-4 h-4" />
               </Button>
@@ -53,7 +62,9 @@ export const StatCard = ({
                 <Span text={growth} />
               </div>
 
-              <div className={`${isPositiveGrowth ? 'bg-success-500' : 'bg-destructive-500'} rounded-xl p-2 flex items-center justify-center`}>
+              <div
+                className={`${isPositiveGrowth ? "bg-success-500" : "bg-destructive-500"} rounded-xl p-2 flex items-center justify-center`}
+              >
                 <Icon className="w-4 h-4" color="#ffffff" strokeWidth={2.5} />
               </div>
             </div>
@@ -62,4 +73,4 @@ export const StatCard = ({
       </CardContent>
     </Card>
   );
-}
+};

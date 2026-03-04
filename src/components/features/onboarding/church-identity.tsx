@@ -320,7 +320,7 @@ export function ChurchIdentityStep({
                 </FormLabel>
                 <FormControl>
                   <div
-                    className="border-2 border-dashed border-border rounded-lg p-8 bg-background hover:border-primary transition-colors cursor-pointer"
+                    className="border-2 border-dashed border-border rounded-lg p-5 sm:p-8 bg-background hover:border-primary transition-colors cursor-pointer"
                     onClick={() =>
                       document.getElementById("logo-upload")?.click()
                     }

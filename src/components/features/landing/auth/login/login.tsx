@@ -63,9 +63,19 @@ export default function LoginForm({ onForgotPassword }: LoginFormProps) {
         router.push(RouteConfig.dashboard.home);
       }
     } catch (error: any) {
-      form.setError("password", {
-        message: error.message || "Invalid credentials",
-      });
+      const status = error?.response?.status;
+
+      if (status === 401) {
+        form.setError("password", {
+          type: "manual",
+          message: "Invalid credentials",
+        });
+      } else {
+        form.setError("root", {
+          type: "manual",
+          message: "An internal server error occurred. Please try again later.",
+        });
+      }
     } finally {
       setIsLoading(false);
     }

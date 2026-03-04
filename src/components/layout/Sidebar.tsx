@@ -11,6 +11,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  useSidebar,
 } from "@/components/ui/sidebar";
 import Link from "next/link";
 import Image from "next/image";
@@ -26,6 +27,7 @@ export function AppSidebar() {
   const pathname = usePathname();
   const [activeTab, setActiveTab] = useState<ActiveTab>(ActiveTab.FAVOURITES);
   const { favorites } = useFavoritesStore();
+  const { isMobile, setOpenMobile } = useSidebar();
 
   const isActive = (url: string) => {
     if (!url) return false;
@@ -34,6 +36,12 @@ export function AppSidebar() {
     const current = normalize(pathname);
     const target = normalize(url);
     return current === target;
+  };
+
+  const handleNavigate = () => {
+    if (isMobile) {
+      setOpenMobile(false);
+    }
   };
 
   return (
@@ -102,6 +110,7 @@ export function AppSidebar() {
                           <Link
                             href={fav.path}
                             className="flex items-center gap-2"
+                            onClick={handleNavigate}
                           >
                             <Span
                               variant={active ? "menuActive" : "menuInactive"}
@@ -132,7 +141,11 @@ export function AppSidebar() {
                 return (
                   <SidebarMenuItem key={page.title}>
                     <SidebarMenuButton asChild isActive={active}>
-                      <Link href={page.url} className="flex items-center gap-2">
+                      <Link
+                        href={page.url}
+                        className="flex items-center gap-2"
+                        onClick={handleNavigate}
+                      >
                         <Icon
                           className={cn(
                             "h-4 w-4 transition-colors",
@@ -155,7 +168,7 @@ export function AppSidebar() {
             {SidebarData.footer.map((page) => (
               <SidebarMenuItem key={page.title}>
                 <SidebarMenuButton asChild isActive={isActive(page.url)}>
-                  <Link href={page.url}>
+                  <Link href={page.url} onClick={handleNavigate}>
                     <page.icon />
                     <Text>{page.title}</Text>
                   </Link>

@@ -290,5 +290,9 @@ export default function ChurchOnboarding() {
     }
   };
 
-  return <Card className="max-w-2xl mx-auto p-8">{renderStep()}</Card>;
+  return (
+    <Card className="w-full max-w-2xl mx-auto p-4 sm:p-6 lg:p-8">
+      {renderStep()}
+    </Card>
+  );
 }

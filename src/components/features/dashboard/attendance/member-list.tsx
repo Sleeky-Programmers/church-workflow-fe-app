@@ -9,7 +9,12 @@ import { Text } from "@/components/ui/typography/Text";
 
 type MemberListItemProps = {
   member: Member;
-  mode: "select" | "view-present" | "view-absent";
+  mode:
+    | "select"
+    | "view-present"
+    | "view-absent"
+    | "readonly-present"
+    | "readonly-absent";
   isSelected?: boolean;
   onSelect?: (memberId: string, selected: boolean) => void;
   onRemove?: (memberId: string) => void;
@@ -32,10 +37,10 @@ export function MemberListItem({
         </Avatar>
 
         <div className="flex-1 min-w-0">
-          <Text variant="default" className=" truncate">
+          <Text variant="default" className="truncate">
             {member.name}
           </Text>
-          <Text variant="default" className=" truncate">
+          <Text variant="muted" className="truncate">
             {member.email}
           </Text>
         </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { format } from "date-fns";
 import {
   Dialog,
@@ -16,6 +16,7 @@ import { fetchMembers, getCurrentAdmin, saveAttendance } from "@/lib/api";
 import { SelectMembersView } from "./select-member-view";
 import { AttendanceStatsView } from "./attendance-stats";
 import { Span } from "@/components/ui/typography/Text";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 type AttendanceModalProps = {
   isOpen: boolean;
@@ -32,6 +33,7 @@ export function AttendanceModal({
   date,
   onSave,
 }: AttendanceModalProps) {
+  const isMobile = useIsMobile();
   const {
     state,
     setMembers,
@@ -45,25 +47,46 @@ export function AttendanceModal({
     reset,
     getPresentMembers,
     getAbsentMembers,
+    initializeAttendance,
   } = useAttendanceModal();
 
   const [isSaving, setIsSaving] = useState(false);
   const [hasMembersLoaded, setHasMembersLoaded] = useState(false);
-  const [isMembersOpen, setIsMembersOpen] = useState(false);
+  const [isMembersDialogOpen, setIsMembersDialogOpen] = useState(false);
   const [membersViewMode, setMembersViewMode] = useState<
     "select" | "present" | "absent"
   >("select");
   const [absentSelections, setAbsentSelections] = useState<string[]>([]);
+  const [isEditMode, setIsEditMode] = useState(false);
 
-  const loadAllMembers = async () => {
+  const existingRecord = useMemo(() => {
+    if (!service || !date) return null;
+    return (
+      service.attendanceRecords?.find((record) => record.date === date) || null
+    );
+  }, [service, date]);
+
+  const hasExistingAttendance = Boolean(existingRecord);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    setIsEditMode(!hasExistingAttendance);
+    setIsMembersDialogOpen(false);
+    setMembersViewMode("select");
+    setAbsentSelections([]);
+    setHasMembersLoaded(false);
+  }, [isOpen, hasExistingAttendance]);
+
+  const ensureMembersLoaded = async () => {
+    if (hasMembersLoaded) return;
     setLoading(true);
     try {
       const data = await fetchMembers(1, 100);
       setMembers(data.members);
+      if (existingRecord?.presentMembers?.length) {
+        initializeAttendance(existingRecord.presentMembers);
+      }
       setHasMembersLoaded(true);
-      setSearch("");
-      setMembersViewMode("select");
-      setIsMembersOpen(true);
     } catch (error) {
       console.error("Failed to load members:", error);
     } finally {
@@ -71,13 +94,24 @@ export function AttendanceModal({
     }
   };
 
+  const loadAllMembers = async () => {
+    await ensureMembersLoaded();
+    setSearch("");
+    setMembersViewMode("select");
+    setIsMembersDialogOpen(true);
+  };
+
   const handleMarkPresent = () => {
     markPresent(state.presentMembers);
-    setIsMembersOpen(false);
+    if (isMobile) {
+      setIsMembersDialogOpen(false);
+    }
   };
 
   const handleUpdatePresentRecord = () => {
-    setIsMembersOpen(false);
+    if (isMobile) {
+      setIsMembersDialogOpen(false);
+    }
   };
 
   const handleAbsentSelection = (memberId: string, selected: boolean) => {
@@ -93,20 +127,24 @@ export function AttendanceModal({
   const handleMarkAbsentAsPresent = () => {
     moveToPresent(absentSelections);
     setAbsentSelections([]);
-    setIsMembersOpen(false);
+    if (isMobile) {
+      setIsMembersDialogOpen(false);
+    }
   };
 
-  const openPresentMembersView = () => {
+  const openPresentMembersView = async () => {
+    await ensureMembersLoaded();
     setMembersViewMode("present");
     setSearch("");
-    setIsMembersOpen(true);
+    setIsMembersDialogOpen(true);
   };
 
-  const openAbsentMembersView = () => {
+  const openAbsentMembersView = async () => {
+    await ensureMembersLoaded();
     setMembersViewMode("absent");
     setSearch("");
     setAbsentSelections([]);
-    setIsMembersOpen(true);
+    setIsMembersDialogOpen(true);
   };
 
   const handleSave = async () => {
@@ -164,10 +202,11 @@ export function AttendanceModal({
   const handleClose = () => {
     reset();
     setHasMembersLoaded(false);
-    setIsMembersOpen(false);
+    setIsMembersDialogOpen(false);
     setSearch("");
     setMembersViewMode("select");
     setAbsentSelections([]);
+    setIsEditMode(false);
     onClose();
   };
 
@@ -177,6 +216,14 @@ export function AttendanceModal({
   const parsedDate = new Date(date);
   const presentMembers = getPresentMembers();
   const absentMembers = getAbsentMembers();
+  const presentCount =
+    hasMembersLoaded || !hasExistingAttendance
+      ? presentMembers.length
+      : existingRecord?.presentMembers.length || 0;
+  const absentCount =
+    hasMembersLoaded || !hasExistingAttendance
+      ? absentMembers.length
+      : existingRecord?.absentMembers.length || 0;
 
   const panelMembers =
     membersViewMode === "present"
@@ -194,10 +241,171 @@ export function AttendanceModal({
 
   const panelActionLabel =
     membersViewMode === "present"
-      ? "Update Record"
+      ? isEditMode
+        ? "Update Record"
+        : "Close"
       : membersViewMode === "absent"
-        ? "Mark as Present"
+        ? isEditMode
+          ? "Mark as present"
+          : "Close"
         : "Mark as present";
+
+  const summaryCard = (
+    <div className="rounded-xl shadow-lg w-full sm:w-[400px] h-full flex flex-col overflow-hidden bg-gray-50">
+      <DialogHeader className="px-6 py-4 border-b">
+        <div className="flex items-start justify-between">
+          <div className="flex-1">
+            <DialogTitle className="text-xl font-semibold mb-3">
+              {service.serviceName} attendance
+            </DialogTitle>
+          </div>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={handleClose}
+            className="flex-shrink-0"
+          >
+            <X className="h-4 w-4" />
+          </Button>
+        </div>
+      </DialogHeader>
+
+      <div className="p-4 sm:p-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3 text-sm">
+          <div className="flex items-center gap-2">
+            <Calendar className="h-4 w-4" />
+            <Span>{format(parsedDate, "MMM. d, yyyy")}</Span>
+          </div>
+          <div className="flex items-center gap-2">
+            <User className="h-4 w-4" />
+            <Span>Recorded by: {admin.name}</Span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Clock className="h-4 w-4" />
+            <Span>
+              {service.startTime}
+              {service.endTime && ` - ${service.endTime}`}
+            </Span>
+          </div>
+          {service.location && (
+            <div className="flex items-center gap-2">
+              <MapPin className="h-4 w-4" />
+              <Span className="truncate">{service.location}</Span>
+            </div>
+          )}
+        </div>
+      </div>
+
+      <AttendanceStatsView
+        presentMembers={presentMembers}
+        absentMembers={absentMembers}
+        presentCount={presentCount}
+        absentCount={absentCount}
+        isMembersLoaded={hasMembersLoaded}
+        isAttendanceMarked={hasExistingAttendance || state.hasChanges}
+        showLoadMembersButton={isEditMode || !hasExistingAttendance}
+        loadMembersMuted={isEditMode}
+        onLoadMembers={loadAllMembers}
+        onOpenPresentMembers={openPresentMembersView}
+        onOpenAbsentMembers={openAbsentMembersView}
+      />
+
+      <div className="px-6 py-4 mt-auto">
+        {hasExistingAttendance && !isEditMode ? (
+          <Button onClick={() => setIsEditMode(true)} className="w-full">
+            Edit
+          </Button>
+        ) : (
+          <Button
+            onClick={handleSave}
+            disabled={isSaving || !state.hasChanges}
+            className="w-full"
+          >
+            {isSaving ? "Saving..." : "Save"}
+          </Button>
+        )}
+      </div>
+    </div>
+  );
+  const membersCard = (
+    <div className="rounded-xl shadow-lg w-full sm:w-[480px] h-[80vh] flex flex-col overflow-hidden bg-gray-50">
+      <SelectMembersView
+        mode={membersViewMode}
+        title={panelTitle}
+        actionLabel={panelActionLabel}
+        editable={isEditMode}
+        members={panelMembers}
+        selectedMembers={
+          membersViewMode === "absent"
+            ? absentSelections
+            : membersViewMode === "select"
+              ? state.presentMembers
+              : []
+        }
+        onToggleMember={
+          membersViewMode === "absent"
+            ? handleAbsentSelection
+            : (memberId, selected) => {
+                if (!selected && state.presentMembers.includes(memberId)) {
+                  toggleMember(memberId);
+                }
+
+                if (selected && !state.presentMembers.includes(memberId)) {
+                  toggleMember(memberId);
+                }
+              }
+        }
+        onAction={
+          !isEditMode
+            ? () => setIsMembersDialogOpen(false)
+            : membersViewMode === "present"
+              ? handleUpdatePresentRecord
+              : membersViewMode === "absent"
+                ? handleMarkAbsentAsPresent
+                : handleMarkPresent
+        }
+        searchQuery={state.searchQuery}
+        onSearchChange={setSearch}
+        removedCount={state.removedMembers.length}
+        onUndoRemove={undoRemove}
+        onRemoveMember={removeMember}
+      />
+    </div>
+  );
+
+  if (isMobile) {
+    const isSummaryOpen = isOpen && !isMembersDialogOpen;
+    const isMembersOpen = isOpen && isMembersDialogOpen;
+
+    return (
+      <>
+        <Dialog open={isSummaryOpen} onOpenChange={handleClose}>
+          <DialogContent
+            showClose={false}
+            mobileSheet
+            className="w-full max-w-[420px] p-0 overflow-hidden max-sm:max-h-[88vh]"
+          >
+            {summaryCard}
+          </DialogContent>
+        </Dialog>
+
+        <Dialog
+          open={isMembersOpen}
+          onOpenChange={(open) => {
+            if (!open) setIsMembersDialogOpen(false);
+          }}
+        >
+          <DialogContent
+            showClose={false}
+            mobileSheet
+            className="w-full max-w-[520px] p-0 overflow-hidden max-sm:max-h-[88vh] h-[80vh]"
+          >
+            {membersCard}
+          </DialogContent>
+        </Dialog>
+      </>
+    );
+  }
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
@@ -206,118 +414,8 @@ export function AttendanceModal({
         className="!p-0 !bg-transparent !shadow-none !border-none !max-w-none !w-auto !h-auto"
       >
         <div className="flex items-start gap-4">
-          <div className="rounded-xl shadow-lg w-[420px] h-full flex flex-col overflow-hidden">
-            <DialogHeader className="px-6 py-4 border-b">
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <DialogTitle className="text-xl font-semibold mb-3">
-                    {service.serviceName} attendance
-                  </DialogTitle>
-                </div>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={handleClose}
-                  className="flex-shrink-0"
-                >
-                  <X className="h-4 w-4" />
-                </Button>
-              </div>
-            </DialogHeader>
-
-            <div className="p-6">
-              <div className="grid grid-cols-2 gap-x-6 gap-y-3 text-sm">
-                <div className="flex items-center gap-2">
-                  <Calendar className="h-4 w-4" />
-                  <Span>{format(parsedDate, "MMM. d, yyyy")}</Span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <User className="h-4 w-4" />
-                  <Span>Recorded by: {admin.name}</Span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Clock className="h-4 w-4" />
-                  <Span>
-                    {service.startTime}
-                    {service.endTime && ` - ${service.endTime}`}
-                  </Span>
-                </div>
-                {service.location && (
-                  <div className="flex items-center gap-2">
-                    <MapPin className="h-4 w-4" />
-                    <Span className="truncate">{service.location}</Span>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            <AttendanceStatsView
-              presentMembers={presentMembers}
-              absentMembers={absentMembers}
-              isMembersLoaded={hasMembersLoaded}
-              isAttendanceMarked={state.hasChanges}
-              onLoadMembers={loadAllMembers}
-              onOpenPresentMembers={openPresentMembersView}
-              onOpenAbsentMembers={openAbsentMembersView}
-            />
-
-            <div className="px-6 py-4 mt-auto">
-              <Button
-                onClick={handleSave}
-                disabled={isSaving || !state.hasChanges}
-                className="w-full"
-              >
-                {isSaving ? "Saving..." : "Save"}
-              </Button>
-            </div>
-          </div>
-
-          {isMembersOpen && (
-            <div className="rounded-xl shadow-lg w-[480px] h-[80vh] flex flex-col overflow-hidden">
-              <SelectMembersView
-                mode={membersViewMode}
-                title={panelTitle}
-                actionLabel={panelActionLabel}
-                members={panelMembers}
-                selectedMembers={
-                  membersViewMode === "absent"
-                    ? absentSelections
-                    : state.presentMembers
-                }
-                onToggleMember={
-                  membersViewMode === "absent"
-                    ? handleAbsentSelection
-                    : (memberId, selected) => {
-                        if (
-                          !selected &&
-                          state.presentMembers.includes(memberId)
-                        ) {
-                          toggleMember(memberId);
-                        }
-
-                        if (
-                          selected &&
-                          !state.presentMembers.includes(memberId)
-                        ) {
-                          toggleMember(memberId);
-                        }
-                      }
-                }
-                onAction={
-                  membersViewMode === "present"
-                    ? handleUpdatePresentRecord
-                    : membersViewMode === "absent"
-                      ? handleMarkAbsentAsPresent
-                      : handleMarkPresent
-                }
-                searchQuery={state.searchQuery}
-                onSearchChange={setSearch}
-                removedCount={state.removedMembers.length}
-                onUndoRemove={undoRemove}
-                onRemoveMember={removeMember}
-              />
-            </div>
-          )}
+          {summaryCard}
+          {isMembersDialogOpen && membersCard}
         </div>
       </DialogContent>
     </Dialog>

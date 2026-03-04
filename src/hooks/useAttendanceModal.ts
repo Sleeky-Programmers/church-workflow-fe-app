@@ -23,6 +23,7 @@ type ModalAction =
   | { type: "REMOVE_MEMBER"; memberId: string }
   | { type: "UNDO_REMOVE" }
   | { type: "MOVE_TO_PRESENT"; memberIds: string[] }
+  | { type: "INITIALIZE_ATTENDANCE"; memberIds: string[] }
   | { type: "SET_LOADING"; isLoading: boolean }
   | { type: "SET_SEARCH"; query: string }
   | { type: "SET_PAGE"; page: number }
@@ -101,6 +102,16 @@ function modalReducer(state: ModalState, action: ModalAction): ModalState {
         hasChanges: true,
       };
 
+    case "INITIALIZE_ATTENDANCE":
+      return {
+        ...state,
+        presentMembers: action.memberIds,
+        absentMembers: state.allMembers
+          .map((m) => m.id)
+          .filter((id) => !action.memberIds.includes(id)),
+        hasChanges: true,
+      };
+
     case "SET_LOADING":
       return { ...state, isLoading: action.isLoading };
 
@@ -171,6 +182,10 @@ export function useAttendanceModal() {
     dispatch({ type: "MOVE_TO_PRESENT", memberIds });
   }, []);
 
+  const initializeAttendance = useCallback((memberIds: string[]) => {
+    dispatch({ type: "INITIALIZE_ATTENDANCE", memberIds });
+  }, []);
+
   const setLoading = useCallback((isLoading: boolean) => {
     dispatch({ type: "SET_LOADING", isLoading });
   }, []);
@@ -214,6 +229,7 @@ export function useAttendanceModal() {
     removeMember,
     undoRemove,
     moveToPresent,
+    initializeAttendance,
     setLoading,
     setSearch,
     setPage,
