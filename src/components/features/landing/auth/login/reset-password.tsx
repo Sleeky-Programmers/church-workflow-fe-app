@@ -56,13 +56,12 @@ export default function ResetPasswordForm({
     }
   };
   return (
-    <div className="bg-gray-50 rounded-2xl p-8 animate-slide-up">
-      <div className="text-left mb-8">
+    <div className="bg-gray-50 rounded-xl sm:rounded-2xl p-4 sm:p-8 animate-slide-up">
+      <div className="text-left mb-6 sm:mb-8">
         <Heading level={1}>Reset Password</Heading>
         <Text variant="muted">
-          Kindly set a new password. Your new password <br />
-          must be different from your previously <br />
-          used password.
+          Kindly set a new password. Your new password must be different from
+          your previously used password.
         </Text>
       </div>
       <Form {...form}>

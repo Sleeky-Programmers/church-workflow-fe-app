@@ -27,12 +27,23 @@ export function CalendarDayCell({
   onAddGivingRecord,
 }: CalendarDayCellProps) {
   const hasMultipleRegularServices = day.services.length > 1;
+  const hasAnyService = day.services.length > 0 || specialServices.length > 0;
+  const dayPalette = [
+    "bg-primary-50",
+    "bg-emerald-50",
+    "bg-violet-50",
+    "bg-amber-50",
+    "bg-sky-50",
+    "bg-fuchsia-50",
+    "bg-rose-50",
+  ];
+  const dayTintClass = dayPalette[day.date.getDay()];
 
   return (
     <div
       className={`
         min-h-[120px] p-2 border-b border-r
-        ${!day.isCurrentMonth ? "bg-gray-50" : "bg-white"}
+        ${!day.isCurrentMonth ? "bg-gray-50" : hasAnyService ? dayTintClass : "bg-white"}
       `}
     >
       <div className="flex items-center justify-between mb-2">

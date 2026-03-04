@@ -173,7 +173,8 @@ export function CreateSpecialServiceModal({
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent
         showClose={false}
-        className="max-w-2xl p-0 overflow-hidden"
+        mobileSheet
+        className="max-w-2xl p-0 overflow-hidden max-sm:max-h-[88vh]"
       >
         <DialogHeader className="px-6 py-4 border-b">
           <div className="flex items-center justify-between">

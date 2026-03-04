@@ -186,6 +186,8 @@ export default function AttendancePage() {
           services={services}
           onAddAttendance={handleAddAttendance}
           onAddGivingRecord={handleAddGivingRecord}
+          onViewServiceDetails={handleViewServiceDetails}
+          onAddService={handleAddService}
           onSelectRegularService={() => {
             setIsTypeModalOpen(false);
             setIsRegularModalOpen(true);
@@ -206,6 +208,71 @@ export default function AttendancePage() {
           open={isSpecialModalOpen}
           onOpenChange={setIsSpecialModalOpen}
           onCreateService={handleCreateSpecialService}
+        />
+
+        <ServiceTypeModal
+          open={isTypeModalOpen}
+          onOpenChange={setIsTypeModalOpen}
+          onSelectType={handleSelectServiceType}
+        />
+
+        <AttendanceModal
+          isOpen={isAttendanceModalOpen}
+          onClose={() => setIsAttendanceModalOpen(false)}
+          service={selectedService}
+          date={selectedDate}
+          onSave={() => {
+            toast({
+              title: "Success",
+              description: "Attendance saved successfully",
+            });
+          }}
+        />
+
+        <GivingRecordModal
+          open={isGivingRecordModalOpen}
+          onOpenChange={setIsGivingRecordModalOpen}
+          service={selectedService}
+          date={selectedDate}
+          initialValues={selectedKey ? givingRecords[selectedKey] : undefined}
+          onSave={(values) => {
+            if (selectedService && selectedDate) {
+              setGivingRecords((prev) => ({
+                ...prev,
+                [getServiceDateKey(selectedService.id, selectedDate)]: values,
+              }));
+            }
+            toast({
+              title: "Success",
+              description: "Giving record saved successfully",
+            });
+          }}
+        />
+
+        <ServiceDetailModal
+          open={isServiceDetailModalOpen}
+          onOpenChange={setIsServiceDetailModalOpen}
+          service={selectedService}
+          date={selectedDate}
+          orderItems={
+            selectedKey
+              ? orderByServiceDate[selectedKey] || DEFAULT_ORDER
+              : DEFAULT_ORDER
+          }
+          canEditOrder={Boolean(
+            selectedService?.frequency === "weekly" && isFutureService,
+          )}
+          onSaveOrder={(items) => {
+            if (!selectedService || !selectedDate) return;
+            setOrderByServiceDate((prev) => ({
+              ...prev,
+              [getServiceDateKey(selectedService.id, selectedDate)]: items,
+            }));
+            toast({
+              title: "Success",
+              description: "Order of service updated",
+            });
+          }}
         />
       </>
     );

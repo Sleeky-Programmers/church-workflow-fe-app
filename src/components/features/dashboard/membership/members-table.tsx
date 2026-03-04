@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { MemberProfile } from "@/types";
 import {
   Table,
@@ -20,13 +20,20 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 type MembersTableProps = {
   members: MemberProfile[];
   onRowClick: (memberId: string) => void;
+  onAddMember?: () => void;
 };
 
-export function MembersTable({ members, onRowClick }: MembersTableProps) {
+export function MembersTable({
+  members,
+  onRowClick,
+  onAddMember,
+}: MembersTableProps) {
+  const isMobile = useIsMobile();
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
 
@@ -40,7 +47,55 @@ export function MembersTable({ members, onRowClick }: MembersTableProps) {
     return members.slice(start, start + pageSize);
   }, [members, currentPage, pageSize]);
 
-  useMemo(() => setCurrentPage(1), [members, pageSize]);
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [members, pageSize]);
+
+  if (isMobile) {
+    return (
+      <div className="rounded-lg border bg-white overflow-hidden">
+        <div className="divide-y">
+          <div className="flex items-center justify-between px-3 py-3">
+            <div className="flex items-center gap-3">
+              <Checkbox />
+              <Text variant="default">All Members</Text>
+            </div>
+            <Button size="sm" className="h-8 px-4" onClick={onAddMember}>
+              Add
+            </Button>
+          </div>
+
+          {paginated.map((member) => (
+            <div
+              key={member.id}
+              className="flex items-center justify-between px-3 py-3"
+            >
+              <div className="flex items-center gap-3 min-w-0">
+                <Checkbox />
+                <Text variant="default" className="truncate">
+                  {member.fullName}
+                </Text>
+              </div>
+              <Button
+                size="sm"
+                variant="outline"
+                className="h-8"
+                onClick={() => onRowClick(member.id)}
+              >
+                View Profile
+              </Button>
+            </div>
+          ))}
+        </div>
+
+        {members.length === 0 && (
+          <div className="p-6 text-center">
+            <Text variant="muted">No members found</Text>
+          </div>
+        )}
+      </div>
+    );
+  }
 
   return (
     <div className="overflow-auto w-full max-w-full">

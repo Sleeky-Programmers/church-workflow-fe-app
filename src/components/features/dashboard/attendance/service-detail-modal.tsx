@@ -72,7 +72,8 @@ export function ServiceDetailModal({
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent
           showClose={false}
-          className="max-w-md p-0 overflow-hidden"
+          mobileSheet
+          className="max-w-md p-0 overflow-hidden max-sm:max-h-[88vh]"
         >
           <DialogHeader className="px-5 py-4 border-b">
             <DialogTitle className="text-2xl">
@@ -80,8 +81,8 @@ export function ServiceDetailModal({
             </DialogTitle>
           </DialogHeader>
 
-          <div className="px-5 py-4 space-y-4">
-            <div className="grid grid-cols-2 gap-4 text-sm">
+          <div className="px-5 py-4 space-y-4 overflow-y-auto">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
               <div className="flex items-center gap-2">
                 <Calendar className="h-4 w-4" />
                 {format(parsedDate, "MMM. d, yyyy")}
@@ -105,7 +106,7 @@ export function ServiceDetailModal({
               {sections.map((section) => (
                 <div key={section} className="space-y-3 border-t pt-4">
                   <div className="text-lg font-semibold">{section}</div>
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
                       <label className="text-sm">Male</label>
                       <Input value={maleCount} readOnly />

@@ -10,8 +10,12 @@ import { Text } from "@/components/ui/typography/Text";
 type AttendanceStatsViewProps = {
   presentMembers: Member[];
   absentMembers: Member[];
+  presentCount?: number;
+  absentCount?: number;
   isMembersLoaded: boolean;
   isAttendanceMarked: boolean;
+  showLoadMembersButton?: boolean;
+  loadMembersMuted?: boolean;
   onLoadMembers: () => void;
   onOpenPresentMembers: () => void;
   onOpenAbsentMembers: () => void;
@@ -20,14 +24,24 @@ type AttendanceStatsViewProps = {
 export function AttendanceStatsView({
   presentMembers,
   absentMembers,
+  presentCount,
+  absentCount,
   isMembersLoaded,
   isAttendanceMarked,
+  showLoadMembersButton = true,
+  loadMembersMuted = false,
   onLoadMembers,
   onOpenPresentMembers,
   onOpenAbsentMembers,
 }: AttendanceStatsViewProps) {
-  const presentIds = presentMembers.map((m) => m.id);
-  const absentIds = absentMembers.map((m) => m.id);
+  const presentIds =
+    presentCount !== undefined
+      ? Array.from({ length: presentCount }, (_, i) => `present-${i}`)
+      : presentMembers.map((m) => m.id);
+  const absentIds =
+    absentCount !== undefined
+      ? Array.from({ length: absentCount }, (_, i) => `absent-${i}`)
+      : absentMembers.map((m) => m.id);
 
   const presentSplit = calculateGenderSplit(presentIds);
   const absentSplit = calculateGenderSplit(absentIds);
@@ -37,21 +51,26 @@ export function AttendanceStatsView({
       <div className="p-4 flex items-center justify-between gap-3">
         <Heading level={4}>Members Attendance</Heading>
 
-        {!isMembersLoaded ? (
-          <Button
-            onClick={onLoadMembers}
-            className="bg-orange-600 hover:bg-orange-700 whitespace-nowrap"
-          >
-            Load members
-          </Button>
-        ) : (
-          <Button
-            disabled
-            className="bg-gray-300 text-gray-700 hover:bg-gray-300 whitespace-nowrap"
-          >
-            Members loaded
-          </Button>
-        )}
+        {showLoadMembersButton &&
+          (!isMembersLoaded ? (
+            <Button
+              onClick={onLoadMembers}
+              className={
+                loadMembersMuted
+                  ? "bg-gray-300 text-gray-700 hover:bg-gray-300 whitespace-nowrap"
+                  : "bg-orange-600 hover:bg-orange-700 whitespace-nowrap"
+              }
+            >
+              Load members
+            </Button>
+          ) : (
+            <Button
+              disabled
+              className="bg-gray-300 text-gray-700 hover:bg-gray-300 whitespace-nowrap"
+            >
+              Members loaded
+            </Button>
+          ))}
       </div>
 
       <div className="flex-1 p-4">

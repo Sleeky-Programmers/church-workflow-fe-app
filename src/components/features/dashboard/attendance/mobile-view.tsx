@@ -13,19 +13,72 @@ import { Button } from "@/components/ui/button";
 import { RegularService } from "@/types";
 import Heading from "@/components/ui/typography/Heading";
 import { Text, Span } from "@/components/ui/typography/Text";
+import { getAttendanceCount } from "@/lib/utils";
 
 type MobileAttendanceViewProps = {
   services: RegularService[];
   onAddAttendance: (service: RegularService, date: string) => void;
   onAddGivingRecord: (service: RegularService, date: string) => void;
+  onViewServiceDetails: (service: RegularService, date: string) => void;
+  onAddService: () => void;
   onSelectRegularService: () => void;
   onSelectSpecialService: () => void;
+};
+
+const SERVICE_COLOR_BY_DAY: Record<
+  string,
+  { dayBg: string; dayText: string; border: string; accentText: string }
+> = {
+  Sunday: {
+    dayBg: "bg-primary-100",
+    dayText: "text-primary-700",
+    border: "border-primary-600",
+    accentText: "text-primary-700",
+  },
+  Monday: {
+    dayBg: "bg-emerald-100",
+    dayText: "text-emerald-700",
+    border: "border-emerald-500",
+    accentText: "text-emerald-700",
+  },
+  Tuesday: {
+    dayBg: "bg-violet-100",
+    dayText: "text-violet-700",
+    border: "border-violet-500",
+    accentText: "text-violet-700",
+  },
+  Wednesday: {
+    dayBg: "bg-amber-100",
+    dayText: "text-amber-700",
+    border: "border-amber-500",
+    accentText: "text-amber-700",
+  },
+  Thursday: {
+    dayBg: "bg-sky-100",
+    dayText: "text-sky-700",
+    border: "border-sky-500",
+    accentText: "text-sky-700",
+  },
+  Friday: {
+    dayBg: "bg-fuchsia-100",
+    dayText: "text-fuchsia-700",
+    border: "border-fuchsia-500",
+    accentText: "text-fuchsia-700",
+  },
+  Saturday: {
+    dayBg: "bg-rose-100",
+    dayText: "text-rose-700",
+    border: "border-rose-500",
+    accentText: "text-rose-700",
+  },
 };
 
 export function MobileAttendanceView({
   services,
   onAddAttendance,
   onAddGivingRecord,
+  onViewServiceDetails,
+  onAddService,
   onSelectRegularService,
   onSelectSpecialService,
 }: MobileAttendanceViewProps) {
@@ -39,11 +92,10 @@ export function MobileAttendanceView({
     const lastDay = new Date(year, month + 1, 0);
     const startingDayOfWeek = firstDay.getDay();
 
-    const days: (Date | null)[] = [];
+    const days: Date[] = [];
 
     for (let i = 0; i < startingDayOfWeek; i++) {
-      const prevDay = new Date(year, month, -startingDayOfWeek + i + 1);
-      days.push(prevDay);
+      days.push(new Date(year, month, -startingDayOfWeek + i + 1));
     }
 
     for (let day = 1; day <= lastDay.getDate(); day++) {
@@ -56,6 +108,21 @@ export function MobileAttendanceView({
     }
 
     return days;
+  };
+
+  const getServiceColor = (service: RegularService) => {
+    const primaryDay = service.days[0] || "Sunday";
+    return SERVICE_COLOR_BY_DAY[primaryDay] || SERVICE_COLOR_BY_DAY.Sunday;
+  };
+
+  const getDayCellClasses = (day: Date) => {
+    const dayName = format(day, "EEEE");
+    const hasService = services.some((service) =>
+      service.days.includes(dayName),
+    );
+    if (!hasService) return "";
+    const color = SERVICE_COLOR_BY_DAY[dayName] || SERVICE_COLOR_BY_DAY.Sunday;
+    return `${color.dayBg} ${color.dayText}`;
   };
 
   const days = generateCalendarDays();
@@ -114,13 +181,14 @@ export function MobileAttendanceView({
 
           <div className="grid grid-cols-7 gap-1">
             {days.map((day, index) => {
-              if (!day) return <div key={index} />;
-
               const isToday =
                 format(day, "yyyy-MM-dd") === format(today, "yyyy-MM-dd");
               const isSelected =
                 format(day, "yyyy-MM-dd") === selectedDateString;
               const isCurrentMonth = day.getMonth() === currentMonth.getMonth();
+              const hasDayServices = services.some((service) =>
+                service.days.includes(format(day, "EEEE")),
+              );
 
               return (
                 <button
@@ -130,8 +198,9 @@ export function MobileAttendanceView({
                     aspect-square flex items-center justify-center text-sm rounded-lg
                     ${isToday ? "bg-primary-600 text-white font-semibold" : ""}
                     ${isSelected && !isToday ? "bg-primary-100 text-primary-600 font-medium" : ""}
+                    ${!isSelected && !isToday ? getDayCellClasses(day) : ""}
                     ${!isCurrentMonth ? "text-gray-300" : "text-gray-900"}
-                    ${!isToday && !isSelected ? "hover:bg-gray-100" : ""}
+                    ${!isToday && !isSelected && !hasDayServices ? "hover:bg-gray-100" : ""}
                   `}
                 >
                   {format(day, "d")}
@@ -146,7 +215,7 @@ export function MobileAttendanceView({
         <div className="flex items-center justify-between mb-4">
           <Heading level={3}>{format(selectedDate, "EEEE, MMMM d")}</Heading>
           {hasServices && (
-            <Button variant="ghost" size="icon">
+            <Button variant="ghost" size="icon" onClick={onAddService}>
               <Plus className="h-5 w-5" />
             </Button>
           )}
@@ -213,24 +282,50 @@ export function MobileAttendanceView({
             {servicesForDate.map((service) => (
               <div
                 key={service.id}
-                className="border-l-4 border-primary-600 bg-gray-50 p-3 rounded-r-lg"
+                className={`border-l-4 bg-gray-50 p-3 rounded-r-lg ${getServiceColor(service).border}`}
               >
-                <Heading level={2} className=" mb-1">
-                  {service.serviceName}
-                </Heading>
-                <Text variant="default" className=" mb-2">
-                  {service.days.join(", ")} · {service.startTime}
+                <button
+                  type="button"
+                  onClick={() =>
+                    onViewServiceDetails(service, selectedDateString)
+                  }
+                  className="w-full text-left"
+                >
+                  <Heading
+                    level={2}
+                    className={`mb-1 ${getServiceColor(service).accentText}`}
+                  >
+                    {service.serviceName}
+                  </Heading>
+                </button>
+                <Text variant="default" className="mb-2">
+                  {service.days.join(", ")} - {service.startTime}
                   {service.endTime && ` - ${service.endTime}`}
-                  {service.location && ` · ${service.location}`}
+                  {service.location && ` - ${service.location}`}
                 </Text>
                 <div className="flex gap-2">
-                  <Button
-                    size="sm"
-                    onClick={() => onAddAttendance(service, selectedDateString)}
-                    className="flex-1"
-                  >
-                    Add Attendance
-                  </Button>
+                  {(() => {
+                    const attendanceCount = getAttendanceCount(
+                      service,
+                      selectedDateString,
+                    );
+                    const hasAttendance = attendanceCount !== null;
+                    return (
+                      <Button
+                        size="sm"
+                        onClick={() =>
+                          onAddAttendance(service, selectedDateString)
+                        }
+                        className={`flex-1 ${
+                          hasAttendance
+                            ? "bg-secondary-600 hover:bg-secondary-700"
+                            : ""
+                        }`}
+                      >
+                        {hasAttendance ? "View Attendance" : "Add Attendance"}
+                      </Button>
+                    );
+                  })()}
                   <Button
                     size="sm"
                     variant="outline"

@@ -130,7 +130,8 @@ export function CreateRegularServiceModal({
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent
         showClose={false}
-        className="sm:max-w-lg max-h-[90vh] overflow-y-auto"
+        mobileSheet
+        className="sm:max-w-lg max-h-[90vh] overflow-y-auto max-sm:max-h-[85vh] max-sm:p-4"
       >
         <DialogHeader className="relative">
           <DialogTitle>Create Regular Service</DialogTitle>
@@ -191,7 +192,7 @@ export function CreateRegularServiceModal({
           </div>
 
           <div className="space-y-2">
-            <div className="grid grid-cols-7 gap-2">
+            <div className="grid grid-cols-4 sm:grid-cols-7 gap-2">
               {daysOfWeek.map((day) => (
                 <Button
                   key={day.short}

@@ -106,7 +106,7 @@ export default function SignupForm({ onSubmit }: SignupFormProps) {
 
   return (
     <div className="animate-fade-in">
-      <div className="mb-8">
+      <div className="mb-6 sm:mb-8">
         <Heading level={1}>Get Started</Heading>
         <Text variant="muted">
           It&apos;s easy! Just take a minute to provide the details.
@@ -114,7 +114,7 @@ export default function SignupForm({ onSubmit }: SignupFormProps) {
       </div>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <FormField
               control={form.control}
               name="firstName"
@@ -208,7 +208,11 @@ export default function SignupForm({ onSubmit }: SignupFormProps) {
               </FormItem>
             )}
           />
-          <Button type="submit" disabled={isLoading} className="w-full py-6">
+          <Button
+            type="submit"
+            disabled={isLoading}
+            className="w-full py-5 sm:py-6"
+          >
             {isLoading ? (
               <Span variant="default" className="flex items-center gap-2">
                 <Loader />
@@ -231,7 +235,7 @@ export default function SignupForm({ onSubmit }: SignupFormProps) {
           />
         </form>
       </Form>
-      <div className="text-center mt-6">
+      <div className="text-center mt-5 sm:mt-6">
         <Text variant="muted">
           Already have an account?
           <Button onClick={onLogin} variant="link">

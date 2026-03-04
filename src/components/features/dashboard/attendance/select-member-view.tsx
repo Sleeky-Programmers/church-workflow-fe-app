@@ -30,6 +30,7 @@ type SelectMembersViewProps = {
   removedCount?: number;
   onUndoRemove?: () => void;
   onRemoveMember?: (memberId: string) => void;
+  editable?: boolean;
 };
 
 export function SelectMembersView({
@@ -45,6 +46,7 @@ export function SelectMembersView({
   removedCount = 0,
   onUndoRemove,
   onRemoveMember,
+  editable = true,
 }: SelectMembersViewProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 10;
@@ -87,11 +89,11 @@ export function SelectMembersView({
             </Text>
           )}
           {mode === "present" && removedCount > 0 && (
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-4 w-full">
               <Text variant="error">You removed {removedCount} members</Text>
               <Button
                 variant="outline"
-                className=" p-2"
+                className="p-2"
                 onClick={onUndoRemove}
                 disabled={!onUndoRemove}
               >
@@ -103,7 +105,9 @@ export function SelectMembersView({
 
         <Button
           onClick={onAction}
-          disabled={mode !== "present" && selectedMembers.length === 0}
+          disabled={
+            editable && mode !== "present" && selectedMembers.length === 0
+          }
           className="whitespace-nowrap"
         >
           {actionLabel}
@@ -135,36 +139,41 @@ export function SelectMembersView({
                 member={member}
                 mode={
                   mode === "present"
-                    ? "view-present"
+                    ? editable
+                      ? "view-present"
+                      : "readonly-present"
                     : mode === "absent"
-                      ? "view-absent"
+                      ? editable
+                        ? "view-absent"
+                        : "readonly-absent"
                       : "select"
                 }
                 isSelected={selectedMembers.includes(member.id)}
-                onSelect={onToggleMember}
-                onRemove={onRemoveMember}
+                onSelect={editable ? onToggleMember : undefined}
+                onRemove={editable ? onRemoveMember : undefined}
               />
             ))}
           </div>
         )}
       </div>
 
-      {totalPages > 1 && (
-        <div className="p-4 border-t">
-          <Pagination>
-            <PaginationContent>
-              <PaginationItem>
-                <PaginationPrevious
-                  onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
-                  className={
-                    currentPage === 1
-                      ? "pointer-events-none opacity-50"
-                      : "cursor-pointer"
-                  }
-                />
-              </PaginationItem>
+      <div className="p-4 border-t">
+        <Pagination>
+          <PaginationContent>
+            <PaginationItem>
+              <PaginationPrevious
+                onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
+                className={
+                  currentPage === 1
+                    ? "pointer-events-none opacity-50"
+                    : "cursor-pointer"
+                }
+              />
+            </PaginationItem>
 
-              {Array.from({ length: Math.min(3, totalPages) }, (_, i) => {
+            {Array.from(
+              { length: Math.max(1, Math.min(3, totalPages)) },
+              (_, i) => {
                 const page = i + 1;
                 return (
                   <PaginationItem key={page}>
@@ -177,24 +186,24 @@ export function SelectMembersView({
                     </PaginationLink>
                   </PaginationItem>
                 );
-              })}
+              },
+            )}
 
-              <PaginationItem>
-                <PaginationNext
-                  onClick={() =>
-                    handlePageChange(Math.min(totalPages, currentPage + 1))
-                  }
-                  className={
-                    currentPage === totalPages
-                      ? "pointer-events-none opacity-50"
-                      : "cursor-pointer"
-                  }
-                />
-              </PaginationItem>
-            </PaginationContent>
-          </Pagination>
-        </div>
-      )}
+            <PaginationItem>
+              <PaginationNext
+                onClick={() =>
+                  handlePageChange(Math.min(totalPages, currentPage + 1))
+                }
+                className={
+                  currentPage === totalPages
+                    ? "pointer-events-none opacity-50"
+                    : "cursor-pointer"
+                }
+              />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
+      </div>
     </div>
   );
 }

@@ -40,7 +40,7 @@ const STEP_CONFIG = [
 function MembershipStepIndicator({ step }: { step: 1 | 2 | 3 }) {
   return (
     <div className="flex-shrink-0">
-      <div className="flex items-center rounded-2xl border border-gray-300 px-4 py-3">
+      <div className="flex items-center rounded-xl sm:rounded-2xl border border-gray-300 px-2 sm:px-4 py-2 sm:py-3">
         {STEP_CONFIG.map((config, index) => {
           const Icon = config.icon;
           const isActive = step === config.number;
@@ -53,7 +53,7 @@ function MembershipStepIndicator({ step }: { step: 1 | 2 | 3 }) {
             >
               <div className="flex items-center gap-4">
                 <div
-                  className={`h-14 w-14 rounded-full flex items-center justify-center flex-shrink-0 ${
+                  className={`h-8 w-8 sm:h-14 sm:w-14 rounded-full flex items-center justify-center flex-shrink-0 ${
                     isActive
                       ? "bg-primary-600"
                       : isCompleted
@@ -62,7 +62,7 @@ function MembershipStepIndicator({ step }: { step: 1 | 2 | 3 }) {
                   }`}
                 >
                   <Icon
-                    className={`h-7 w-7 ${
+                    className={`h-4 w-4 sm:h-7 sm:w-7 ${
                       isActive
                         ? "text-white"
                         : isCompleted
@@ -73,15 +73,19 @@ function MembershipStepIndicator({ step }: { step: 1 | 2 | 3 }) {
                 </div>
 
                 {isActive && (
-                  <div className="hidden md:block">
-                    <Text variant="muted">Step {config.number}/3</Text>
-                    <Text variant="menuActive">{config.label}</Text>
+                  <div className="block">
+                    <Text variant="muted" className="text-xs sm:text-sm">
+                      Step {config.number}/3
+                    </Text>
+                    <Text variant="menuActive" className="text-base sm:text-lg">
+                      {config.label}
+                    </Text>
                   </div>
                 )}
               </div>
 
               {index < STEP_CONFIG.length - 1 && (
-                <div className="mx-6 h-12 w-px bg-gray-200" />
+                <div className="mx-2 sm:mx-6 h-8 sm:h-12 w-px bg-gray-200" />
               )}
             </div>
           );
@@ -158,10 +162,14 @@ export function AddMemberModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent showClose={false}>
+      <DialogContent
+        showClose={false}
+        mobileSheet
+        className="w-full sm:max-w-3xl max-sm:max-h-[90vh] overflow-y-auto p-4 sm:p-6"
+      >
         <MembershipStepIndicator step={step === 4 ? 3 : step} />
 
-        <div className="flex-1 px-6 py-6">
+        <div className="flex-1 px-0 sm:px-6 py-3 sm:py-6">
           {step === 1 && (
             <ProfileDetailsStep
               onNext={handleStep1Next}

@@ -74,7 +74,8 @@ export function GivingRecordModal({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         showClose={false}
-        className="max-w-2xl p-0 overflow-hidden"
+        mobileSheet
+        className="max-w-2xl p-0 overflow-hidden max-sm:max-h-[88vh]"
       >
         <DialogHeader className="px-6 py-4 border-b">
           <DialogTitle className="text-2xl">
@@ -82,8 +83,8 @@ export function GivingRecordModal({
           </DialogTitle>
         </DialogHeader>
 
-        <div className="p-6 space-y-6">
-          <div className="grid grid-cols-2 gap-4 text-sm">
+        <div className="p-4 sm:p-6 space-y-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
             <div className="flex items-center gap-2">
               <Calendar className="h-5 w-5" />
               {format(parsedDate, "MMM. d, yyyy")}
@@ -105,7 +106,7 @@ export function GivingRecordModal({
 
           <div>
             <h3 className="text-3xl font-semibold mb-4">Giving Summary</h3>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="mb-2 block text-sm font-medium">Tithe</label>
                 <Input

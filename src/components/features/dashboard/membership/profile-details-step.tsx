@@ -66,7 +66,7 @@ export function ProfileDetailsStep({
         </div>
 
         <div className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-3 gap-4">
             <div>
               <Label>Title</Label>
               <Select
@@ -89,7 +89,7 @@ export function ProfileDetailsStep({
               </Select>
             </div>
 
-            <div className="md:col-span-2">
+            <div className="col-span-2">
               <Label>
                 Full Name <Span variant="error">*</Span>
               </Label>
@@ -109,7 +109,7 @@ export function ProfileDetailsStep({
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-3 gap-4">
             <div>
               <Label>
                 Gender <Span variant="error">*</Span>
@@ -137,7 +137,7 @@ export function ProfileDetailsStep({
               )}
             </div>
 
-            <div className="md:col-span-2">
+            <div className="col-span-2">
               <Label>
                 Birthday <Span variant="error">*</Span>
               </Label>
@@ -156,7 +156,7 @@ export function ProfileDetailsStep({
               )}
             </div>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-2 gap-6">
             <div>
               <Label>Marital Status</Label>
               <Select
@@ -198,7 +198,7 @@ export function ProfileDetailsStep({
           </div>
 
           {formData.maritalStatus === "Married" && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-2 gap-6">
               <div>
                 <Label>Spouse's First Name</Label>
                 <Input

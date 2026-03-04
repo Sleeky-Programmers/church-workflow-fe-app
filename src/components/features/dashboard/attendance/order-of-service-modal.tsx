@@ -68,7 +68,10 @@ export function OrderOfServiceModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-sm p-0 overflow-hidden">
+      <DialogContent
+        mobileSheet
+        className="max-w-sm p-0 overflow-hidden max-sm:max-h-[88vh]"
+      >
         <DialogHeader className="px-5 py-4 border-b">
           <DialogTitle className="text-lg">
             {serviceName} Order of Service
