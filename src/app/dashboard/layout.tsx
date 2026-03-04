@@ -3,6 +3,7 @@ import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/layout/Sidebar";
 import { Navbar } from "@/components/layout/Navbar";
 import { RecentTracker } from "@/components/layout/recent-tracker";
+import { DashboardGuard } from "@/components/auth/dashboard-guard";
 
 export const metadata: Metadata = {
   title: process.env.NEXT_PUBLIC_APP_NAME,
@@ -15,17 +16,19 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   return (
-    <SidebarProvider>
-      <RecentTracker />
+    <DashboardGuard>
+      <SidebarProvider>
+        <RecentTracker />
 
-      <div className="min-h-screen flex bg-gray-50 relative">
-        <AppSidebar />
+        <div className="min-h-screen flex bg-gray-50 relative">
+          <AppSidebar />
 
-        <SidebarInset>
-          <Navbar />
-          <main className="p-4 md:p-6">{children}</main>
-        </SidebarInset>
-      </div>
-    </SidebarProvider>
+          <SidebarInset>
+            <Navbar />
+            <main className="p-4 md:p-6">{children}</main>
+          </SidebarInset>
+        </div>
+      </SidebarProvider>
+    </DashboardGuard>
   );
 }

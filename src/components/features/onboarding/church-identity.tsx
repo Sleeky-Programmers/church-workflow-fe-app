@@ -29,6 +29,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { COUNTRIES, CURRENCIES, TIME_ZONES } from "@/lib/data";
 
 type ChurchIdentityStepProps = {
   form: UseFormReturn<ChurchIdentityValues>;
@@ -39,74 +40,6 @@ type ChurchIdentityStepProps = {
   onLogoSelect: (file: File | null) => void;
   isSubmitting?: boolean;
 };
-
-const COUNTRIES = [
-  { code: "NG", name: "Nigeria", currency: "NGN", timeZone: "Africa/Lagos" },
-  {
-    code: "US",
-    name: "United States",
-    currency: "USD",
-    timeZone: "America/New_York",
-  },
-  {
-    code: "GB",
-    name: "United Kingdom",
-    currency: "GBP",
-    timeZone: "Europe/London",
-  },
-  { code: "CA", name: "Canada", currency: "CAD", timeZone: "America/Toronto" },
-  { code: "GH", name: "Ghana", currency: "GHS", timeZone: "Africa/Accra" },
-  { code: "KE", name: "Kenya", currency: "KES", timeZone: "Africa/Nairobi" },
-  {
-    code: "ZA",
-    name: "South Africa",
-    currency: "ZAR",
-    timeZone: "Africa/Johannesburg",
-  },
-  { code: "IN", name: "India", currency: "INR", timeZone: "Asia/Kolkata" },
-  { code: "PH", name: "Philippines", currency: "PHP", timeZone: "Asia/Manila" },
-  {
-    code: "AU",
-    name: "Australia",
-    currency: "AUD",
-    timeZone: "Australia/Sydney",
-  },
-  { code: "DE", name: "Germany", currency: "EUR", timeZone: "Europe/Berlin" },
-  { code: "FR", name: "France", currency: "EUR", timeZone: "Europe/Paris" },
-];
-
-const CURRENCIES = [
-  { code: "NGN", label: "Nigerian Naira (NGN)" },
-  { code: "USD", label: "US Dollar (USD)" },
-  { code: "EUR", label: "Euro (EUR)" },
-  { code: "GBP", label: "British Pound (GBP)" },
-  { code: "CAD", label: "Canadian Dollar (CAD)" },
-  { code: "GHS", label: "Ghanaian Cedi (GHS)" },
-  { code: "KES", label: "Kenyan Shilling (KES)" },
-  { code: "ZAR", label: "South African Rand (ZAR)" },
-  { code: "INR", label: "Indian Rupee (INR)" },
-  { code: "PHP", label: "Philippine Peso (PHP)" },
-  { code: "AUD", label: "Australian Dollar (AUD)" },
-];
-
-const TIME_ZONES = [
-  "Africa/Lagos",
-  "Africa/Accra",
-  "Africa/Nairobi",
-  "Africa/Johannesburg",
-  "America/New_York",
-  "America/Chicago",
-  "America/Denver",
-  "America/Los_Angeles",
-  "America/Toronto",
-  "Europe/London",
-  "Europe/Berlin",
-  "Europe/Paris",
-  "Asia/Kolkata",
-  "Asia/Manila",
-  "Australia/Sydney",
-  "UTC",
-];
 
 const COUNTRY_BY_CODE: Record<string, string> = COUNTRIES.reduce(
   (acc, country) => {
@@ -311,9 +244,7 @@ export function ChurchIdentityStep({
               name="state"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>
-                    State / Province <Span variant="muted">(optional)</Span>
-                  </FormLabel>
+                  <FormLabel>State / Province</FormLabel>
                   <FormControl>
                     <Input {...field} placeholder="State / Province" />
                   </FormControl>

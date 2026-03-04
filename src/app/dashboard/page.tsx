@@ -1,5 +1,5 @@
 "use client";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { CalendarDays, User } from "lucide-react";
 import { Span, Text } from "@/components/ui/typography/Text";
 import { StatCard } from "@/components/features/dashboard/StatCard";
@@ -20,15 +20,56 @@ import Link from "next/link";
 import { TrendChart } from "@/components/features/dashboard/trend-chart";
 import { IncomeVsExpenses } from "@/components/features/dashboard/income-expense";
 import { IncomeBreakdown } from "@/components/features/dashboard/income-breakdown";
-import { getCurrentAdmin } from "@/lib/api";
+import type { ChurchIdentityRecord } from "@/lib/auth/session";
+import {
+  getCurrentOnboardingState,
+  getCurrentUserProfile,
+} from "@/lib/auth/session";
 
 export default function Dashboard() {
+  const [displayName, setDisplayName] = useState("Super Admin");
+  const [churchName, setChurchName] = useState<string | null>(null);
+  const [churchIdentity, setChurchIdentity] =
+    useState<ChurchIdentityRecord | null>(null);
+
+  useEffect(() => {
+    const profile = getCurrentUserProfile();
+    const onboarding = getCurrentOnboardingState();
+
+    if (profile?.firstName) {
+      setDisplayName(profile.firstName);
+    } else if (profile?.fullName) {
+      setDisplayName(profile.fullName);
+    }
+
+    if (onboarding?.churchIdentity?.name) {
+      setChurchName(onboarding.churchIdentity.name);
+      setChurchIdentity(onboarding.churchIdentity);
+    }
+  }, []);
+
   return (
     <>
       <div className="flex md:items-center justify-between md:flex-row flex-col items-start mb-6">
-        <Heading level={1} text="Hello, Super Admin" />
-        <Text text="Overview" />
+        <Heading level={1} text={`Hello, ${displayName}`} />
+        <Text text={churchName ? `Overview - ${churchName}` : "Overview"} />
       </div>
+
+      {churchIdentity && (
+        <Card className="mb-6 rounded-3xl">
+          <CardContent className="py-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+              <Text text={`Church: ${churchIdentity.name}`} variant="blue" />
+              <Text
+                text={`Location: ${churchIdentity.address}, ${churchIdentity.country}`}
+              />
+              <Text
+                text={`Currency/Timezone: ${churchIdentity.defaultCurrency} - ${churchIdentity.timeZone}`}
+              />
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 mb-6">
         <div className="lg:col-span-2 space-y-6">
