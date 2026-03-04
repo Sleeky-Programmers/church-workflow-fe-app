@@ -24,6 +24,7 @@ import { Link } from "@/components/ui/link";
 import { adminSignupSchema } from "@/types/schema";
 import { RouteConfig } from "@/config/routes";
 import { googleAuth } from "@/lib/api";
+import { initializeAuthSession } from "@/lib/auth/session";
 
 type AdminSignupFormValues = z.infer<typeof adminSignupSchema>;
 
@@ -72,9 +73,11 @@ export default function AdminSignupForm({
     try {
       setIsLoading(true);
       const data = await googleAuth(idToken, inviteToken);
-      if (typeof window !== "undefined") {
-        localStorage.setItem("accessToken", data.accessToken);
-      }
+      initializeAuthSession({
+        accessToken: data.accessToken,
+        emailHint: data.user?.email || preFilledEmail,
+        user: data.user,
+      });
       router.push(RouteConfig.dashboard.home);
     } catch (error: any) {
       form.setError("email", {

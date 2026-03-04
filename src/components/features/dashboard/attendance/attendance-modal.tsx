@@ -201,11 +201,6 @@ export function AttendanceModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      {/*
-        The DialogContent is made transparent and borderless so we can render
-        two independent card panels side by side inside it, matching the design
-        where each panel is its own floating card.
-      */}
       <DialogContent
         showClose={false}
         className="!p-0 !bg-transparent !shadow-none !border-none !max-w-none !w-auto !h-auto"

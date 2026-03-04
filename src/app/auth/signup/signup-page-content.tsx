@@ -12,6 +12,7 @@ import { RouteConfig } from "@/config/routes";
 import { SignUpStep } from "@/lib/enums";
 import AuthLayout from "@/components/features/landing/auth/signup/auth-layout";
 import { resendOtp, verifyOtp } from "@/lib/api";
+import { initializeAuthSession } from "@/lib/auth/session";
 
 export function SignupPageContent() {
   const router = useRouter();
@@ -69,8 +70,16 @@ export function SignupPageContent() {
     try {
       const response = await verifyOtp({ email, otp: Number(otp) });
 
-      if (typeof window !== "undefined" && response.accessToken) {
-        localStorage.setItem("accessToken", response.accessToken);
+      if (response.accessToken) {
+        initializeAuthSession({
+          accessToken: response.accessToken,
+          emailHint: email,
+          user: {
+            email,
+            firstName: signupData?.firstName,
+            lastName: signupData?.lastName,
+          },
+        });
       }
 
       if (signupData && typeof window !== "undefined") {

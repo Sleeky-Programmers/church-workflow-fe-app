@@ -17,6 +17,12 @@ import {
 import { createChurch, createWeeklyService, uploadMembersCsv } from "@/lib/api";
 import { RouteConfig } from "@/config/routes";
 import { convertTo12Hour } from "@/lib/utils";
+import {
+  getAccessToken,
+  markChurchIdentityComplete,
+  markMembersUploaded,
+  markWeeklyServicesComplete,
+} from "@/lib/auth/session";
 
 export default function ChurchOnboarding() {
   const [step, setStep] = useState(1);
@@ -45,6 +51,11 @@ export default function ChurchOnboarding() {
   });
 
   useEffect(() => {
+    if (!getAccessToken()) {
+      router.replace(RouteConfig.auth.signIn);
+      return;
+    }
+
     if (typeof window === "undefined") return;
 
     const savedDraft = window.localStorage.getItem(
@@ -67,28 +78,24 @@ export default function ChurchOnboarding() {
     } catch (error) {
       console.error("Failed to parse saved onboarding draft:", error);
     }
-  }, [identityForm]);
+  }, [identityForm, router]);
 
   const onIdentitySubmit = async (data: ChurchIdentityValues) => {
-    if (!logoFile) {
-      alert("Please upload a church logo");
-      return;
-    }
+    setIsSubmittingIdentity(true);
+
     try {
-      if (logoFile) {
-        await createChurch(
-          {
-            name: data.name,
-            alias: data.alias || "",
-            address: data.address,
-            country: data.country,
-            state: data.state || "",
-            defaultCurrency: data.defaultCurrency,
-            timeZone: data.timeZone,
-          },
-          logoFile,
-        );
-      }
+      const church = await createChurch(
+        {
+          name: data.name,
+          alias: data.alias || "",
+          address: data.address,
+          country: data.country,
+          state: data.state || "",
+          defaultCurrency: data.defaultCurrency,
+          timeZone: data.timeZone,
+        },
+        logoFile,
+      );
 
       if (typeof window !== "undefined") {
         window.localStorage.setItem(
@@ -96,6 +103,23 @@ export default function ChurchOnboarding() {
           JSON.stringify(data),
         );
       }
+
+      markChurchIdentityComplete({
+        name: data.name,
+        alias: data.alias || "",
+        address: data.address,
+        country: data.country,
+        state: data.state || "",
+        defaultCurrency: data.defaultCurrency,
+        timeZone: data.timeZone,
+        logoUrl:
+          (church as { logoUrl?: string } | null)?.logoUrl ||
+          (church as { church?: { logoUrl?: string } } | null)?.church?.logoUrl,
+        logoPublicId:
+          (church as { logoPublicId?: string } | null)?.logoPublicId ||
+          (church as { church?: { logoPublicId?: string } } | null)?.church
+            ?.logoPublicId,
+      });
 
       setStep(2);
     } catch (error: any) {
@@ -109,20 +133,18 @@ export default function ChurchOnboarding() {
   const onSaveIdentityAndExit = async (data: ChurchIdentityValues) => {
     setIsSubmittingIdentity(true);
     try {
-      if (logoFile) {
-        await createChurch(
-          {
-            name: data.name,
-            alias: data.alias || "",
-            address: data.address,
-            country: data.country,
-            state: data.state || "",
-            defaultCurrency: data.defaultCurrency,
-            timeZone: data.timeZone,
-          },
-          logoFile,
-        );
-      }
+      const church = await createChurch(
+        {
+          name: data.name,
+          alias: data.alias || "",
+          address: data.address,
+          country: data.country,
+          state: data.state || "",
+          defaultCurrency: data.defaultCurrency,
+          timeZone: data.timeZone,
+        },
+        logoFile,
+      );
 
       if (typeof window !== "undefined") {
         window.localStorage.setItem(
@@ -130,6 +152,23 @@ export default function ChurchOnboarding() {
           JSON.stringify(data),
         );
       }
+
+      markChurchIdentityComplete({
+        name: data.name,
+        alias: data.alias || "",
+        address: data.address,
+        country: data.country,
+        state: data.state || "",
+        defaultCurrency: data.defaultCurrency,
+        timeZone: data.timeZone,
+        logoUrl:
+          (church as { logoUrl?: string } | null)?.logoUrl ||
+          (church as { church?: { logoUrl?: string } } | null)?.church?.logoUrl,
+        logoPublicId:
+          (church as { logoPublicId?: string } | null)?.logoPublicId ||
+          (church as { church?: { logoPublicId?: string } } | null)?.church
+            ?.logoPublicId,
+      });
 
       router.push(RouteConfig.dashboard.home);
     } catch (error: any) {
@@ -155,6 +194,8 @@ export default function ChurchOnboarding() {
           });
         }
       }
+
+      markWeeklyServicesComplete();
       setStep(3);
     } catch (error: any) {
       console.error("Failed to create weekly services", error);
@@ -170,6 +211,7 @@ export default function ChurchOnboarding() {
 
     try {
       await uploadMembersCsv(data.csvFile);
+      markMembersUploaded();
 
       router.push(RouteConfig.dashboard.home);
     } catch (error: any) {
@@ -179,7 +221,14 @@ export default function ChurchOnboarding() {
   };
 
   const handleBack = () => step > 1 && setStep(step - 1);
-  const handleSkip = () => setStep(step + 1);
+  const handleSkip = () => {
+    if (step === 2) {
+      setStep(3);
+      return;
+    }
+
+    router.push(RouteConfig.dashboard.home);
+  };
 
   const addService = (service: WeeklyServicesValues[number]) => {
     setServices((prev) => [...prev, service]);

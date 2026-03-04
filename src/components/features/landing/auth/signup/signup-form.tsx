@@ -24,6 +24,7 @@ import { Link } from "@/components/ui/link";
 import { signupSchema } from "@/types/schema";
 import { googleAuth, signup } from "@/lib/api";
 import { RouteConfig } from "@/config/routes";
+import { initializeAuthSession } from "@/lib/auth/session";
 
 type SignupFormValues = z.infer<typeof signupSchema>;
 
@@ -61,9 +62,22 @@ export default function SignupForm({ onSubmit }: SignupFormProps) {
       onSubmit(data.email, data);
     } catch (error: any) {
       console.error(error);
-      form.setError("email", {
-        message: error.message || "Signup failed",
-      });
+      const backendMessage =
+        error?.response?.data?.message ||
+        error?.message ||
+        "Something went wrong. Please try again.";
+
+      if (backendMessage.includes("already exists")) {
+        form.setError("email", {
+          type: "manual",
+          message: "An account with this email already exists.",
+        });
+      } else {
+        form.setError("root", {
+          type: "manual",
+          message: backendMessage,
+        });
+      }
     } finally {
       setIsLoading(false);
     }
@@ -73,9 +87,11 @@ export default function SignupForm({ onSubmit }: SignupFormProps) {
     try {
       setIsLoading(true);
       const data = await googleAuth(idToken);
-      if (typeof window !== "undefined") {
-        localStorage.setItem("accessToken", data.accessToken);
-      }
+      initializeAuthSession({
+        accessToken: data.accessToken,
+        emailHint: data.user?.email,
+        user: data.user,
+      });
       router.push(RouteConfig.onboarding);
     } catch (error: any) {
       form.setError("email", {

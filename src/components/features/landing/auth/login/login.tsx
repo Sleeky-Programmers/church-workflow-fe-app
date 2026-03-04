@@ -20,6 +20,11 @@ import { PasswordInput } from "@/components/ui/passport-input";
 import { Input } from "@/components/ui/input";
 import { RouteConfig } from "@/config/routes";
 import { googleAuth, login } from "@/lib/api";
+import {
+  initializeAuthSession,
+  shouldCurrentUserCompleteOnboarding,
+} from "@/lib/auth/session";
+import { useAuthStore } from "@/stores/useAuthStore";
 
 interface LoginFormProps {
   onForgotPassword: () => void;
@@ -28,6 +33,7 @@ interface LoginFormProps {
 export default function LoginForm({ onForgotPassword }: LoginFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+  const setUser = useAuthStore((state) => state.setUser);
   const form = useForm<LoginFormValues>({
     defaultValues: {
       email: "",
@@ -39,13 +45,19 @@ export default function LoginForm({ onForgotPassword }: LoginFormProps) {
     setIsLoading(true);
     try {
       const data = await login(values);
-      if (typeof window !== "undefined") {
-        localStorage.setItem("accessToken", data.accessToken);
-      }
-      const onboardingCompleted =
-        localStorage.getItem("onboardingCompleted") === "true";
+      const profile = initializeAuthSession({
+        accessToken: data.accessToken,
+        emailHint: values.email,
+        user: data.user,
+      });
 
-      if (!onboardingCompleted) {
+      setUser({
+        id: profile.id || profile.userKey,
+        name: profile.fullName || profile.firstName || "Super Admin",
+        email: profile.email || values.email,
+      });
+
+      if (shouldCurrentUserCompleteOnboarding()) {
         router.push(RouteConfig.onboarding);
       } else {
         router.push(RouteConfig.dashboard.home);
@@ -65,14 +77,19 @@ export default function LoginForm({ onForgotPassword }: LoginFormProps) {
     setIsLoading(true);
     try {
       const data = await googleAuth(idToken);
-      if (typeof window !== "undefined") {
-        localStorage.setItem("accessToken", data.accessToken);
-      }
+      const profile = initializeAuthSession({
+        accessToken: data.accessToken,
+        emailHint: data.user?.email,
+        user: data.user,
+      });
 
-      const onboardingCompleted =
-        localStorage.getItem("onboardingCompleted") === "true";
+      setUser({
+        id: profile.id || profile.userKey,
+        name: profile.fullName || profile.firstName || "Super Admin",
+        email: profile.email || data.user?.email || "",
+      });
 
-      if (!onboardingCompleted) {
+      if (shouldCurrentUserCompleteOnboarding()) {
         router.push(RouteConfig.onboarding);
       } else {
         router.push(RouteConfig.dashboard.home);
