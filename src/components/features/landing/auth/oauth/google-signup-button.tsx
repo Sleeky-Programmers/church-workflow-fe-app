@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { FcGoogle } from "react-icons/fc";
+import { useToast } from "@/hooks/use-toast";
 
 declare global {
   interface Window {
@@ -34,6 +35,8 @@ export default function GoogleSignupButton({
   const [isScriptReady, setIsScriptReady] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
+  const { toast } = useToast();
+
   useEffect(() => {
     if (window.google?.accounts?.id) {
       setIsScriptReady(true);
@@ -61,12 +64,10 @@ export default function GoogleSignupButton({
   const handleGoogleClick = async () => {
     const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
     if (!clientId) {
-      console.error("NEXT_PUBLIC_GOOGLE_CLIENT_ID is not configured.");
       return;
     }
 
     if (!isScriptReady || !window.google?.accounts?.id) {
-      console.error("Google Identity Services is not ready.");
       return;
     }
 
@@ -81,8 +82,12 @@ export default function GoogleSignupButton({
           }
 
           await onCredential(response.credential);
-        } catch (error) {
-          console.error("Google auth failed:", error);
+        } catch (error: any) {
+          toast({
+            title: "Error",
+            description: error.message || "Google auth failed",
+            variant: "destructive",
+          });
         } finally {
           setIsLoading(false);
         }
