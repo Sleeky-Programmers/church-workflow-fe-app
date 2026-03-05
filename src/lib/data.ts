@@ -31,6 +31,15 @@ import {
 } from "lucide-react";
 import { MODULE_PERMISSIONS } from "./role-constants";
 
+export const DEFAULT_ORDER = [
+  "Opening Prayer",
+  "Praise and Worship",
+  "Bible Reading",
+  "Sermon",
+  "Offering",
+  "Closing Prayer",
+];
+
 export const COUNTRIES = [
   { code: "NG", name: "Nigeria", currency: "NGN", timeZone: "Africa/Lagos" },
   {

@@ -14,6 +14,7 @@ import { UploadMembersValues } from "@/types/type";
 import { useState } from "react";
 import { Pause, X, Download } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { MEMBERS_CSV_TEMPLATE } from "./constants";
 
 type UploadFile = {
   name: string;
@@ -40,9 +41,6 @@ export function UploadMembersStep({
   totalSteps = 3,
 }: UploadMembersStepProps) {
   const [uploadedFiles, setUploadedFiles] = useState<UploadFile[]>([]);
-  const csvTemplate = `title,fullName,gender,birthday,maritalStatus,dateOfMarriage,spouseFirstName,spouseLastName,phoneNumber,email,occupation,educationalBackground,membershipStatus,dateJoined,previousChurchMembership,isBaptized,ministries,volunteerPreferences,cellGroupName
-MR.,John Mensah,MALE,1985-03-15,MARRIED,2010-07-20,Ama,Mensah,+233-24-123-4567,john.mensah@email.com,Teacher,Masters in Education,MEMBER,2020-01-15,St. Peter's Church,true,Worship Team,Music Ministry,Christ Embassy
-MRS.,Sarah Adjei,FEMALE,1990-08-22,SINGLE,,,,+233-20-234-5678,sarah.adjei@email.com,Nurse,Bachelors in Nursing,VOLUNTEER,2019-11-10,Healing Streams Church,true,Children's Ministry,Teaching,Victory Chapel`;
 
   const getUploadStatusConfig = (status: string, message?: string) => {
     const configs = {
@@ -127,7 +125,9 @@ MRS.,Sarah Adjei,FEMALE,1990-08-22,SINGLE,,,,+233-20-234-5678,sarah.adjei@email.
   };
 
   const handleDownloadTemplate = () => {
-    const blob = new Blob([csvTemplate], { type: "text/csv;charset=utf-8;" });
+    const blob = new Blob([MEMBERS_CSV_TEMPLATE], {
+      type: "text/csv;charset=utf-8;",
+    });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
@@ -170,7 +170,7 @@ MRS.,Sarah Adjei,FEMALE,1990-08-22,SINGLE,,,,+233-20-234-5678,sarah.adjei@email.
                   htmlFor="csv-upload"
                   className="border-2 border-dashed border-gray-200 rounded-lg p-8 bg-white hover:border-gray-300 transition-colors cursor-pointer flex items-center justify-center"
                 >
-                  <Text className="muted">
+                  <Text variant="muted">
                     Click to upload file (Supported formats: .csv)
                   </Text>
                   <Input
@@ -242,7 +242,10 @@ MRS.,Sarah Adjei,FEMALE,1990-08-22,SINGLE,,,,+233-20-234-5678,sarah.adjei@email.
 
         <div className="text-center pt-2">
           <Text variant="muted">
-            Step <Span variant="default">{step}</Span> of {totalSteps}
+            Step{" "}
+            <Span variant="blue">
+              {step} of {totalSteps}
+            </Span>
           </Text>
         </div>
 
@@ -250,18 +253,18 @@ MRS.,Sarah Adjei,FEMALE,1990-08-22,SINGLE,,,,+233-20-234-5678,sarah.adjei@email.
           <Button
             type="button"
             variant="outline"
-            onClick={onSkip}
+            onClick={onBack}
             className="w-full"
           >
-            Skip for now
+            <Text variant="blue">Back</Text>
           </Button>
           <Button
             type="button"
             variant="outline"
-            onClick={onBack}
+            onClick={onSkip}
             className="w-full"
           >
-            Back
+            <Text variant="blue">Skip for now</Text>
           </Button>
           <Button
             type="button"

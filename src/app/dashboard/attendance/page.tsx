@@ -17,6 +17,8 @@ import { ServiceDetailModal } from "@/components/features/dashboard/attendance/s
 import { GivingValues } from "@/components/features/dashboard/attendance/giving-record-modal";
 import { SpecialServiceEvent } from "@/components/features/dashboard/attendance/types";
 import Heading from "@/components/ui/typography/Heading";
+import { DEFAULT_ORDER } from "@/lib/data";
+import { ServiceFrequency, ServiceType } from "@/lib/enums";
 
 function useIsMobile() {
   const [isMobile, setIsMobile] = useState(false);
@@ -59,15 +61,6 @@ export default function AttendancePage() {
   const [specialServices, setSpecialServices] = useState<SpecialServiceEvent[]>(
     [],
   );
-
-  const DEFAULT_ORDER = [
-    "Opening Prayer",
-    "Praise and Worship",
-    "Bible Reading",
-    "Sermon",
-    "Offering",
-    "Closing Prayer",
-  ];
 
   const setServiceContext = (service: RegularService, date: string) => {
     setSelectedService(service);
@@ -134,8 +127,10 @@ export default function AttendancePage() {
     setIsTypeModalOpen(true);
   };
 
-  const handleSelectServiceType = (type: "regular" | "special") => {
-    if (type === "regular") {
+  const handleSelectServiceType = (
+    type: ServiceType.REGULAR | ServiceType.SPECIAL,
+  ) => {
+    if (type === ServiceType.REGULAR) {
       setIsRegularModalOpen(true);
     } else {
       setIsSpecialModalOpen(true);
@@ -260,7 +255,8 @@ export default function AttendancePage() {
               : DEFAULT_ORDER
           }
           canEditOrder={Boolean(
-            selectedService?.frequency === "weekly" && isFutureService,
+            selectedService?.frequency === ServiceFrequency.WEEKLY &&
+            isFutureService,
           )}
           onSaveOrder={(items) => {
             if (!selectedService || !selectedDate) return;
@@ -379,7 +375,8 @@ export default function AttendancePage() {
             : DEFAULT_ORDER
         }
         canEditOrder={Boolean(
-          selectedService?.frequency === "weekly" && isFutureService,
+          selectedService?.frequency === ServiceFrequency.WEEKLY &&
+          isFutureService,
         )}
         onSaveOrder={(items) => {
           if (!selectedService || !selectedDate) return;
