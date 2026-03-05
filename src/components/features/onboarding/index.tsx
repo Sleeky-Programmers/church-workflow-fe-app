@@ -182,8 +182,11 @@ export default function ChurchOnboarding() {
 
       router.push(RouteConfig.dashboard.home);
     } catch (error: any) {
-      console.error("Save and exit failed:", error);
-      alert(error.message || "Failed to save church identity");
+      toast({
+        title: "Error",
+        description: error.message || "Failed to save church identity",
+        variant: "destructive",
+      });
     } finally {
       setIsSubmittingIdentity(false);
     }

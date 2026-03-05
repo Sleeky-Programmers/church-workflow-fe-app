@@ -92,7 +92,7 @@ export function AttendanceModal({
         initializeAttendance(existingRecord.presentMembers);
       }
       setHasMembersLoaded(true);
-    } catch (error) {
+    } catch (error: any) {
       toast({
         title: "Error",
         description: error.message || "Failed to load members",

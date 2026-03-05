@@ -45,7 +45,7 @@ export default function DepartmentPage() {
   };
 
   const handleExport = (row: DepartmentRow) => {
-    console.log("Export", row.id);
+    alert(`Export: ${row.id}`);
   };
 
   const handleConfirmDelete = () => {
