@@ -3,10 +3,9 @@
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { RolePermissions as RolePermissionsType } from "../../../../types/user";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Label } from "@/components/ui/label";
 import Heading from "@/components/ui/typography/Heading";
 import { Text } from "@/components/ui/typography/Text";
+import { UserDetailsPermissionsView } from "./mini-components/user-permission";
 
 type RolePermissionsViewProps = {
   rolePermissions: RolePermissionsType;
@@ -39,62 +38,7 @@ export function RolePermissionsView({
       </div>
 
       <div>
-        <Heading level={3} className=" mb-2">
-          Permissions (Read-only)
-        </Heading>
-        <Text variant="default" className="mb-4">
-          Permissions shown are inherited from the assigned role and cannot be
-          edited here.
-        </Text>
-
-        <div className="space-y-6">
-          {rolePermissions.permissions.map((permission, index) => (
-            <div key={index} className="space-y-3">
-              <Heading level={3}>{permission.module}</Heading>
-              <RadioGroup value={permission.level} disabled>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="no_access" id={`no-access-${index}`} />
-                  <Label
-                    htmlFor={`no-access-${index}`}
-                    className="text-sm font-normal cursor-not-allowed"
-                  >
-                    No Access
-                  </Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="view" id={`view-${index}`} />
-                  <Label
-                    htmlFor={`view-${index}`}
-                    className="text-sm font-normal cursor-not-allowed"
-                  >
-                    View → View members
-                  </Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="manage" id={`manage-${index}`} />
-                  <Label
-                    htmlFor={`manage-${index}`}
-                    className="text-sm font-normal cursor-not-allowed"
-                  >
-                    Manage → Add / Edit members
-                  </Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem
-                    value="full_access"
-                    id={`full-access-${index}`}
-                  />
-                  <Label
-                    htmlFor={`full-access-${index}`}
-                    className="text-sm font-normal cursor-not-allowed"
-                  >
-                    {permission.description}
-                  </Label>
-                </div>
-              </RadioGroup>
-            </div>
-          ))}
-        </div>
+        <UserDetailsPermissionsView rolePermissions={rolePermissions} />
       </div>
 
       <div className="flex justify-end pt-4 border-t">

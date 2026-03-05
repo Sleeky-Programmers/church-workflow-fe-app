@@ -6,17 +6,21 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Text } from "@/components/ui/typography/Text";
 import { Role, RoleAction } from "@/types";
-import { MOCK_ROLES } from "@/lib/data";
+import { fetchRoles, updateRoleStatus } from "@/lib/api/admin-settings";
 import { RolesTable } from "@/components/features/dashboard/admin/role-table";
 import { DeactivateRoleDialog } from "@/components/features/dashboard/admin/mini-components/deactivate-role-dialog";
+import { ViewRolePermissionsDialog } from "@/components/features/dashboard/admin/mini-components/view-role-permissions-dialog";
 import Heading from "@/components/ui/typography/Heading";
 import { RouteConfig } from "@/config/routes";
+import { Loader } from "@/components/ui/loader";
 
 export default function RolesPermissionsPage() {
   const router = useRouter();
   const [roles, setRoles] = useState<Role[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isDeactivateDialogOpen, setIsDeactivateDialogOpen] = useState(false);
+  const [isViewPermissionsDialogOpen, setIsViewPermissionsDialogOpen] =
+    useState(false);
   const [selectedRole, setSelectedRole] = useState<Role | null>(null);
   const { toast } = useToast();
 
@@ -27,12 +31,20 @@ export default function RolesPermissionsPage() {
   const loadRoles = async () => {
     setIsLoading(true);
     try {
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      setRoles(MOCK_ROLES);
-    } catch (error) {
+      const data = await fetchRoles();
+      const mappedRoles: Role[] = data.map((role: any) => ({
+        id: role._id,
+        name: role.roleName,
+        type: role.type.toLowerCase() as "system" | "custom",
+        users: 0,
+        status: role.status.toLowerCase() as "active" | "disabled",
+        description: role.description || "",
+      }));
+      setRoles(mappedRoles);
+    } catch (error: any) {
       toast({
         title: "Error",
-        description: "Failed to load roles. Please try again.",
+        description: error.message || "Failed to load roles. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -46,10 +58,8 @@ export default function RolesPermissionsPage() {
 
     switch (action) {
       case "view_permissions":
-        toast({
-          title: "View Permissions",
-          description: `Viewing permissions for ${role.name}`,
-        });
+        setSelectedRole(role);
+        setIsViewPermissionsDialogOpen(true);
         break;
 
       case "edit":
@@ -76,7 +86,7 @@ export default function RolesPermissionsPage() {
     if (!idToDeactivate) return;
 
     try {
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      await updateRoleStatus(idToDeactivate, "DISABLED");
 
       setRoles((prev) =>
         prev.map((r) =>
@@ -88,10 +98,11 @@ export default function RolesPermissionsPage() {
         title: "Success",
         description: "Role has been deactivated",
       });
-    } catch (error) {
+      setIsDeactivateDialogOpen(false);
+    } catch (error: any) {
       toast({
         title: "Error",
-        description: "Failed to deactivate role",
+        description: error.message || "Failed to deactivate role",
         variant: "destructive",
       });
     }
@@ -99,7 +110,7 @@ export default function RolesPermissionsPage() {
 
   const handleEnableRole = async (roleId: string) => {
     try {
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      await updateRoleStatus(roleId, "ACTIVE");
 
       setRoles((prev) =>
         prev.map((r) => (r.id === roleId ? { ...r, status: "active" } : r)),
@@ -109,10 +120,10 @@ export default function RolesPermissionsPage() {
         title: "Success",
         description: "Role has been enabled",
       });
-    } catch (error) {
+    } catch (error: any) {
       toast({
         title: "Error",
-        description: "Failed to enable role",
+        description: error.message || "Failed to enable role",
         variant: "destructive",
       });
     }
@@ -124,13 +135,9 @@ export default function RolesPermissionsPage() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center py-16">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto" />
-          <Text variant="default" className="mt-4">
-            Loading roles...
-          </Text>
-        </div>
+      <div className="flex items-center justify-center py-16 gap-2">
+        <Loader />
+        <Text variant="default">Loading roles...</Text>
       </div>
     );
   }
@@ -151,6 +158,13 @@ export default function RolesPermissionsPage() {
         onOpenChange={setIsDeactivateDialogOpen}
         roleName={selectedRole?.name || ""}
         onConfirm={() => handleDeactivateRole()}
+      />
+
+      <ViewRolePermissionsDialog
+        open={isViewPermissionsDialogOpen}
+        onOpenChange={setIsViewPermissionsDialogOpen}
+        roleId={selectedRole?.id || null}
+        roleName={selectedRole?.name || ""}
       />
     </div>
   );

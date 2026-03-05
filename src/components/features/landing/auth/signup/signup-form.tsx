@@ -61,7 +61,6 @@ export default function SignupForm({ onSubmit }: SignupFormProps) {
 
       onSubmit(data.email, data);
     } catch (error: any) {
-      console.error(error);
       const backendMessage =
         error?.response?.data?.message ||
         error?.message ||

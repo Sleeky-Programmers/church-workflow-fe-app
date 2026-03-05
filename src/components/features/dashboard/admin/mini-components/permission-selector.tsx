@@ -8,21 +8,24 @@ import Heading from "@/components/ui/typography/Heading";
 type PermissionModuleSelectorProps = {
   module: ModulePermission;
   value: PermissionLevel;
-  onChange: (moduleName: string, level: PermissionLevel) => void;
+  onChange?: (moduleName: string, level: PermissionLevel) => void;
+  disabled?: boolean;
 };
 
 export function PermissionModuleSelector({
   module,
   value,
   onChange,
+  disabled = false,
 }: PermissionModuleSelectorProps) {
   return (
     <div className="space-y-3">
       <Heading level={4}>{module.module}</Heading>
       <RadioGroup
         value={value}
+        disabled={disabled}
         onValueChange={(newValue) =>
-          onChange(module.module, newValue as PermissionLevel)
+          onChange && onChange(module.module, newValue as PermissionLevel)
         }
       >
         {module.options.map((option) => (
@@ -33,7 +36,7 @@ export function PermissionModuleSelector({
             />
             <Label
               htmlFor={`${module.module}-${option.value}`}
-              className="text-sm font-normal cursor-pointer"
+              className={`text-sm font-normal ${disabled ? "cursor-not-allowed text-gray-600" : "cursor-pointer"}`}
             >
               {option.label}
               {option.description && (

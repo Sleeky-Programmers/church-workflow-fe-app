@@ -16,7 +16,7 @@ export const StatCard = ({
   className,
 }: {
   title: string;
-  count: string;
+  count: string | number;
   growth: string;
   growthText?: string;
   statFilter?: string;

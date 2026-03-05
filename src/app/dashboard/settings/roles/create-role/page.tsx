@@ -9,8 +9,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { ArrowLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { PermissionModuleSelector } from "@/components/features/dashboard/admin/mini-components/permission-selector";
-import { MODULE_PERMISSIONS } from "@/lib/role-constants";
+import {
+  MODULE_PERMISSIONS,
+  frontendToBackendModule,
+} from "@/lib/role-constants";
 import { PermissionLevel } from "@/types";
+import { createRole, updateRole } from "@/lib/api/admin-settings";
 import Heading from "@/components/ui/typography/Heading";
 import { Text, Span } from "@/components/ui/typography/Text";
 import { RouteConfig } from "@/config/routes";
@@ -76,7 +80,26 @@ export default function CreateRolePage({
     setIsLoading(true);
 
     try {
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      const formattedPermissions = Object.entries(permissions).map(
+        ([moduleName, level]) => ({
+          moduleSection: frontendToBackendModule[moduleName] || moduleName,
+          accessLevel: level.toUpperCase(),
+        }),
+      );
+
+      if (mode === "create") {
+        await createRole({
+          roleName: name,
+          permissions: formattedPermissions,
+          description: description || undefined,
+        } as any);
+      } else if (roleId) {
+        await updateRole(roleId, {
+          roleName: name,
+          description: description || undefined,
+          permissions: formattedPermissions,
+        });
+      }
 
       toast({
         title: "Success",
@@ -87,10 +110,10 @@ export default function CreateRolePage({
       });
 
       router.push(RouteConfig.dashboard.admin.roles);
-    } catch (error) {
+    } catch (error: any) {
       toast({
         title: "Error",
-        description: "Failed to save role. Please try again.",
+        description: error.message || "Failed to save role. Please try again.",
         variant: "destructive",
       });
     } finally {

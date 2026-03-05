@@ -12,6 +12,7 @@ import { Text, Span } from "@/components/ui/typography/Text";
 import { Loader } from "@/components/ui/loader";
 import Heading from "@/components/ui/typography/Heading";
 import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
 
 interface Props {
   email: string;
@@ -26,6 +27,8 @@ export default function VerifyOtpForm({ email, onVerify, onResend }: Props) {
   const [error, setError] = useState(false);
   const [resendSuccess, setResendSuccess] = useState(false);
   const [resendTimer, setResendTimer] = useState(60);
+
+  const { toast } = useToast();
 
   useEffect(() => {
     if (otp.length === 6) handleVerify(otp);
@@ -68,8 +71,12 @@ export default function VerifyOtpForm({ email, onVerify, onResend }: Props) {
       setResendSuccess(true);
       setResendTimer(60);
       setTimeout(() => setResendSuccess(false), 4000);
-    } catch (err: any) {
-      console.error("Resend failed:", err);
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to resend code",
+        variant: "destructive",
+      });
       setError(true);
     } finally {
       setIsResending(false);

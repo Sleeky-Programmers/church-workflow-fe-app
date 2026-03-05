@@ -16,6 +16,17 @@ import {
   addMonths,
   subMonths,
 } from "date-fns";
+import {
+  FileText,
+  MessageCircle,
+  ShieldCheck,
+  Cake,
+  CreditCard,
+  Users,
+  Banknote,
+} from "lucide-react";
+import { LucideIcon } from "lucide-react";
+import { NotificationType } from "./enums";
 
 const MILLISECONDS_IN_SECOND = 1000;
 const SECONDS_IN_MINUTE = 60;
@@ -253,3 +264,47 @@ export function calculateGenderSplit(memberIds: string[]): {
 
   return { males, females };
 }
+
+type NotificationMeta = {
+  icon: LucideIcon;
+  color: string;
+  background: string;
+};
+
+export const notificationConfig: Record<NotificationType, NotificationMeta> = {
+  [NotificationType.REQUISITION]: {
+    icon: FileText,
+    color: "text-blue-500",
+    background: "bg-blue-50",
+  },
+  [NotificationType.MESSAGE]: {
+    icon: MessageCircle,
+    color: "text-green-500",
+    background: "bg-green-50",
+  },
+  [NotificationType.ROLE_UPDATE]: {
+    icon: ShieldCheck,
+    color: "text-purple-500",
+    background: "bg-purple-50",
+  },
+  [NotificationType.BIRTHDAY]: {
+    icon: Cake,
+    color: "text-pink-500",
+    background: "bg-pink-50",
+  },
+  [NotificationType.SUBSCRIPTION]: {
+    icon: CreditCard,
+    color: "text-orange-500",
+    background: "bg-orange-50",
+  },
+  [NotificationType.MEMBER]: {
+    icon: Users,
+    color: "text-indigo-500",
+    background: "bg-indigo-50",
+  },
+  [NotificationType.FINANCE]: {
+    icon: Banknote,
+    color: "text-emerald-500",
+    background: "bg-emerald-50",
+  },
+};

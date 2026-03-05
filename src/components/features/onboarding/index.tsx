@@ -17,6 +17,7 @@ import {
 import { createChurch, createWeeklyService, uploadMembersCsv } from "@/lib/api";
 import { RouteConfig } from "@/config/routes";
 import { convertTo12Hour } from "@/lib/utils";
+import { useToast } from "@/hooks/use-toast";
 import {
   getAccessToken,
   markChurchIdentityComplete,
@@ -29,6 +30,8 @@ export default function ChurchOnboarding() {
   const [services, setServices] = useState<WeeklyServicesValues>([]);
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [isSubmittingIdentity, setIsSubmittingIdentity] = useState(false);
+
+  const { toast } = useToast();
 
   const router = useRouter();
 
@@ -75,8 +78,12 @@ export default function ChurchOnboarding() {
         defaultCurrency: parsed.defaultCurrency || "",
         timeZone: parsed.timeZone || "",
       });
-    } catch (error) {
-      console.error("Failed to parse saved onboarding draft:", error);
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to parse saved onboarding draft",
+        variant: "destructive",
+      });
     }
   }, [identityForm, router]);
 
@@ -123,8 +130,11 @@ export default function ChurchOnboarding() {
 
       setStep(2);
     } catch (error: any) {
-      console.error("Church creation failed:", error);
-      alert(error.message || "Failed to create church");
+      toast({
+        title: "Error",
+        description: error.message || "Failed to create church",
+        variant: "destructive",
+      });
     } finally {
       setIsSubmittingIdentity(false);
     }
@@ -198,8 +208,11 @@ export default function ChurchOnboarding() {
       markWeeklyServicesComplete();
       setStep(3);
     } catch (error: any) {
-      console.error("Failed to create weekly services", error);
-      alert(error?.message || "Failed to create weekly services");
+      toast({
+        title: "Error",
+        description: error.message || "Failed to create weekly services",
+        variant: "destructive",
+      });
     }
   };
 
@@ -215,8 +228,11 @@ export default function ChurchOnboarding() {
 
       router.push(RouteConfig.dashboard.home);
     } catch (error: any) {
-      console.error("Upload failed:", error.message);
-      alert(error?.message || "Members upload failed");
+      toast({
+        title: "Error",
+        description: error.message || "Members upload failed",
+        variant: "destructive",
+      });
     }
   };
 
