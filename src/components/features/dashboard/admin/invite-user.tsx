@@ -31,6 +31,7 @@ import { RolePermissionsView } from "./role-permission";
 import Link from "next/link";
 import { RouteConfig } from "@/config/routes";
 import { backendToFrontendModule } from "@/lib/role-constants";
+import { useToast } from "@/hooks/use-toast";
 
 type InviteUserDialogProps = {
   open: boolean;
@@ -61,6 +62,8 @@ export function InviteUserDialog({
     role: "",
   });
 
+  const { toast } = useToast();
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (formData.email && formData.role) {
@@ -80,7 +83,13 @@ export function InviteUserDialog({
           },
         ]);
         resetForm();
-      } catch (err) {}
+      } catch (error: any) {
+        toast({
+          title: "Error",
+          description: error.message || "Failed to invite user",
+          variant: "destructive",
+        });
+      }
     }
   };
 

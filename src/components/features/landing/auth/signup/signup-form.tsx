@@ -61,7 +61,6 @@ export default function SignupForm({ onSubmit }: SignupFormProps) {
 
       onSubmit(data.email, data);
     } catch (error: any) {
-      console.error(error);
       form.setError("email", {
         message: error.message || "Signup failed",
       });

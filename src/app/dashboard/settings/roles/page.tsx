@@ -41,10 +41,10 @@ export default function RolesPermissionsPage() {
         description: role.description || "",
       }));
       setRoles(mappedRoles);
-    } catch (error) {
+    } catch (error: any) {
       toast({
         title: "Error",
-        description: "Failed to load roles. Please try again.",
+        description: error.message || "Failed to load roles. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -99,10 +99,10 @@ export default function RolesPermissionsPage() {
         description: "Role has been deactivated",
       });
       setIsDeactivateDialogOpen(false);
-    } catch (error) {
+    } catch (error: any) {
       toast({
         title: "Error",
-        description: "Failed to deactivate role",
+        description: error.message || "Failed to deactivate role",
         variant: "destructive",
       });
     }
@@ -120,10 +120,10 @@ export default function RolesPermissionsPage() {
         title: "Success",
         description: "Role has been enabled",
       });
-    } catch (error) {
+    } catch (error: any) {
       toast({
         title: "Error",
-        description: "Failed to enable role",
+        description: error.message || "Failed to enable role",
         variant: "destructive",
       });
     }

@@ -4,7 +4,14 @@ import React, { useMemo, useState, useEffect } from "react";
 import Table, { Column } from "@/components/features/dashboard/Table";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { ChevronDown, Download, Search, User2, ChevronLeft, ChevronRight } from "lucide-react";
+import {
+  ChevronDown,
+  Download,
+  Search,
+  User2,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Text } from "@/components/ui/typography/Text";
 import ActivityLogPopup from "@/components/features/dashboard/ActivityLogPopup";
@@ -13,7 +20,12 @@ import { formatDateTime12h } from "@/lib/utils";
 import { Span } from "@/components/ui/typography/Text";
 import { fetchActivityLogs } from "@/lib/api";
 import { Loader } from "@/components/ui/loader";
-import { Pagination, PaginationContent, PaginationItem } from "@/components/ui/pagination";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+} from "@/components/ui/pagination";
+import { useToast } from "@/hooks/use-toast";
 
 export default function ActivityLogPage() {
   const [query, setQuery] = useState("");
@@ -23,7 +35,11 @@ export default function ActivityLogPage() {
   const [activityLogs, setActivityLogs] = useState<ActivityRow[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const [pagination, setPagination] = useState<ActivityLogApiResponse["pagination"] | null>(null);
+  const [pagination, setPagination] = useState<
+    ActivityLogApiResponse["pagination"] | null
+  >(null);
+
+  const { toast } = useToast();
 
   const avatarColors = ["#E7EFF7", "#FFF1E6", "#E6F2E6"];
   const avatarTextColors = [
@@ -43,8 +59,13 @@ export default function ActivityLogPage() {
       setActivityLogs(response.data);
       setPagination(response.pagination);
       setCurrentPage(page);
-    } catch (error) {
-      console.error("Error fetching activity logs:", error);
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description:
+          error.message || "An error occurred while fetching activity logs",
+        variant: "destructive",
+      });
     } finally {
       setIsLoading(false);
     }
@@ -57,16 +78,16 @@ export default function ActivityLogPage() {
   const filtered = useMemo(() => {
     const q = query.toLowerCase();
 
-    return activityLogs.filter((row) => {
-      if (moduleFilter && row.module !== moduleFilter) return false;
-      if (!q) return true;
+    return activityLogs
+      .filter((row) => {
+        if (moduleFilter && row.module !== moduleFilter) return false;
+        if (!q) return true;
 
-      const userName = `${row.adminId.firstName} ${row.adminId.lastName}`.toLowerCase();
-      return (
-        userName.includes(q) ||
-        row.action.toLowerCase().includes(q)
-      );
-    }).sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt));
+        const userName =
+          `${row.adminId.firstName} ${row.adminId.lastName}`.toLowerCase();
+        return userName.includes(q) || row.action.toLowerCase().includes(q);
+      })
+      .sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt));
   }, [query, moduleFilter, activityLogs]);
 
   const exportToCSV = () => {
@@ -118,7 +139,9 @@ export default function ActivityLogPage() {
               <User2 className="w-4 h-4" />
             </AvatarFallback>
           </Avatar>
-          <Span variant="default">{row.adminId.firstName} {row.adminId.lastName}</Span>
+          <Span variant="default">
+            {row.adminId.firstName} {row.adminId.lastName}
+          </Span>
         </div>
       ),
     },
@@ -250,7 +273,10 @@ export default function ActivityLogPage() {
                     </Button>
                   </PaginationItem>
 
-                  {Array.from({ length: pagination.totalPages }, (_, i) => i + 1).map((page) => (
+                  {Array.from(
+                    { length: pagination.totalPages },
+                    (_, i) => i + 1,
+                  ).map((page) => (
                     <PaginationItem key={page}>
                       <Button
                         variant={currentPage === page ? "default" : "outline"}

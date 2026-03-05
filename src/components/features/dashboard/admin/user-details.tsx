@@ -73,8 +73,12 @@ export function UserDetailsPage({
           );
           setRoleData(fallbackObj || null);
         }
-      } catch (error) {
-        console.error("Failed to fetch role details:", error);
+      } catch (error: any) {
+        toast({
+          title: "Error",
+          description: error.message || "Failed to load role data",
+          variant: "destructive",
+        });
         const fallbackObj = roles.find(
           (r: any) => r._id === selectedRole || r.roleName === selectedRole,
         );

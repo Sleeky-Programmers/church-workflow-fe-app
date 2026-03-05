@@ -12,6 +12,7 @@ import { RouteConfig } from "@/config/routes";
 import { SignUpStep } from "@/lib/enums";
 import AuthLayout from "@/components/features/landing/auth/signup/auth-layout";
 import { resendOtp, verifyOtp } from "@/lib/api";
+import { useToast } from "@/hooks/use-toast";
 
 export function SignupPageContent() {
   const router = useRouter();
@@ -19,6 +20,8 @@ export function SignupPageContent() {
   const [currentStep, setCurrentStep] = useState<SignUpStep>(SignUpStep.SIGNUP);
   const [email, setEmail] = useState("");
   const [signupData, setSignupData] = useState<any>(null);
+
+  const { toast } = useToast();
 
   if (isLoading) {
     return (
@@ -79,8 +82,12 @@ export function SignupPageContent() {
 
       router.push(RouteConfig.onboarding);
       return true;
-    } catch (error) {
-      console.error("OTP verification failed:", error);
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "An error occurred while verifying OTP",
+        variant: "destructive",
+      });
       return false;
     }
   };
@@ -88,8 +95,12 @@ export function SignupPageContent() {
   const handleResendOtp = async () => {
     try {
       await resendOtp(email);
-    } catch (error) {
-      console.error("Resend failed:", error);
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "An error occurred while resending OTP",
+        variant: "destructive",
+      });
       throw error;
     }
   };

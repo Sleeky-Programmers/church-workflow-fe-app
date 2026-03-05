@@ -110,10 +110,10 @@ export default function CreateRolePage({
       });
 
       router.push(RouteConfig.dashboard.admin.roles);
-    } catch (error) {
+    } catch (error: any) {
       toast({
         title: "Error",
-        description: "Failed to save role. Please try again.",
+        description: error.message || "Failed to save role. Please try again.",
         variant: "destructive",
       });
     } finally {

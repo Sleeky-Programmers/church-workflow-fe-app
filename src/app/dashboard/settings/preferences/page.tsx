@@ -41,7 +41,15 @@ export default function PersonalPreferencePage() {
             birthdays: settings.personalPreferences?.birthday,
           });
         }
-      } catch (error) {}
+      } catch (error: any) {
+        toast({
+          title: "Error",
+          description:
+            error.message ||
+            "An error occurred while fetching account settings",
+          variant: "destructive",
+        });
+      }
     }
     loadSettings();
   }, []);
@@ -75,10 +83,11 @@ export default function PersonalPreferencePage() {
       });
 
       setHasChanges(false);
-    } catch (error) {
+    } catch (error: any) {
       toast({
         title: "Error",
-        description: "Failed to save preferences. Please try again.",
+        description:
+          error.message || "Failed to save preferences. Please try again.",
         variant: "destructive",
       });
     } finally {

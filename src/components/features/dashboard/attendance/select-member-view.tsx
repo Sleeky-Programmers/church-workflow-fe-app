@@ -17,6 +17,7 @@ import { fetchMembers } from "@/lib/api";
 import { MemberListItem } from "./member-list";
 import Heading from "@/components/ui/typography/Heading";
 import { Text } from "@/components/ui/typography/Text";
+import { useToast } from "@/hooks/use-toast";
 
 type SelectMembersViewProps = {
   selectedMembers: string[];
@@ -39,6 +40,8 @@ export function SelectMembersView({
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
+  const { toast } = useToast();
+
   const loadMembers = async (page: number = 1) => {
     setIsLoading(true);
     try {
@@ -46,8 +49,12 @@ export function SelectMembersView({
       setMembers(data.members);
       setTotalPages(data.pages);
       setHasLoaded(true);
-    } catch (error) {
-      console.error("Failed to load members:", error);
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to load members",
+        variant: "destructive",
+      });
     } finally {
       setIsLoading(false);
     }

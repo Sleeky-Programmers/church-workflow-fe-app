@@ -9,12 +9,15 @@ import { AnimatePresence, motion } from "framer-motion";
 import AuthLayout from "@/components/features/landing/auth/signup/auth-layout";
 import { AuthVariant } from "@/lib/auth-content";
 import { requestOtp, verifyOtp } from "@/lib/api";
+import { useToast } from "@/hooks/use-toast";
 
 type AuthStep = "login" | "forgot-password" | "verify-code" | "reset-password";
 
 export default function LoginPage() {
   const [step, setStep] = useState<AuthStep>("login");
   const [email, setEmail] = useState("");
+
+  const { toast } = useToast();
 
   const getVariant = (): AuthVariant => {
     switch (step) {
@@ -36,8 +39,12 @@ export default function LoginPage() {
       await requestOtp(email);
       setEmail(email);
       setStep("verify-code");
-    } catch (error) {
-      console.error(error);
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "An error occurred while requesting OTP",
+        variant: "destructive",
+      });
     }
   };
 

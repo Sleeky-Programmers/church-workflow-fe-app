@@ -6,6 +6,7 @@ import { UserDetailsPageClient } from "@/components/features/dashboard/admin/use
 import { fetchAdminInvites, fetchRoles } from "@/lib/api/admin-settings";
 import { User } from "@/types/user";
 import { Loader } from "@/components/ui/loader";
+import { useToast } from "@/hooks/use-toast";
 
 export default function UserDetailsRoute() {
   const params = useParams();
@@ -13,6 +14,8 @@ export default function UserDetailsRoute() {
   const [user, setUser] = useState<User | null>(null);
   const [roles, setRoles] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+
+  const { toast } = useToast();
 
   useEffect(() => {
     async function loadData() {
@@ -50,8 +53,12 @@ export default function UserDetailsRoute() {
           };
           setUser(mappedUser);
         }
-      } catch (error) {
-        console.error("Error fetching user data:", error);
+      } catch (error: any) {
+        toast({
+          title: "Error",
+          description: error.message || "Failed to load user data",
+          variant: "destructive",
+        });
         setUser(null);
       } finally {
         setIsLoading(false);

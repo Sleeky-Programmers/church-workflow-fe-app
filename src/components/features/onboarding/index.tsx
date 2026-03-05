@@ -17,11 +17,14 @@ import {
 import { createChurch, createWeeklyService, uploadMembersCsv } from "@/lib/api";
 import { RouteConfig } from "@/config/routes";
 import { convertTo12Hour } from "@/lib/utils";
+import { useToast } from "@/hooks/use-toast";
 
 export default function ChurchOnboarding() {
   const [step, setStep] = useState(1);
   const [services, setServices] = useState<WeeklyServicesValues>([]);
   const [logoFile, setLogoFile] = useState<File | null>(null);
+
+  const { toast } = useToast();
 
   const router = useRouter();
 
@@ -63,8 +66,11 @@ export default function ChurchOnboarding() {
       );
       setStep(2);
     } catch (error: any) {
-      console.error("Church creation failed:", error);
-      alert(error.message || "Failed to create church");
+      toast({
+        title: "Error",
+        description: error.message || "Failed to create church",
+        variant: "destructive",
+      });
     }
   };
 
@@ -85,8 +91,11 @@ export default function ChurchOnboarding() {
       }
       setStep(3);
     } catch (error: any) {
-      console.error("Failed to create weekly services", error);
-      alert(error?.message || "Failed to create weekly services");
+      toast({
+        title: "Error",
+        description: error.message || "Failed to create weekly services",
+        variant: "destructive",
+      });
     }
   };
 
@@ -101,8 +110,11 @@ export default function ChurchOnboarding() {
 
       router.push(RouteConfig.dashboard.home);
     } catch (error: any) {
-      console.error("Upload failed:", error.message);
-      alert(error?.message || "Members upload failed");
+      toast({
+        title: "Error",
+        description: error.message || "Members upload failed",
+        variant: "destructive",
+      });
     }
   };
 

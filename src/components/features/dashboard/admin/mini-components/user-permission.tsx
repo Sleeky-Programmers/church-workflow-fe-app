@@ -14,7 +14,6 @@ type UserDetailsPermissionsViewProps = {
 export function UserDetailsPermissionsView({
   rolePermissions,
 }: UserDetailsPermissionsViewProps) {
-  console.log({ rolePermissions });
   return (
     <div className="space-y-4">
       <div>

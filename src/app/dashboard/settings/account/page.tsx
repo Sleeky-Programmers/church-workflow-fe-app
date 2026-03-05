@@ -65,7 +65,15 @@ export default function AccountSettingsPage() {
           );
           setWaitingPeriodDays(waitVal > 0 ? waitVal : 0);
         }
-      } catch (error) {}
+      } catch (error: any) {
+        toast({
+          title: "Error",
+          description:
+            error.message ||
+            "An error occurred while fetching account settings",
+          variant: "destructive",
+        });
+      }
     }
     loadSettings();
   }, []);
@@ -93,10 +101,10 @@ export default function AccountSettingsPage() {
         title: "Privacy setting updated",
         description: "Your privacy preferences have been saved",
       });
-    } catch (error) {
+    } catch (error: any) {
       toast({
         title: "Error",
-        description: "Failed to update privacy settings.",
+        description: error.message || "Failed to update privacy settings.",
         variant: "destructive",
       });
       setPrivacy(privacy);
@@ -122,7 +130,7 @@ export default function AccountSettingsPage() {
       toast({
         title: "Error",
         description:
-          error?.message || "Failed to schedule deletion. Please try again.",
+          error.message || "Failed to schedule deletion. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -147,7 +155,7 @@ export default function AccountSettingsPage() {
       toast({
         title: "Error",
         description:
-          error?.message || "Failed to cancel deletion. Please try again.",
+          error.message || "Failed to cancel deletion. Please try again.",
         variant: "destructive",
       });
     } finally {

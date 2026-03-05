@@ -14,6 +14,7 @@ import { Loader } from "@/components/ui/loader";
 import { Text } from "@/components/ui/typography/Text";
 import { ROLE_PERMISSIONS } from "@/lib/permissions";
 import { backendToFrontendModule } from "@/lib/role-constants";
+import { useToast } from "@/hooks/use-toast";
 
 type ViewRolePermissionsDialogProps = {
   open: boolean;
@@ -31,6 +32,8 @@ export function ViewRolePermissionsDialog({
   const [rolePermissions, setRolePermissions] =
     useState<RolePermissionsType | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+
+  const { toast } = useToast();
 
   useEffect(() => {
     async function loadRole() {
@@ -56,8 +59,12 @@ export function ViewRolePermissionsDialog({
         } else {
           setRolePermissions(ROLE_PERMISSIONS[roleName] || null);
         }
-      } catch (error) {
-        console.error("Failed to fetch role details:", error);
+      } catch (error: any) {
+        toast({
+          title: "Error",
+          description: error.message || "Failed to load role permissions",
+          variant: "destructive",
+        });
         setRolePermissions(ROLE_PERMISSIONS[roleName] || null);
       } finally {
         setIsLoading(false);

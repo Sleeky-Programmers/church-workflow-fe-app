@@ -28,6 +28,7 @@ import { AttendanceStatsView } from "./attendance-stats";
 import { MemberListItem } from "./member-list";
 import { Span } from "@/components/ui/typography/Text";
 import Heading from "@/components/ui/typography/Heading";
+import { useToast } from "@/hooks/use-toast";
 
 type AttendanceModalProps = {
   isOpen: boolean;
@@ -63,6 +64,8 @@ export function AttendanceModal({
 
   const [isSaving, setIsSaving] = useState(false);
 
+  const { toast } = useToast();
+
   useEffect(() => {
     if (isOpen && service) {
       loadAllMembers();
@@ -74,8 +77,12 @@ export function AttendanceModal({
     try {
       const data = await fetchMembers(1, 100);
       setMembers(data.members);
-    } catch (error) {
-      console.error("Failed to load members:", error);
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to load members",
+        variant: "destructive",
+      });
     } finally {
       setLoading(false);
     }
@@ -103,8 +110,12 @@ export function AttendanceModal({
 
       onSave();
       handleClose();
-    } catch (error) {
-      console.error("Failed to save attendance:", error);
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to save attendance",
+        variant: "destructive",
+      });
     } finally {
       setIsSaving(false);
     }

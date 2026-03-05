@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useToast } from "./use-toast";
 
 export interface SignupDataType {
   firstName?: string;
@@ -10,6 +11,8 @@ export function useSignupData(): SignupDataType | null {
   const [signupData, setSignupData] = useState<SignupDataType | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  const { toast } = useToast();
+
   useEffect(() => {
     if (typeof window !== "undefined") {
       try {
@@ -18,11 +21,13 @@ export function useSignupData(): SignupDataType | null {
           const data = JSON.parse(stored) as SignupDataType;
           setSignupData(data);
         }
-      } catch (error) {
-        console.error(
-          "Failed to parse signup data from sessionStorage:",
-          error,
-        );
+      } catch (error: any) {
+        toast({
+          title: "Error",
+          description:
+            error.message || "Failed to parse signup data from session storage",
+          variant: "destructive",
+        });
       }
     }
     setIsLoading(false);

@@ -37,10 +37,10 @@ export function UserDetailsPageClient({
         title: "Success",
         description: `Role updated successfully`,
       });
-    } catch (error) {
+    } catch (error: any) {
       toast({
         title: "Error",
-        description: "Failed to update role",
+        description: error.message || "Failed to update role",
         variant: "destructive",
       });
     }
@@ -54,10 +54,10 @@ export function UserDetailsPageClient({
         title: "Success",
         description: "User has been suspended",
       });
-    } catch (error) {
+    } catch (error: any) {
       toast({
         title: "Error",
-        description: "Failed to suspend user",
+        description: error.message || "Failed to suspend user",
         variant: "destructive",
       });
     }
@@ -71,10 +71,10 @@ export function UserDetailsPageClient({
         description: "User has been removed",
       });
       router.push(RouteConfig.dashboard.admin.users);
-    } catch (error) {
+    } catch (error: any) {
       toast({
         title: "Error",
-        description: "Failed to remove user",
+        description: error.message || "Failed to remove user",
         variant: "destructive",
       });
     }
@@ -87,10 +87,10 @@ export function UserDetailsPageClient({
         title: "Success",
         description: "Invitation has been resent",
       });
-    } catch (error) {
+    } catch (error: any) {
       toast({
         title: "Error",
-        description: "Failed to resend invitation",
+        description: error.message || "Failed to resend invitation",
         variant: "destructive",
       });
     }
@@ -104,10 +104,10 @@ export function UserDetailsPageClient({
         description: "Invitation has been deleted",
       });
       router.push(RouteConfig.dashboard.admin.users);
-    } catch (error) {
+    } catch (error: any) {
       toast({
         title: "Error",
-        description: "Failed to delete invitation",
+        description: error.message || "Failed to delete invitation",
         variant: "destructive",
       });
     }
@@ -121,10 +121,10 @@ export function UserDetailsPageClient({
         title: "Success",
         description: "User has been reinstated",
       });
-    } catch (error) {
+    } catch (error: any) {
       toast({
         title: "Error",
-        description: "Failed to reinstate user",
+        description: error.message || "Failed to reinstate user",
         variant: "destructive",
       });
     }

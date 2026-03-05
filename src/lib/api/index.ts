@@ -44,10 +44,8 @@ export async function authenticatedFetch<T>(
 
   if (response.status === 401) {
     if (typeof window !== "undefined") {
-      try {
-        localStorage.removeItem("accessToken");
-        window.location.href = "/auth/login";
-      } catch (e) {}
+      localStorage.removeItem("accessToken");
+      window.location.href = "/auth/login";
     }
     throw new Error("Unauthorized");
   }
@@ -79,10 +77,8 @@ export async function apiFetch<T>(
 
   if (response.status === 401) {
     if (typeof window !== "undefined") {
-      try {
-        localStorage.removeItem("accessToken");
-        window.location.href = "/auth/login";
-      } catch (e) {}
+      localStorage.removeItem("accessToken");
+      window.location.href = "/auth/login";
     }
     throw new Error("Unauthorized");
   }
@@ -305,13 +301,8 @@ export async function fetchTotalMembers(): Promise<{
   totalMembers: number;
   growth: string;
 }> {
-  try {
-    const res = await apiFetch<any>("/members/stats", { method: "GET" });
-    return { totalMembers: res.totalMembers || 0, growth: res.growth || "0%" };
-  } catch (err) {
-    console.error("Failed to fetch total members:", err);
-    return { totalMembers: 0, growth: "0%" };
-  }
+  const res = await apiFetch<any>("/members/stats", { method: "GET" });
+  return { totalMembers: res.totalMembers || 0, growth: res.growth || "0%" };
 }
 
 export async function fetchMembers(

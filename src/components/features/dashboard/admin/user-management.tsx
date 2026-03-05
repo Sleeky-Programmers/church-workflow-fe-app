@@ -67,10 +67,10 @@ export function UserManagementPage() {
         };
       });
       setUsers(mappedUsers);
-    } catch (error) {
+    } catch (error: any) {
       toast({
         title: "Error",
-        description: "Failed to load users. Please try again.",
+        description: error.message || "Failed to load users. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -179,10 +179,11 @@ export function UserManagementPage() {
       setIsRemoveDialogOpen(false);
       setSelectedUser(null);
       loadUsers();
-    } catch (error) {
+    } catch (error: any) {
       toast({
         title: "Error",
-        description: "Failed to remove user. Please try again.",
+        description:
+          error.message || "Failed to remove user. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -202,10 +203,11 @@ export function UserManagementPage() {
       setIsChangeRoleDialogOpen(false);
       setSelectedUser(null);
       loadUsers();
-    } catch (error) {
+    } catch (error: any) {
       toast({
         title: "Error",
-        description: "Failed to update role. Please try again.",
+        description:
+          error.message || "Failed to update role. Please try again.",
         variant: "destructive",
       });
     } finally {
