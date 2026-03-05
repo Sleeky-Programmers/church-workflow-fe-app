@@ -3,7 +3,6 @@ import {
   DepartmentRow,
   Gender,
   MaritalStatus,
-  Member,
   MemberAttendanceRecord,
   MemberProfile,
   RegularService,
@@ -31,6 +30,74 @@ import {
   Wallet,
 } from "lucide-react";
 import { MODULE_PERMISSIONS } from "./role-constants";
+
+export const COUNTRIES = [
+  { code: "NG", name: "Nigeria", currency: "NGN", timeZone: "Africa/Lagos" },
+  {
+    code: "US",
+    name: "United States",
+    currency: "USD",
+    timeZone: "America/New_York",
+  },
+  {
+    code: "GB",
+    name: "United Kingdom",
+    currency: "GBP",
+    timeZone: "Europe/London",
+  },
+  { code: "CA", name: "Canada", currency: "CAD", timeZone: "America/Toronto" },
+  { code: "GH", name: "Ghana", currency: "GHS", timeZone: "Africa/Accra" },
+  { code: "KE", name: "Kenya", currency: "KES", timeZone: "Africa/Nairobi" },
+  {
+    code: "ZA",
+    name: "South Africa",
+    currency: "ZAR",
+    timeZone: "Africa/Johannesburg",
+  },
+  { code: "IN", name: "India", currency: "INR", timeZone: "Asia/Kolkata" },
+  { code: "PH", name: "Philippines", currency: "PHP", timeZone: "Asia/Manila" },
+  {
+    code: "AU",
+    name: "Australia",
+    currency: "AUD",
+    timeZone: "Australia/Sydney",
+  },
+  { code: "DE", name: "Germany", currency: "EUR", timeZone: "Europe/Berlin" },
+  { code: "FR", name: "France", currency: "EUR", timeZone: "Europe/Paris" },
+];
+
+export const CURRENCIES = [
+  { code: "NGN", label: "Nigerian Naira (NGN)" },
+  { code: "USD", label: "US Dollar (USD)" },
+  { code: "EUR", label: "Euro (EUR)" },
+  { code: "GBP", label: "British Pound (GBP)" },
+  { code: "CAD", label: "Canadian Dollar (CAD)" },
+  { code: "GHS", label: "Ghanaian Cedi (GHS)" },
+  { code: "KES", label: "Kenyan Shilling (KES)" },
+  { code: "ZAR", label: "South African Rand (ZAR)" },
+  { code: "INR", label: "Indian Rupee (INR)" },
+  { code: "PHP", label: "Philippine Peso (PHP)" },
+  { code: "AUD", label: "Australian Dollar (AUD)" },
+];
+
+export const TIME_ZONES = [
+  "Africa/Lagos",
+  "Africa/Accra",
+  "Africa/Nairobi",
+  "Africa/Johannesburg",
+  "America/New_York",
+  "America/Chicago",
+  "America/Denver",
+  "America/Los_Angeles",
+  "America/Toronto",
+  "Europe/London",
+  "Europe/Berlin",
+  "Europe/Paris",
+  "Asia/Kolkata",
+  "Asia/Manila",
+  "Australia/Sydney",
+  "UTC",
+];
 
 export const SidebarData = {
   pages: [
@@ -685,3 +752,14 @@ export const MOCK_ADMIN = {
   id: "admin-1",
   name: "Admin_003",
 };
+
+export const AVATAR_COLORS: { bg: string; text: string }[] = [
+  { bg: "bg-primary-100", text: "text-primary-600" },
+  { bg: "bg-secondary-100", text: "text-secondary-500" },
+  { bg: "bg-success-100", text: "text-success-600" },
+  { bg: "bg-violet-100", text: "text-violet-600" },
+  { bg: "bg-rose-100", text: "text-rose-500" },
+  { bg: "bg-amber-100", text: "text-amber-600" },
+  { bg: "bg-cyan-100", text: "text-cyan-600" },
+  { bg: "bg-pink-100", text: "text-pink-500" },
+];

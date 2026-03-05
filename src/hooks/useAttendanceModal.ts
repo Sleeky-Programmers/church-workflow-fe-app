@@ -23,6 +23,7 @@ type ModalAction =
   | { type: "REMOVE_MEMBER"; memberId: string }
   | { type: "UNDO_REMOVE" }
   | { type: "MOVE_TO_PRESENT"; memberIds: string[] }
+  | { type: "INITIALIZE_ATTENDANCE"; memberIds: string[] }
   | { type: "SET_LOADING"; isLoading: boolean }
   | { type: "SET_SEARCH"; query: string }
   | { type: "SET_PAGE"; page: number }
@@ -51,7 +52,7 @@ function modalReducer(state: ModalState, action: ModalAction): ModalState {
         absentMembers: isPresent
           ? [...state.absentMembers, action.memberId]
           : state.absentMembers.filter((id) => id !== action.memberId),
-        hasChanges: true,
+        hasChanges: false,
       };
 
     case "MARK_PRESENT":
@@ -88,13 +89,26 @@ function modalReducer(state: ModalState, action: ModalAction): ModalState {
       };
 
     case "MOVE_TO_PRESENT":
+      const nextPresentMembers = Array.from(
+        new Set([...state.presentMembers, ...action.memberIds]),
+      );
       return {
         ...state,
-        presentMembers: [...state.presentMembers, ...action.memberIds],
+        presentMembers: nextPresentMembers,
         absentMembers: state.absentMembers.filter(
           (id) => !action.memberIds.includes(id),
         ),
         view: "stats",
+        hasChanges: true,
+      };
+
+    case "INITIALIZE_ATTENDANCE":
+      return {
+        ...state,
+        presentMembers: action.memberIds,
+        absentMembers: state.allMembers
+          .map((m) => m.id)
+          .filter((id) => !action.memberIds.includes(id)),
         hasChanges: true,
       };
 
@@ -168,6 +182,10 @@ export function useAttendanceModal() {
     dispatch({ type: "MOVE_TO_PRESENT", memberIds });
   }, []);
 
+  const initializeAttendance = useCallback((memberIds: string[]) => {
+    dispatch({ type: "INITIALIZE_ATTENDANCE", memberIds });
+  }, []);
+
   const setLoading = useCallback((isLoading: boolean) => {
     dispatch({ type: "SET_LOADING", isLoading });
   }, []);
@@ -211,6 +229,7 @@ export function useAttendanceModal() {
     removeMember,
     undoRemove,
     moveToPresent,
+    initializeAttendance,
     setLoading,
     setSearch,
     setPage,

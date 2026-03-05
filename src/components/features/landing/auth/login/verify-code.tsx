@@ -86,8 +86,8 @@ export default function VerifyCodeForm({
   };
 
   return (
-    <div className="bg-gray-50 rounded-2xl p-8 animate-slide-up">
-      <div className="text-center mb-8">
+    <div className="bg-gray-50 rounded-xl sm:rounded-2xl p-4 sm:p-8 animate-slide-up">
+      <div className="text-center mb-6 sm:mb-8">
         <Heading level={1}>Forgot Password</Heading>
         <Text variant="muted">
           Please check your email, we&apos;ve sent a code to{" "}
@@ -109,14 +109,14 @@ export default function VerifyCodeForm({
             render={({ field }) => (
               <FormItem className="flex flex-col items-center">
                 <FormControl>
-                  <div className="flex justify-center">
+                  <div className="w-full overflow-x-auto pb-1">
                     <InputOTP
                       maxLength={6}
                       value={field.value}
                       onChange={field.onChange}
                       inputMode="numeric"
                       autoComplete="one-time-code"
-                      containerClassName="justify-center"
+                      containerClassName="justify-center min-w-max mx-auto"
                     >
                       <InputOTPGroup className="space-x-2">
                         <InputOTPSlot index={0} />

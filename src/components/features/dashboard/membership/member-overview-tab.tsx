@@ -32,15 +32,17 @@ function DetailField({
 
 export function MemberOverviewTab({ member }: MemberOverviewTabProps) {
   return (
-    <div className="p-6 space-y-6">
-      <AttendanceStatsCards
-        servicesAttended={member.servicesAttended}
-        servicesMissed={member.servicesMissed}
-        attendanceRate={member.attendanceRate}
-      />
+    <div className="p-1 sm:p-6 space-y-4 sm:space-y-6">
+      <div className="hidden sm:block">
+        <AttendanceStatsCards
+          servicesAttended={member.servicesAttended}
+          servicesMissed={member.servicesMissed}
+          attendanceRate={member.attendanceRate}
+        />
+      </div>
 
-      <div className="grid grid-cols-2 gap-6">
-        <Card className="p-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+        <Card className="p-4 sm:p-6">
           <Heading level={4} className="mb-4">
             Profile Details
           </Heading>
@@ -57,7 +59,7 @@ export function MemberOverviewTab({ member }: MemberOverviewTabProps) {
           </div>
         </Card>
 
-        <Card className="p-6">
+        <Card className="p-4 sm:p-6">
           <Heading level={4} className="mb-4">
             Contact Information
           </Heading>
@@ -69,7 +71,7 @@ export function MemberOverviewTab({ member }: MemberOverviewTabProps) {
         </Card>
       </div>
 
-      <Card className="p-6">
+      <Card className="p-4 sm:p-6">
         <Heading level={4} className="mb-4">
           Church Involvement
         </Heading>

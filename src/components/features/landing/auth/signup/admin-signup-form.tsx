@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -19,12 +20,11 @@ import GoogleSignupButton from "../oauth/google-signup-button";
 import Heading from "@/components/ui/typography/Heading";
 import { Text, Span } from "@/components/ui/typography/Text";
 import { Loader } from "@/components/ui/loader";
-import { useRouter, useSearchParams } from "next/navigation";
 import { Link } from "@/components/ui/link";
 import { adminSignupSchema } from "@/types/schema";
 import { RouteConfig } from "@/config/routes";
-import { getGoogleIdToken } from "@/lib/google-auth";
 import { googleAuth } from "@/lib/api";
+import { initializeAuthSession } from "@/lib/auth/session";
 
 type AdminSignupFormValues = z.infer<typeof adminSignupSchema>;
 
@@ -68,17 +68,16 @@ export default function AdminSignupForm({
     }, 1000);
   };
 
-  const handleGoogleSignup = async () => {
+  const handleGoogleSignup = async (idToken: string) => {
+    const inviteToken = searchParams.get("invite") || undefined;
     try {
       setIsLoading(true);
-      const inviteToken = searchParams.get("invite") || undefined;
-      const idToken = await getGoogleIdToken();
-      const data = await googleAuth({ idToken }, inviteToken);
-
-      if (typeof window !== "undefined") {
-        localStorage.setItem("accessToken", data.accessToken);
-      }
-
+      const data = await googleAuth(idToken, inviteToken);
+      initializeAuthSession({
+        accessToken: data.accessToken,
+        emailHint: data.user?.email || preFilledEmail,
+        user: data.user,
+      });
       router.push(RouteConfig.dashboard.home);
     } catch (error: any) {
       form.setError("email", {
@@ -93,7 +92,7 @@ export default function AdminSignupForm({
 
   return (
     <div className="animate-fade-in">
-      <div className="mb-8">
+      <div className="mb-6 sm:mb-8">
         <Heading level={1}>Get Started</Heading>
         <Text variant="muted">
           It&apos;s easy! Just take a minute to provide the details.
@@ -101,7 +100,7 @@ export default function AdminSignupForm({
       </div>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <FormField
               control={form.control}
               name="firstName"
@@ -240,7 +239,7 @@ export default function AdminSignupForm({
           <Button
             type="submit"
             disabled={isLoading || !form.formState.isValid}
-            className="w-full py-6"
+            className="w-full py-5 sm:py-6"
           >
             {isLoading ? (
               <Span variant="default" className="flex items-center gap-2">
@@ -258,10 +257,13 @@ export default function AdminSignupForm({
             </Span>
             <div className="flex-grow border-t border-gray-200" />
           </div>
-          <GoogleSignupButton onClick={handleGoogleSignup} />
+          <GoogleSignupButton
+            onCredential={handleGoogleSignup}
+            disabled={isLoading}
+          />
         </form>
       </Form>
-      <div className="text-center mt-6">
+      <div className="text-center mt-5 sm:mt-6">
         <Text variant="muted">
           Already have an account?
           <Button onClick={onLogin} variant="link">

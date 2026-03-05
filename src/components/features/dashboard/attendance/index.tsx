@@ -55,6 +55,14 @@ export function AttendanceCalendarPage() {
     setIsAttendanceModalOpen(true);
   };
 
+  const handleViewServiceDetails = (service: RegularService, _date: string) => {
+    toast({
+      title: service.serviceName,
+      description:
+        "Service details modal is available on the dashboard attendance page.",
+    });
+  };
+
   const handleAddGivingRecord = (service: RegularService, date: string) => {
     toast({
       title: "Coming Soon",
@@ -128,6 +136,7 @@ export function AttendanceCalendarPage() {
         <CalendarGrid
           services={services}
           onAddAttendance={handleAddAttendance}
+          onViewServiceDetails={handleViewServiceDetails}
           onAddGivingRecord={handleAddGivingRecord}
           onAddService={handleAddService}
         />

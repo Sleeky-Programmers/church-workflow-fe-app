@@ -12,7 +12,6 @@ import {
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Span, Text } from "@/components/ui/typography/Text";
-import Heading from "@/components/ui/typography/Heading";
 import { ChartContainer, ChartTooltipContent } from "@/components/ui/chart";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -33,7 +32,7 @@ export function TrendChart({ attendanceData, incomeData }: TrendChartProps) {
   return (
     <Card className="rounded-3xl p-3">
       <CardContent>
-        <div className="flex items-center gap-3 col-span-3 text-sm">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-sm">
           <Button
             onClick={() => setTrend("attendance")}
             variant="link"
@@ -56,16 +55,14 @@ export function TrendChart({ attendanceData, incomeData }: TrendChartProps) {
             Income Growth
           </Button>
 
-          <Span text="|" className="text-muted-foreground" />
-
-          <Text text="• This month" className="text-muted-foreground" />
-
-          <Text text="• Last month" className="text-muted-foreground" />
+          <Span text="|" className="text-muted-foreground hidden sm:inline" />
+          <Text text="This month" className="text-muted-foreground" />
+          <Text text="Last month" className="text-muted-foreground" />
         </div>
 
         <div className="mt-4">
           <ChartContainer
-            className="p-4"
+            className="w-full aspect-auto h-[260px] sm:h-[300px] overflow-hidden p-2 sm:p-4"
             config={{
               thisMonth: { color: "#2563EB" },
               lastMonth: { color: "#93C5FD" },
@@ -73,11 +70,11 @@ export function TrendChart({ attendanceData, incomeData }: TrendChartProps) {
           >
             <LineChart
               data={data}
-              margin={{ top: 10, right: 20, left: 0, bottom: 0 }}
+              margin={{ top: 10, right: 8, left: -16, bottom: 0 }}
             >
               <CartesianGrid strokeDasharray="3 3" stroke="#E6E6E6" />
-              <XAxis dataKey="month" />
-              <YAxis />
+              <XAxis dataKey="month" tickLine={false} axisLine={false} />
+              <YAxis tickLine={false} axisLine={false} width={32} />
               <Tooltip content={<ChartTooltipContent />} />
 
               <Line

@@ -21,8 +21,34 @@ import { TrendChart } from "@/components/features/dashboard/trend-chart";
 import { IncomeVsExpenses } from "@/components/features/dashboard/income-expense";
 import { IncomeBreakdown } from "@/components/features/dashboard/income-breakdown";
 import { getCurrentAdmin, fetchTotalMembers } from "@/lib/api";
+import type { ChurchIdentityRecord } from "@/lib/auth/session";
+import {
+  getCurrentOnboardingState,
+  getCurrentUserProfile,
+} from "@/lib/auth/session";
 
 export default function Dashboard() {
+  const [displayName, setDisplayName] = useState("Super Admin");
+  const [churchName, setChurchName] = useState<string | null>(null);
+  const [churchIdentity, setChurchIdentity] =
+    useState<ChurchIdentityRecord | null>(null);
+
+  useEffect(() => {
+    const profile = getCurrentUserProfile();
+    const onboarding = getCurrentOnboardingState();
+
+    if (profile?.firstName) {
+      setDisplayName(profile.firstName);
+    } else if (profile?.fullName) {
+      setDisplayName(profile.fullName);
+    }
+
+    if (onboarding?.churchIdentity?.name) {
+      setChurchName(onboarding.churchIdentity.name);
+      setChurchIdentity(onboarding.churchIdentity);
+    }
+  }, []);
+  
   const [totalMembers, setTotalMembers] = useState<string>(
     DashboardData.stats.totalMembers,
   );
@@ -38,16 +64,39 @@ export default function Dashboard() {
     }
     loadStats();
   }, []);
+
   return (
     <>
-      <div className="flex md:items-center justify-between md:flex-row flex-col items-start mb-6">
-        <Heading level={1} text="Hello, Super Admin" />
-        <Text text="Overview" />
+      <div className="flex md:items-center justify-between md:flex-row flex-col items-start gap-1 mb-5 sm:mb-6">
+        <Heading level={1} text={`Hello, ${displayName}`} />
+        <Text text={churchName ? `Overview - ${churchName}` : "Overview"} />
       </div>
+
+      {churchIdentity && (
+        <Card className="mb-6 rounded-3xl">
+          <CardContent className="py-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+              <Text
+                text={`Church: ${churchIdentity.name}`}
+                variant="blue"
+                className="break-words"
+              />
+              <Text
+                text={`Location: ${churchIdentity.address}, ${churchIdentity.country}`}
+                className="break-words"
+              />
+              <Text
+                text={`Currency/Timezone: ${churchIdentity.defaultCurrency} - ${churchIdentity.timeZone}`}
+                className="break-words"
+              />
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 mb-6">
         <div className="lg:col-span-2 space-y-6">
-          <div className="flex items-center gap-2 flex-wrap lg:flex-nowrap overflow-x-auto hide-scrollbar">
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
             <StatCard
               compact
               title="Total Members"
@@ -112,15 +161,19 @@ export default function Dashboard() {
                         key={i}
                         className="flex items-center justify-between gap-3"
                       >
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-3 min-w-0">
                           <Span
                             className={cn(
                               "w-3 h-3 rounded-full block",
                               categoryConfig.dotClass,
                             )}
                           />
-                          <div>
-                            <Heading level={5} text={event.title} />
+                          <div className="min-w-0">
+                            <Heading
+                              level={5}
+                              text={event.title}
+                              className="truncate"
+                            />
                           </div>
                         </div>
 
@@ -139,13 +192,13 @@ export default function Dashboard() {
                     key={i}
                     className="flex items-center justify-between gap-3"
                   >
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 min-w-0">
                       <Avatar>
                         <AvatarFallback>
                           <User className="w-4 h-4 text-primary" />
                         </AvatarFallback>
                       </Avatar>
-                      <Text text={b.name} />
+                      <Text text={b.name} className="truncate" />
                     </div>
                     <Span
                       text={formatUpcomingBirthday(b.date)}

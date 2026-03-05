@@ -1,3 +1,6 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import {
   Form,
   FormControl,
@@ -20,29 +23,98 @@ import { Span, Text } from "@/components/ui/typography/Text";
 import { UseFormReturn } from "react-hook-form";
 import { ChurchIdentityValues } from "@/types/type";
 import { Info } from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { COUNTRIES, CURRENCIES, TIME_ZONES } from "@/lib/data";
 
 type ChurchIdentityStepProps = {
   form: UseFormReturn<ChurchIdentityValues>;
   onSubmit: (data: ChurchIdentityValues) => void;
-  onSkip: () => void;
+  onSaveAndExit: (data: ChurchIdentityValues) => void;
   step?: number;
   totalSteps?: number;
   onLogoSelect: (file: File | null) => void;
   isSubmitting?: boolean;
 };
 
+const COUNTRY_BY_CODE: Record<string, string> = COUNTRIES.reduce(
+  (acc, country) => {
+    acc[country.code] = country.name;
+    return acc;
+  },
+  {} as Record<string, string>,
+);
+
 export function ChurchIdentityStep({
   form,
   onSubmit,
-  onSkip,
+  onSaveAndExit,
   step = 1,
   totalSteps = 3,
   onLogoSelect,
   isSubmitting = false,
 }: ChurchIdentityStepProps) {
+  useEffect(() => {
+    const currentCountry = form.getValues("country");
+    const currentCurrency = form.getValues("defaultCurrency");
+    const currentTimeZone = form.getValues("timeZone");
+
+    if (currentCountry || currentCurrency || currentTimeZone) return;
+
+    const browserTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    const locale = navigator.language || "";
+    const localeRegion = locale.split("-")[1]?.toUpperCase();
+
+    const matchedByTimeZone = COUNTRIES.find(
+      (country) => country.timeZone === browserTimeZone,
+    );
+    const matchedCountryName =
+      matchedByTimeZone?.name ||
+      (localeRegion ? COUNTRY_BY_CODE[localeRegion] : undefined);
+
+    if (matchedCountryName) {
+      const matchedCountry = COUNTRIES.find(
+        (country) => country.name === matchedCountryName,
+      );
+      if (matchedCountry) {
+        form.setValue("country", matchedCountry.name);
+        form.setValue("defaultCurrency", matchedCountry.currency);
+      }
+    }
+
+    if (browserTimeZone && TIME_ZONES.includes(browserTimeZone)) {
+      form.setValue("timeZone", browserTimeZone);
+    }
+  }, [form]);
+  const [selectedLogoName, setSelectedLogoName] = useState<string | null>(null);
+  const [logoPreviewUrl, setLogoPreviewUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (logoPreviewUrl) {
+        URL.revokeObjectURL(logoPreviewUrl);
+      }
+    };
+  }, [logoPreviewUrl]);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     form.handleSubmit(onSubmit)(e);
+  };
+
+  const handleLogoChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    onChange: (value: any) => void,
+  ) => {
+    const file = e.target.files?.[0] || null;
+    onChange(file);
+    onLogoSelect(file);
+    setSelectedLogoName(file?.name || null);
+    setLogoPreviewUrl(file ? URL.createObjectURL(file) : null);
   };
 
   return (
@@ -62,7 +134,7 @@ export function ChurchIdentityStep({
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>
+                  <FormLabel className="h-5 flex items-center">
                     Church Name <Span variant="error">*</Span>
                   </FormLabel>
                   <FormControl>
@@ -78,15 +150,26 @@ export function ChurchIdentityStep({
               name="alias"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="flex items-center gap-1">
-                    Church Alias
-                    <div className="relative group">
-                      <Info className="h-3.5 w-3.5 text-primary-500 cursor-help" />
-                      <Span className="absolute left-0 bottom-full mb-2 hidden group-hover:block w-64 p-2 bg-primary-500 text-white-600 rounded shadow-lg z-10">
-                        A short or alternative name your church is commonly
-                        known by
-                      </Span>
-                    </div>
+                  <FormLabel className="h-5 flex items-center gap-1">
+                    Church Alias <Span variant="muted">(optional)</Span>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            className="h-5 w-5"
+                          >
+                            <Info className="h-3.5 w-3.5 text-primary cursor-help" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent className="max-w-64 text-left">
+                          A short or alternative name your church is commonly
+                          known by.
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
                   </FormLabel>
                   <FormControl>
                     <Input {...field} placeholder="Living Grace" />
@@ -112,6 +195,7 @@ export function ChurchIdentityStep({
               </FormItem>
             )}
           />
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <FormField
               control={form.control}
@@ -122,12 +206,31 @@ export function ChurchIdentityStep({
                     Country <Span variant="error">*</Span>
                   </FormLabel>
                   <FormControl>
-                    <Select onValueChange={field.onChange} value={field.value}>
+                    <Select
+                      onValueChange={(value) => {
+                        field.onChange(value);
+                        const selectedCountry = COUNTRIES.find(
+                          (country) => country.name === value,
+                        );
+                        if (selectedCountry) {
+                          form.setValue(
+                            "defaultCurrency",
+                            selectedCountry.currency,
+                          );
+                          form.setValue("timeZone", selectedCountry.timeZone);
+                        }
+                      }}
+                      value={field.value}
+                    >
                       <SelectTrigger>
-                        <SelectValue placeholder="Nigeria" />
+                        <SelectValue placeholder="Select country" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="Nigeria">Nigeria</SelectItem>
+                        {COUNTRIES.map((country) => (
+                          <SelectItem key={country.code} value={country.name}>
+                            {country.name}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                   </FormControl>
@@ -141,11 +244,9 @@ export function ChurchIdentityStep({
               name="state"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>
-                    State / Province <Span variant="error">*</Span>
-                  </FormLabel>
+                  <FormLabel>State / Province</FormLabel>
                   <FormControl>
-                    <Input {...field} placeholder="State" />
+                    <Input {...field} placeholder="State / Province" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -165,10 +266,14 @@ export function ChurchIdentityStep({
                   <FormControl>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <SelectTrigger>
-                        <SelectValue placeholder="₦ NGN" />
+                        <SelectValue placeholder="Select currency" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="NGN">₦ Nigerian Naira</SelectItem>
+                        {CURRENCIES.map((currency) => (
+                          <SelectItem key={currency.code} value={currency.code}>
+                            {currency.label}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                   </FormControl>
@@ -188,12 +293,14 @@ export function ChurchIdentityStep({
                   <FormControl>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <SelectTrigger>
-                        <SelectValue placeholder="(GMT+1) West Africa Time" />
+                        <SelectValue placeholder="Select time zone" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="GMT+1">
-                          (GMT+1) West Africa Time
-                        </SelectItem>
+                        {TIME_ZONES.map((timeZone) => (
+                          <SelectItem key={timeZone} value={timeZone}>
+                            {timeZone}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                   </FormControl>
@@ -206,23 +313,32 @@ export function ChurchIdentityStep({
           <FormField
             control={form.control}
             name="file"
-            render={() => (
+            render={({ field }) => (
               <FormItem>
                 <FormLabel>
                   Church Logo <Span variant="muted">(optional)</Span>
                 </FormLabel>
                 <FormControl>
                   <div
-                    className="border-2 border-dashed border-gray-200 rounded-lg p-8 bg-white hover:border-gray-300 transition-colors cursor-pointer"
+                    className="border-2 border-dashed border-border rounded-lg p-5 sm:p-8 bg-background hover:border-primary transition-colors cursor-pointer"
                     onClick={() =>
                       document.getElementById("logo-upload")?.click()
                     }
                   >
                     <div className="text-center">
-                      <Text variant="muted">Click to upload church logo</Text>
-                      <Text variant="muted" className="text-xs mt-1">
-                        PNG or JPG • max 5MB
-                      </Text>
+                      <Text variant="muted">Click to upload logo</Text>
+                      {selectedLogoName && (
+                        <Text className="mt-2 text-sm text-green-700">
+                          Selected: {selectedLogoName}
+                        </Text>
+                      )}
+                      {logoPreviewUrl && (
+                        <img
+                          src={logoPreviewUrl}
+                          alt="Church logo preview"
+                          className="mx-auto mt-3 h-16 w-16 rounded object-cover"
+                        />
+                      )}
                     </div>
                   </div>
                 </FormControl>
@@ -232,7 +348,7 @@ export function ChurchIdentityStep({
                   type="file"
                   className="hidden"
                   accept="image/*"
-                  onChange={(e) => onLogoSelect(e.target.files?.[0] || null)}
+                  onChange={(e) => handleLogoChange(e, field.onChange)}
                   disabled={isSubmitting}
                 />
               </FormItem>
@@ -249,7 +365,7 @@ export function ChurchIdentityStep({
             <Button
               type="button"
               variant="outline"
-              onClick={onSkip}
+              onClick={form.handleSubmit(onSaveAndExit)}
               className="w-full order-2 md:order-1"
               disabled={isSubmitting}
             >

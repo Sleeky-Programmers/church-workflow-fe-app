@@ -140,7 +140,7 @@ MRS.,Sarah Adjei,FEMALE,1990-08-22,SINGLE,,,,+233-20-234-5678,sarah.adjei@email.
 
   return (
     <Form {...form}>
-      <div className="space-y-6 max-w-2xl">
+      <div className="space-y-6 w-full max-w-2xl">
         <div className="space-y-1">
           <Heading level={1}>Upload Church Members</Heading>
           <Text variant="muted">Upload your members in bulk using a CSV</Text>
@@ -246,12 +246,12 @@ MRS.,Sarah Adjei,FEMALE,1990-08-22,SINGLE,,,,+233-20-234-5678,sarah.adjei@email.
           </Text>
         </div>
 
-        <div className="flex gap-3 pt-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-4">
           <Button
             type="button"
             variant="outline"
             onClick={onSkip}
-            className="flex-1"
+            className="w-full"
           >
             Skip for now
           </Button>
@@ -259,7 +259,7 @@ MRS.,Sarah Adjei,FEMALE,1990-08-22,SINGLE,,,,+233-20-234-5678,sarah.adjei@email.
             type="button"
             variant="outline"
             onClick={onBack}
-            className="flex-1"
+            className="w-full"
           >
             Back
           </Button>
@@ -267,7 +267,7 @@ MRS.,Sarah Adjei,FEMALE,1990-08-22,SINGLE,,,,+233-20-234-5678,sarah.adjei@email.
             type="button"
             variant="default"
             onClick={handleSubmit}
-            className="flex-1 "
+            className="w-full"
           >
             Upload & Continue
           </Button>

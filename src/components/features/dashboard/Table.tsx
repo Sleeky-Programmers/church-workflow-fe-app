@@ -31,6 +31,7 @@ export type Column<T> = {
   sortable?: boolean;
   width?: string;
   align?: Align;
+  contentClassName?: string;
 };
 
 export interface CustomTableProps<T> {
@@ -240,7 +241,9 @@ export default function Table<T extends Record<string, any>>({
                             key={col.key}
                             className={`${col.align === "center" ? "text-center" : col.align === "right" ? "text-right" : "text-left"} align-top ${col.width ?? ""} px-4`}
                           >
-                            <div className="truncate sm:whitespace-normal">
+                            <div
+                              className={`${col.contentClassName ?? "truncate"} sm:whitespace-normal`}
+                            >
                               {getCellValue(col, row)}
                             </div>
                           </TableCell>
