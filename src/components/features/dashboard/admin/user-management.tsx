@@ -1,20 +1,34 @@
 "use client";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { fetchUsers, inviteUser, performUserAction } from "@/lib/api";
+import {
+  fetchAdminInvites,
+  createAdminInvite,
+  updateAdminStatus,
+  removeAdminUser,
+  fetchRoles,
+  deleteAdminInvite,
+  changeAdminRole,
+  resendAdminInvite,
+} from "@/lib/api/admin-settings";
 import { User, UserAction } from "@/types/user";
 import { UserTable } from "@/components/features/dashboard/admin/users-table";
 import { InviteUserDialog } from "@/components/features/dashboard/admin/invite-user";
 import { RemoveUserDialog } from "@/components/features/dashboard/admin/mini-components/remove-user-dialog";
+import { ChangeRoleDialog } from "@/components/features/dashboard/admin/mini-components/change-role-dialog";
 import { useToast } from "@/hooks/use-toast";
 import Heading from "@/components/ui/typography/Heading";
 import { Text } from "@/components/ui/typography/Text";
+import { Loader } from "@/components/ui/loader";
+import { AdminOption } from "@/lib/enums";
 
 export function UserManagementPage() {
   const [users, setUsers] = useState<User[]>([]);
+  const [roles, setRoles] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isInviteDialogOpen, setIsInviteDialogOpen] = useState(false);
   const [isRemoveDialogOpen, setIsRemoveDialogOpen] = useState(false);
+  const [isChangeRoleDialogOpen, setIsChangeRoleDialogOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [isActionLoading, setIsActionLoading] = useState(false);
   const { toast } = useToast();
@@ -26,12 +40,38 @@ export function UserManagementPage() {
   const loadUsers = async () => {
     setIsLoading(true);
     try {
-      const data = await fetchUsers();
-      setUsers(data);
-    } catch (error) {
+      const [data, rolesData] = await Promise.all([
+        fetchAdminInvites(),
+        fetchRoles(),
+      ]);
+      setRoles(rolesData);
+      const mappedUsers: User[] = data.map((invite: any) => {
+        const roleId =
+          typeof invite.churchRole === "string"
+            ? invite.churchRole
+            : invite.churchRole?._id;
+        const roleObj = rolesData.find((r: any) => r._id === roleId);
+
+        return {
+          id: invite._id,
+          name: invite?.firstName
+            ? `${invite.firstName} ${invite.lastName || ""}`.trim()
+            : "-",
+          email: invite.email,
+          role: roleObj ? roleObj.roleName : "-",
+          roleId: roleId,
+          status: invite.status.toLowerCase() as
+            | "active"
+            | "pending"
+            | "suspended",
+          dateInvited: new Date(invite.createdAt).toLocaleString(),
+        };
+      });
+      setUsers(mappedUsers);
+    } catch (error: any) {
       toast({
         title: "Error",
-        description: "Failed to load users. Please try again.",
+        description: error.message || "Failed to load users. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -39,24 +79,43 @@ export function UserManagementPage() {
     }
   };
 
-  const handleInviteUser = async (data: { email: string; role: string }) => {
+  const handleInviteUser = async (data: {
+    email: string;
+    role: string;
+    title?: string;
+    firstName?: string;
+    lastName?: string;
+  }) => {
     setIsActionLoading(true);
     try {
-      const result = await inviteUser(data);
-      if (result.success) {
+      const payload: any = { email: data.email };
+      if (data.title) {
+        payload.title = data.title;
+      }
+      if (data.firstName) {
+        payload.firstName = data.firstName;
+      }
+      if (data.lastName) {
+        payload.lastName = data.lastName;
+      }
+
+      const result = await createAdminInvite(data.role, payload);
+      if (result) {
         toast({
           title: "Success",
-          description: result.message,
+          description: "Invitation sent successfully",
         });
-        setIsInviteDialogOpen(false);
         loadUsers();
+        return result;
       }
-    } catch (error) {
+    } catch (error: any) {
       toast({
         title: "Error",
-        description: "Failed to send invitation. Please try again.",
+        description:
+          error.message || "Failed to send invitation. Please try again.",
         variant: "destructive",
       });
+      throw error;
     } finally {
       setIsActionLoading(false);
     }
@@ -64,7 +123,9 @@ export function UserManagementPage() {
 
   const handleActionSelect = async (userId: string, action: UserAction) => {
     const user = users.find((u) => u.id === userId);
-    if (!user) return;
+    if (!user) {
+      return;
+    }
 
     if (action === "remove") {
       setSelectedUser(user);
@@ -72,20 +133,41 @@ export function UserManagementPage() {
       return;
     }
 
+    if (action === "change_role") {
+      setSelectedUser(user);
+      setIsChangeRoleDialogOpen(true);
+      return;
+    }
+
     setIsActionLoading(true);
     try {
-      const result = await performUserAction(userId, action);
-      if (result.success) {
-        toast({
-          title: "Success",
-          description: result.message,
-        });
-        loadUsers();
+      let result;
+      switch (action) {
+        case "suspend":
+          result = await updateAdminStatus(userId, AdminOption.SUSPEND);
+          break;
+        case "restore":
+          result = await updateAdminStatus(userId, AdminOption.RESTORE);
+          break;
+        case "delete_invitation":
+          result = await deleteAdminInvite(userId);
+          break;
+        case "resend_invite":
+          result = await resendAdminInvite(userId);
+          break;
+        default:
+          throw new Error("Action not supported locally yet");
       }
-    } catch (error) {
+
+      toast({
+        title: "Success",
+        description: "Action completed successfully",
+      });
+      loadUsers();
+    } catch (error: any) {
       toast({
         title: "Error",
-        description: "Action failed. Please try again.",
+        description: error.message || "Action failed. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -94,24 +176,51 @@ export function UserManagementPage() {
   };
 
   const handleRemoveUser = async () => {
-    if (!selectedUser) return;
+    if (!selectedUser) {
+      return;
+    }
 
     setIsActionLoading(true);
     try {
-      const result = await performUserAction(selectedUser.id, "remove");
-      if (result.success) {
-        toast({
-          title: "Success",
-          description: result.message,
-        });
-        setIsRemoveDialogOpen(false);
-        setSelectedUser(null);
-        loadUsers();
-      }
-    } catch (error) {
+      await removeAdminUser(selectedUser.id);
+      toast({
+        title: "Success",
+        description: "User removed successfully",
+      });
+      setIsRemoveDialogOpen(false);
+      setSelectedUser(null);
+      loadUsers();
+    } catch (error: any) {
       toast({
         title: "Error",
-        description: "Failed to remove user. Please try again.",
+        description:
+          error.message || "Failed to remove user. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsActionLoading(false);
+    }
+  };
+
+  const handleConfirmChangeRole = async (newRoleId: string) => {
+    if (!selectedUser) {
+      return;
+    }
+    setIsActionLoading(true);
+    try {
+      await changeAdminRole(selectedUser.id, newRoleId);
+      toast({
+        title: "Success",
+        description: "User role updated successfully",
+      });
+      setIsChangeRoleDialogOpen(false);
+      setSelectedUser(null);
+      loadUsers();
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description:
+          error.message || "Failed to update role. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -121,13 +230,9 @@ export function UserManagementPage() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center py-16">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto" />
-          <Text variant="default" className="mt-4 ">
-            Loading users...
-          </Text>
-        </div>
+      <div className="flex items-center justify-center py-16 gap-2">
+        <Loader />
+        <Text variant="default">Loading users...</Text>
       </div>
     );
   }
@@ -148,6 +253,7 @@ export function UserManagementPage() {
         onOpenChange={setIsInviteDialogOpen}
         onSubmit={handleInviteUser}
         isLoading={isActionLoading}
+        roles={roles}
       />
 
       <RemoveUserDialog
@@ -155,6 +261,16 @@ export function UserManagementPage() {
         onOpenChange={setIsRemoveDialogOpen}
         userName={selectedUser?.name || ""}
         onConfirm={handleRemoveUser}
+      />
+
+      <ChangeRoleDialog
+        open={isChangeRoleDialogOpen}
+        onOpenChange={setIsChangeRoleDialogOpen}
+        userName={selectedUser?.name || ""}
+        currentRoleId={selectedUser?.roleId || ""}
+        roles={roles}
+        onConfirm={handleConfirmChangeRole}
+        isLoading={isActionLoading}
       />
     </div>
   );

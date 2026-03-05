@@ -20,6 +20,7 @@ import Link from "next/link";
 import { TrendChart } from "@/components/features/dashboard/trend-chart";
 import { IncomeVsExpenses } from "@/components/features/dashboard/income-expense";
 import { IncomeBreakdown } from "@/components/features/dashboard/income-breakdown";
+import { getCurrentAdmin, fetchTotalMembers } from "@/lib/api";
 import type { ChurchIdentityRecord } from "@/lib/auth/session";
 import {
   getCurrentOnboardingState,
@@ -46,6 +47,22 @@ export default function Dashboard() {
       setChurchName(onboarding.churchIdentity.name);
       setChurchIdentity(onboarding.churchIdentity);
     }
+  }, []);
+
+  const [totalMembers, setTotalMembers] = useState<string>(
+    DashboardData.stats.totalMembers,
+  );
+  const [totalMembersGrowth, setTotalMembersGrowth] = useState<string>(
+    DashboardData.stats.totalMembersGrowth,
+  );
+
+  useEffect(() => {
+    async function loadStats() {
+      const { totalMembers: count, growth } = await fetchTotalMembers();
+      setTotalMembers(count.toLocaleString());
+      setTotalMembersGrowth(growth);
+    }
+    loadStats();
   }, []);
 
   return (
@@ -83,8 +100,8 @@ export default function Dashboard() {
             <StatCard
               compact
               title="Total Members"
-              count={DashboardData.stats.totalMembers}
-              growth={DashboardData.stats.totalMembersGrowth}
+              count={totalMembers}
+              growth={totalMembersGrowth}
             />
 
             <StatCard

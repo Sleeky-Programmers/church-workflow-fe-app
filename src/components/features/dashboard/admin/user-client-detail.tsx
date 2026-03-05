@@ -3,15 +3,26 @@
 import { useRouter } from "next/navigation";
 import { User } from "@/types/user";
 import { performUserAction } from "@/lib/api";
+import {
+  changeAdminRole,
+  updateAdminStatus,
+  removeAdminUser,
+  deleteAdminInvite,
+} from "@/lib/api/admin-settings";
 import { useToast } from "@/hooks/use-toast";
 import { UserDetailsPage } from "./user-details";
 import { RouteConfig } from "@/config/routes";
+import { AdminOption } from "@/lib/enums";
 
 type UserDetailsPageClientProps = {
   user: User;
+  roles?: any[];
 };
 
-export function UserDetailsPageClient({ user }: UserDetailsPageClientProps) {
+export function UserDetailsPageClient({
+  user,
+  roles,
+}: UserDetailsPageClientProps) {
   const router = useRouter();
   const { toast } = useToast();
 
@@ -21,16 +32,16 @@ export function UserDetailsPageClient({ user }: UserDetailsPageClientProps) {
 
   const handleRoleChange = async (userId: string, newRole: string) => {
     try {
-      await performUserAction(userId, "change_role", { role: newRole });
+      await changeAdminRole(userId, newRole);
       router.refresh();
       toast({
         title: "Success",
-        description: `Role updated to ${newRole}`,
+        description: "Role updated successfully",
       });
-    } catch (error) {
+    } catch (error: any) {
       toast({
         title: "Error",
-        description: "Failed to update role",
+        description: error.message || "Failed to update role",
         variant: "destructive",
       });
     }
@@ -38,16 +49,16 @@ export function UserDetailsPageClient({ user }: UserDetailsPageClientProps) {
 
   const handleSuspend = async (userId: string) => {
     try {
-      await performUserAction(userId, "suspend");
+      await updateAdminStatus(userId, AdminOption.SUSPEND);
       router.refresh();
       toast({
         title: "Success",
         description: "User has been suspended",
       });
-    } catch (error) {
+    } catch (error: any) {
       toast({
         title: "Error",
-        description: "Failed to suspend user",
+        description: error.message || "Failed to suspend user",
         variant: "destructive",
       });
     }
@@ -55,16 +66,16 @@ export function UserDetailsPageClient({ user }: UserDetailsPageClientProps) {
 
   const handleRemove = async (userId: string) => {
     try {
-      await performUserAction(userId, "remove");
+      await removeAdminUser(userId);
       toast({
         title: "Success",
         description: "User has been removed",
       });
       router.push(RouteConfig.dashboard.admin.users);
-    } catch (error) {
+    } catch (error: any) {
       toast({
         title: "Error",
-        description: "Failed to remove user",
+        description: error.message || "Failed to remove user",
         variant: "destructive",
       });
     }
@@ -77,10 +88,10 @@ export function UserDetailsPageClient({ user }: UserDetailsPageClientProps) {
         title: "Success",
         description: "Invitation has been resent",
       });
-    } catch (error) {
+    } catch (error: any) {
       toast({
         title: "Error",
-        description: "Failed to resend invitation",
+        description: error.message || "Failed to resend invitation",
         variant: "destructive",
       });
     }
@@ -88,16 +99,16 @@ export function UserDetailsPageClient({ user }: UserDetailsPageClientProps) {
 
   const handleDeleteInvite = async (userId: string) => {
     try {
-      await performUserAction(userId, "delete_invitation");
+      await deleteAdminInvite(userId);
       toast({
         title: "Success",
         description: "Invitation has been deleted",
       });
       router.push(RouteConfig.dashboard.admin.users);
-    } catch (error) {
+    } catch (error: any) {
       toast({
         title: "Error",
-        description: "Failed to delete invitation",
+        description: error.message || "Failed to delete invitation",
         variant: "destructive",
       });
     }
@@ -105,16 +116,16 @@ export function UserDetailsPageClient({ user }: UserDetailsPageClientProps) {
 
   const handleReinstate = async (userId: string) => {
     try {
-      await performUserAction(userId, "restore");
+      await updateAdminStatus(userId, AdminOption.RESTORE);
       router.refresh();
       toast({
         title: "Success",
         description: "User has been reinstated",
       });
-    } catch (error) {
+    } catch (error: any) {
       toast({
         title: "Error",
-        description: "Failed to reinstate user",
+        description: error.message || "Failed to reinstate user",
         variant: "destructive",
       });
     }
@@ -123,6 +134,7 @@ export function UserDetailsPageClient({ user }: UserDetailsPageClientProps) {
   return (
     <UserDetailsPage
       user={user}
+      roles={roles}
       onBack={handleBack}
       onRoleChange={handleRoleChange}
       onSuspend={handleSuspend}

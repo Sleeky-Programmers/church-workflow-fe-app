@@ -8,8 +8,17 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { ScheduleDeletionDialog } from "@/components/features/dashboard/admin/schedule-deletion-modal";
 import { PrivacySettings, AccountDeletionStatus } from "@/types";
+import {
+  fetchAccountSettings,
+  updateAccountSettings,
+  AccountSettings,
+  getDeletionSchedule,
+  scheduleAccountDeletion,
+  unscheduleAccountDeletion,
+} from "@/lib/api/admin-settings";
 import Heading from "@/components/ui/typography/Heading";
 import { Text, Span } from "@/components/ui/typography/Text";
+import { useEffect } from "react";
 
 export default function AccountSettingsPage() {
   const { toast } = useToast();
@@ -27,24 +36,86 @@ export default function AccountSettingsPage() {
   const [waitingPeriodDays, setWaitingPeriodDays] = useState<number | null>(
     null,
   );
+  const [initialSettings, setInitialSettings] =
+    useState<AccountSettings | null>(null);
 
-  const handlePrivacyToggle = (key: keyof PrivacySettings) => {
-    setPrivacy((prev) => ({
-      ...prev,
-      [key]: !prev[key],
-    }));
+  useEffect(() => {
+    async function loadSettings() {
+      try {
+        const [settings, deletionSchedule] = await Promise.all([
+          fetchAccountSettings(),
+          getDeletionSchedule().catch(() => null),
+        ]);
 
-    toast({
-      title: "Privacy setting updated",
-      description: "Your privacy preferences have been saved",
-    });
+        if (settings) {
+          setInitialSettings(settings);
+          setPrivacy({
+            birthdayCalendar: settings.personalPrivacy?.birthdayCalendarDisplay,
+            birthdayReminders: settings.personalPrivacy?.birthdayShoutOut,
+            emailAlerts: settings.personalPrivacy?.emailAlerts,
+          });
+        }
+
+        if (deletionSchedule && deletionSchedule.status === "PENDING") {
+          setDeletionStatus("scheduled");
+          const waitVal = Math.ceil(
+            (new Date(deletionSchedule.executeAt).getTime() -
+              new Date().getTime()) /
+              (1000 * 3600 * 24),
+          );
+          setWaitingPeriodDays(waitVal > 0 ? waitVal : 0);
+        }
+      } catch (error: any) {
+        toast({
+          title: "Error",
+          description:
+            error.message ||
+            "An error occurred while fetching account settings",
+          variant: "destructive",
+        });
+      }
+    }
+    loadSettings();
+  }, []);
+
+  const handlePrivacyToggle = async (key: keyof PrivacySettings) => {
+    const newPrivacy = {
+      ...privacy,
+      [key]: !privacy[key],
+    };
+    setPrivacy(newPrivacy);
+
+    try {
+      if (initialSettings) {
+        const updated = await updateAccountSettings({
+          personalPrivacy: {
+            birthdayCalendarDisplay: newPrivacy.birthdayCalendar,
+            birthdayShoutOut: newPrivacy.birthdayReminders,
+            emailAlerts: newPrivacy.emailAlerts,
+          },
+        });
+        setInitialSettings(updated);
+      }
+
+      toast({
+        title: "Privacy setting updated",
+        description: "Your privacy preferences have been saved",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update privacy settings.",
+        variant: "destructive",
+      });
+      setPrivacy(privacy);
+    }
   };
 
   const handleScheduleDeletion = async (days: number) => {
     setIsLoading(true);
 
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      await scheduleAccountDeletion(days);
 
       setDeletionStatus("scheduled");
       setWaitingPeriodDays(days);
@@ -55,10 +126,11 @@ export default function AccountSettingsPage() {
         description: `Your account will be deleted in ${days} days. You can cancel anytime within this period.`,
         variant: "destructive",
       });
-    } catch (error) {
+    } catch (error: any) {
       toast({
         title: "Error",
-        description: "Failed to schedule deletion. Please try again.",
+        description:
+          error.message || "Failed to schedule deletion. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -70,7 +142,7 @@ export default function AccountSettingsPage() {
     setIsLoading(true);
 
     try {
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      await unscheduleAccountDeletion();
 
       setDeletionStatus("none");
       setWaitingPeriodDays(null);
@@ -79,10 +151,11 @@ export default function AccountSettingsPage() {
         title: "Account deletion cancelled",
         description: "Your account deletion has been cancelled successfully",
       });
-    } catch (error) {
+    } catch (error: any) {
       toast({
         title: "Error",
-        description: "Failed to cancel deletion. Please try again.",
+        description:
+          error.message || "Failed to cancel deletion. Please try again.",
         variant: "destructive",
       });
     } finally {

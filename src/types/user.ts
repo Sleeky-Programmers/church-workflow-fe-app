@@ -7,6 +7,7 @@ export type User = {
   name: string;
   email: string;
   role: UserRole;
+  roleId?: string;
   status: UserStatus;
   dateInvited: string;
   avatar?: string;

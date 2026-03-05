@@ -11,7 +11,8 @@ export const activityDetailsConfig: {
   },
   {
     key: ActivityDetailLabel.BY,
-    getValue: (row) => row.user.name,
+    getValue: (row) =>
+      `${row.adminId?.firstName || "Unknown"} ${row.adminId?.lastName || ""}`,
   },
   {
     key: ActivityDetailLabel.MODULE,

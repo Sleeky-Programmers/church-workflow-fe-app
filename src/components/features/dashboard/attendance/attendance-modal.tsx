@@ -16,6 +16,8 @@ import { fetchMembers, getCurrentAdmin, saveAttendance } from "@/lib/api";
 import { SelectMembersView } from "./select-member-view";
 import { AttendanceStatsView } from "./attendance-stats";
 import { Span } from "@/components/ui/typography/Text";
+import Heading from "@/components/ui/typography/Heading";
+import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 type AttendanceModalProps = {
@@ -68,6 +70,8 @@ export function AttendanceModal({
 
   const hasExistingAttendance = Boolean(existingRecord);
 
+  const { toast } = useToast();
+
   useEffect(() => {
     if (!isOpen) return;
     setIsEditMode(!hasExistingAttendance);
@@ -83,12 +87,17 @@ export function AttendanceModal({
     try {
       const data = await fetchMembers(1, 100);
       setMembers(data.members);
+
       if (existingRecord?.presentMembers?.length) {
         initializeAttendance(existingRecord.presentMembers);
       }
       setHasMembersLoaded(true);
-    } catch (error) {
-      console.error("Failed to load members:", error);
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to load members",
+        variant: "destructive",
+      });
     } finally {
       setLoading(false);
     }
@@ -192,8 +201,12 @@ export function AttendanceModal({
 
       onSave();
       handleClose();
-    } catch (error) {
-      console.error("Failed to save attendance:", error);
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to save attendance",
+        variant: "destructive",
+      });
     } finally {
       setIsSaving(false);
     }

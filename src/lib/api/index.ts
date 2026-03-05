@@ -12,11 +12,17 @@ import {
   CreateWeeklyServicePayload,
 } from "@/types/payload";
 import { MOCK_ADMIN, MOCK_MEMBERS_FULL, MOCK_SERVICES } from "../data";
-import { AttendanceRecord, Member, RegularService } from "@/types";
+import {
+  ActivityLogApiResponse,
+  AttendanceRecord,
+  Member,
+  NotificationApiResponse,
+  RegularService,
+} from "@/types";
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
-async function authenticatedFetch<T>(
+export async function authenticatedFetch<T>(
   endpoint: string,
   options: RequestInit = {},
 ): Promise<T> {
@@ -34,15 +40,27 @@ async function authenticatedFetch<T>(
     },
   });
 
+  if (response.status === 401) {
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("accessToken");
+      window.location.href = "/auth/login";
+    }
+    throw new Error("Unauthorized");
+  }
+
   const data = await response.json().catch(() => ({}));
 
   if (!response.ok) {
     throw new Error(data?.message || "Request failed");
   }
+
   return data as T;
 }
 
-async function apiFetch<T>(endpoint: string, options: RequestInit): Promise<T> {
+export async function apiFetch<T>(
+  endpoint: string,
+  options: RequestInit,
+): Promise<T> {
   const token =
     typeof window !== "undefined" ? localStorage.getItem("accessToken") : null;
 
@@ -55,11 +73,20 @@ async function apiFetch<T>(endpoint: string, options: RequestInit): Promise<T> {
     },
   });
 
+  if (response.status === 401) {
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("accessToken");
+      window.location.href = "/auth/login";
+    }
+    throw new Error("Unauthorized");
+  }
+
   if (!response.ok) {
     throw new Error(await response.text());
   }
 
-  return response.json();
+  const text = await response.text();
+  return text ? JSON.parse(text) : (null as unknown as T);
 }
 
 export function signup(payload: SignupPayload) {
@@ -165,7 +192,7 @@ export async function createChurch(
 }
 
 export async function createWeeklyService(payload: CreateWeeklyServicePayload) {
-  return apiFetch("/church-services", {
+  return apiFetch("/church-services/create", {
     method: "POST",
     body: JSON.stringify(payload),
   });
@@ -277,6 +304,14 @@ export async function fetchServices(month: string): Promise<RegularService[]> {
       resolve(MOCK_SERVICES);
     }, 300);
   });
+}
+
+export async function fetchTotalMembers(): Promise<{
+  totalMembers: number;
+  growth: string;
+}> {
+  const res = await apiFetch<any>("/members/stats", { method: "GET" });
+  return { totalMembers: res.totalMembers || 0, growth: res.growth || "0%" };
 }
 
 export async function fetchMembers(
@@ -393,4 +428,28 @@ export async function updateAttendance(
 
 export function getCurrentAdmin() {
   return MOCK_ADMIN;
+}
+
+export async function fetchNotifications(): Promise<NotificationApiResponse> {
+  return await apiFetch("/notifications", {
+    method: "GET",
+  });
+}
+
+export async function markNotificationAsRead(notificationId: string) {
+  return await apiFetch(`/notifications/${notificationId}/read`, {
+    method: "PUT",
+  });
+}
+
+export async function markAllNotificationsAsRead() {
+  return await apiFetch("/notifications/read-all", {
+    method: "PUT",
+  });
+}
+
+export async function fetchActivityLogs(): Promise<ActivityLogApiResponse> {
+  return await apiFetch("/activity-log", {
+    method: "GET",
+  });
 }

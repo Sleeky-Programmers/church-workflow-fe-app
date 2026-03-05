@@ -8,11 +8,16 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import Heading from "@/components/ui/typography/Heading";
 import { NotificationSettings } from "@/types";
+import {
+  fetchAccountSettings,
+  updateAccountSettings,
+  AccountSettings,
+} from "@/lib/api/admin-settings";
+import { useEffect } from "react";
 
 export default function PersonalPreferencePage() {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
-
   const [notifications, setNotifications] = useState<NotificationSettings>({
     requisitionApprovals: true,
     events: true,
@@ -20,6 +25,34 @@ export default function PersonalPreferencePage() {
   });
 
   const [hasChanges, setHasChanges] = useState(false);
+  const [initialSettings, setInitialSettings] =
+    useState<AccountSettings | null>(null);
+
+  useEffect(() => {
+    async function loadSettings() {
+      try {
+        const settings = await fetchAccountSettings();
+        if (settings) {
+          setInitialSettings(settings);
+          setNotifications({
+            requisitionApprovals:
+              settings.personalPreferences?.requisitionApproval,
+            events: settings.personalPreferences?.event,
+            birthdays: settings.personalPreferences?.birthday,
+          });
+        }
+      } catch (error: any) {
+        toast({
+          title: "Error",
+          description:
+            error.message ||
+            "An error occurred while fetching account settings",
+          variant: "destructive",
+        });
+      }
+    }
+    loadSettings();
+  }, []);
 
   const handleToggle = (key: keyof NotificationSettings) => {
     setNotifications((prev) => ({
@@ -33,7 +66,16 @@ export default function PersonalPreferencePage() {
     setIsLoading(true);
 
     try {
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      if (initialSettings) {
+        const updated = await updateAccountSettings({
+          personalPreferences: {
+            requisitionApproval: notifications.requisitionApprovals,
+            event: notifications.events,
+            birthday: notifications.birthdays,
+          },
+        });
+        setInitialSettings(updated);
+      }
 
       toast({
         title: "Success",
@@ -41,10 +83,11 @@ export default function PersonalPreferencePage() {
       });
 
       setHasChanges(false);
-    } catch (error) {
+    } catch (error: any) {
       toast({
         title: "Error",
-        description: "Failed to save preferences. Please try again.",
+        description:
+          error.message || "Failed to save preferences. Please try again.",
         variant: "destructive",
       });
     } finally {

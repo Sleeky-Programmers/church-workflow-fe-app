@@ -38,11 +38,10 @@ export function AttendanceCalendarPage() {
     try {
       const data = await fetchServices("2025-05");
       setServices(data);
-    } catch (error) {
-      console.error("Failed to load services:", error);
+    } catch (error: any) {
       toast({
         title: "Error",
-        description: "Failed to load services",
+        description: error.message || "Failed to load services",
         variant: "destructive",
       });
     } finally {

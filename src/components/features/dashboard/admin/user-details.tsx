@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -17,6 +17,8 @@ import { useToast } from "@/hooks/use-toast";
 import { User } from "@/types/user";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { ROLE_OPTIONS, ROLE_PERMISSIONS } from "@/lib/permissions";
+import { fetchRoleById } from "@/lib/api/admin-settings";
+import { backendToFrontendModule } from "@/lib/role-constants";
 import { UserDetailsPermissionsView } from "./mini-components/user-permission";
 import { UserActionZone } from "./mini-components/user-action-zone";
 import { RemoveUserDialog } from "./mini-components/remove-user-dialog";
@@ -26,6 +28,7 @@ import { Span, Text } from "@/components/ui/typography/Text";
 type UserDetailsPageProps = {
   user: User;
   onBack: () => void;
+  roles?: any[];
   onRoleChange?: (userId: string, newRole: string) => void;
   onSuspend?: (userId: string) => void;
   onRemove?: (userId: string) => void;
@@ -37,6 +40,7 @@ type UserDetailsPageProps = {
 export function UserDetailsPage({
   user,
   onBack,
+  roles = [],
   onRoleChange,
   onSuspend,
   onRemove,
@@ -44,20 +48,72 @@ export function UserDetailsPage({
   onDeleteInvite,
   onReinstate,
 }: UserDetailsPageProps) {
-  const [selectedRole, setSelectedRole] = useState(user.role);
+  const [selectedRole, setSelectedRole] = useState(user.roleId || user.role);
   const [isRemoveDialogOpen, setIsRemoveDialogOpen] = useState(false);
+  const [roleData, setRoleData] = useState<any>(null);
+  const [isLoadingRole, setIsLoadingRole] = useState(false);
   const { toast } = useToast();
 
-  const rolePermissions = ROLE_PERMISSIONS[selectedRole];
+  useEffect(() => {
+    setSelectedRole(user.roleId || user.role);
+  }, [user.roleId, user.role]);
+
+  useEffect(() => {
+    async function loadRole() {
+      if (!selectedRole) {
+        return;
+      }
+
+      setIsLoadingRole(true);
+      try {
+        if (/^[a-fA-F0-9]{24}$/.test(selectedRole)) {
+          const fetchedRole = await fetchRoleById(selectedRole);
+          setRoleData(fetchedRole);
+        } else {
+          const fallbackObj = roles.find(
+            (r: any) => r._id === selectedRole || r.roleName === selectedRole,
+          );
+          setRoleData(fallbackObj || null);
+        }
+      } catch (error: any) {
+        toast({
+          title: "Error",
+          description: error.message || "Failed to load role data",
+          variant: "destructive",
+        });
+        const fallbackObj = roles.find(
+          (r: any) => r._id === selectedRole || r.roleName === selectedRole,
+        );
+        setRoleData(fallbackObj || null);
+      } finally {
+        setIsLoadingRole(false);
+      }
+    }
+    loadRole();
+  }, [selectedRole, roles]);
+
+  let rolePermissions = null;
+  if (roleData) {
+    rolePermissions = {
+      role: roleData.roleName,
+      description:
+        roleData.description ||
+        "Permissions are automatically assigned based on role.",
+      permissions:
+        roleData.permissions?.map((p: any) => ({
+          module: backendToFrontendModule[p.moduleSection] || p.moduleSection,
+          level: p.accessLevel?.toLowerCase(),
+          description: `Access Level: ${p.accessLevel}`,
+        })) || [],
+    };
+  } else {
+    rolePermissions = ROLE_PERMISSIONS[selectedRole];
+  }
 
   const handleRoleChange = (newRole: string) => {
     setSelectedRole(newRole);
     if (onRoleChange) {
       onRoleChange(user.id, newRole);
-      toast({
-        title: "Success",
-        description: `Role updated to ${newRole}`,
-      });
     }
   };
 
@@ -178,11 +234,17 @@ export function UserDetailsPage({
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {ROLE_OPTIONS.map((role) => (
-                    <SelectItem key={role} value={role}>
-                      {role}
-                    </SelectItem>
-                  ))}
+                  {roles && roles.length > 0
+                    ? roles.map((r: any) => (
+                        <SelectItem key={r._id} value={r._id}>
+                          {r.roleName}
+                        </SelectItem>
+                      ))
+                    : ROLE_OPTIONS.map((role) => (
+                        <SelectItem key={role} value={role}>
+                          {role}
+                        </SelectItem>
+                      ))}
                 </SelectContent>
               </Select>
               <Text variant="default">
@@ -201,11 +263,17 @@ export function UserDetailsPage({
           )}
         </div>
 
-        {rolePermissions && (
+        {isLoadingRole ? (
+          <div className="bg-white rounded-lg border p-6 flex justify-center py-10">
+            <Text variant="default" className="text-muted-foreground">
+              Loading permissions...
+            </Text>
+          </div>
+        ) : rolePermissions ? (
           <div className="bg-white rounded-lg border p-6">
             <UserDetailsPermissionsView rolePermissions={rolePermissions} />
           </div>
-        )}
+        ) : null}
 
         <UserActionZone
           status={user.status}

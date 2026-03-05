@@ -1,10 +1,11 @@
 "use client";
 
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Label } from "@/components/ui/label";
 import { RolePermissions as RolePermissionsType } from "../../../../../types/user";
 import Heading from "@/components/ui/typography/Heading";
 import { Text } from "@/components/ui/typography/Text";
+import { PermissionModuleSelector } from "./permission-selector";
+import { MODULE_PERMISSIONS } from "@/lib/role-constants";
+import { PermissionLevel } from "@/types";
 
 type UserDetailsPermissionsViewProps = {
   rolePermissions: RolePermissionsType;
@@ -24,54 +25,32 @@ export function UserDetailsPermissionsView({
       </div>
 
       <div className="space-y-6">
-        {rolePermissions.permissions.map((permission, index) => (
-          <div key={index} className="space-y-3">
-            <Heading level={4}>{permission.module}</Heading>
-            <RadioGroup value={permission.level} disabled>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="no_access" id={`no-access-${index}`} />
-                <Label
-                  htmlFor={`no-access-${index}`}
-                  className="text-sm font-normal cursor-not-allowed text-gray-600"
-                >
-                  No Access
-                </Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="view" id={`view-${index}`} />
-                <Label
-                  htmlFor={`view-${index}`}
-                  className="text-sm font-normal cursor-not-allowed text-gray-600"
-                >
-                  View → View{" "}
-                  {permission.module.toLowerCase().replace(" module", "")}
-                </Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="manage" id={`manage-${index}`} />
-                <Label
-                  htmlFor={`manage-${index}`}
-                  className="text-sm font-normal cursor-not-allowed text-gray-600"
-                >
-                  Manage → Add / Edit{" "}
-                  {permission.module.toLowerCase().replace(" module", "")}
-                </Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem
-                  value="full_access"
-                  id={`full-access-${index}`}
-                />
-                <Label
-                  htmlFor={`full-access-${index}`}
-                  className="text-sm font-normal cursor-not-allowed text-gray-600"
-                >
-                  {permission.description}
-                </Label>
-              </div>
-            </RadioGroup>
+        {MODULE_PERMISSIONS.map((moduleDef) => {
+          const matchedPerm = rolePermissions.permissions.find(
+            (p) => p.module === moduleDef.module,
+          );
+          const level: PermissionLevel = matchedPerm
+            ? (matchedPerm.level as PermissionLevel)
+            : "no_access";
+
+          if (level === "no_access") return null;
+
+          return (
+            <PermissionModuleSelector
+              key={moduleDef.module}
+              module={moduleDef}
+              value={level}
+              disabled={true}
+            />
+          );
+        })}
+
+        {rolePermissions.permissions.length === 0 ||
+        rolePermissions.permissions.every((p) => p.level === "no_access") ? (
+          <div className="text-gray-500 py-4 italic">
+            No specific permissions granted yet.
           </div>
-        ))}
+        ) : null}
       </div>
     </div>
   );

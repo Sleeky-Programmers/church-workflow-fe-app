@@ -16,6 +16,7 @@ import { Member } from "@/types";
 import { MemberListItem } from "./member-list";
 import Heading from "@/components/ui/typography/Heading";
 import { Text } from "@/components/ui/typography/Text";
+import { useToast } from "@/hooks/use-toast";
 
 type SelectMembersViewProps = {
   mode: "select" | "present" | "absent";
@@ -50,6 +51,26 @@ export function SelectMembersView({
 }: SelectMembersViewProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 10;
+
+  const { toast } = useToast();
+
+  const loadMembers = async (page: number = 1) => {
+    setIsLoading(true);
+    try {
+      const data = await fetchMembers(page, 10, searchQuery);
+      setMembers(data.members);
+      setTotalPages(data.pages);
+      setHasLoaded(true);
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to load members",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const filteredMembers = useMemo(() => {
     if (!searchQuery.trim()) return members;
