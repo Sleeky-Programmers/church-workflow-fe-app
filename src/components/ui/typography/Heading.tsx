@@ -5,7 +5,7 @@ type HeadingVariant = "default" | "primary" | "muted";
 
 interface HeadingProps extends React.HTMLAttributes<HTMLHeadingElement> {
   level?: HeadingLevel;
-  text?: string;
+  text?: string | number;
   variant?: HeadingVariant;
   children?: React.ReactNode;
   className?: string;

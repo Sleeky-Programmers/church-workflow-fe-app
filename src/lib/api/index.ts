@@ -14,7 +14,13 @@ import {
   CreateWeeklyServicePayload,
 } from "@/types/payload";
 import { MOCK_ADMIN, MOCK_MEMBERS_FULL, MOCK_SERVICES } from "../data";
-import { ActivityLogApiResponse, AttendanceRecord, Member, NotificationApiResponse, RegularService } from "@/types";
+import {
+  ActivityLogApiResponse,
+  AttendanceRecord,
+  Member,
+  NotificationApiResponse,
+  RegularService,
+} from "@/types";
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -36,15 +42,12 @@ export async function authenticatedFetch<T>(
     },
   });
 
-  // If unauthorized, clear token and redirect to login
   if (response.status === 401) {
     if (typeof window !== "undefined") {
       try {
         localStorage.removeItem("accessToken");
         window.location.href = "/auth/login";
-      } catch (e) {
-        // ignore errors during redirect
-      }
+      } catch (e) {}
     }
     throw new Error("Unauthorized");
   }
@@ -58,7 +61,10 @@ export async function authenticatedFetch<T>(
   return data as T;
 }
 
-export async function apiFetch<T>(endpoint: string, options: RequestInit): Promise<T> {
+export async function apiFetch<T>(
+  endpoint: string,
+  options: RequestInit,
+): Promise<T> {
   const token =
     typeof window !== "undefined" ? localStorage.getItem("accessToken") : null;
 
@@ -71,15 +77,12 @@ export async function apiFetch<T>(endpoint: string, options: RequestInit): Promi
     },
   });
 
-  // Redirect to login on 401 so the user can re-authenticate
   if (response.status === 401) {
     if (typeof window !== "undefined") {
       try {
         localStorage.removeItem("accessToken");
         window.location.href = "/auth/login";
-      } catch (e) {
-        // ignore redirect errors
-      }
+      } catch (e) {}
     }
     throw new Error("Unauthorized");
   }
@@ -88,7 +91,8 @@ export async function apiFetch<T>(endpoint: string, options: RequestInit): Promi
     throw new Error(await response.text());
   }
 
-  return response.json();
+  const text = await response.text();
+  return text ? JSON.parse(text) : (null as unknown as T);
 }
 
 export function signup(payload: SignupPayload) {
@@ -295,6 +299,19 @@ export async function fetchServices(month: string): Promise<RegularService[]> {
       resolve(MOCK_SERVICES);
     }, 300);
   });
+}
+
+export async function fetchTotalMembers(): Promise<{
+  totalMembers: number;
+  growth: string;
+}> {
+  try {
+    const res = await apiFetch<any>("/members/stats", { method: "GET" });
+    return { totalMembers: res.totalMembers || 0, growth: res.growth || "0%" };
+  } catch (err) {
+    console.error("Failed to fetch total members:", err);
+    return { totalMembers: 0, growth: "0%" };
+  }
 }
 
 export async function fetchMembers(

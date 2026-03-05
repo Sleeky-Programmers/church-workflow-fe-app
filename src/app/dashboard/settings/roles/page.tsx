@@ -9,14 +9,18 @@ import { Role, RoleAction } from "@/types";
 import { fetchRoles, updateRoleStatus } from "@/lib/api/admin-settings";
 import { RolesTable } from "@/components/features/dashboard/admin/role-table";
 import { DeactivateRoleDialog } from "@/components/features/dashboard/admin/mini-components/deactivate-role-dialog";
+import { ViewRolePermissionsDialog } from "@/components/features/dashboard/admin/mini-components/view-role-permissions-dialog";
 import Heading from "@/components/ui/typography/Heading";
 import { RouteConfig } from "@/config/routes";
+import { Loader } from "@/components/ui/loader";
 
 export default function RolesPermissionsPage() {
   const router = useRouter();
   const [roles, setRoles] = useState<Role[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isDeactivateDialogOpen, setIsDeactivateDialogOpen] = useState(false);
+  const [isViewPermissionsDialogOpen, setIsViewPermissionsDialogOpen] =
+    useState(false);
   const [selectedRole, setSelectedRole] = useState<Role | null>(null);
   const { toast } = useToast();
 
@@ -28,13 +32,11 @@ export default function RolesPermissionsPage() {
     setIsLoading(true);
     try {
       const data = await fetchRoles();
-      console.log({ roleData: data });
-      // Map API roles to component roles format
       const mappedRoles: Role[] = data.map((role: any) => ({
         id: role._id,
         name: role.roleName,
         type: role.type.toLowerCase() as "system" | "custom",
-        users: 0, // Not provided by the API directly
+        users: 0,
         status: role.status.toLowerCase() as "active" | "disabled",
         description: role.description || "",
       }));
@@ -56,10 +58,8 @@ export default function RolesPermissionsPage() {
 
     switch (action) {
       case "view_permissions":
-        toast({
-          title: "View Permissions",
-          description: `Viewing permissions for ${role.name}`,
-        });
+        setSelectedRole(role);
+        setIsViewPermissionsDialogOpen(true);
         break;
 
       case "edit":
@@ -135,13 +135,9 @@ export default function RolesPermissionsPage() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center py-16">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto" />
-          <Text variant="default" className="mt-4">
-            Loading roles...
-          </Text>
-        </div>
+      <div className="flex items-center justify-center py-16 gap-2">
+        <Loader />
+        <Text variant="default">Loading roles...</Text>
       </div>
     );
   }
@@ -162,6 +158,13 @@ export default function RolesPermissionsPage() {
         onOpenChange={setIsDeactivateDialogOpen}
         roleName={selectedRole?.name || ""}
         onConfirm={() => handleDeactivateRole()}
+      />
+
+      <ViewRolePermissionsDialog
+        open={isViewPermissionsDialogOpen}
+        onOpenChange={setIsViewPermissionsDialogOpen}
+        roleId={selectedRole?.id || null}
+        roleName={selectedRole?.name || ""}
       />
     </div>
   );

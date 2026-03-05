@@ -9,7 +9,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { ArrowLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { PermissionModuleSelector } from "@/components/features/dashboard/admin/mini-components/permission-selector";
-import { MODULE_PERMISSIONS } from "@/lib/role-constants";
+import {
+  MODULE_PERMISSIONS,
+  frontendToBackendModule,
+} from "@/lib/role-constants";
 import { PermissionLevel } from "@/types";
 import { createRole, updateRole } from "@/lib/api/admin-settings";
 import Heading from "@/components/ui/typography/Heading";
@@ -77,12 +80,12 @@ export default function CreateRolePage({
     setIsLoading(true);
 
     try {
-      const formattedPermissions = Object.entries(permissions)
-        .filter(([_, level]) => level !== "no_access")
-        .map(([moduleName, level]) => ({
-          moduleSection: moduleName,
+      const formattedPermissions = Object.entries(permissions).map(
+        ([moduleName, level]) => ({
+          moduleSection: frontendToBackendModule[moduleName] || moduleName,
           accessLevel: level.toUpperCase(),
-        }));
+        }),
+      );
 
       if (mode === "create") {
         await createRole({

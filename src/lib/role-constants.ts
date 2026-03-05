@@ -1,4 +1,20 @@
 import { ModulePermission, Role } from "@/types";
+
+export const frontendToBackendModule: Record<string, string> = {
+  "Members Module": "MEMBERS",
+  "Finance Module (Giving Records)": "GIVING",
+  "Finance Module (Giving & Expenses Record)": "GIVING_AND_EXPENSES",
+  "Requests Module": "REQUESTS",
+  "Events Module": "EVENTS",
+  "Departments Module": "DEPARTMENTS",
+  "Attendance Module": "ATTENDANCE",
+};
+
+export const backendToFrontendModule: Record<string, string> =
+  Object.fromEntries(
+    Object.entries(frontendToBackendModule).map(([k, v]) => [v, k]),
+  );
+
 export const MODULE_PERMISSIONS: ModulePermission[] = [
   {
     module: "Members Module",

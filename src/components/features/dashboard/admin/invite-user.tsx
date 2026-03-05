@@ -28,13 +28,17 @@ import {
 import { InviteFormData, PendingInvite } from "@/types/user";
 import { PendingInvitesList } from "./mini-components/pending-invite";
 import { RolePermissionsView } from "./role-permission";
+import Link from "next/link";
+import { RouteConfig } from "@/config/routes";
+import { backendToFrontendModule } from "@/lib/role-constants";
 
 type InviteUserDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSubmit: (data: InviteFormData) => void;
+  onSubmit: (data: InviteFormData) => Promise<any> | void;
   pendingInvites?: PendingInvite[];
   isLoading?: boolean;
+  roles?: any[];
 };
 
 export function InviteUserDialog({
@@ -43,9 +47,11 @@ export function InviteUserDialog({
   onSubmit,
   pendingInvites = [],
   isLoading = false,
+  roles = [],
 }: InviteUserDialogProps) {
   const [showPermissions, setShowPermissions] = useState(false);
   const [selectedRole, setSelectedRole] = useState("");
+  const [localInvites, setLocalInvites] = useState<PendingInvite[]>([]);
 
   const [formData, setFormData] = useState<InviteFormData>({
     title: "",
@@ -55,11 +61,26 @@ export function InviteUserDialog({
     role: "",
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (formData.email && formData.role) {
-      onSubmit(formData);
-      resetForm();
+      try {
+        const result = await Promise.resolve(onSubmit(formData));
+        const roleObj = roles.find((r) => r._id === formData.role);
+        setLocalInvites((prev) => [
+          ...prev,
+          {
+            id: result?._id || Date.now().toString(),
+            name: formData.firstName
+              ? `${formData.firstName} ${formData.lastName || ""}`.trim()
+              : formData.email.split("@")[0],
+            email: formData.email,
+            role: roleObj ? roleObj.roleName : formData.role,
+            status: "pending",
+          },
+        ]);
+        resetForm();
+      } catch (err) {}
     }
   };
 
@@ -76,6 +97,7 @@ export function InviteUserDialog({
 
   const handleCancel = () => {
     resetForm();
+    setLocalInvites([]);
     onOpenChange(false);
   };
 
@@ -90,7 +112,26 @@ export function InviteUserDialog({
     setShowPermissions(false);
   };
 
-  const rolePermissions = selectedRole ? ROLE_PERMISSIONS[selectedRole] : null;
+  let rolePermissions = null;
+  const targetRole = roles.find(
+    (r) => r._id === selectedRole || r.roleName === selectedRole,
+  );
+  if (targetRole) {
+    rolePermissions = {
+      role: targetRole.roleName,
+      description:
+        targetRole.description ||
+        "Permissions are automatically assigned based on role.",
+      permissions:
+        targetRole.permissions?.map((p: any) => ({
+          module: backendToFrontendModule[p.moduleSection] || p.moduleSection,
+          level: p.accessLevel?.toLowerCase(),
+          description: `Access Level: ${p.accessLevel}`,
+        })) || [],
+    };
+  } else {
+    rolePermissions = selectedRole ? ROLE_PERMISSIONS[selectedRole] : null;
+  }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -206,11 +247,27 @@ export function InviteUserDialog({
                     <SelectValue placeholder="Select a role" />
                   </SelectTrigger>
                   <SelectContent>
-                    {ROLE_OPTIONS.map((role) => (
-                      <SelectItem key={role} value={role}>
-                        {role}
-                      </SelectItem>
-                    ))}
+                    {roles.length > 0
+                      ? roles.map((role: any) => (
+                          <SelectItem key={role._id} value={role._id}>
+                            {role.roleName}
+                          </SelectItem>
+                        ))
+                      : ROLE_OPTIONS.map((role) => (
+                          <SelectItem key={role} value={role}>
+                            {role}
+                          </SelectItem>
+                        ))}
+                    <div className="px-2 py-2 border-t mt-1">
+                      <Link
+                        href={RouteConfig.dashboard.admin.createRole}
+                        className="text-primary text-xs flex justify-between items-center hover:underline cursor-pointer"
+                        style={{ pointerEvents: "auto" }}
+                      >
+                        <span>Create a new role</span>
+                        <ExternalLink className="h-3 w-3" />
+                      </Link>
+                    </div>
                   </SelectContent>
                 </Select>
               </div>
@@ -235,21 +292,23 @@ export function InviteUserDialog({
                 {isLoading ? "Sending..." : "Send Invite"}
               </Button>
 
-              {pendingInvites.length > 0 && (
-                <div className="pt-4 border-t">
-                  <PendingInvitesList invites={pendingInvites} />
+              {localInvites.length > 0 && (
+                <div className="pt-4 border-t mt-4">
+                  <PendingInvitesList invites={localInvites} />
                 </div>
               )}
 
-              <div className="flex justify-end pt-2">
-                <Button
-                  type="button"
-                  onClick={handleCancel}
-                  disabled={isLoading}
-                >
-                  Done
-                </Button>
-              </div>
+              {localInvites.length > 0 && (
+                <div className="flex justify-end pt-2">
+                  <Button
+                    type="button"
+                    onClick={handleCancel}
+                    disabled={isLoading}
+                  >
+                    Done
+                  </Button>
+                </div>
+              )}
             </form>
           </>
         ) : (

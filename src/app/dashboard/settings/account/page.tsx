@@ -12,14 +12,13 @@ import {
   fetchAccountSettings,
   updateAccountSettings,
   AccountSettings,
+  getDeletionSchedule,
+  scheduleAccountDeletion,
+  unscheduleAccountDeletion,
 } from "@/lib/api/admin-settings";
 import Heading from "@/components/ui/typography/Heading";
-<<<<<<< Updated upstream
 import { Text, Span } from "@/components/ui/typography/Text";
-=======
-import { Text } from "@/components/ui/typography/Text";
 import { useEffect } from "react";
->>>>>>> Stashed changes
 
 export default function AccountSettingsPage() {
   const { toast } = useToast();
@@ -43,16 +42,30 @@ export default function AccountSettingsPage() {
   useEffect(() => {
     async function loadSettings() {
       try {
-        const settings = await fetchAccountSettings();
-        setInitialSettings(settings);
-        setPrivacy({
-          birthdayCalendar: settings.personalPrivacy.birthdayCalendarDisplay,
-          birthdayReminders: settings.personalPrivacy.birthdayShoutOut,
-          emailAlerts: settings.personalPrivacy.emailAlerts,
-        });
-      } catch (error) {
-        console.error("Failed to load settings:", error);
-      }
+        const [settings, deletionSchedule] = await Promise.all([
+          fetchAccountSettings(),
+          getDeletionSchedule().catch(() => null),
+        ]);
+
+        if (settings) {
+          setInitialSettings(settings);
+          setPrivacy({
+            birthdayCalendar: settings.personalPrivacy?.birthdayCalendarDisplay,
+            birthdayReminders: settings.personalPrivacy?.birthdayShoutOut,
+            emailAlerts: settings.personalPrivacy?.emailAlerts,
+          });
+        }
+
+        if (deletionSchedule && deletionSchedule.status === "PENDING") {
+          setDeletionStatus("scheduled");
+          const waitVal = Math.ceil(
+            (new Date(deletionSchedule.executeAt).getTime() -
+              new Date().getTime()) /
+              (1000 * 3600 * 24),
+          );
+          setWaitingPeriodDays(waitVal > 0 ? waitVal : 0);
+        }
+      } catch (error) {}
     }
     loadSettings();
   }, []);
@@ -66,15 +79,14 @@ export default function AccountSettingsPage() {
 
     try {
       if (initialSettings) {
-        await updateAccountSettings({
-          personalPreferences: initialSettings.personalPreferences,
+        const updated = await updateAccountSettings({
           personalPrivacy: {
-            ...initialSettings.personalPrivacy,
             birthdayCalendarDisplay: newPrivacy.birthdayCalendar,
             birthdayShoutOut: newPrivacy.birthdayReminders,
             emailAlerts: newPrivacy.emailAlerts,
           },
         });
+        setInitialSettings(updated);
       }
 
       toast({
@@ -87,7 +99,6 @@ export default function AccountSettingsPage() {
         description: "Failed to update privacy settings.",
         variant: "destructive",
       });
-      // Revert state if error
       setPrivacy(privacy);
     }
   };
@@ -96,7 +107,7 @@ export default function AccountSettingsPage() {
     setIsLoading(true);
 
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      await scheduleAccountDeletion(days);
 
       setDeletionStatus("scheduled");
       setWaitingPeriodDays(days);
@@ -107,10 +118,11 @@ export default function AccountSettingsPage() {
         description: `Your account will be deleted in ${days} days. You can cancel anytime within this period.`,
         variant: "destructive",
       });
-    } catch (error) {
+    } catch (error: any) {
       toast({
         title: "Error",
-        description: "Failed to schedule deletion. Please try again.",
+        description:
+          error?.message || "Failed to schedule deletion. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -122,7 +134,7 @@ export default function AccountSettingsPage() {
     setIsLoading(true);
 
     try {
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      await unscheduleAccountDeletion();
 
       setDeletionStatus("none");
       setWaitingPeriodDays(null);
@@ -131,10 +143,11 @@ export default function AccountSettingsPage() {
         title: "Account deletion cancelled",
         description: "Your account deletion has been cancelled successfully",
       });
-    } catch (error) {
+    } catch (error: any) {
       toast({
         title: "Error",
-        description: "Failed to cancel deletion. Please try again.",
+        description:
+          error?.message || "Failed to cancel deletion. Please try again.",
         variant: "destructive",
       });
     } finally {

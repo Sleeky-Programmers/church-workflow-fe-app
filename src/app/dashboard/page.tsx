@@ -1,5 +1,5 @@
 "use client";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { CalendarDays, User } from "lucide-react";
 import { Span, Text } from "@/components/ui/typography/Text";
 import { StatCard } from "@/components/features/dashboard/StatCard";
@@ -20,9 +20,24 @@ import Link from "next/link";
 import { TrendChart } from "@/components/features/dashboard/trend-chart";
 import { IncomeVsExpenses } from "@/components/features/dashboard/income-expense";
 import { IncomeBreakdown } from "@/components/features/dashboard/income-breakdown";
-import { getCurrentAdmin } from "@/lib/api";
+import { getCurrentAdmin, fetchTotalMembers } from "@/lib/api";
 
 export default function Dashboard() {
+  const [totalMembers, setTotalMembers] = useState<string>(
+    DashboardData.stats.totalMembers,
+  );
+  const [totalMembersGrowth, setTotalMembersGrowth] = useState<string>(
+    DashboardData.stats.totalMembersGrowth,
+  );
+
+  useEffect(() => {
+    async function loadStats() {
+      const { totalMembers: count, growth } = await fetchTotalMembers();
+      setTotalMembers(count.toLocaleString());
+      setTotalMembersGrowth(growth);
+    }
+    loadStats();
+  }, []);
   return (
     <>
       <div className="flex md:items-center justify-between md:flex-row flex-col items-start mb-6">
@@ -36,8 +51,8 @@ export default function Dashboard() {
             <StatCard
               compact
               title="Total Members"
-              count={DashboardData.stats.totalMembers}
-              growth={DashboardData.stats.totalMembersGrowth}
+              count={totalMembers}
+              growth={totalMembersGrowth}
             />
 
             <StatCard

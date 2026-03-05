@@ -32,16 +32,16 @@ export default function PersonalPreferencePage() {
     async function loadSettings() {
       try {
         const settings = await fetchAccountSettings();
-        setInitialSettings(settings);
-        setNotifications({
-          requisitionApprovals:
-            settings.personalPreferences.requisitionApproval,
-          events: settings.personalPreferences.event,
-          birthdays: settings.personalPreferences.birthday,
-        });
-      } catch (error) {
-        console.error("Failed to load settings:", error);
-      }
+        if (settings) {
+          setInitialSettings(settings);
+          setNotifications({
+            requisitionApprovals:
+              settings.personalPreferences?.requisitionApproval,
+            events: settings.personalPreferences?.event,
+            birthdays: settings.personalPreferences?.birthday,
+          });
+        }
+      } catch (error) {}
     }
     loadSettings();
   }, []);
@@ -59,15 +59,14 @@ export default function PersonalPreferencePage() {
 
     try {
       if (initialSettings) {
-        await updateAccountSettings({
+        const updated = await updateAccountSettings({
           personalPreferences: {
-            ...initialSettings.personalPreferences,
             requisitionApproval: notifications.requisitionApprovals,
             event: notifications.events,
             birthday: notifications.birthdays,
           },
-          personalPrivacy: initialSettings.personalPrivacy,
         });
+        setInitialSettings(updated);
       }
 
       toast({
