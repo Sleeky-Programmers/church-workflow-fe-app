@@ -1,4 +1,12 @@
-import { NotificationType, UserRole, UserStatus } from "@/lib/enums";
+import {
+  EventCalendarView,
+  EventRecurrence,
+  EventReminderType,
+  EventType,
+  NotificationType,
+  UserRole,
+  UserStatus,
+} from "@/lib/enums";
 import { LucideIcon } from "lucide-react";
 
 export type ActivityRow = {
@@ -41,9 +49,9 @@ export type NotificationApiResponse = {
     itemCount: number;
     totalPages: number;
     hasPreviousPage: boolean;
-    hasNextPage: boolean
-  }
-}
+    hasNextPage: boolean;
+  };
+};
 
 export type ActivityLogApiResponse = {
   data: ActivityRow[];
@@ -53,8 +61,8 @@ export type ActivityLogApiResponse = {
     itemCount: number;
     totalPages: number;
     hasPreviousPage: boolean;
-    hasNextPage: boolean
-  }
+    hasNextPage: boolean;
+  };
 };
 
 export type DepartmentRow = {
@@ -276,3 +284,32 @@ export type AddMemberStep3Data = {
 export type NewMemberData = AddMemberStep1Data &
   AddMemberStep2Data &
   AddMemberStep3Data;
+
+export type ChurchEvent = {
+  id: string;
+  title: string;
+  type: EventType;
+  recurrence: EventRecurrence;
+  date: string;
+  startTime: string;
+  endTime?: string;
+  location?: string;
+  description?: string;
+  sendReminder: boolean;
+  reminderType: EventReminderType;
+  remindBeforeMinutes: number;
+  colorClass: string;
+};
+
+export type EventFormData = Omit<ChurchEvent, "id" | "colorClass">;
+
+export type EventTypeOption = {
+  value: EventType;
+  label: string;
+  colorClass: string;
+};
+
+export type EventViewOption = {
+  value: EventCalendarView;
+  label: string;
+};

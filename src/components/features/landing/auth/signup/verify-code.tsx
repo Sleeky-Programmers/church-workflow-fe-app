@@ -84,8 +84,8 @@ export default function VerifyOtpForm({ email, onVerify, onResend }: Props) {
   };
 
   return (
-    <div className="space-y-6 sm:space-y-8">
-      <div className="space-y-2">
+    <div className="space-y-5 sm:space-y-8">
+      <div className="space-y-2 max-w-sm">
         <Heading level={1}>Enter the code</Heading>
         <Text variant="muted">
           Enter the code sent to{" "}
@@ -108,15 +108,33 @@ export default function VerifyOtpForm({ email, onVerify, onResend }: Props) {
           containerClassName="justify-center min-w-max mx-auto"
         >
           <InputOTPGroup className="space-x-2">
-            <InputOTPSlot index={0} />
-            <InputOTPSlot index={1} />
-            <InputOTPSlot index={2} />
+            <InputOTPSlot
+              index={0}
+              className="h-12 w-10 text-lg sm:h-14 sm:w-12 sm:text-xl"
+            />
+            <InputOTPSlot
+              index={1}
+              className="h-12 w-10 text-lg sm:h-14 sm:w-12 sm:text-xl"
+            />
+            <InputOTPSlot
+              index={2}
+              className="h-12 w-10 text-lg sm:h-14 sm:w-12 sm:text-xl"
+            />
           </InputOTPGroup>
-          <InputOTPSeparator />
+          <InputOTPSeparator className="[&>svg]:h-4 [&>svg]:w-4 text-muted-foreground" />
           <InputOTPGroup className="space-x-2">
-            <InputOTPSlot index={3} />
-            <InputOTPSlot index={4} />
-            <InputOTPSlot index={5} />
+            <InputOTPSlot
+              index={3}
+              className="h-12 w-10 text-lg sm:h-14 sm:w-12 sm:text-xl"
+            />
+            <InputOTPSlot
+              index={4}
+              className="h-12 w-10 text-lg sm:h-14 sm:w-12 sm:text-xl"
+            />
+            <InputOTPSlot
+              index={5}
+              className="h-12 w-10 text-lg sm:h-14 sm:w-12 sm:text-xl"
+            />
           </InputOTPGroup>
         </InputOTP>
       </div>
@@ -147,8 +165,11 @@ export default function VerifyOtpForm({ email, onVerify, onResend }: Props) {
         )}
       </Button>
 
-      <Text variant="muted" className="text-center">
-        Didn&apos;t receive a code?{" "}
+      <Text
+        variant="muted"
+        className="text-center flex flex-wrap justify-center items-center gap-1"
+      >
+        <Span variant="muted">Didn&apos;t receive a code?</Span>
         {resendTimer > 0 ? (
           <Span className="font-medium">
             Resend in {Math.floor(resendTimer / 60)}:

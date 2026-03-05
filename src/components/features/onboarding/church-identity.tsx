@@ -22,7 +22,7 @@ import Heading from "@/components/ui/typography/Heading";
 import { Span, Text } from "@/components/ui/typography/Text";
 import { UseFormReturn } from "react-hook-form";
 import { ChurchIdentityValues } from "@/types/type";
-import { Info } from "lucide-react";
+import { ChevronDown, Info } from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
@@ -222,8 +222,11 @@ export function ChurchIdentityStep({
                       }}
                       value={field.value}
                     >
-                      <SelectTrigger>
+                      <SelectTrigger className="relative pr-10 [&>svg]:hidden">
                         <SelectValue placeholder="Select country" />
+                        <span className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full border border-dashed p-1">
+                          <ChevronDown className="h-3 w-3 text-muted-foreground" />
+                        </span>
                       </SelectTrigger>
                       <SelectContent>
                         {COUNTRIES.map((country) => (
@@ -265,8 +268,11 @@ export function ChurchIdentityStep({
                   </FormLabel>
                   <FormControl>
                     <Select onValueChange={field.onChange} value={field.value}>
-                      <SelectTrigger>
+                      <SelectTrigger className="relative pr-10 [&>svg]:hidden">
                         <SelectValue placeholder="Select currency" />
+                        <span className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full border border-dashed p-1">
+                          <ChevronDown className="h-3 w-3 text-muted-foreground" />
+                        </span>
                       </SelectTrigger>
                       <SelectContent>
                         {CURRENCIES.map((currency) => (
@@ -292,8 +298,11 @@ export function ChurchIdentityStep({
                   </FormLabel>
                   <FormControl>
                     <Select onValueChange={field.onChange} value={field.value}>
-                      <SelectTrigger>
+                      <SelectTrigger className="relative pr-10 [&>svg]:hidden">
                         <SelectValue placeholder="Select time zone" />
+                        <span className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full border border-dashed p-1">
+                          <ChevronDown className="h-3 w-3 text-muted-foreground" />
+                        </span>
                       </SelectTrigger>
                       <SelectContent>
                         {TIME_ZONES.map((timeZone) => (
@@ -357,26 +366,29 @@ export function ChurchIdentityStep({
 
           <div className="text-center mb-4">
             <Text variant="muted">
-              Step <Span variant="default">{step}</Span> of {totalSteps}
+              Step{" "}
+              <Span variant="blue">
+                {step} of {totalSteps}
+              </Span>
             </Text>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={form.handleSubmit(onSaveAndExit)}
-              className="w-full order-2 md:order-1"
-              disabled={isSubmitting}
-            >
-              Save & Go to Dashboard
-            </Button>
             <Button
               type="submit"
               className="w-full order-1 md:order-2"
               disabled={isSubmitting}
             >
               {isSubmitting ? "Saving..." : "Save & Continue"}
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={form.handleSubmit(onSaveAndExit)}
+              className="w-full order-2 md:order-1 "
+              disabled={isSubmitting}
+            >
+              <Text variant="blue">Save & Go to Dashboard</Text>
             </Button>
           </div>
         </form>

@@ -36,7 +36,7 @@ export default function ActivityLogPopup({
                 <div>
                   <Heading
                     level={3}
-                    text={`${selectedRow.action} by ${selectedRow.adminId?.firstName || 'Unknown'} ${selectedRow.adminId?.lastName || ''}`}
+                    text={`${selectedRow.action} by ${selectedRow.adminId?.firstName || "Unknown"} ${selectedRow.adminId?.lastName || ""}`}
                     className="text-lg font-semibold"
                   />
                   <Text variant="default" className=" mt-1">

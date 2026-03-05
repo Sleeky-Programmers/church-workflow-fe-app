@@ -3,12 +3,24 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Span, Text } from "@/components/ui/typography/Text";
 import Heading from "@/components/ui/typography/Heading";
-import { ApiNotification, NotificationTypes, NotificationApiResponse } from "@/types";
+import {
+  ApiNotification,
+  NotificationTypes,
+  NotificationApiResponse,
+} from "@/types";
 import { ChevronDown, Bell, ChevronLeft, ChevronRight } from "lucide-react";
-import { fetchNotifications, markAllNotificationsAsRead, markNotificationAsRead } from "@/lib/api";
+import {
+  fetchNotifications,
+  markAllNotificationsAsRead,
+  markNotificationAsRead,
+} from "@/lib/api";
 import { notificationConfig } from "@/lib/utils";
 import { Loader } from "@/components/ui/loader";
-import { Pagination, PaginationContent, PaginationItem } from "@/components/ui/pagination";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+} from "@/components/ui/pagination";
 
 type FilterType = "all" | "unread" | "read";
 
@@ -16,7 +28,9 @@ export default function Notification() {
   const [notifications, setNotifications] = useState<NotificationTypes[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const [pagination, setPagination] = useState<NotificationApiResponse["pagination"] | null>(null);
+  const [pagination, setPagination] = useState<
+    NotificationApiResponse["pagination"] | null
+  >(null);
 
   const [filter, setFilter] = useState<FilterType>("all");
 
@@ -29,7 +43,7 @@ export default function Notification() {
   const markAsRead = async (id: string) => {
     markNotificationAsRead(id);
     getAllNotifications();
-  }
+  };
 
   const markAllAsRead = async () => {
     await markAllNotificationsAsRead();
@@ -45,26 +59,28 @@ export default function Notification() {
       return;
     }
 
-    const notificationPayload = allNotifications.data.map((notification: ApiNotification) => ({
-      _id: notification._id,
-      icon: notificationConfig[notification.type].icon,
-      title: notification.title,
-      description: notification.body,
-      type: notification.type,
-      isRead: notification.isRead,
-      iconBg: notificationConfig[notification.type].background,
-      iconColor: notificationConfig[notification.type].color,
-      date: new Date(notification.createdAt).toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-        year: "numeric",
+    const notificationPayload = allNotifications.data.map(
+      (notification: ApiNotification) => ({
+        _id: notification._id,
+        icon: notificationConfig[notification.type].icon,
+        title: notification.title,
+        description: notification.body,
+        type: notification.type,
+        isRead: notification.isRead,
+        iconBg: notificationConfig[notification.type].background,
+        iconColor: notificationConfig[notification.type].color,
+        date: new Date(notification.createdAt).toLocaleDateString("en-US", {
+          month: "short",
+          day: "numeric",
+          year: "numeric",
+        }),
       }),
-    }));
+    );
     setNotifications(notificationPayload);
     setPagination(allNotifications.pagination);
     setCurrentPage(page);
     setIsLoading(false);
-  }
+  };
 
   useEffect(() => {
     getAllNotifications();
@@ -119,106 +135,110 @@ export default function Notification() {
             </Text>
           </div>
         ) : (
-          filteredNotifications.map(
-            (notification: NotificationTypes) => {
-              const Icon = notification.icon;
+          filteredNotifications.map((notification: NotificationTypes) => {
+            const Icon = notification.icon;
 
-              return (
-                <div
-                  key={notification._id}
-                  className={`flex items-center gap-4 p-3 rounded-lg cursor-pointer transition-colors
+            return (
+              <div
+                key={notification._id}
+                className={`flex items-center gap-4 p-3 rounded-lg cursor-pointer transition-colors
                     hover:bg-sky-50
                   `}
-                  onClick={() => markAsRead(notification._id)}
-                >
-                  <Span
-                    className={`mt-2 w-2 h-2 rounded-full ${
-                      notification.isRead ? "bg-transparent" : "bg-sky-500"
-                    }`}
-                  />
+                onClick={() => markAsRead(notification._id)}
+              >
+                <Span
+                  className={`mt-2 w-2 h-2 rounded-full ${
+                    notification.isRead ? "bg-transparent" : "bg-sky-500"
+                  }`}
+                />
 
-                  <div
-                    className={`flex items-center justify-center w-10 h-10 rounded-md
+                <div
+                  className={`flex items-center justify-center w-10 h-10 rounded-md
                       ${notification.iconBg} ${notification.iconColor}`}
-                  >
-                    <Icon className="w-5 h-5" />
+                >
+                  <Icon className="w-5 h-5" />
+                </div>
+
+                <div className="flex items-center gap-6 min-w-0 flex-1">
+                  <div className="flex-shrink-0 w-48">
+                    <Text
+                      className={`text-sm truncate ${
+                        notification.isRead
+                          ? "font-normal text-gray-700"
+                          : "font-semibold text-gray-900"
+                      }`}
+                    >
+                      {notification.title}
+                    </Text>
                   </div>
 
-                  <div className="flex items-center gap-6 min-w-0 flex-1">
-                    <div className="flex-shrink-0 w-48">
-                      <Text
-                        className={`text-sm truncate ${
-                          notification.isRead
-                            ? "font-normal text-gray-700"
-                            : "font-semibold text-gray-900"
-                        }`}
-                      >
-                        {notification.title}
-                      </Text>
-                    </div>
+                  <div className="flex-1 min-w-0">
+                    <Text variant="muted" className="truncate">
+                      {notification.description}
+                    </Text>
+                  </div>
 
-                    <div className="flex-1 min-w-0">
-                      <Text variant="muted" className="truncate">
-                        {notification.description}
-                      </Text>
-                    </div>
-
-                    <div className="flex-shrink-0 text-xs text-gray-400 whitespace-nowrap">
-                      {notification.date}
-                    </div>
+                  <div className="flex-shrink-0 text-xs text-gray-400 whitespace-nowrap">
+                    {notification.date}
                   </div>
                 </div>
-              );
-            },
-          )
+              </div>
+            );
+          })
         )}
       </div>
 
-      {pagination && pagination.totalPages > 1 && !isLoading && filteredNotifications.length > 0 && (
-        <div className="mt-8 flex items-center justify-between">
-          <Text variant="muted" className="text-sm">
-            Page {currentPage} of {pagination.totalPages}
-          </Text>
-          <Pagination className="justify-end m-0">
-            <PaginationContent>
-              <PaginationItem>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  disabled={!pagination.hasPreviousPage}
-                  onClick={() => getAllNotifications(currentPage - 1)}
-                >
-                  <ChevronLeft className="w-4 h-4" />
-                </Button>
-              </PaginationItem>
-
-              {Array.from({ length: pagination.totalPages }, (_, i) => i + 1).map((page) => (
-                <PaginationItem key={page}>
+      {pagination &&
+        pagination.totalPages > 1 &&
+        !isLoading &&
+        filteredNotifications.length > 0 && (
+          <div className="mt-8 flex items-center justify-between">
+            <Text variant="muted" className="text-sm">
+              Page {currentPage} of {pagination.totalPages}
+            </Text>
+            <Pagination className="justify-end m-0">
+              <PaginationContent>
+                <PaginationItem>
                   <Button
-                    variant={currentPage === page ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => getAllNotifications(page)}
-                    className="w-10"
+                    variant="outline"
+                    size="icon"
+                    disabled={!pagination.hasPreviousPage}
+                    onClick={() => getAllNotifications(currentPage - 1)}
                   >
-                    {page}
+                    <ChevronLeft className="w-4 h-4" />
                   </Button>
                 </PaginationItem>
-              ))}
 
-              <PaginationItem>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  disabled={!pagination.hasNextPage}
-                  onClick={() => getAllNotifications(currentPage + 1)}
-                >
-                  <ChevronRight className="w-4 h-4" />
-                </Button>
-              </PaginationItem>
-            </PaginationContent>
-          </Pagination>
-        </div>
-      )}
+                {Array.from(
+                  { length: pagination.totalPages },
+                  (_, i) => i + 1,
+                ).map((page) => (
+                  <PaginationItem key={page}>
+                    <Button
+                      variant={currentPage === page ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => getAllNotifications(page)}
+                      className="w-10"
+                    >
+                      {page}
+                    </Button>
+                  </PaginationItem>
+                ))}
+
+                <PaginationItem>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    disabled={!pagination.hasNextPage}
+                    onClick={() => getAllNotifications(currentPage + 1)}
+                  >
+                    <ChevronRight className="w-4 h-4" />
+                  </Button>
+                </PaginationItem>
+              </PaginationContent>
+            </Pagination>
+          </div>
+        )}
     </div>
   );
 }

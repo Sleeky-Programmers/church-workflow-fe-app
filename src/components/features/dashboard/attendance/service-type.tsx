@@ -9,11 +9,12 @@ import {
 import { RefreshCw, Star } from "lucide-react";
 import { Span } from "@/components/ui/typography/Text";
 import { Button } from "@/components/ui/button";
+import { ServiceType } from "@/lib/enums";
 
 type ServiceTypeModalProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSelectType: (type: "regular" | "special") => void;
+  onSelectType: (type: ServiceType.REGULAR | ServiceType.SPECIAL) => void;
 };
 
 export function ServiceTypeModal({
@@ -21,7 +22,9 @@ export function ServiceTypeModal({
   onOpenChange,
   onSelectType,
 }: ServiceTypeModalProps) {
-  const handleTypeSelect = (type: "regular" | "special") => {
+  const handleTypeSelect = (
+    type: ServiceType.REGULAR | ServiceType.SPECIAL,
+  ) => {
     onSelectType(type);
     onOpenChange(false);
   };
@@ -41,7 +44,7 @@ export function ServiceTypeModal({
 
         <div className="grid grid-cols-2 gap-4 py-6">
           <Button
-            onClick={() => handleTypeSelect("regular")}
+            onClick={() => handleTypeSelect(ServiceType.REGULAR)}
             className="flex flex-col items-center gap-4 p-8 rounded-lg border border-primary-200 bg-primary-50 hover:bg-primary-100 hover:border-primary-300 transition-colors"
           >
             <RefreshCw className="h-10 w-10 text-primary-600" />
@@ -50,7 +53,7 @@ export function ServiceTypeModal({
           </Button>
 
           <Button
-            onClick={() => handleTypeSelect("special")}
+            onClick={() => handleTypeSelect(ServiceType.SPECIAL)}
             className="flex flex-col items-center gap-4 p-8 rounded-lg border border-primary-200 bg-primary-50 hover:bg-primary-100 hover:border-primary-300 transition-colors"
           >
             <Star className="h-10 w-10 text-primary-600" />

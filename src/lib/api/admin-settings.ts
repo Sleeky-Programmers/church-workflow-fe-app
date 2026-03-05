@@ -115,10 +115,7 @@ export async function deleteAdminInvite(inviteId: string) {
   });
 }
 
-export async function updateAdminStatus(
-  inviteId: string,
-  option: AdminOption,
-) {
+export async function updateAdminStatus(inviteId: string, option: AdminOption) {
   return apiFetch<AdminInvite>(`/admin-invite/update/${inviteId}`, {
     method: "PUT",
     body: JSON.stringify({ option }),

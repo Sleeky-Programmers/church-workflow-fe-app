@@ -24,6 +24,7 @@ import {
   markMembersUploaded,
   markWeeklyServicesComplete,
 } from "@/lib/auth/session";
+import Image from "next/image";
 
 export default function ChurchOnboarding() {
   const [step, setStep] = useState(1);
@@ -311,6 +312,15 @@ export default function ChurchOnboarding() {
 
   return (
     <Card className="w-full max-w-2xl mx-auto p-4 sm:p-6 lg:p-8">
+      <div className="mb-4 sm:mb-6">
+        <Image
+          src="/assets/logo/horizontal/main.png"
+          alt="Church Workflow"
+          width={180}
+          height={52}
+          priority
+        />
+      </div>
       {renderStep()}
     </Card>
   );

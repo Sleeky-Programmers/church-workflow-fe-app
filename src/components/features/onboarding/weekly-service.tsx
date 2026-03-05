@@ -4,7 +4,7 @@ import { Card } from "@/components/ui/card";
 import { Text, Span } from "@/components/ui/typography/Text";
 import { Label } from "@/components/ui/label";
 import { WeeklyServicesValues } from "@/types/type";
-import { Trash2, Plus } from "lucide-react";
+import { Trash2, Plus, Clock3 } from "lucide-react";
 import Heading from "@/components/ui/typography/Heading";
 import { useState } from "react";
 
@@ -142,29 +142,40 @@ export function WeeklyServicesStep({
             <Label>
               Start Time <Span variant="error">*</Span>
             </Label>
-            <Input
-              type="time"
-              placeholder="--:-- --"
-              value={newService.startTime}
-              onChange={(e) =>
-                setNewService((prev) => ({
-                  ...prev,
-                  startTime: e.target.value,
-                }))
-              }
-            />
+            <div className="relative">
+              <Input
+                type="time"
+                placeholder="--:-- --"
+                value={newService.startTime}
+                onChange={(e) =>
+                  setNewService((prev) => ({
+                    ...prev,
+                    startTime: e.target.value,
+                  }))
+                }
+                className="pr-10"
+              />
+              <Clock3 className="h-4 w-4 absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+            </div>
           </div>
 
           <div>
             <Label>End Time</Label>
-            <Input
-              type="time"
-              placeholder="--:-- --"
-              value={newService.endTime}
-              onChange={(e) =>
-                setNewService((prev) => ({ ...prev, endTime: e.target.value }))
-              }
-            />
+            <div className="relative">
+              <Input
+                type="time"
+                placeholder="--:-- --"
+                value={newService.endTime}
+                onChange={(e) =>
+                  setNewService((prev) => ({
+                    ...prev,
+                    endTime: e.target.value,
+                  }))
+                }
+                className="pr-10"
+              />
+              <Clock3 className="h-4 w-4 absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+            </div>
           </div>
         </div>
 
@@ -220,7 +231,10 @@ export function WeeklyServicesStep({
 
       <div className="text-center mb-4">
         <Text variant="muted">
-          Step <Span variant="default">{step}</Span> of {totalSteps}
+          Step{" "}
+          <Span variant="blue">
+            {step} of {totalSteps}
+          </Span>
         </Text>
       </div>
 
@@ -231,7 +245,7 @@ export function WeeklyServicesStep({
           onClick={onBack}
           className="w-full"
         >
-          Back
+          <Span variant="blue">Back</Span>
         </Button>
         <Button
           type="button"
@@ -239,10 +253,10 @@ export function WeeklyServicesStep({
           onClick={onSkip}
           className="w-full"
         >
-          Skip for now
+          <Span variant="blue">Skip for now</Span>
         </Button>
         <Button type="button" onClick={onSubmit} className="w-full">
-          Continue
+          Save & Continue
         </Button>
       </div>
     </div>
