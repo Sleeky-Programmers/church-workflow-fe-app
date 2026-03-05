@@ -20,6 +20,7 @@ import { useToast } from "@/hooks/use-toast";
 import Heading from "@/components/ui/typography/Heading";
 import { Text } from "@/components/ui/typography/Text";
 import { Loader } from "@/components/ui/loader";
+import { AdminOption } from "@/lib/enums";
 
 export function UserManagementPage() {
   const [users, setUsers] = useState<User[]>([]);
@@ -88,9 +89,15 @@ export function UserManagementPage() {
     setIsActionLoading(true);
     try {
       const payload: any = { email: data.email };
-      if (data.title) payload.title = data.title;
-      if (data.firstName) payload.firstName = data.firstName;
-      if (data.lastName) payload.lastName = data.lastName;
+      if (data.title) {
+        payload.title = data.title;
+      }
+      if (data.firstName) {
+        payload.firstName = data.firstName;
+      }
+      if (data.lastName) {
+        payload.lastName = data.lastName;
+      }
 
       const result = await createAdminInvite(data.role, payload);
       if (result) {
@@ -116,7 +123,9 @@ export function UserManagementPage() {
 
   const handleActionSelect = async (userId: string, action: UserAction) => {
     const user = users.find((u) => u.id === userId);
-    if (!user) return;
+    if (!user) {
+      return;
+    }
 
     if (action === "remove") {
       setSelectedUser(user);
@@ -135,10 +144,10 @@ export function UserManagementPage() {
       let result;
       switch (action) {
         case "suspend":
-          result = await updateAdminStatus(userId, "SUSPEND");
+          result = await updateAdminStatus(userId, AdminOption.SUSPEND);
           break;
         case "restore":
-          result = await updateAdminStatus(userId, "RESTORE");
+          result = await updateAdminStatus(userId, AdminOption.RESTORE);
           break;
         case "delete_invitation":
           result = await deleteAdminInvite(userId);
@@ -167,7 +176,9 @@ export function UserManagementPage() {
   };
 
   const handleRemoveUser = async () => {
-    if (!selectedUser) return;
+    if (!selectedUser) {
+      return;
+    }
 
     setIsActionLoading(true);
     try {
@@ -192,7 +203,9 @@ export function UserManagementPage() {
   };
 
   const handleConfirmChangeRole = async (newRoleId: string) => {
-    if (!selectedUser) return;
+    if (!selectedUser) {
+      return;
+    }
     setIsActionLoading(true);
     try {
       await changeAdminRole(selectedUser.id, newRoleId);

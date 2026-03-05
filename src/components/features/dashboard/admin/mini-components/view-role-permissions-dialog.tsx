@@ -37,7 +37,9 @@ export function ViewRolePermissionsDialog({
 
   useEffect(() => {
     async function loadRole() {
-      if (!open || !roleId) return;
+      if (!open || !roleId) {
+        return;
+      }
 
       setIsLoading(true);
       try {

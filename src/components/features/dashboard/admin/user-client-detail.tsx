@@ -12,6 +12,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { UserDetailsPage } from "./user-details";
 import { RouteConfig } from "@/config/routes";
+import { AdminOption } from "@/lib/enums";
 
 type UserDetailsPageClientProps = {
   user: User;
@@ -35,7 +36,7 @@ export function UserDetailsPageClient({
       router.refresh();
       toast({
         title: "Success",
-        description: `Role updated successfully`,
+        description: "Role updated successfully",
       });
     } catch (error: any) {
       toast({
@@ -48,7 +49,7 @@ export function UserDetailsPageClient({
 
   const handleSuspend = async (userId: string) => {
     try {
-      await updateAdminStatus(userId, "SUSPEND");
+      await updateAdminStatus(userId, AdminOption.SUSPEND);
       router.refresh();
       toast({
         title: "Success",
@@ -115,7 +116,7 @@ export function UserDetailsPageClient({
 
   const handleReinstate = async (userId: string) => {
     try {
-      await updateAdminStatus(userId, "RESTORE");
+      await updateAdminStatus(userId, AdminOption.RESTORE);
       router.refresh();
       toast({
         title: "Success",

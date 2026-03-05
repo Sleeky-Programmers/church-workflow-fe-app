@@ -110,7 +110,6 @@ export type Role = {
   users: number;
   status: RoleStatus;
   description?: string;
-  // permissions: ModulePermission[];
 };
 
 export type CreateRoleFormData = {

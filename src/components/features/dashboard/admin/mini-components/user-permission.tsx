@@ -45,7 +45,6 @@ export function UserDetailsPermissionsView({
           );
         })}
 
-        {/* If no module is allowed, show a helpful message */}
         {rolePermissions.permissions.length === 0 ||
         rolePermissions.permissions.every((p) => p.level === "no_access") ? (
           <div className="text-gray-500 py-4 italic">

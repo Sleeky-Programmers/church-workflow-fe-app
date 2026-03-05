@@ -19,6 +19,11 @@ export enum NotificationType {
   FINANCE = 'FINANCE',
 }
 
+export enum AdminOption {
+  SUSPEND = "SUSPEND",
+  RESTORE = "RESTORE",
+}
+
 export enum ActivityDetailLabel {
   ACTION = "Action",
   BY = "By",

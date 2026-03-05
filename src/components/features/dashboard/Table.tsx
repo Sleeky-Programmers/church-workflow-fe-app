@@ -178,7 +178,6 @@ export default function Table<T extends Record<string, any>>({
   const controlled = Array.isArray(selectedRowKeys);
   const selectedKeys = controlled ? selectedRowKeys! : internalSelected;
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   const visibleRowKeys = useMemo(
     () => paginatedData.map((r, i) => getRowKey(r, i)),
     [paginatedData],
@@ -189,7 +188,6 @@ export default function Table<T extends Record<string, any>>({
   return (
     <Card className={className}>
       <CardContent className="p-0">
-        {/* Horizontal scrolling should be confined to this container */}
         <div className="overflow-x-auto w-full max-w-full">
           <div className="min-w-max">
             <TableComponent>

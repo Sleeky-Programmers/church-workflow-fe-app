@@ -19,7 +19,10 @@ export default function UserDetailsRoute() {
 
   useEffect(() => {
     async function loadData() {
-      if (!id) return;
+      if (!id) {
+        return;
+      }
+
       try {
         const [invitesData, rolesData] = await Promise.all([
           fetchAdminInvites(),

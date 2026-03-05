@@ -1,3 +1,4 @@
+import { AdminOption } from "../enums";
 import { apiFetch } from "./index";
 
 export interface Role {
@@ -116,7 +117,7 @@ export async function deleteAdminInvite(inviteId: string) {
 
 export async function updateAdminStatus(
   inviteId: string,
-  option: "SUSPEND" | "RESTORE",
+  option: AdminOption,
 ) {
   return apiFetch<AdminInvite>(`/admin-invite/update/${inviteId}`, {
     method: "PUT",

@@ -60,7 +60,9 @@ export function UserDetailsPage({
 
   useEffect(() => {
     async function loadRole() {
-      if (!selectedRole) return;
+      if (!selectedRole) {
+        return;
+      }
 
       setIsLoadingRole(true);
       try {
