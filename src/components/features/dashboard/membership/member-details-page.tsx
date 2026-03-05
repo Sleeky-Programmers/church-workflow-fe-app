@@ -31,22 +31,24 @@ export function MemberDetailsPage({ member, onBack }: MemberDetailsPageProps) {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="bg-white border-b">
-        <div className="px-6 py-4 flex items-center justify-center relative">
+        <div className="px-4 sm:px-6 py-4 flex items-center justify-center relative">
           <Button
             variant="ghost"
             size="sm"
             onClick={onBack}
-            className="absolute left-6 gap-1"
+            className="absolute left-2 sm:left-6 gap-1"
           >
             <ArrowLeft className="h-4 w-4" />
-            <Span variant="default">Back</Span>
+            <Span variant="default" className="hidden sm:inline">
+              Back
+            </Span>
           </Button>
 
           <Heading level={2}>Member Details</Heading>
         </div>
       </div>
 
-      <div className="bg-white border-b px-6 py-6">
+      <div className="bg-white border-b px-4 sm:px-6 py-4 sm:py-6">
         <div className="flex items-start gap-4">
           <Avatar className="h-16 w-16">
             <AvatarFallback className="bg-gray-900 text-white text-lg font-semibold">
@@ -66,7 +68,7 @@ export function MemberDetailsPage({ member, onBack }: MemberDetailsPageProps) {
       </div>
 
       <div className="border-b bg-white">
-        <div className="flex items-center justify-between px-6">
+        <div className="flex items-center justify-between px-4 sm:px-6 gap-2">
           <div className="flex gap-1">
             <Button
               variant={activeTab === "overview" ? "default" : "ghost"}
@@ -83,13 +85,16 @@ export function MemberDetailsPage({ member, onBack }: MemberDetailsPageProps) {
           </div>
 
           {activeTab === "overview" ? (
-            <Button variant="outline" className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              className="flex items-center gap-2 h-8 sm:h-9"
+            >
               <Edit className="h-4 w-4" />
-              Edit
+              <Span className="hidden sm:inline">Edit</Span>
             </Button>
           ) : (
             <Select value={filterValue} onValueChange={setFilterValue}>
-              <SelectTrigger className="w-[120px]">
+              <SelectTrigger className="w-[110px] sm:w-[120px] h-8 sm:h-9">
                 <SelectValue placeholder="Filter" />
               </SelectTrigger>
               <SelectContent>
@@ -103,7 +108,7 @@ export function MemberDetailsPage({ member, onBack }: MemberDetailsPageProps) {
           )}
         </div>
       </div>
-      <div className="bg-gray-50 p-6">
+      <div className="bg-gray-50 p-3 sm:p-6">
         {activeTab === "overview" && <MemberOverviewTab member={member} />}
         {activeTab === "attendance" && (
           <MemberAttendanceTab

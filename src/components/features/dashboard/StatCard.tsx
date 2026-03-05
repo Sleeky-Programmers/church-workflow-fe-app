@@ -27,8 +27,8 @@ export const StatCard = ({
   const Icon = isPositiveGrowth ? TrendingUp : TrendingDown;
 
   const sizeClasses = compact
-    ? "min-w-[220px] flex-shrink-0 h-[120px]"
-    : "min-w-[260px] flex-shrink-0 h-[150px]";
+    ? "w-full min-w-0 sm:min-w-[220px] h-[120px]"
+    : "w-full min-w-0 sm:min-w-[260px] h-[150px]";
 
   return (
     <Card
@@ -38,7 +38,7 @@ export const StatCard = ({
         className,
       )}
     >
-      <CardContent className="p-4">
+      <CardContent className="p-3 sm:p-4">
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <Heading level={5} text={title} />

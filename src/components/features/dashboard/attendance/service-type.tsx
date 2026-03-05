@@ -28,7 +28,11 @@ export function ServiceTypeModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent showClose={false} className="sm:max-w-md">
+      <DialogContent
+        showClose={false}
+        mobileSheet
+        className="sm:max-w-md max-sm:p-4"
+      >
         <DialogHeader>
           <DialogTitle className="text-center text-xl font-semibold">
             Service Type

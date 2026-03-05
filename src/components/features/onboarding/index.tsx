@@ -18,11 +18,18 @@ import { createChurch, createWeeklyService, uploadMembersCsv } from "@/lib/api";
 import { RouteConfig } from "@/config/routes";
 import { convertTo12Hour } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
+import {
+  getAccessToken,
+  markChurchIdentityComplete,
+  markMembersUploaded,
+  markWeeklyServicesComplete,
+} from "@/lib/auth/session";
 
 export default function ChurchOnboarding() {
   const [step, setStep] = useState(1);
   const [services, setServices] = useState<WeeklyServicesValues>([]);
   const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [isSubmittingIdentity, setIsSubmittingIdentity] = useState(false);
 
   const { toast } = useToast();
 
@@ -46,13 +53,45 @@ export default function ChurchOnboarding() {
     defaultValues: { csvFile: undefined },
   });
 
-  const onIdentitySubmit = async (data: ChurchIdentityValues) => {
-    if (!logoFile) {
-      alert("Please upload a church logo");
+  useEffect(() => {
+    if (!getAccessToken()) {
+      router.replace(RouteConfig.auth.signIn);
       return;
     }
+
+    if (typeof window === "undefined") return;
+
+    const savedDraft = window.localStorage.getItem(
+      "onboarding:church-identity-draft",
+    );
+
+    if (!savedDraft) return;
+
     try {
-      await createChurch(
+      const parsed = JSON.parse(savedDraft) as Partial<ChurchIdentityValues>;
+      identityForm.reset({
+        name: parsed.name || "",
+        alias: parsed.alias || "",
+        address: parsed.address || "",
+        country: parsed.country || "",
+        state: parsed.state || "",
+        defaultCurrency: parsed.defaultCurrency || "",
+        timeZone: parsed.timeZone || "",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to parse saved onboarding draft",
+        variant: "destructive",
+      });
+    }
+  }, [identityForm, router]);
+
+  const onIdentitySubmit = async (data: ChurchIdentityValues) => {
+    setIsSubmittingIdentity(true);
+
+    try {
+      const church = await createChurch(
         {
           name: data.name,
           alias: data.alias || "",
@@ -64,6 +103,31 @@ export default function ChurchOnboarding() {
         },
         logoFile,
       );
+
+      if (typeof window !== "undefined") {
+        window.localStorage.setItem(
+          "onboarding:church-identity-draft",
+          JSON.stringify(data),
+        );
+      }
+
+      markChurchIdentityComplete({
+        name: data.name,
+        alias: data.alias || "",
+        address: data.address,
+        country: data.country,
+        state: data.state || "",
+        defaultCurrency: data.defaultCurrency,
+        timeZone: data.timeZone,
+        logoUrl:
+          (church as { logoUrl?: string } | null)?.logoUrl ||
+          (church as { church?: { logoUrl?: string } } | null)?.church?.logoUrl,
+        logoPublicId:
+          (church as { logoPublicId?: string } | null)?.logoPublicId ||
+          (church as { church?: { logoPublicId?: string } } | null)?.church
+            ?.logoPublicId,
+      });
+
       setStep(2);
     } catch (error: any) {
       toast({
@@ -71,6 +135,57 @@ export default function ChurchOnboarding() {
         description: error.message || "Failed to create church",
         variant: "destructive",
       });
+    } finally {
+      setIsSubmittingIdentity(false);
+    }
+  };
+
+  const onSaveIdentityAndExit = async (data: ChurchIdentityValues) => {
+    setIsSubmittingIdentity(true);
+    try {
+      const church = await createChurch(
+        {
+          name: data.name,
+          alias: data.alias || "",
+          address: data.address,
+          country: data.country,
+          state: data.state || "",
+          defaultCurrency: data.defaultCurrency,
+          timeZone: data.timeZone,
+        },
+        logoFile,
+      );
+
+      if (typeof window !== "undefined") {
+        window.localStorage.setItem(
+          "onboarding:church-identity-draft",
+          JSON.stringify(data),
+        );
+      }
+
+      markChurchIdentityComplete({
+        name: data.name,
+        alias: data.alias || "",
+        address: data.address,
+        country: data.country,
+        state: data.state || "",
+        defaultCurrency: data.defaultCurrency,
+        timeZone: data.timeZone,
+        logoUrl:
+          (church as { logoUrl?: string } | null)?.logoUrl ||
+          (church as { church?: { logoUrl?: string } } | null)?.church?.logoUrl,
+        logoPublicId:
+          (church as { logoPublicId?: string } | null)?.logoPublicId ||
+          (church as { church?: { logoPublicId?: string } } | null)?.church
+            ?.logoPublicId,
+      });
+
+      router.push(RouteConfig.dashboard.home);
+    } catch (error: any) {
+      console.error("Save and exit failed:", error);
+      alert(error.message || "Failed to save church identity");
+    } finally {
+      setIsSubmittingIdentity(false);
     }
   };
 
@@ -89,6 +204,8 @@ export default function ChurchOnboarding() {
           });
         }
       }
+
+      markWeeklyServicesComplete();
       setStep(3);
     } catch (error: any) {
       toast({
@@ -107,6 +224,7 @@ export default function ChurchOnboarding() {
 
     try {
       await uploadMembersCsv(data.csvFile);
+      markMembersUploaded();
 
       router.push(RouteConfig.dashboard.home);
     } catch (error: any) {
@@ -119,7 +237,14 @@ export default function ChurchOnboarding() {
   };
 
   const handleBack = () => step > 1 && setStep(step - 1);
-  const handleSkip = () => setStep(step + 1);
+  const handleSkip = () => {
+    if (step === 2) {
+      setStep(3);
+      return;
+    }
+
+    router.push(RouteConfig.dashboard.home);
+  };
 
   const addService = (service: WeeklyServicesValues[number]) => {
     setServices((prev) => [...prev, service]);
@@ -146,10 +271,11 @@ export default function ChurchOnboarding() {
           <ChurchIdentityStep
             form={identityForm}
             onSubmit={onIdentitySubmit}
-            onSkip={handleSkip}
+            onSaveAndExit={onSaveIdentityAndExit}
             step={step}
             totalSteps={3}
             onLogoSelect={setLogoFile}
+            isSubmitting={isSubmittingIdentity}
           />
         );
       case 2:
@@ -180,5 +306,9 @@ export default function ChurchOnboarding() {
     }
   };
 
-  return <Card className="max-w-2xl mx-auto p-8">{renderStep()}</Card>;
+  return (
+    <Card className="w-full max-w-2xl mx-auto p-4 sm:p-6 lg:p-8">
+      {renderStep()}
+    </Card>
+  );
 }

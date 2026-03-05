@@ -12,7 +12,7 @@ export default function AuthLayout({ children, variant }: Props) {
   const { imageUrl, verse, reference } = AUTH_CONTENT[variant];
   return (
     <div className="min-h-screen grid grid-cols-1 lg:grid-cols-2 relative">
-      <div className="flex items-center justify-center px-6 py-12">
+      <div className="flex items-start sm:items-center justify-center px-4 py-8 sm:px-6 sm:py-12">
         <div className="w-full max-w-md animate-fade-in-up">{children}</div>
       </div>
       <div

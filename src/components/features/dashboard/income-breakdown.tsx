@@ -28,8 +28,11 @@ export function IncomeBreakdown() {
       <CardContent>
         <Heading level={4} text="Income Breakdown" />
 
-        <div className="mt-4 grid grid-cols-2 gap-4 items-center">
-          <ChartContainer className="w-full h-[160px]" config={config}>
+        <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4 items-center">
+          <ChartContainer
+            className="w-full aspect-auto h-[180px] sm:h-[160px] overflow-hidden"
+            config={config}
+          >
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
@@ -76,14 +79,14 @@ export function IncomeBreakdown() {
             {DashboardData.incomeBreakdown.map((item) => (
               <div
                 key={item.name}
-                className="flex items-center justify-between text-sm"
+                className="flex items-center justify-between gap-3 text-sm"
               >
                 <div className="flex items-center gap-2">
                   <Span
                     className="w-3 h-3 rounded-full"
                     style={{ backgroundColor: item.color }}
                   />
-                  <Span>{item.name}</Span>
+                  <Span className="truncate">{item.name}</Span>
                 </div>
                 <Span className="font-mono">{item.value}%</Span>
               </div>

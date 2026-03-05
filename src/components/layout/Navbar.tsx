@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Bell, Search, Star, User } from "lucide-react";
 import {
   Breadcrumb,
@@ -20,15 +20,28 @@ import { Text } from "../ui/typography/Text";
 import { RouteConfig } from "@/config/routes";
 import { useFavoritesStore } from "@/stores/useFavoritesStore";
 import { useAuthStore } from "@/stores/useAuthStore";
+import { getCurrentUserProfile } from "@/lib/auth/session";
 
 export function Navbar() {
   const pathname = usePathname() || RouteConfig.dashboard.home;
   const router = useRouter();
 
   const [search, setSearch] = useState("");
+  const [fallbackName, setFallbackName] = useState("John Doe");
   const { toggleFavorite, isFavorite } = useFavoritesStore();
   const { user } = useAuthStore();
   const starred = isFavorite(pathname);
+
+  useEffect(() => {
+    const profile = getCurrentUserProfile();
+    if (profile?.firstName) {
+      setFallbackName(profile.firstName);
+      return;
+    }
+    if (profile?.fullName) {
+      setFallbackName(profile.fullName);
+    }
+  }, []);
 
   const pageLabel = useMemo(() => {
     const path = pathname.replace(/\/+$/, "");
@@ -119,7 +132,7 @@ export function Navbar() {
               </AvatarFallback>
             </Avatar>
             <Text variant="default" className="hidden sm:block">
-              {user?.name || "John Doe"}
+              {user?.name || fallbackName}
             </Text>
           </Button>
         </Link>

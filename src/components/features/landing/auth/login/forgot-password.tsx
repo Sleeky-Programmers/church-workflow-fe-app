@@ -43,8 +43,8 @@ export default function ForgotPasswordForm({
   };
 
   return (
-    <div className="bg-gray-50 rounded-2xl p-8 animate-slide-up">
-      <div className="text-center mb-8">
+    <div className="bg-gray-50 rounded-xl sm:rounded-2xl p-4 sm:p-8 animate-slide-up">
+      <div className="text-center mb-6 sm:mb-8">
         <Heading level={1}>Forgot Password</Heading>
         <Text variant="muted" className="mt-2">
           Enter your email to reset password
@@ -83,7 +83,12 @@ export default function ForgotPasswordForm({
             )}
           </Button>
           <div className="text-center">
-            <Button type="button" variant="link" onClick={onBackToLogin}>
+            <Button
+              type="button"
+              variant="link"
+              onClick={onBackToLogin}
+              className="h-auto p-0"
+            >
               ← Back to login
             </Button>
           </div>

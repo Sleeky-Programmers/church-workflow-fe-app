@@ -64,7 +64,7 @@ export function ChurchActivityStep({
         </Text>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-2 gap-6">
         <div>
           <Label className="mb-2">
             Membership Status <Span variant="error">*</Span>
@@ -190,7 +190,7 @@ export function ChurchActivityStep({
           </Select>
         </div>
 
-        <div className="md:col-span-2">
+        <div className="col-span-2">
           <Label className="mb-2">Are you in a small Group/Cell Group?</Label>
           <Select
             value={formData.smallGroupMember || ""}

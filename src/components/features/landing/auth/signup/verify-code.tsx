@@ -84,7 +84,7 @@ export default function VerifyOtpForm({ email, onVerify, onResend }: Props) {
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 sm:space-y-8">
       <div className="space-y-2">
         <Heading level={1}>Enter the code</Heading>
         <Text variant="muted">
@@ -93,14 +93,19 @@ export default function VerifyOtpForm({ email, onVerify, onResend }: Props) {
         </Text>
       </div>
 
-      <div className={cn("flex justify-center", error && "animate-shake")}>
+      <div
+        className={cn(
+          "w-full overflow-x-auto pb-1 flex justify-center",
+          error && "animate-shake",
+        )}
+      >
         <InputOTP
           maxLength={6}
           value={otp}
           onChange={setOtp}
           autoFocus
           disabled={isVerifying}
-          containerClassName="justify-center"
+          containerClassName="justify-center min-w-max mx-auto"
         >
           <InputOTPGroup className="space-x-2">
             <InputOTPSlot index={0} />

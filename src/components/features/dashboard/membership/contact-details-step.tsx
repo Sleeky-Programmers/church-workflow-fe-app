@@ -54,7 +54,7 @@ export function ContactDetailsStep({
           Enter the member's phone number, email, and address details
         </Text>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-2 gap-4">
         <div>
           <Label className="mb-2">Email</Label>
           <Input
@@ -91,7 +91,7 @@ export function ContactDetailsStep({
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-2 gap-4">
         <div>
           <Label className="mb-2">Occupation</Label>
           <Input

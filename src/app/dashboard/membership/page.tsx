@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, Plus, Edit } from "lucide-react";
+import { Search, Plus, Edit, MoreVertical } from "lucide-react";
 import Heading from "@/components/ui/typography/Heading";
 import { MembersTable } from "@/components/features/dashboard/membership/members-table";
 import { MOCK_MEMBERS_FULL } from "@/lib/data";
@@ -18,8 +18,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export default function MembershipPage() {
+  const isMobile = useIsMobile();
   const [members, setMembers] = useState<MemberProfile[]>(MOCK_MEMBERS_FULL);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedMemberId, setSelectedMemberId] = useState<string | null>(null);
@@ -101,11 +103,11 @@ export default function MembershipPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="bg-white">
-        <div className="px-6 py-4 flex items-center justify-between">
+        <div className="px-4 sm:px-6 py-4 flex items-center justify-between gap-2">
           <Heading level={3}>Membership</Heading>
 
-          <div className="flex items-center gap-3">
-            <div className="relative w-96">
+          <div className="hidden sm:flex items-center gap-3">
+            <div className="relative w-72 md:w-96">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
               <Input
                 placeholder="Search members..."
@@ -137,13 +139,19 @@ export default function MembershipPage() {
               Add a member
             </Button>
           </div>
+          {isMobile && (
+            <Button variant="ghost" size="icon" className="h-8 w-8">
+              <MoreVertical className="h-4 w-4" />
+            </Button>
+          )}
         </div>
       </div>
 
-      <div className="py-6 px-4">
+      <div className="py-4 sm:py-6 px-3 sm:px-4">
         <MembersTable
           members={filteredMembers}
           onRowClick={(memberId) => setSelectedMemberId(memberId)}
+          onAddMember={() => setIsFormatModalOpen(true)}
         />
       </div>
 

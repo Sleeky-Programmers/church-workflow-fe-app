@@ -6,8 +6,6 @@ import {
   VerifyOtpResponse,
   LoginPayload,
   LoginResponse,
-  GoogleAuthPayload,
-  GoogleAuthResponse,
   ResetPasswordPayload,
   ResetPasswordResponse,
   CreateChurchPayload,
@@ -119,12 +117,21 @@ export async function login(payload: LoginPayload) {
   });
 }
 
-export async function googleAuth(payload: GoogleAuthPayload, token?: string) {
+export async function googleAuth(idToken: string, token?: string) {
   const query = token ? `?token=${encodeURIComponent(token)}` : "";
 
-  return apiFetch<GoogleAuthResponse>(`/auth/google${query}`, {
+  return apiFetch<{
+    message: string;
+    accessToken: string;
+    user?: {
+      _id: string;
+      email: string;
+      firstName: string;
+      lastName: string;
+    };
+  }>(`/auth/google${query}`, {
     method: "POST",
-    body: JSON.stringify(payload),
+    body: JSON.stringify({ idToken }),
   });
 }
 
@@ -164,11 +171,13 @@ export async function completeOnboarding() {
 
 export async function createChurch(
   payload: CreateChurchPayload,
-  logoFile: File,
+  logoFile?: File | null,
 ) {
   const formData = new FormData();
 
-  formData.append("file", logoFile);
+  if (logoFile) {
+    formData.append("file", logoFile);
+  }
   formData.append("name", payload.name);
   formData.append("alias", payload.alias || "");
   formData.append("address", payload.address);
