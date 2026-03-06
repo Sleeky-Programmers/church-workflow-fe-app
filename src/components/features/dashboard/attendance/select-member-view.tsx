@@ -52,7 +52,9 @@ export function SelectMembersView({
   const pageSize = 10;
 
   const filteredMembers = useMemo(() => {
-    if (!searchQuery.trim()) return members;
+    if (!searchQuery.trim()) {
+      return members;
+    }
 
     const query = searchQuery.toLowerCase();
     return members.filter(
