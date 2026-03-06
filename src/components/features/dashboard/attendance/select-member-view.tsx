@@ -16,8 +16,6 @@ import { Member } from "@/types";
 import { MemberListItem } from "./member-list";
 import Heading from "@/components/ui/typography/Heading";
 import { Text } from "@/components/ui/typography/Text";
-import { useToast } from "@/hooks/use-toast";
-import { fetchMembers } from "@/lib/api";
 
 type SelectMembersViewProps = {
   mode: "select" | "present" | "absent";
@@ -54,7 +52,9 @@ export function SelectMembersView({
   const pageSize = 10;
 
   const filteredMembers = useMemo(() => {
-    if (!searchQuery.trim()) return members;
+    if (!searchQuery.trim()) {
+      return members;
+    }
 
     const query = searchQuery.toLowerCase();
     return members.filter(
