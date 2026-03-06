@@ -37,14 +37,14 @@ export function UserManagementPage() {
     loadUsers();
   }, []);
 
-  const loadUsers = async () => {
+  const loadUsers: any = async () => {
     setIsLoading(true);
     try {
       const [data, rolesData] = await Promise.all([
         fetchAdminInvites(),
         fetchRoles(),
       ]);
-      console.log({ data });
+
       setRoles(rolesData);
       const mappedUsers: User[] = data.map((invite: any) => {
         const roleId =
