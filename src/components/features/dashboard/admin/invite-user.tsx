@@ -39,7 +39,7 @@ type InviteUserDialogProps = {
   onSubmit: (data: InviteFormData) => Promise<any> | void;
   pendingInvites?: PendingInvite[];
   isLoading?: boolean;
-  roles?: any[];
+  roles: any[];
   title?: string;
 };
 
@@ -49,7 +49,7 @@ export function InviteUserDialog({
   onSubmit,
   pendingInvites = [],
   isLoading = false,
-  roles = [],
+  roles,
   title = "Invite User",
 }: InviteUserDialogProps) {
   const [showPermissions, setShowPermissions] = useState(false);

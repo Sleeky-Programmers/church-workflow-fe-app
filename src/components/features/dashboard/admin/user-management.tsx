@@ -44,6 +44,7 @@ export function UserManagementPage() {
         fetchAdminInvites(),
         fetchRoles(),
       ]);
+      console.log({ data });
       setRoles(rolesData);
       const mappedUsers: User[] = data.map((invite: any) => {
         const roleId =

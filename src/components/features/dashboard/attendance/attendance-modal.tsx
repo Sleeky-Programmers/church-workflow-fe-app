@@ -73,7 +73,9 @@ export function AttendanceModal({
   const { toast } = useToast();
 
   useEffect(() => {
-    if (!isOpen) return;
+    if (!isOpen) {
+      return;
+    }
     setIsEditMode(!hasExistingAttendance);
     setIsMembersDialogOpen(false);
     setMembersViewMode("select");
@@ -82,7 +84,9 @@ export function AttendanceModal({
   }, [isOpen, hasExistingAttendance]);
 
   const ensureMembersLoaded = async () => {
-    if (hasMembersLoaded) return;
+    if (hasMembersLoaded) {
+      return;
+    }
     setLoading(true);
     try {
       const data = await fetchMembers(1, 100);
@@ -157,7 +161,9 @@ export function AttendanceModal({
   };
 
   const handleSave = async () => {
-    if (!service || !date) return;
+    if (!service || !date) {
+      return;
+    }
 
     setIsSaving(true);
     try {
@@ -358,7 +364,7 @@ export function AttendanceModal({
         onToggleMember={
           membersViewMode === "absent"
             ? handleAbsentSelection
-            : (memberId, selected) => {
+            : (memberId: any, selected: any) => {
                 if (!selected && state.presentMembers.includes(memberId)) {
                   toggleMember(memberId);
                 }
