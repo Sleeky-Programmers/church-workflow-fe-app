@@ -44,6 +44,7 @@ export function WeeklyServicesStep({
   step = 2,
   totalSteps = 3,
 }: WeeklyServicesStepProps) {
+  const [isSaving, setIsSaving] = useState(false);
   const [newService, setNewService] = useState<{
     serviceName: string;
     days: string[];
@@ -89,6 +90,17 @@ export function WeeklyServicesStep({
       endTime: "",
       location: "",
     });
+  };
+
+  const handleSaveAndContinue = async () => {
+    if (isSaving) return;
+
+    setIsSaving(true);
+    try {
+      await Promise.resolve(onSubmit());
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -191,7 +203,12 @@ export function WeeklyServicesStep({
         </div>
       </div>
 
-      <Button onClick={handleAddService} className="w-full" variant="default">
+      <Button
+        type="button"
+        onClick={handleAddService}
+        className="w-full"
+        variant="default"
+      >
         <Plus className="mr-2 h-4 w-4" />
         Add Service
       </Button>
@@ -205,14 +222,20 @@ export function WeeklyServicesStep({
                   <Heading level={3} className="mb-1">
                     {service.serviceName || "Untitled Service"}
                   </Heading>
-                  <Text variant="muted">
-                    {service.days.join(", ") || "No days selected"} ·{" "}
-                    {service.startTime || "--:--"} -{" "}
-                    {service.endTime || "--:--"}
-                    {service.location && ` · ${service.location}`}
-                  </Text>
+                  <div className="space-y-1">
+                    <Text variant="muted" className="text-sm">
+                      {service.days.join(", ") || "No days selected"} ·{" "}
+                      {service.startTime || "--:--"} -{" "}
+                      {service.endTime || "--:--"}
+                    </Text>
+                    {service.location && (
+                      <Text variant="muted" className="text-sm">
+                        {service.location}
+                      </Text>
+                    )}
+                  </div>
                 </div>
-                <div className="flex items-center gap-2 sm:ml-4 self-end sm:self-auto">
+                <div className="flex items-center gap-2 sm:ml-8 self-end sm:self-auto">
                   <Text variant="tag">Weekly</Text>
                   <Button
                     type="button"
@@ -255,8 +278,13 @@ export function WeeklyServicesStep({
         >
           <Span variant="blue">Skip for now</Span>
         </Button>
-        <Button type="button" onClick={onSubmit} className="w-full">
-          Save & Continue
+        <Button
+          type="button"
+          onClick={handleSaveAndContinue}
+          className="w-full"
+          disabled={isSaving}
+        >
+          {isSaving ? "Saving..." : "Save & Continue"}
         </Button>
       </div>
     </div>

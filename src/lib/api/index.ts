@@ -10,7 +10,9 @@ import {
   ResetPasswordResponse,
   CreateChurchPayload,
   CreateWeeklyServicePayload,
+  GoogleAuthResponse,
 } from "@/types/payload";
+import { parseChurchResponse } from "@/types/type";
 import { MOCK_ADMIN, MOCK_MEMBERS_FULL, MOCK_SERVICES } from "../data";
 import {
   ActivityLogApiResponse,
@@ -48,10 +50,22 @@ export async function authenticatedFetch<T>(
     throw new Error("Unauthorized");
   }
 
-  const data = await response.json().catch(() => ({}));
+  const text = await response.text();
+  let data: unknown = null;
+  if (text) {
+    try {
+      data = JSON.parse(text);
+    } catch {
+      data = text;
+    }
+  }
 
   if (!response.ok) {
-    throw new Error(data?.message || "Request failed");
+    const message =
+      typeof data === "object" && data && "message" in data
+        ? String((data as { message?: unknown }).message || "Request failed")
+        : "Request failed";
+    throw new Error(message);
   }
 
   return data as T;
@@ -120,16 +134,7 @@ export async function login(payload: LoginPayload) {
 export async function googleAuth(idToken: string, token?: string) {
   const query = token ? `?token=${encodeURIComponent(token)}` : "";
 
-  return apiFetch<{
-    message: string;
-    accessToken: string;
-    user?: {
-      _id: string;
-      email: string;
-      firstName: string;
-      lastName: string;
-    };
-  }>(`/auth/google${query}`, {
+  return apiFetch<GoogleAuthResponse>(`/auth/google${query}`, {
     method: "POST",
     body: JSON.stringify({ idToken }),
   });
@@ -159,16 +164,6 @@ export async function getCurrentUser() {
   });
 }
 
-export async function completeOnboarding() {
-  const token = localStorage.getItem("accessToken");
-  if (!token) throw new Error("No auth token");
-
-  return apiFetch("/auth/complete-onboarding", {
-    method: "POST",
-    headers: { Authorization: `Bearer ${token}` },
-  });
-}
-
 export async function createChurch(
   payload: CreateChurchPayload,
   logoFile?: File | null,
@@ -191,8 +186,15 @@ export async function createChurch(
   });
 }
 
+export async function getMyChurch() {
+  const payload = await authenticatedFetch<unknown>("/church/me", {
+    method: "GET",
+  });
+  return parseChurchResponse(payload);
+}
+
 export async function createWeeklyService(payload: CreateWeeklyServicePayload) {
-  return apiFetch("/church-services/create", {
+  return apiFetch("/church-services", {
     method: "POST",
     body: JSON.stringify(payload),
   });
@@ -217,7 +219,18 @@ export async function uploadMembersCsv(file: File) {
   });
 
   if (!response.ok) {
-    throw new Error(await response.text());
+    const text = await response.text();
+    try {
+      const parsed = JSON.parse(text) as {
+        message?: string | string[];
+      };
+      const message = Array.isArray(parsed.message)
+        ? parsed.message.join(", ")
+        : parsed.message;
+      throw new Error(message || "Members upload failed");
+    } catch {
+      throw new Error(text || "Members upload failed");
+    }
   }
 
   return response.json();

@@ -4,6 +4,7 @@ export type LoginFormValues = {
 };
 
 import { z } from "zod";
+import type { ChurchResponse } from "./payload";
 
 export const churchIdentitySchema = z.object({
   name: z.string().min(1, "Church name is required"),
@@ -37,3 +38,21 @@ export type WeeklyServiceValues = z.infer<typeof weeklyServiceSchema>;
 export const weeklyServicesArraySchema = z.array(weeklyServiceSchema);
 
 export type WeeklyServicesValues = WeeklyServiceValues[];
+
+export const churchResponseSchema = z.object({
+  _id: z.string(),
+  name: z.string(),
+  alias: z.string().optional(),
+  address: z.string(),
+  country: z.string(),
+  state: z.string().optional(),
+  defaultCurrency: z.string(),
+  timeZone: z.string(),
+  logoUrl: z.string().optional(),
+  logoPublicId: z.string().optional(),
+});
+
+export function parseChurchResponse(payload: unknown): ChurchResponse | null {
+  const parsed = churchResponseSchema.safeParse(payload);
+  return parsed.success ? parsed.data : null;
+}

@@ -5,10 +5,8 @@ import { useRouter } from "next/navigation";
 import { Loader } from "@/components/ui/loader";
 import { Text } from "@/components/ui/typography/Text";
 import { RouteConfig } from "@/config/routes";
-import {
-  getAccessToken,
-  shouldCurrentUserCompleteOnboarding,
-} from "@/lib/auth/session";
+import { getAccessToken } from "@/lib/auth/session";
+import { getMyChurch } from "@/lib/api";
 
 type DashboardGuardProps = {
   children: ReactNode;
@@ -19,18 +17,26 @@ export function DashboardGuard({ children }: DashboardGuardProps) {
   const [isChecking, setIsChecking] = useState(true);
 
   useEffect(() => {
-    const token = getAccessToken();
-    if (!token) {
-      router.replace(RouteConfig.auth.signIn);
-      return;
-    }
+    const checkAccess = async () => {
+      const token = getAccessToken();
+      if (!token) {
+        router.replace(RouteConfig.auth.signIn);
+        return;
+      }
 
-    if (shouldCurrentUserCompleteOnboarding()) {
-      router.replace(RouteConfig.onboarding);
-      return;
-    }
+      try {
+        const church = await getMyChurch();
+        if (!church) {
+          router.replace(RouteConfig.onboarding);
+          return;
+        }
+        setIsChecking(false);
+      } catch {
+        router.replace(RouteConfig.auth.signIn);
+      }
+    };
 
-    setIsChecking(false);
+    checkAccess();
   }, [router]);
 
   if (isChecking) {

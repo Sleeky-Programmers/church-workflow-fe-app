@@ -20,10 +20,7 @@ import { PasswordInput } from "@/components/ui/passport-input";
 import { Input } from "@/components/ui/input";
 import { RouteConfig } from "@/config/routes";
 import { googleAuth, login } from "@/lib/api";
-import {
-  initializeAuthSession,
-  shouldCurrentUserCompleteOnboarding,
-} from "@/lib/auth/session";
+import { initializeAuthSession } from "@/lib/auth/session";
 import { useAuthStore } from "@/stores/useAuthStore";
 
 interface LoginFormProps {
@@ -57,10 +54,10 @@ export default function LoginForm({ onForgotPassword }: LoginFormProps) {
         email: profile.email || values.email,
       });
 
-      if (shouldCurrentUserCompleteOnboarding()) {
-        router.push(RouteConfig.onboarding);
-      } else {
+      if (data.user?.churchId) {
         router.push(RouteConfig.dashboard.home);
+      } else {
+        router.push(RouteConfig.onboarding);
       }
     } catch (error: any) {
       const status = error?.response?.status;
@@ -99,10 +96,10 @@ export default function LoginForm({ onForgotPassword }: LoginFormProps) {
         email: profile.email || data.user?.email || "",
       });
 
-      if (shouldCurrentUserCompleteOnboarding()) {
-        router.push(RouteConfig.onboarding);
-      } else {
+      if (data.user?.churchId) {
         router.push(RouteConfig.dashboard.home);
+      } else {
+        router.push(RouteConfig.onboarding);
       }
     } catch (error: any) {
       form.setError("email", {
