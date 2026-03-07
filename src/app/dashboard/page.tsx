@@ -20,33 +20,40 @@ import Link from "next/link";
 import { TrendChart } from "@/components/features/dashboard/trend-chart";
 import { IncomeVsExpenses } from "@/components/features/dashboard/income-expense";
 import { IncomeBreakdown } from "@/components/features/dashboard/income-breakdown";
-import { getCurrentAdmin, fetchTotalMembers } from "@/lib/api";
-import type { ChurchIdentityRecord } from "@/lib/auth/session";
-import {
-  getCurrentOnboardingState,
-  getCurrentUserProfile,
-} from "@/lib/auth/session";
+import { fetchTotalMembers, getMyChurch } from "@/lib/api";
+import type { ChurchResponse } from "@/types/payload";
+import { getCurrentUserProfile } from "@/lib/auth/session";
 
 export default function Dashboard() {
   const [displayName, setDisplayName] = useState("Super Admin");
   const [churchName, setChurchName] = useState<string | null>(null);
-  const [churchIdentity, setChurchIdentity] =
-    useState<ChurchIdentityRecord | null>(null);
+  const [churchIdentity, setChurchIdentity] = useState<ChurchResponse | null>(
+    null,
+  );
 
   useEffect(() => {
     const profile = getCurrentUserProfile();
-    const onboarding = getCurrentOnboardingState();
 
     if (profile?.firstName) {
       setDisplayName(profile.firstName);
     } else if (profile?.fullName) {
       setDisplayName(profile.fullName);
     }
+  }, []);
 
-    if (onboarding?.churchIdentity?.name) {
-      setChurchName(onboarding.churchIdentity.name);
-      setChurchIdentity(onboarding.churchIdentity);
+  useEffect(() => {
+    async function loadChurch() {
+      try {
+        const church = await getMyChurch();
+        if (!church) return;
+        setChurchName(church.name);
+        setChurchIdentity(church);
+      } catch {
+        setChurchName(null);
+        setChurchIdentity(null);
+      }
     }
+    loadChurch();
   }, []);
 
   const [totalMembers, setTotalMembers] = useState<string>(

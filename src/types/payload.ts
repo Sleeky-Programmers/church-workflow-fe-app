@@ -20,10 +20,18 @@ export interface LoginPayload {
   password: string;
 }
 
+export interface AuthUserSummary {
+  _id: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  churchId?: string | null;
+}
+
 export interface LoginResponse {
   accessToken: string;
   refreshToken?: string;
-  user?: any;
+  user?: AuthUserSummary;
 }
 
 export interface GoogleAuthPayload {
@@ -33,7 +41,20 @@ export interface GoogleAuthPayload {
 export interface GoogleAuthResponse {
   message: string;
   accessToken: string;
-  user?: any;
+  user?: AuthUserSummary;
+}
+
+export interface ChurchResponse {
+  _id: string;
+  name: string;
+  alias?: string;
+  address: string;
+  country: string;
+  state?: string;
+  defaultCurrency: string;
+  timeZone: string;
+  logoUrl?: string;
+  logoPublicId?: string;
 }
 
 export interface ResetPasswordPayload {

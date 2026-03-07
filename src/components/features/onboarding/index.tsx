@@ -18,12 +18,7 @@ import { createChurch, createWeeklyService, uploadMembersCsv } from "@/lib/api";
 import { RouteConfig } from "@/config/routes";
 import { convertTo12Hour } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
-import {
-  getAccessToken,
-  markChurchIdentityComplete,
-  markMembersUploaded,
-  markWeeklyServicesComplete,
-} from "@/lib/auth/session";
+import { getAccessToken } from "@/lib/auth/session";
 import Image from "next/image";
 
 export default function ChurchOnboarding() {
@@ -92,7 +87,7 @@ export default function ChurchOnboarding() {
     setIsSubmittingIdentity(true);
 
     try {
-      const church = await createChurch(
+      await createChurch(
         {
           name: data.name,
           alias: data.alias || "",
@@ -111,23 +106,6 @@ export default function ChurchOnboarding() {
           JSON.stringify(data),
         );
       }
-
-      markChurchIdentityComplete({
-        name: data.name,
-        alias: data.alias || "",
-        address: data.address,
-        country: data.country,
-        state: data.state || "",
-        defaultCurrency: data.defaultCurrency,
-        timeZone: data.timeZone,
-        logoUrl:
-          (church as { logoUrl?: string } | null)?.logoUrl ||
-          (church as { church?: { logoUrl?: string } } | null)?.church?.logoUrl,
-        logoPublicId:
-          (church as { logoPublicId?: string } | null)?.logoPublicId ||
-          (church as { church?: { logoPublicId?: string } } | null)?.church
-            ?.logoPublicId,
-      });
 
       setStep(2);
     } catch (error: any) {
@@ -144,7 +122,7 @@ export default function ChurchOnboarding() {
   const onSaveIdentityAndExit = async (data: ChurchIdentityValues) => {
     setIsSubmittingIdentity(true);
     try {
-      const church = await createChurch(
+      await createChurch(
         {
           name: data.name,
           alias: data.alias || "",
@@ -163,23 +141,6 @@ export default function ChurchOnboarding() {
           JSON.stringify(data),
         );
       }
-
-      markChurchIdentityComplete({
-        name: data.name,
-        alias: data.alias || "",
-        address: data.address,
-        country: data.country,
-        state: data.state || "",
-        defaultCurrency: data.defaultCurrency,
-        timeZone: data.timeZone,
-        logoUrl:
-          (church as { logoUrl?: string } | null)?.logoUrl ||
-          (church as { church?: { logoUrl?: string } } | null)?.church?.logoUrl,
-        logoPublicId:
-          (church as { logoPublicId?: string } | null)?.logoPublicId ||
-          (church as { church?: { logoPublicId?: string } } | null)?.church
-            ?.logoPublicId,
-      });
 
       router.push(RouteConfig.dashboard.home);
     } catch (error: any) {
@@ -209,7 +170,6 @@ export default function ChurchOnboarding() {
         }
       }
 
-      markWeeklyServicesComplete();
       setStep(3);
     } catch (error: any) {
       toast({
@@ -228,8 +188,6 @@ export default function ChurchOnboarding() {
 
     try {
       await uploadMembersCsv(data.csvFile);
-      markMembersUploaded();
-
       router.push(RouteConfig.dashboard.home);
     } catch (error: any) {
       toast({
@@ -242,11 +200,6 @@ export default function ChurchOnboarding() {
 
   const handleBack = () => step > 1 && setStep(step - 1);
   const handleSkip = () => {
-    if (step === 2) {
-      setStep(3);
-      return;
-    }
-
     router.push(RouteConfig.dashboard.home);
   };
 

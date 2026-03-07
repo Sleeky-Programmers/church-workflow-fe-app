@@ -1,18 +1,5 @@
 export const MEMBERS_CSV_TEMPLATE = `title,fullName,gender,birthday,maritalStatus,dateOfMarriage,spouseFirstName,spouseLastName,phoneNumber,email,occupation,educationalBackground,membershipStatus,dateJoined,previousChurchMembership,isBaptized,ministries,volunteerPreferences,cellGroupName
-Mr.,John Mensah,Male,1985-03-15,Married,2010-07-20,Ama,Mensah,+233-24-123-4567,john.mensah@email.com,Teacher,Masters in Education,Active,2020-01-15,St. Peter's Church,TRUE,Worship Team,Music Ministry,Christ Embassy
-Mrs.,Sarah Adjei,Female,1990-08-22,Single,,,,+233-20-234-5678,sarah.adjei@email.com,Nurse,Bachelors in Nursing,Active,2019-11-10,Healing Streams Church,TRUE,Children's Ministry,Teaching,Victory Chapel
-Mr.,Michael Osei,Male,1978-12-05,Married,2005-05-18,Grace,Osei,+233-26-345-6789,michael.osei@email.com,Accountant,MBA,Active,2018-03-20,Redeemed Church,TRUE,Finance Committee,Accounting,Faith Fellowship
-Ms.,Esther Boateng,Female,1995-04-30,Single,,,,+233-50-456-7890,esther.boateng@email.com,Software Developer,BSc Computer Science,New Member,2023-08-05,,FALSE,Ushering,Technology,Grace Assembly
-Dr.,James Asare,Male,1965-09-18,Married,1990-12-12,Mary,Asare,+233-27-567-8901,james.asare@email.com,Medical Doctor,MBChB,Active,2015-06-01,Catholic Church,TRUE,Prayer Ministry,Counseling,Life Spring
-Mrs.,Patricia Owusu,Female,1982-07-14,Divorced,,,,+233-24-678-9012,patricia.owusu@email.com,Lawyer,LLB,Active,2017-09-15,Methodist Church,TRUE,Women's Fellowship,Legal Advice,Cornerstone
-Mr.,Daniel Afari,Male,1972-11-28,Married,2000-04-22,Elizabeth,Afari,+233-20-789-0123,daniel.afari@email.com,Civil Engineer,MSc Engineering,Inactive,2016-02-10,Presbyterian Church,TRUE,Maintenance,Building,New Dawn
-Ms.,Grace Nyarko,Female,1988-06-03,Single,,,,+233-26-890-1234,grace.nyarko@email.com,Marketing Manager,MBA,Pending,2023-10-20,,FALSE,Evangelism,Social Media,Harvesters
-Mr.,Kwame Asante,Male,1955-02-14,Widowed,,,,+233-50-901-2345,kwame.asante@email.com,Retired,Bachelors Education,Active,2014-04-12,Anglican Church,TRUE,Elders Council,Mentoring,Seasoned Saints
-Mrs.,Akosua Dapaah,Female,1992-10-19,Married,2018-06-16,Kofi,Dapaah,+233-24-012-3456,akosua.dapaah@email.com,Pharmacist,PharmD,Active,2021-07-11,Church of Christ,TRUE,Health Team,Medical Outreach,Wellness Group
-Mr.,Samuel Tetteh,Male,1980-09-08,Married,2012-03-03,Abena,Tetteh,+233-27-123-4567,samuel.tetteh@email.com,Banker,BSc Economics,Active,2019-08-22,International Central Gospel,TRUE,Ushering,Finance,Blessings
-Ms.,Marian Amoah,Female,1997-12-30,Single,,,,+233-20-234-5678,marian.amoah@email.com,Journalist,BA Communications,New Member,2023-09-05,,FALSE,Media Team,Writing,Truth Bearers
-Mr.,Peter Kumi,Male,1975-04-17,Married,2008-09-14,Janet,Kumi,+233-26-345-6789,peter.kumi@email.com,Architect,MSc Architecture,Active,2018-11-18,Action Chapel,TRUE,Facilities Management,Design,Creative Arts
-Mrs.,Faustina Appiah,Female,1968-07-23,Widowed,,,,+233-50-456-7890,faustina.appiah@email.com,Nursing Officer,Dip Nursing,Active,2016-05-30,Catholic Church,TRUE,Visitation Team,Caregiving,Compassion Group
-Mr.,Emmanuel Akoto,Male,1990-11-11,Single,,,,+233-24-567-8901,emmanuel.akoto@email.com,IT Consultant,BSc IT,Pending,2023-11-15,,FALSE,Technical Team,IT Support,Digital Disciples
-Mrs.,Dorothy Mensah,Female,1984-03-27,Married,2015-10-10,Francis,Mensah,+233-27-678-9012,dorothy.mensah@email.com,HR Manager,MBA,Active,2020-02-28,Methodist Church,TRUE,Women's Ministry,Administration,Excel Group
-Mr.,Joseph Nkrumah,Male,1962-08-19,Married,1988-05-07,Theresa,Nkrumah,+233-20-789-0123,joseph.nkrumah@email.com,Professor,PhD,Active,2013-09-09,Presbyterian Church,TRUE,Education Ministry,Teaching,Academics United`;
+MR.,John Mensah,MALE,1985-03-15,MARRIED,2010-07-20,Ama,Mensah,+233-24-123-4567,john.mensah@email.com,Teacher,Masters in Education,MEMBER,2020-01-15,St. Peter's Church,true,Worship Team,Music Ministry,Christ Embassy
+MRS.,Sarah Adjei,FEMALE,1990-08-22,SINGLE,,,,+233-20-234-5678,sarah.adjei@email.com,Nurse,Bachelors in Nursing,VOLUNTEER,2019-11-10,Healing Streams Church,true,Children's Ministry,Teaching,Victory Chapel
+MR.,Michael Osei,MALE,1978-12-05,MARRIED,2005-05-18,Grace,Osei,+233-26-345-6789,michael.osei@email.com,Accountant,MBA,LEADER,2018-03-20,Redeemed Church,true,Finance Committee,Accounting,Faith Fellowship
+MRS.,Esther Boateng,FEMALE,1995-04-30,SINGLE,,,,+233-50-456-7890,esther.boateng@email.com,Software Developer,BSc Computer Science,VISITOR,2023-08-05,,false,Ushering,Technology,Grace Assembly`;
