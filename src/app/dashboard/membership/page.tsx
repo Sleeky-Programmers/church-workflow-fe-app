@@ -14,6 +14,7 @@ import { AddMemberFormatModal } from "@/components/features/dashboard/membership
 import { useToast } from "@/hooks/use-toast";
 import { uploadMembersCsv } from "@/services/memberService";
 import { useDebounce } from "@/hooks/use-debounce";
+import { MemberFormType } from "@/types";
 
 import {
   Select,
@@ -106,15 +107,17 @@ export default function MembershipPage() {
     setIsAddModalOpen(false);
     setSelectedFormat(null);
   };
-  const handleFormatSelect = (format: "form" | "csv") => {
+  const handleFormatSelect = (
+    format: MemberFormType.FORM | MemberFormType.CSV,
+  ) => {
     setSelectedFormat(format);
 
-    if (format === "form") {
+    if (format === MemberFormType.FORM) {
       setIsAddModalOpen(true);
       return;
     }
 
-    if (format === "csv") {
+    if (format === MemberFormType.CSV) {
       const input = document.createElement("input");
       input.type = "file";
       input.accept = ".csv";
