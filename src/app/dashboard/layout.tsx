@@ -19,13 +19,12 @@ export default function DashboardLayout({
     <DashboardGuard>
       <SidebarProvider>
         <RecentTracker />
-
-        <div className="flex min-h-screen w-full bg-gray-50 ">
+        <div className="relative flex min-h-screen w-full bg-gray-50">
           <AppSidebar />
 
-          <SidebarInset>
+          <SidebarInset className="min-w-0">
             <Navbar />
-            <main className="min-w-0 p-3 sm:p-4 md:p-6">{children}</main>
+            <main className="min-w-0 w-full p-3 sm:p-4 md:p-6">{children}</main>
           </SidebarInset>
         </div>
       </SidebarProvider>
