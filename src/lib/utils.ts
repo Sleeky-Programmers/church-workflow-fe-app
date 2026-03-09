@@ -308,3 +308,7 @@ export const notificationConfig: Record<NotificationType, NotificationMeta> = {
     background: "bg-emerald-50",
   },
 };
+
+export const toUpperCaseStatus = (status: any): string => {
+  return status.toUpperCase();
+};

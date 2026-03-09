@@ -10,6 +10,7 @@ import { ChurchActivityStep } from "./church-activity-step";
 import { ReviewMemberStep } from "./review-member-step";
 import { useToast } from "@/hooks/use-toast";
 import { Text } from "@/components/ui/typography/Text";
+import { createMember } from "@/services/memberService";
 
 type AddMemberModalProps = {
   open: boolean;
@@ -118,7 +119,7 @@ export function AddMemberModal({
     const finalData: NewMemberData = {
       ...(formData as Partial<NewMemberData>),
       ...data,
-      membershipStatus: formData.membershipStatus || "Member",
+      membershipStatus: formData.membershipStatus || "MEMBER",
       dateJoined: formData.dateJoined || new Date().toISOString().slice(0, 10),
       baptized: formData.baptized ?? false,
       volunteersPreference: formData.volunteersPreference || "Not Interested",
@@ -138,16 +139,24 @@ export function AddMemberModal({
     setStep(4);
   };
 
-  const handleSaveMember = () => {
-    const finalData = formData as NewMemberData;
-    onMemberAdded?.(finalData);
-    toast({
-      title: "Success",
-      description: "Member added successfully",
-    });
-    handleClose();
-  };
+  const handleSaveMember = async () => {
+    try {
+      await createMember(formData as NewMemberData);
 
+      toast({
+        title: "Success",
+        description: "Member added successfully",
+      });
+
+      handleClose();
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to add member",
+        variant: "destructive",
+      });
+    }
+  };
   const handleBack = () => {
     if (step > 1) {
       setStep((prev) => (prev - 1) as 1 | 2 | 3 | 4);
@@ -165,6 +174,7 @@ export function AddMemberModal({
       <DialogContent
         showClose={false}
         mobileSheet
+        onPointerDownOutside={(e) => e.preventDefault()}
         className="w-full sm:max-w-3xl max-sm:max-h-[90vh] overflow-y-auto p-4 sm:p-6"
       >
         <MembershipStepIndicator step={step === 4 ? 3 : step} />

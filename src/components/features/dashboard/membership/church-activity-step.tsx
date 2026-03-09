@@ -86,9 +86,15 @@ export function ChurchActivityStep({
               <SelectValue placeholder="Select" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="Member">Member</SelectItem>
-              <SelectItem value="Visitor">Visitor</SelectItem>
-              <SelectItem value="New Convert">New Convert</SelectItem>
+              <SelectItem value={MembershipStatus.MEMBER}>Member</SelectItem>
+              <SelectItem value={MembershipStatus.VISITOR}>Visitor</SelectItem>
+              <SelectItem value={MembershipStatus.VOLUNTEER}>
+                Volunteer
+              </SelectItem>
+              <SelectItem value={MembershipStatus.LEADER}>Leader</SelectItem>
+              <SelectItem value={MembershipStatus.CONVERT}>
+                New Convert
+              </SelectItem>
             </SelectContent>
           </Select>
           {errors.membershipStatus && (

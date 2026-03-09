@@ -20,7 +20,7 @@ export default function DashboardLayout({
       <SidebarProvider>
         <RecentTracker />
 
-        <div className="min-h-screen flex bg-gray-50 relative">
+        <div className="flex min-h-screen w-full bg-gray-50 ">
           <AppSidebar />
 
           <SidebarInset>

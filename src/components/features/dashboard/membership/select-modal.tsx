@@ -11,10 +11,12 @@ import { Text, Span } from "@/components/ui/typography/Text";
 import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
 
+import { MemberFormType } from "@/types";
+
 type AddMemberFormatModalProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSelectFormat: (format: "form" | "csv") => void;
+  onSelectFormat: (format: MemberFormType.FORM | MemberFormType.CSV) => void;
 };
 
 export function AddMemberFormatModal({
@@ -24,7 +26,9 @@ export function AddMemberFormatModal({
 }: AddMemberFormatModalProps) {
   const isMobile = useIsMobile();
 
-  const handleFormatSelect = (format: "form" | "csv") => {
+  const handleFormatSelect = (
+    format: MemberFormType.FORM | MemberFormType.CSV,
+  ) => {
     onSelectFormat(format);
     onOpenChange(false);
   };
@@ -46,7 +50,7 @@ export function AddMemberFormatModal({
           <div className="py-4 space-y-3">
             <Button
               variant="outline"
-              onClick={() => handleFormatSelect("form")}
+              onClick={() => handleFormatSelect(MemberFormType.FORM)}
               className="w-full h-auto justify-between p-4"
             >
               <div className="flex items-center gap-3 text-left">
@@ -63,7 +67,7 @@ export function AddMemberFormatModal({
 
             <Button
               variant="outline"
-              onClick={() => handleFormatSelect("csv")}
+              onClick={() => handleFormatSelect(MemberFormType.CSV)}
               className=" p-4"
             >
               <div className="flex items-center gap-3 text-left">
@@ -71,7 +75,7 @@ export function AddMemberFormatModal({
                   <UploadIcon className="h-5 w-5 text-primary-600" />
                 </Span>
                 <Span>
-                  <Text variant="default">Upload CVS</Text>
+                  <Text variant="default">Upload CSV</Text>
                   <Text variant="muted">Import multiple members at once.</Text>
                 </Span>
               </div>
@@ -82,7 +86,7 @@ export function AddMemberFormatModal({
           <div className="grid grid-cols-2 gap-6 py-6">
             <Button
               variant="outline"
-              onClick={() => handleFormatSelect("form")}
+              onClick={() => handleFormatSelect(MemberFormType.FORM)}
               className="h-44 flex-col gap-4 "
             >
               <BookPlus className="h-12 w-12 text-primary-600" />
@@ -93,7 +97,7 @@ export function AddMemberFormatModal({
 
             <Button
               variant="outline"
-              onClick={() => handleFormatSelect("csv")}
+              onClick={() => handleFormatSelect(MemberFormType.CSV)}
               className="h-44 flex-col gap-4"
             >
               <UploadIcon className="h-12 w-12 text-primary-600" />

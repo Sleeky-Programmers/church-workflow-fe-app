@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
 import { MemberProfile } from "@/types";
 import {
   Table,
@@ -12,45 +11,35 @@ import {
 } from "@/components/ui/table";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Text, Span } from "@/components/ui/typography/Text";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { formatDate } from "@/utils/helpers";
 
 type MembersTableProps = {
   members: MemberProfile[];
   onRowClick: (memberId: string) => void;
   onAddMember?: () => void;
+  pagination: {
+    page: number;
+    totalPages: number;
+    hasPreviousPage: boolean;
+    hasNextPage: boolean;
+  } | null;
+  onPageChange: (page: number) => void;
 };
 
 export function MembersTable({
   members,
   onRowClick,
   onAddMember,
+  pagination,
+  onPageChange,
 }: MembersTableProps) {
   const isMobile = useIsMobile();
-  const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const currentPage = pagination?.page || 1;
+  const totalPages = pagination?.totalPages || 1;
 
-  const totalPages = useMemo(
-    () => Math.max(1, Math.ceil(members.length / pageSize)),
-    [members.length, pageSize],
-  );
-
-  const paginated = useMemo(() => {
-    const start = (currentPage - 1) * pageSize;
-    return members.slice(start, start + pageSize);
-  }, [members, currentPage, pageSize]);
-
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [members, pageSize]);
-
+  // MOBILE VIEW
   if (isMobile) {
     return (
       <div className="rounded-lg border bg-white overflow-hidden">
@@ -60,12 +49,15 @@ export function MembersTable({
               <Checkbox />
               <Text variant="default">All Members</Text>
             </div>
-            <Button size="sm" className="h-8 px-4" onClick={onAddMember}>
-              Add
-            </Button>
+
+            {onAddMember && (
+              <Button size="sm" className="h-8 px-4" onClick={onAddMember}>
+                Add
+              </Button>
+            )}
           </div>
 
-          {paginated.map((member) => (
+          {members.map((member) => (
             <div
               key={member.id}
               className="flex items-center justify-between px-3 py-3"
@@ -76,6 +68,7 @@ export function MembersTable({
                   {member.fullName}
                 </Text>
               </div>
+
               <Button
                 size="sm"
                 variant="outline"
@@ -93,10 +86,35 @@ export function MembersTable({
             <Text variant="muted">No members found</Text>
           </div>
         )}
+
+        {pagination && members.length > 0 && (
+          <div className="flex items-center justify-between px-4 py-3 border-t">
+            <Span>
+              Page {currentPage} of {totalPages}
+            </Span>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                disabled={!pagination.hasPreviousPage}
+                onClick={() => onPageChange(currentPage - 1)}
+              >
+                Previous
+              </Button>
+              <Button
+                variant="outline"
+                disabled={!pagination.hasNextPage}
+                onClick={() => onPageChange(currentPage + 1)}
+              >
+                Next
+              </Button>
+            </div>
+          </div>
+        )}
       </div>
     );
   }
 
+  // DESKTOP VIEW
   return (
     <div className="overflow-auto w-full max-w-full">
       <div className="min-w-max border rounded-lg">
@@ -113,32 +131,34 @@ export function MembersTable({
               <TableHead>Email</TableHead>
             </TableRow>
           </TableHeader>
+
           <TableBody>
-            {paginated.map((member) => (
+            {members.map((member) => (
               <TableRow
                 key={member.id}
                 onClick={() => onRowClick(member.id)}
-                className="cursor-pointer hover:bg-gray-50 p-5"
+                className="cursor-pointer hover:bg-gray-50"
               >
                 <TableCell onClick={(e) => e.stopPropagation()}>
                   <Checkbox />
                 </TableCell>
+
                 <TableCell>
-                  <div className="flex items-center gap-3">
-                    <Text variant="default" className="truncate">
-                      {member.fullName}
-                    </Text>
-                  </div>
+                  <Text variant="default">{member.fullName}</Text>
                 </TableCell>
+
                 <TableCell>
-                  <Text variant="default">{member.birthday}</Text>
+                  <Text variant="default">{formatDate(member.birthday)}</Text>
                 </TableCell>
+
                 <TableCell>
                   <Text variant="default">{member.gender}</Text>
                 </TableCell>
+
                 <TableCell>
                   <Text variant="default">{member.phone}</Text>
                 </TableCell>
+
                 <TableCell>
                   <Text variant="default" className="truncate">
                     {member.email}
@@ -149,49 +169,30 @@ export function MembersTable({
           </TableBody>
         </Table>
       </div>
+
       {members.length === 0 && (
         <div className="p-8 text-center">
           <Text variant="muted">No members found</Text>
         </div>
       )}
 
-      {members.length > 0 && (
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-4 py-3 border-t">
+      {pagination && members.length > 0 && (
+        <div className="flex items-center justify-between px-4 py-3 border-t">
           <Span>
             Page {currentPage} of {totalPages}
           </Span>
-
-          <Select
-            value={String(pageSize)}
-            onValueChange={(v) => setPageSize(Number(v))}
-          >
-            <SelectTrigger className="w-[110px]">
-              <SelectValue placeholder="Page size" />
-            </SelectTrigger>
-            <SelectContent>
-              {[10, 20, 50].map((s) => (
-                <SelectItem key={s} value={String(s)}>
-                  {s} / page
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-
           <div className="flex items-center gap-2">
             <Button
-              className="px-3 py-1 rounded-md border disabled:opacity-50"
               variant="outline"
-              disabled={currentPage === 1}
-              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+              disabled={!pagination.hasPreviousPage}
+              onClick={() => onPageChange(currentPage - 1)}
             >
               Previous
             </Button>
-
             <Button
-              className="px-3 py-1 rounded-md border disabled:opacity-50"
               variant="outline"
-              disabled={currentPage === totalPages}
-              onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+              disabled={!pagination.hasNextPage}
+              onClick={() => onPageChange(currentPage + 1)}
             >
               Next
             </Button>

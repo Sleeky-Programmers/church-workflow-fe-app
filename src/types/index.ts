@@ -204,11 +204,39 @@ export type CalendarDay = {
   services: RegularService[];
 };
 
-export type Gender = "Male" | "Female";
-export type MaritalStatus = "Single" | "Married" | "Divorced" | "Widowed";
-export type MembershipStatus = "Member" | "Visitor" | "New Convert";
-export type Title = "Mr." | "Mrs." | "Miss" | "Dr." | "Pastor" | "Rev.";
+export enum MemberTitle {
+  MR = "MR.",
+  MRS = "MRS.",
+  MISS = "MISS.",
+  DR = "DR.",
+  PASTOR = "PASTOR.",
+  REV = "REV.",
+}
 
+export enum MemberFormType {
+  CSV = "csv",
+  FORM = "form",
+}
+
+export enum Gender {
+  MALE = "MALE",
+  FEMALE = "FEMALE",
+}
+
+export enum MaritalStatus {
+  MARRIED = "MARRIED",
+  SINGLE = "SINGLE",
+  DIVORCED = "DIVORCED",
+  WIDOWED = "WIDOWED",
+}
+
+export enum MembershipStatus {
+  VISITOR = "VISITOR",
+  MEMBER = "MEMBER",
+  VOLUNTEER = "VOLUNTEER",
+  LEADER = "LEADER",
+  CONVERT = "NEW CONVERT",
+}
 export type AttendanceStatus = "Present" | "Absent";
 
 export type MemberAttendanceRecord = {
@@ -222,7 +250,7 @@ export type MemberAttendanceRecord = {
 
 export type MemberProfile = {
   id: string;
-  title: Title;
+  title: MemberTitle;
   fullName: string;
   firstName: string;
   lastName: string;
@@ -230,7 +258,7 @@ export type MemberProfile = {
   phone: string;
   gender: Gender;
   birthday: string;
-  address: string;
+  address?: string;
   maritalStatus: MaritalStatus;
   dateOfMarriage?: string;
   spouseFirstName?: string;
@@ -252,7 +280,7 @@ export type MemberProfile = {
 };
 
 export type AddMemberStep1Data = {
-  title: Title;
+  title: MemberTitle;
   fullName: string;
   gender: Gender;
   birthday: string;

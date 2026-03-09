@@ -1,7 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { AddMemberStep1Data, Gender, MaritalStatus, Title } from "@/types";
+import {
+  AddMemberStep1Data,
+  Gender,
+  MaritalStatus,
+  MemberTitle,
+} from "@/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -72,19 +77,19 @@ export function ProfileDetailsStep({
               <Select
                 value={formData.title || ""}
                 onValueChange={(value) =>
-                  setFormData({ ...formData, title: value as Title })
+                  setFormData({ ...formData, title: value as MemberTitle })
                 }
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Mr.">Mr.</SelectItem>
-                  <SelectItem value="Mrs.">Mrs.</SelectItem>
-                  <SelectItem value="Miss">Miss</SelectItem>
-                  <SelectItem value="Dr.">Dr.</SelectItem>
-                  <SelectItem value="Pastor">Pastor</SelectItem>
-                  <SelectItem value="Rev.">Rev.</SelectItem>
+                  <SelectItem value={MemberTitle.MR}>Mr.</SelectItem>
+                  <SelectItem value={MemberTitle.MRS}>Mrs.</SelectItem>
+                  <SelectItem value={MemberTitle.MISS}>Miss</SelectItem>
+                  <SelectItem value={MemberTitle.DR}>Dr.</SelectItem>
+                  <SelectItem value={MemberTitle.PASTOR}>Pastor</SelectItem>
+                  <SelectItem value={MemberTitle.REV}>Rev.</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -122,11 +127,11 @@ export function ProfileDetailsStep({
                 className="mt-2 space-y-3"
               >
                 <div className="flex items-center gap-3">
-                  <RadioGroupItem value="Male" id="male" />
+                  <RadioGroupItem value={Gender.MALE} id="male" />
                   <Label htmlFor="male">Male</Label>
                 </div>
                 <div className="flex items-center gap-3">
-                  <RadioGroupItem value="Female" id="female" />
+                  <RadioGroupItem value={Gender.FEMALE} id="female" />
                   <Label htmlFor="female">Female</Label>
                 </div>
               </RadioGroup>
@@ -172,15 +177,17 @@ export function ProfileDetailsStep({
                   <SelectValue placeholder="Select" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Single">Single</SelectItem>
-                  <SelectItem value="Married">Married</SelectItem>
-                  <SelectItem value="Divorced">Divorced</SelectItem>
-                  <SelectItem value="Widowed">Widowed</SelectItem>
+                  <SelectItem value={MaritalStatus.SINGLE}>Single</SelectItem>
+                  <SelectItem value={MaritalStatus.MARRIED}>Married</SelectItem>
+                  <SelectItem value={MaritalStatus.DIVORCED}>
+                    Divorced
+                  </SelectItem>
+                  <SelectItem value={MaritalStatus.WIDOWED}>Widowed</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
-            {formData.maritalStatus === "Married" && (
+            {formData.maritalStatus === "MARRIED" && (
               <div>
                 <Label>Date of Marriage</Label>
                 <Input
@@ -197,7 +204,7 @@ export function ProfileDetailsStep({
             )}
           </div>
 
-          {formData.maritalStatus === "Married" && (
+          {formData.maritalStatus === "MARRIED" && (
             <div className="grid grid-cols-2 gap-6">
               <div>
                 <Label>Spouse's First Name</Label>
