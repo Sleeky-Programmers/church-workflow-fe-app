@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { AddMemberStep3Data, MembershipStatus } from "@/types";
+import { AddMemberStep3Data } from "@/types";
+import { MembershipStatus } from "@/lib/enums";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {

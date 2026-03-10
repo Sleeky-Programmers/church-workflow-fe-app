@@ -11,7 +11,7 @@ import { Text, Span } from "@/components/ui/typography/Text";
 import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
 
-import { MemberFormType } from "@/types";
+import { MemberFormType } from "@/lib/enums";
 
 type AddMemberFormatModalProps = {
   open: boolean;

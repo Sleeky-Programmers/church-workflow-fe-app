@@ -6,6 +6,10 @@ import {
   NotificationType,
   UserRole,
   UserStatus,
+  MemberTitle,
+  MaritalStatus,
+  Gender,
+  MembershipStatus,
 } from "@/lib/enums";
 import { LucideIcon } from "lucide-react";
 
@@ -204,39 +208,6 @@ export type CalendarDay = {
   services: RegularService[];
 };
 
-export enum MemberTitle {
-  MR = "MR.",
-  MRS = "MRS.",
-  MISS = "MISS.",
-  DR = "DR.",
-  PASTOR = "PASTOR.",
-  REV = "REV.",
-}
-
-export enum MemberFormType {
-  CSV = "csv",
-  FORM = "form",
-}
-
-export enum Gender {
-  MALE = "MALE",
-  FEMALE = "FEMALE",
-}
-
-export enum MaritalStatus {
-  MARRIED = "MARRIED",
-  SINGLE = "SINGLE",
-  DIVORCED = "DIVORCED",
-  WIDOWED = "WIDOWED",
-}
-
-export enum MembershipStatus {
-  VISITOR = "VISITOR",
-  MEMBER = "MEMBER",
-  VOLUNTEER = "VOLUNTEER",
-  LEADER = "LEADER",
-  CONVERT = "NEW CONVERT",
-}
 export type AttendanceStatus = "Present" | "Absent";
 
 export type MemberAttendanceRecord = {

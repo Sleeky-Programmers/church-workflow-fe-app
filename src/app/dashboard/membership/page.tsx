@@ -7,14 +7,14 @@ import { Search, Plus, Edit, MoreVertical } from "lucide-react";
 import Heading from "@/components/ui/typography/Heading";
 import { MembersTable } from "@/components/features/dashboard/membership/members-table";
 import { fetchMembers } from "@/services/memberService";
-import { MemberProfile, NewMemberData, MemberTitle } from "@/types";
+import { MemberProfile, NewMemberData } from "@/types";
 import { MemberDetailsPage } from "@/components/features/dashboard/membership/member-details-page";
 import { AddMemberModal } from "@/components/features/dashboard/membership/add-member-modal";
 import { AddMemberFormatModal } from "@/components/features/dashboard/membership/select-modal";
 import { useToast } from "@/hooks/use-toast";
 import { uploadMembersCsv } from "@/services/memberService";
 import { useDebounce } from "@/hooks/use-debounce";
-import { MemberFormType } from "@/types";
+import { MemberTitle, MemberFormType } from "@/lib/enums";
 
 import {
   Select,

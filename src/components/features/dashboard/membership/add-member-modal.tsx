@@ -11,6 +11,7 @@ import { ReviewMemberStep } from "./review-member-step";
 import { useToast } from "@/hooks/use-toast";
 import { Text } from "@/components/ui/typography/Text";
 import { createMember } from "@/services/memberService";
+import { MembershipStatus } from "@/lib/enums";
 
 type AddMemberModalProps = {
   open: boolean;
@@ -119,7 +120,7 @@ export function AddMemberModal({
     const finalData: NewMemberData = {
       ...(formData as Partial<NewMemberData>),
       ...data,
-      membershipStatus: formData.membershipStatus || "MEMBER",
+      membershipStatus: formData.membershipStatus || MembershipStatus.MEMBER,
       dateJoined: formData.dateJoined || new Date().toISOString().slice(0, 10),
       baptized: formData.baptized ?? false,
       volunteersPreference: formData.volunteersPreference || "Not Interested",

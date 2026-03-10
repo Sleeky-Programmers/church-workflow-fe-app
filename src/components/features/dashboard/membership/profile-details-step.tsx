@@ -1,12 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import {
-  AddMemberStep1Data,
-  Gender,
-  MaritalStatus,
-  MemberTitle,
-} from "@/types";
+import { AddMemberStep1Data } from "@/types";
+import { Gender, MaritalStatus, MemberTitle } from "@/lib/enums";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -187,7 +183,7 @@ export function ProfileDetailsStep({
               </Select>
             </div>
 
-            {formData.maritalStatus === "MARRIED" && (
+            {formData.maritalStatus === MaritalStatus.MARRIED && (
               <div>
                 <Label>Date of Marriage</Label>
                 <Input
@@ -204,7 +200,7 @@ export function ProfileDetailsStep({
             )}
           </div>
 
-          {formData.maritalStatus === "MARRIED" && (
+          {formData.maritalStatus === MaritalStatus.MARRIED && (
             <div className="grid grid-cols-2 gap-6">
               <div>
                 <Label>Spouse's First Name</Label>

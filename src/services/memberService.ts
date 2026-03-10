@@ -1,5 +1,6 @@
 import { apiFetch } from "@/lib/api";
-import { MemberProfile, NewMemberData, MemberTitle } from "@/types";
+import { MemberProfile, NewMemberData } from "@/types";
+import { mapMember } from "@/mappers/member.mapper";
 
 export interface FetchMembersResponse {
   data: MemberProfile[];
@@ -12,7 +13,6 @@ export interface FetchMembersResponse {
     hasNextPage: boolean;
   };
 }
-
 export async function fetchMembers(
   page = 1,
   limit = 10,
@@ -31,39 +31,8 @@ export async function fetchMembers(
     method: "GET",
   });
 
-  const mapped = response.data.map((m: any) => {
-    const nameParts = m.fullName.split(" ");
-
-    return {
-      id: m._id,
-      title: (m.title || "MR.") as MemberTitle,
-      fullName: m.fullName,
-      firstName: nameParts[0] || "",
-      lastName: nameParts.slice(1).join(" "),
-      email: m.email || "",
-      phone: m.phoneNumber || "",
-      gender: m.gender,
-      birthday: m.birthday,
-      maritalStatus: m.maritalStatus,
-      dateOfMarriage: m.dateOfMarriage,
-      spouseFirstName: m.spouseFirstName,
-      spouseLastName: m.spouseLastName,
-      membershipStatus: m.membershipStatus,
-      dateJoined: m.dateJoined,
-      baptized: m.isBaptized,
-      volunteersPreference: m.volunteerPreferences,
-      servicesAttended: 0,
-      servicesMissed: 0,
-      attendanceRate: 0,
-      attendanceRecords: [],
-      initials:
-        nameParts[0]?.[0]?.toUpperCase() +
-        (nameParts[1]?.[0]?.toUpperCase() || ""),
-    };
-  });
-
   return {
-    data: mapped,
+    data: response.data.map(mapMember),
     pagination: response.pagination,
   };
 }
