@@ -202,7 +202,7 @@ export async function createChurch(
 }
 
 export async function getMyChurch() {
-  return await authenticatedFetch<unknown>("/church/me", {
+  return await authenticatedFetch<any>("/church/me", {
     method: "GET",
   });
 }
