@@ -24,8 +24,13 @@ export async function fetchMembers(
     limit: String(limit),
   });
 
-  if (search) params.append("search", search);
-  if (filter && filter !== "all") params.append("filter", filter);
+  if (search) {
+    params.append("search", search);
+  }
+  
+  if (filter && filter !== "all") {
+    params.append("filter", filter);
+  }
 
   const response = await apiFetch<FetchMembersResponse>(`/members?${params}`, {
     method: "GET",
