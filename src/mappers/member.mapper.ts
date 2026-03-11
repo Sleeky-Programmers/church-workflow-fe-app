@@ -1,26 +1,26 @@
 import { MemberTitle } from "@/lib/enums";
 
-export function mapMember(m: any) {
-  const nameParts = m.fullName.split(" ");
+export function mapMember(member: any) {
+  const nameParts = member.fullName.split(" ");
 
   return {
-    id: m._id,
-    title: (m.title || MemberTitle.MR) as MemberTitle,
-    fullName: m.fullName,
+    id: member._id,
+    title: (member.title || MemberTitle.MR) as MemberTitle,
+    fullName: member.fullName,
     firstName: nameParts[0] || "",
     lastName: nameParts.slice(1).join(" "),
-    email: m.email || "",
-    phone: m.phoneNumber || "",
-    gender: m.gender,
-    birthday: m.birthday,
-    maritalStatus: m.maritalStatus,
-    dateOfMarriage: m.dateOfMarriage,
-    spouseFirstName: m.spouseFirstName,
-    spouseLastName: m.spouseLastName,
-    membershipStatus: m.membershipStatus,
-    dateJoined: m.dateJoined,
-    baptized: m.isBaptized,
-    volunteersPreference: m.volunteerPreferences,
+    email: member.email || "",
+    phone: member.phoneNumber || "",
+    gender: member.gender,
+    birthday: member.birthday,
+    maritalStatus: member.maritalStatus,
+    dateOfMarriage: member.dateOfMarriage,
+    spouseFirstName: member.spouseFirstName,
+    spouseLastName: member.spouseLastName,
+    membershipStatus: member.membershipStatus,
+    dateJoined: member.dateJoined,
+    baptized: member.isBaptized,
+    volunteersPreference: member.volunteerPreferences,
     servicesAttended: 0,
     servicesMissed: 0,
     attendanceRate: 0,
