@@ -110,7 +110,7 @@ export enum ServiceFrequency {
 export enum MemberTitle {
   MR = "MR.",
   MRS = "MRS.",
-  MISS = "MISS.",
+  MISS = "MISS",
   DR = "DR.",
   PASTOR = "PASTOR.",
   REV = "REV.",
