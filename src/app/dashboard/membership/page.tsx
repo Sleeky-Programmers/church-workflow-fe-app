@@ -1,16 +1,21 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search, Plus, Edit, MoreVertical } from "lucide-react";
 import Heading from "@/components/ui/typography/Heading";
 import { MembersTable } from "@/components/features/dashboard/membership/members-table";
-import { MOCK_MEMBERS_FULL } from "@/lib/data";
-import { MemberProfile, NewMemberData, Title } from "@/types";
+import { fetchMembers } from "@/services/memberService";
+import { MemberProfile, NewMemberData } from "@/types";
 import { MemberDetailsPage } from "@/components/features/dashboard/membership/member-details-page";
 import { AddMemberModal } from "@/components/features/dashboard/membership/add-member-modal";
 import { AddMemberFormatModal } from "@/components/features/dashboard/membership/select-modal";
+import { useToast } from "@/hooks/use-toast";
+import { uploadMembersCsv } from "@/services/memberService";
+import { useDebounce } from "@/hooks/use-debounce";
+import { MemberTitle, MemberFormType } from "@/lib/enums";
+
 import {
   Select,
   SelectContent,
@@ -21,23 +26,47 @@ import {
 import { useIsMobile } from "@/hooks/use-mobile";
 
 export default function MembershipPage() {
+  const { toast } = useToast();
   const isMobile = useIsMobile();
-  const [members, setMembers] = useState<MemberProfile[]>(MOCK_MEMBERS_FULL);
+
+  const [members, setMembers] = useState<MemberProfile[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedMemberId, setSelectedMemberId] = useState<string | null>(null);
   const [isFormatModalOpen, setIsFormatModalOpen] = useState(false);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const debouncedSearch = useDebounce(searchQuery, 500);
   const [selectedFormat, setSelectedFormat] = useState<"form" | "csv" | null>(
     null,
   );
   const [filterValue, setFilterValue] = useState("all");
+  const [page, setPage] = useState(1);
+  const [pagination, setPagination] = useState<any>(null);
 
-  const filteredMembers = members.filter(
-    (member) =>
-      member.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      member.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      member.phone.includes(searchQuery),
-  );
+  useEffect(() => {
+    const loadMembers = async () => {
+      try {
+        const response = await fetchMembers(
+          page,
+          10,
+          debouncedSearch,
+          filterValue,
+        );
+
+        setMembers(response.data);
+        setPagination(response.pagination);
+      } catch (err) {
+        toast({
+          title: "Cannot fetch members data",
+        });
+      }
+    };
+
+    loadMembers();
+  }, [page, debouncedSearch, filterValue]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [debouncedSearch, filterValue]);
 
   const handleAddMember = (newMember: NewMemberData) => {
     const nameParts = newMember.fullName.trim().split(/\s+/);
@@ -50,7 +79,7 @@ export default function MembershipPage() {
 
     const memberProfile: MemberProfile = {
       id: crypto.randomUUID(),
-      title: (newMember.title || "Mr.") as Title,
+      title: (newMember.title || "MR.") as MemberTitle,
       fullName: newMember.fullName,
       firstName,
       lastName,
@@ -78,13 +107,47 @@ export default function MembershipPage() {
     setIsAddModalOpen(false);
     setSelectedFormat(null);
   };
-
-  const handleFormatSelect = (format: "form" | "csv") => {
+  const handleFormatSelect = (
+    format: MemberFormType.FORM | MemberFormType.CSV,
+  ) => {
     setSelectedFormat(format);
-    if (format === "form") {
+
+    if (format === MemberFormType.FORM) {
       setIsAddModalOpen(true);
-    } else if (format === "csv") {
-      alert("CSV upload selected");
+      return;
+    }
+
+    if (format === MemberFormType.CSV) {
+      const input = document.createElement("input");
+      input.type = "file";
+      input.accept = ".csv";
+
+      input.onchange = async (e: any) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        try {
+          await uploadMembersCsv(file);
+
+          toast({
+            title: "Success",
+            description: "Members imported successfully",
+          });
+
+          const response = await fetchMembers(1, 10);
+          setMembers(response.data);
+          setPagination(response.pagination);
+          setPage(1);
+        } catch (error) {
+          toast({
+            title: "Error",
+            description: "CSV upload failed",
+            variant: "destructive",
+          });
+        }
+      };
+
+      input.click();
     }
   };
 
@@ -126,7 +189,7 @@ export default function MembershipPage() {
                   <SelectItem value="all">Filter</SelectItem>
                   <SelectItem value="male">Male</SelectItem>
                   <SelectItem value="female">Female</SelectItem>
-                  <SelectItem value="this-month">Baptized</SelectItem>
+                  <SelectItem value="isBaptized">Baptized</SelectItem>
                   <SelectItem value="new-members">New Members</SelectItem>
                 </SelectContent>
               </Select>
@@ -149,7 +212,9 @@ export default function MembershipPage() {
 
       <div className="py-4 sm:py-6 px-3 sm:px-4">
         <MembersTable
-          members={filteredMembers}
+          members={members}
+          pagination={pagination}
+          onPageChange={setPage}
           onRowClick={(memberId) => setSelectedMemberId(memberId)}
           onAddMember={() => setIsFormatModalOpen(true)}
         />

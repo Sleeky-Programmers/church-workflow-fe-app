@@ -6,6 +6,10 @@ import {
   NotificationType,
   UserRole,
   UserStatus,
+  MemberTitle,
+  MaritalStatus,
+  Gender,
+  MembershipStatus,
 } from "@/lib/enums";
 import { LucideIcon } from "lucide-react";
 
@@ -204,11 +208,6 @@ export type CalendarDay = {
   services: RegularService[];
 };
 
-export type Gender = "Male" | "Female";
-export type MaritalStatus = "Single" | "Married" | "Divorced" | "Widowed";
-export type MembershipStatus = "Member" | "Visitor" | "New Convert";
-export type Title = "Mr." | "Mrs." | "Miss" | "Dr." | "Pastor" | "Rev.";
-
 export type AttendanceStatus = "Present" | "Absent";
 
 export type MemberAttendanceRecord = {
@@ -222,7 +221,7 @@ export type MemberAttendanceRecord = {
 
 export type MemberProfile = {
   id: string;
-  title: Title;
+  title: MemberTitle;
   fullName: string;
   firstName: string;
   lastName: string;
@@ -230,7 +229,7 @@ export type MemberProfile = {
   phone: string;
   gender: Gender;
   birthday: string;
-  address: string;
+  address?: string;
   maritalStatus: MaritalStatus;
   dateOfMarriage?: string;
   spouseFirstName?: string;
@@ -252,7 +251,7 @@ export type MemberProfile = {
 };
 
 export type AddMemberStep1Data = {
-  title: Title;
+  title: MemberTitle;
   fullName: string;
   gender: Gender;
   birthday: string;
