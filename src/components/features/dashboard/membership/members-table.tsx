@@ -39,7 +39,6 @@ export function MembersTable({
   const currentPage = pagination?.page || 1;
   const totalPages = pagination?.totalPages || 1;
 
-  // MOBILE VIEW
   if (isMobile) {
     return (
       <div className="rounded-lg border bg-white overflow-hidden">
@@ -114,7 +113,6 @@ export function MembersTable({
     );
   }
 
-  // DESKTOP VIEW
   return (
     <div className="overflow-auto w-full max-w-full">
       <div className="min-w-max border rounded-lg">

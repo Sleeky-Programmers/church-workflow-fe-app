@@ -26,6 +26,7 @@ export function DashboardGuard({ children }: DashboardGuardProps) {
 
       try {
         const church = await getMyChurch();
+        console.log({ church });
         if (!church) {
           router.replace(RouteConfig.onboarding);
           return;

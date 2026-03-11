@@ -12,7 +12,6 @@ import {
   CreateWeeklyServicePayload,
   GoogleAuthResponse,
 } from "@/types/payload";
-import { parseChurchResponse } from "@/types/type";
 import { MOCK_ADMIN, MOCK_MEMBERS_FULL, MOCK_SERVICES } from "../data";
 import {
   ActivityLogApiResponse,
@@ -187,10 +186,9 @@ export async function createChurch(
 }
 
 export async function getMyChurch() {
-  const payload = await authenticatedFetch<unknown>("/church/me", {
+  return await authenticatedFetch<unknown>("/church/me", {
     method: "GET",
   });
-  return parseChurchResponse(payload);
 }
 
 export async function createWeeklyService(payload: CreateWeeklyServicePayload) {

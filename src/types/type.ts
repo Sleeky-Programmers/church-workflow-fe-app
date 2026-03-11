@@ -51,8 +51,3 @@ export const churchResponseSchema = z.object({
   logoUrl: z.string().optional(),
   logoPublicId: z.string().optional(),
 });
-
-export function parseChurchResponse(payload: unknown): ChurchResponse | null {
-  const parsed = churchResponseSchema.safeParse(payload);
-  return parsed.success ? parsed.data : null;
-}
