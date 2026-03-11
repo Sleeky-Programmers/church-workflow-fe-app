@@ -45,7 +45,9 @@ export default function Dashboard() {
     async function loadChurch() {
       try {
         const church = await getMyChurch();
-        if (!church) return;
+        if (!church) {
+          return;
+        }
         setChurchName(church.name);
         setChurchIdentity(church);
       } catch {
