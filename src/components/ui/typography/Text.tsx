@@ -51,7 +51,7 @@ export function Text({
     pending:
       "text-xs font-medium text-foreground bg-accent border border-input",
     success: "text-foreground font-medium bg-accent",
-    chip: "rounded-full border border-input bg-muted px-2.5 py-1 text-xs text-foreground",
+    chip: "rounded-full border border-input bg-primary-100 px-2.5 py-1 text-xs text-foreground",
   }[variant];
 
   return (
@@ -85,7 +85,7 @@ export function Span({
     pending:
       "text-xs font-medium text-foreground bg-accent border border-input",
     success: "text-foreground font-medium bg-accent border border-input",
-    chip: "rounded-full border border-input bg-muted px-2.5 py-1 text-xs text-foreground",
+    chip: "rounded-full border border-input bg-primary-100 px-2.5 py-1 text-xs text-foreground",
   }[variant];
 
   return (
