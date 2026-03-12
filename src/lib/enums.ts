@@ -111,6 +111,7 @@ export enum ServiceFrequency {
 export enum TeamStatus {
   ACTIVE = "Active",
   INACTIVE = "Inactive",
+}
 export enum MemberTitle {
   MR = "MR.",
   MRS = "MRS.",
