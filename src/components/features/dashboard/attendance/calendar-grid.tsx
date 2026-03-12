@@ -66,7 +66,7 @@ const MONTHS = [
   "November",
   "December",
 ];
-const TIME_SLOTS = Array.from({ length: 18 }, (_, i) => i + 1); // 1AM - 6PM
+const TIME_SLOTS = Array.from({ length: 18 }, (_, i) => i + 1);
 
 function parseHour(value: string): number {
   const input = value.trim().toLowerCase();

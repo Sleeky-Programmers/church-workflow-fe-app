@@ -12,7 +12,6 @@ import {
   CreateWeeklyServicePayload,
   GoogleAuthResponse,
 } from "@/types/payload";
-import { parseChurchResponse } from "@/types/type";
 import { MOCK_ADMIN, MOCK_MEMBERS_FULL, MOCK_SERVICES } from "../data";
 import {
   ActivityLogApiResponse,
@@ -45,9 +44,14 @@ export async function authenticatedFetch<T>(
   if (response.status === 401) {
     if (typeof window !== "undefined") {
       localStorage.removeItem("accessToken");
-      window.location.href = "/auth/login";
+      if (!window.location.pathname.includes("/auth/login")) {
+        window.location.href = "/auth/login";
+      }
     }
-    throw new Error("Unauthorized");
+    const error: any = new Error("Unauthorized");
+    error.response = { status: 401 };
+    error.status = 401;
+    throw error;
   }
 
   const text = await response.text();
@@ -65,7 +69,10 @@ export async function authenticatedFetch<T>(
       typeof data === "object" && data && "message" in data
         ? String((data as { message?: unknown }).message || "Request failed")
         : "Request failed";
-    throw new Error(message);
+    const error: any = new Error(message);
+    error.response = { status: response.status };
+    error.status = response.status;
+    throw error;
   }
 
   return data as T;
@@ -90,13 +97,21 @@ export async function apiFetch<T>(
   if (response.status === 401) {
     if (typeof window !== "undefined") {
       localStorage.removeItem("accessToken");
-      window.location.href = "/auth/login";
+      if (!window.location.pathname.includes("/auth/login")) {
+        window.location.href = "/auth/login";
+      }
     }
-    throw new Error("Unauthorized");
+    const error: any = new Error("Unauthorized");
+    error.response = { status: 401 };
+    error.status = 401;
+    throw error;
   }
 
   if (!response.ok) {
-    throw new Error(await response.text());
+    const error: any = new Error(await response.text());
+    error.response = { status: response.status };
+    error.status = response.status;
+    throw error;
   }
 
   const text = await response.text();
@@ -187,10 +202,9 @@ export async function createChurch(
 }
 
 export async function getMyChurch() {
-  const payload = await authenticatedFetch<unknown>("/church/me", {
+  return await authenticatedFetch<any>("/church/me", {
     method: "GET",
   });
-  return parseChurchResponse(payload);
 }
 
 export async function createWeeklyService(payload: CreateWeeklyServicePayload) {

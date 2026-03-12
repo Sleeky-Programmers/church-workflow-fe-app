@@ -19,7 +19,6 @@ export default function DashboardLayout({
     <DashboardGuard>
       <SidebarProvider>
         <RecentTracker />
-
         <div className="relative flex min-h-screen w-full bg-gray-50">
           <AppSidebar />
 

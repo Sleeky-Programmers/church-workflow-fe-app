@@ -1,15 +1,19 @@
 import {
   ActivityRow,
   DepartmentRow,
-  Gender,
-  MaritalStatus,
   MemberAttendanceRecord,
   MemberProfile,
   RegularService,
   Role,
-  Title,
 } from "@/types";
-import { EventCategory, RequisitionStatus } from "./enums";
+import {
+  EventCategory,
+  Gender,
+  MaritalStatus,
+  MembershipStatus,
+  MemberTitle,
+  RequisitionStatus,
+} from "./enums";
 import {
   Activity,
   Calendar1,
@@ -30,7 +34,6 @@ import {
   Users,
   Wallet,
 } from "lucide-react";
-import { MODULE_PERMISSIONS } from "./role-constants";
 
 export const DEFAULT_ORDER = [
   "Opening Prayer",
@@ -651,13 +654,20 @@ export const MOCK_MEMBERS_FULL: MemberProfile[] = Array.from(
       "Martin",
     ];
 
-    const titles: Title[] = ["Mr.", "Mrs.", "Miss", "Dr.", "Pastor"];
-    const genders: Gender[] = ["Male", "Female"];
+    const titles: MemberTitle[] = [
+      MemberTitle.MR,
+      MemberTitle.MRS,
+      MemberTitle.MISS,
+      MemberTitle.DR,
+      MemberTitle.PASTOR,
+      MemberTitle.REV,
+    ];
+    const genders: Gender[] = [Gender.MALE, Gender.FEMALE];
     const maritalStatuses: MaritalStatus[] = [
-      "Single",
-      "Married",
-      "Divorced",
-      "Widowed",
+      MaritalStatus.SINGLE,
+      MaritalStatus.MARRIED,
+      MaritalStatus.DIVORCED,
+      MaritalStatus.WIDOWED,
     ];
 
     const firstName = firstNames[i % firstNames.length];
@@ -698,11 +708,13 @@ export const MOCK_MEMBERS_FULL: MemberProfile[] = Array.from(
       address: "Abuja, Nigeria",
       maritalStatus,
       dateOfMarriage:
-        maritalStatus === "Married" ? "1st of March, 1999" : undefined,
-      spouseFirstName: maritalStatus === "Married" ? "Jane" : undefined,
-      spouseLastName: maritalStatus === "Married" ? "Doe" : undefined,
+        maritalStatus === MaritalStatus.MARRIED
+          ? "1st of March, 1999"
+          : undefined,
+      spouseFirstName: MaritalStatus.MARRIED ? "Jane" : undefined,
+      spouseLastName: MaritalStatus.MARRIED ? "Doe" : undefined,
 
-      membershipStatus: "Member",
+      membershipStatus: MembershipStatus.MEMBER,
       dateJoined: "14th of March, 2026",
       baptized: Math.random() > 0.3,
       volunteersPreference: "Interested",
