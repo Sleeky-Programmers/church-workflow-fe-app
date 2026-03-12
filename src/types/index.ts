@@ -73,6 +73,14 @@ export type DepartmentRow = {
   status: "Active" | "Inactive";
 };
 
+export type TeamRow = {
+  id: string;
+  name: string;
+  leader: { name: string; initials?: string } | null;
+  members: number;
+  status: "Active" | "Inactive";
+};
+
 export type Permission =
   | "users.view"
   | "users.invite"

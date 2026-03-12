@@ -107,3 +107,8 @@ export enum ServiceFrequency {
   WEEKLY = "weekly",
   MONTHLY = "monthly",
 }
+
+export enum TeamStatus {
+  ACTIVE = "Active",
+  INACTIVE = "Inactive",
+}

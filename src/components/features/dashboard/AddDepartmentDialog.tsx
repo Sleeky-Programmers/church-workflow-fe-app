@@ -167,11 +167,9 @@ export default function AddDepartmentDialog({ onSave }: Props) {
 
             <div className="space-y-2">
               {memberIds.length > 0 && (
-                <div className="space-y-2">
+                <div className="rounded-xl shadow-lg w-full sm:w-[480px] h-[80vh] flex flex-col overflow-hidden bg-gray-50">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-medium text-gray-700">
-                      Selected Members
-                    </span>
+                    <Span variant="default">Selected Members</Span>
                   </div>
                   <div className="flex flex-wrap gap-2">
                     {memberIds.map((id) => {

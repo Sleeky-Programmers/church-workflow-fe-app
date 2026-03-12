@@ -27,6 +27,7 @@ import {
   Settings,
   Tag,
   UserPlus,
+  Users,
   Wallet,
 } from "lucide-react";
 import { MODULE_PERMISSIONS } from "./role-constants";
@@ -129,6 +130,11 @@ export const SidebarData = {
       title: "Departments/Units",
       url: "/dashboard/departments",
       icon: Layers,
+    },
+    {
+      title: "Small Teams",
+      url: "/dashboard/teams",
+      icon: Users,
     },
     {
       title: "Events & Reminders",
@@ -418,6 +424,37 @@ export const departmentData: DepartmentRow[] = [
   },
 ];
 
+export const smallTeamsData = [
+  {
+    id: "team-1",
+    name: "Lincoln Folk",
+    leader: { name: "John Doe", initials: "JD" },
+    members: 6,
+    status: "Active",
+  },
+  {
+    id: "team-2",
+    name: "Youth Group A",
+    leader: { name: "Mary Doe", initials: "MD" },
+    members: 10,
+    status: "Active",
+  },
+  {
+    id: "team-3",
+    name: "Youth Group B",
+    leader: { name: "John Doe", initials: "JD" },
+    members: 19,
+    status: "Active",
+  },
+  {
+    id: "team-4",
+    name: "Men of Valor",
+    leader: { name: "Mary Doe", initials: "MD" },
+    members: 15,
+    status: "Active",
+  },
+];
+
 export const departmentMembers = [
   {
     id: "m1",
@@ -681,6 +718,13 @@ export const MOCK_MEMBERS_FULL: MemberProfile[] = Array.from(
     };
   },
 );
+
+export const smallTeamMemberMap: Record<string, string[]> = {
+  "team-1": MOCK_MEMBERS_FULL.slice(0, 6).map((member) => member.id),
+  "team-2": MOCK_MEMBERS_FULL.slice(6, 16).map((member) => member.id),
+  "team-3": MOCK_MEMBERS_FULL.slice(16, 35).map((member) => member.id),
+  "team-4": MOCK_MEMBERS_FULL.slice(35, 50).map((member) => member.id),
+};
 
 function getDaySuffix(day: number): string {
   if (day >= 11 && day <= 13) return "th";

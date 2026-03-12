@@ -20,6 +20,8 @@ import {
 import { MemberProfile } from "@/types";
 import { AVATAR_COLORS } from "@/lib/data";
 import { cn } from "@/lib/utils";
+import { Span } from "@/components/ui/typography/Text";
+import { Checkbox } from "@/components/ui/checkbox";
 
 function getAvatarColor(name: string) {
   if (!name) return AVATAR_COLORS[0];
@@ -159,14 +161,14 @@ export function MemberMultiSelect({
           aria-expanded={open}
           className="h-auto min-h-10 w-full justify-between py-2"
         >
-          <span
+          <Span
             className={cn(
               "truncate text-left",
               value.length === 0 && "text-muted-foreground",
             )}
           >
             {summary}
-          </span>
+          </Span>
           <ChevronDown className="h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
@@ -193,15 +195,18 @@ export function MemberMultiSelect({
                           : [...value, member.id],
                       );
                     }}
+                    className="gap-2"
                   >
-                    <MemberAvatar name={member.fullName} />
-                    <span className="truncate">{member.fullName}</span>
-                    <Check
-                      className={cn(
-                        "ml-auto h-4 w-4",
-                        isSelected ? "opacity-100" : "opacity-0",
-                      )}
-                    />
+                    <div className="flex items-center gap-2 flex-1 min-w-0">
+                      <MemberAvatar name={member.fullName} />
+                      <div className="min-w-0">
+                        <Span className="truncate">{member.fullName}</Span>
+                        <Span className="block text-xs text-muted-foreground truncate">
+                          {member.email}
+                        </Span>
+                      </div>
+                    </div>
+                    <Checkbox checked={isSelected} className="ml-auto" />
                   </CommandItem>
                 );
               })}
