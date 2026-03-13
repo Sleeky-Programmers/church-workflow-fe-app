@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { format } from "date-fns";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -36,7 +37,7 @@ export function AttendanceCalendarPage() {
   const loadServices = async () => {
     setIsLoading(true);
     try {
-      const data = await fetchServices("2025-05");
+      const data = await fetchServices(format(new Date(), "yyyy-MM"));
       setServices(data);
     } catch (error: any) {
       toast({
@@ -87,10 +88,6 @@ export function AttendanceCalendarPage() {
 
   const handleCreateServices = (newServices: RegularService[]) => {
     setServices((prev) => [...prev, ...newServices]);
-    toast({
-      title: "Success",
-      description: `${newServices.length} service(s) created successfully`,
-    });
   };
 
   const handleAttendanceSaved = () => {
@@ -105,7 +102,7 @@ export function AttendanceCalendarPage() {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto" />
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto" />
           <Text variant="default" className="mt-4">
             Loading calendar...
           </Text>

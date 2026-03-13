@@ -1,12 +1,14 @@
+import { apiFetch } from "@/lib/api";
+
 export interface AdminInviteData {
   firstName: string;
   lastName: string;
   email: string;
-  churchName: string;
-  churchId: string;
-  role: "admin" | "administrator";
-  invitedAt: number;
-  expiresAt: number;
+  churchName?: string;
+  churchId?: string;
+  role?: "admin" | "administrator" | string;
+  invitedAt?: number;
+  expiresAt?: number;
 }
 
 export function decodeInviteToken(): AdminInviteData | null {
@@ -19,6 +21,9 @@ export function decodeInviteToken(): AdminInviteData | null {
 
 export function isInviteTokenValid(inviteData: AdminInviteData): boolean {
   const now = Date.now();
+  if (!inviteData.expiresAt) {
+    return true;
+  }
   return now < inviteData.expiresAt;
 }
 
@@ -26,20 +31,10 @@ export async function fetchAdminInviteData(
   inviteToken: string,
 ): Promise<AdminInviteData | null> {
   try {
-    if (inviteToken === "test-invite-token" || inviteToken === "demo") {
-      return {
-        firstName: "John",
-        lastName: "Doe",
-        email: "johndoe@gmail.com",
-        churchName: "Holy Church",
-        churchId: "church-001",
-        role: "admin",
-        invitedAt: Date.now() - 86400000,
-        expiresAt: Date.now() + 604800000,
-      };
-    }
-
-    return null;
+    const query = `?token=${encodeURIComponent(inviteToken)}`;
+    return await apiFetch<AdminInviteData>(`/auth/preview${query}`, {
+      method: "GET",
+    });
   } catch {
     return null;
   }

@@ -1,18 +1,24 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { format } from "date-fns";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Calendar, Clock, MapPin, User, X } from "lucide-react";
-import { RegularService } from "@/types";
+import { AttendanceRecord, RegularService } from "@/types";
 import { useAttendanceModal } from "@/hooks/useAttendanceModal";
-import { fetchMembers, getCurrentAdmin, saveAttendance } from "@/lib/api";
+import {
+  fetchMembers,
+  getAttendanceRecord,
+  getCurrentAdmin,
+  saveAttendance,
+} from "@/lib/api";
 import { SelectMembersView } from "./select-member-view";
 import { AttendanceStatsView } from "./attendance-stats";
 import { Span } from "@/components/ui/typography/Text";
@@ -60,15 +66,14 @@ export function AttendanceModal({
   >("select");
   const [absentSelections, setAbsentSelections] = useState<string[]>([]);
   const [isEditMode, setIsEditMode] = useState(false);
+  const [attendanceRecord, setAttendanceRecord] =
+    useState<AttendanceRecord | null>(null);
+  const [attendanceStats, setAttendanceStats] = useState<{
+    presentCount: number;
+    absentCount: number;
+  } | null>(null);
 
-  const existingRecord = useMemo(() => {
-    if (!service || !date) return null;
-    return (
-      service.attendanceRecords?.find((record) => record.date === date) || null
-    );
-  }, [service, date]);
-
-  const hasExistingAttendance = Boolean(existingRecord);
+  const hasExistingAttendance = Boolean(attendanceRecord);
 
   const { toast } = useToast();
 
@@ -76,12 +81,79 @@ export function AttendanceModal({
     if (!isOpen) {
       return;
     }
-    setIsEditMode(!hasExistingAttendance);
+    setIsEditMode(false);
     setIsMembersDialogOpen(false);
     setMembersViewMode("select");
     setAbsentSelections([]);
     setHasMembersLoaded(false);
-  }, [isOpen, hasExistingAttendance]);
+    setAttendanceRecord(null);
+    setAttendanceStats(null);
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (!isOpen || !service || !date) return;
+
+    let isActive = true;
+
+    const loadAttendance = async () => {
+      try {
+        const result = await getAttendanceRecord(service.id, date);
+        if (!isActive) return;
+
+        if (result.stats) {
+          setAttendanceStats({
+            presentCount: result.stats.present.total,
+            absentCount: result.stats.absent.total,
+          });
+        } else {
+          setAttendanceStats(null);
+        }
+
+        if (result.attendance) {
+          const record: AttendanceRecord = {
+            serviceId: service.id,
+            date,
+            presentMembers: result.attendance.attendees || [],
+            absentMembers: [],
+            recordedBy: result.attendance.recordedBy,
+            location: service.location || "",
+            startTime: service.startTime,
+            endTime: service.endTime,
+          };
+          setAttendanceRecord(record);
+          if (!service.attendanceRecords) service.attendanceRecords = [];
+          const recordIndex = service.attendanceRecords.findIndex(
+            (item) => item.date === date,
+          );
+          if (recordIndex >= 0) {
+            service.attendanceRecords[recordIndex] = record;
+          } else {
+            service.attendanceRecords.push(record);
+          }
+          setIsEditMode(false);
+        } else {
+          setAttendanceRecord(null);
+          setIsEditMode(true);
+        }
+      } catch (error: any) {
+        if (!isActive) return;
+        toast({
+          title: "Error",
+          description: error.message || "Failed to load attendance",
+          variant: "destructive",
+        });
+        setAttendanceRecord(null);
+        setAttendanceStats(null);
+        setIsEditMode(true);
+      }
+    };
+
+    loadAttendance();
+
+    return () => {
+      isActive = false;
+    };
+  }, [isOpen, service, date, toast]);
 
   const ensureMembersLoaded = async () => {
     if (hasMembersLoaded) {
@@ -92,8 +164,8 @@ export function AttendanceModal({
       const data = await fetchMembers(1, 100);
       setMembers(data.members);
 
-      if (existingRecord?.presentMembers?.length) {
-        initializeAttendance(existingRecord.presentMembers);
+      if (attendanceRecord?.presentMembers?.length) {
+        initializeAttendance(attendanceRecord.presentMembers);
       }
       setHasMembersLoaded(true);
     } catch (error: any) {
@@ -167,17 +239,13 @@ export function AttendanceModal({
 
     setIsSaving(true);
     try {
-      const admin = getCurrentAdmin();
       await saveAttendance({
         serviceId: service.id,
         date,
         presentMembers: state.presentMembers,
-        recordedBy: admin.name,
-        location: service.location || "",
-        startTime: service.startTime,
-        endTime: service.endTime,
       });
 
+      const admin = getCurrentAdmin();
       const nextRecord = {
         serviceId: service.id,
         date,
@@ -191,18 +259,22 @@ export function AttendanceModal({
         endTime: service.endTime,
       };
 
-      if (!service.attendanceRecords) {
-        service.attendanceRecords = [nextRecord];
+      if (!service.attendanceRecords) service.attendanceRecords = [];
+      const recordIndex = service.attendanceRecords.findIndex(
+        (record) => record.date === date,
+      );
+      if (recordIndex >= 0) {
+        service.attendanceRecords[recordIndex] = nextRecord;
       } else {
-        const recordIndex = service.attendanceRecords.findIndex(
-          (record) => record.date === date,
-        );
+        service.attendanceRecords.push(nextRecord);
+      }
 
-        if (recordIndex >= 0) {
-          service.attendanceRecords[recordIndex] = nextRecord;
-        } else {
-          service.attendanceRecords.push(nextRecord);
-        }
+      setAttendanceRecord(nextRecord);
+      if (state.allMembers.length) {
+        setAttendanceStats({
+          presentCount: nextRecord.presentMembers.length,
+          absentCount: nextRecord.absentMembers.length,
+        });
       }
 
       onSave();
@@ -238,11 +310,13 @@ export function AttendanceModal({
   const presentCount =
     hasMembersLoaded || !hasExistingAttendance
       ? presentMembers.length
-      : existingRecord?.presentMembers.length || 0;
+      : (attendanceStats?.presentCount ??
+        (attendanceRecord?.presentMembers.length || 0));
   const absentCount =
     hasMembersLoaded || !hasExistingAttendance
       ? absentMembers.length
-      : existingRecord?.absentMembers.length || 0;
+      : (attendanceStats?.absentCount ??
+        (attendanceRecord?.absentMembers.length || 0));
 
   const panelMembers =
     membersViewMode === "present"
@@ -277,6 +351,9 @@ export function AttendanceModal({
             <DialogTitle className="text-xl font-semibold mb-3">
               {service.serviceName} attendance
             </DialogTitle>
+            <DialogDescription className="sr-only">
+              Review attendance details and manage present or absent members.
+            </DialogDescription>
           </div>
           <Button
             variant="ghost"
@@ -404,6 +481,9 @@ export function AttendanceModal({
             mobileSheet
             className="w-full max-w-[420px] p-0 overflow-hidden max-sm:max-h-[88vh]"
           >
+            <DialogDescription className="sr-only">
+              Attendance summary for the selected service.
+            </DialogDescription>
             {summaryCard}
           </DialogContent>
         </Dialog>
@@ -419,6 +499,9 @@ export function AttendanceModal({
             mobileSheet
             className="w-full max-w-[520px] p-0 overflow-hidden max-sm:max-h-[88vh] h-[80vh]"
           >
+            <DialogDescription className="sr-only">
+              Select members to mark attendance as present or absent.
+            </DialogDescription>
             {membersCard}
           </DialogContent>
         </Dialog>
@@ -432,6 +515,9 @@ export function AttendanceModal({
         showClose={false}
         className="!p-0 !bg-transparent !shadow-none !border-none !max-w-none !w-auto !h-auto"
       >
+        <DialogDescription className="sr-only">
+          Attendance details for the selected service.
+        </DialogDescription>
         <div className="flex items-start gap-4">
           {summaryCard}
           {isMembersDialogOpen && membersCard}

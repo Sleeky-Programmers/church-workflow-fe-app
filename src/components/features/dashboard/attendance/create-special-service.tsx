@@ -21,7 +21,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { CalendarDays, Clock3, X } from "lucide-react";
-import { SpecialServiceDaySchedule, SpecialServiceEvent } from "./types";
+import { SpecialServiceDaySchedule, SpecialServiceEvent } from "@/types";
 
 type CreateSpecialServiceModalProps = {
   open: boolean;

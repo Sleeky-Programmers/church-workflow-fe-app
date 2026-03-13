@@ -2,6 +2,8 @@ import { InviteFormData, PendingInvite, User, UserAction } from "@/types/user";
 import { MOCK_USERS } from "../user-data";
 import {
   SignupPayload,
+  AdminRegisterPayload,
+  AdminRegisterResponse,
   VerifyOtpPayload,
   VerifyOtpResponse,
   LoginPayload,
@@ -15,11 +17,11 @@ import {
 import { MOCK_ADMIN, MOCK_MEMBERS_FULL, MOCK_SERVICES } from "../data";
 import {
   ActivityLogApiResponse,
-  AttendanceRecord,
   Member,
   NotificationApiResponse,
   RegularService,
 } from "@/types";
+import { getInitials } from "@/lib/utils";
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -125,6 +127,14 @@ export function signup(payload: SignupPayload) {
   });
 }
 
+export function adminRegister(token: string, payload: AdminRegisterPayload) {
+  const query = token ? `?token=${encodeURIComponent(token)}` : "";
+  return apiFetch<AdminRegisterResponse>(`/auth/admin-register${query}`, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
 export async function verifyOtp(payload: VerifyOtpPayload) {
   return apiFetch<VerifyOtpResponse>("/auth/verify-otp", {
     method: "POST",
@@ -208,7 +218,7 @@ export async function getMyChurch() {
 }
 
 export async function createWeeklyService(payload: CreateWeeklyServicePayload) {
-  return apiFetch("/church-services", {
+  return authenticatedFetch("/church-services", {
     method: "POST",
     body: JSON.stringify(payload),
   });
@@ -325,12 +335,115 @@ export async function sendInvitation(
   });
 }
 
-export async function fetchServices(month: string): Promise<RegularService[]> {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve(MOCK_SERVICES);
-    }, 300);
-  });
+type ChurchServiceApi = {
+  _id: string;
+  serviceName: string;
+  type: "REGULAR" | "SPECIAL";
+  day?: string;
+  startTime: string;
+  endTime?: string;
+  location?: string;
+  startDate?: string;
+  endDate?: string;
+  description?: string;
+  specialDays?: { date: string; startTime: string; endTime?: string }[];
+};
+
+type PaginatedResponse<T> = {
+  data: T[];
+  pagination: {
+    page: number;
+    limit: number;
+    itemCount: number;
+    totalPages: number;
+    hasPreviousPage: boolean;
+    hasNextPage: boolean;
+  };
+};
+
+const SERVICE_DAY_MAP: Record<string, string> = {
+  SUNDAY: "Sunday",
+  MONDAY: "Monday",
+  TUESDAY: "Tuesday",
+  WEDNESDAY: "Wednesday",
+  THURSDAY: "Thursday",
+  FRIDAY: "Friday",
+  SATURDAY: "Saturday",
+};
+
+const DAY_NAME_ALIASES: Record<string, string> = {
+  SUNDAY: "Sunday",
+  SUN: "Sunday",
+  SUNDAYFULL: "Sunday",
+  MONDAY: "Monday",
+  MON: "Monday",
+  TUESDAY: "Tuesday",
+  TUE: "Tuesday",
+  TUES: "Tuesday",
+  WEDNESDAY: "Wednesday",
+  WED: "Wednesday",
+  THURSDAY: "Thursday",
+  THU: "Thursday",
+  THUR: "Thursday",
+  THURS: "Thursday",
+  FRIDAY: "Friday",
+  FRI: "Friday",
+  SATURDAY: "Saturday",
+  SAT: "Saturday",
+};
+
+function normalizeDayName(value?: string): string | undefined {
+  if (!value) return undefined;
+  const trimmed = value.trim();
+  if (!trimmed) return undefined;
+
+  const upper = trimmed.toUpperCase();
+  if (SERVICE_DAY_MAP[upper]) return SERVICE_DAY_MAP[upper];
+  if (DAY_NAME_ALIASES[upper]) return DAY_NAME_ALIASES[upper];
+
+  const capitalized =
+    trimmed.charAt(0).toUpperCase() + trimmed.slice(1).toLowerCase();
+  if (Object.values(SERVICE_DAY_MAP).includes(capitalized)) {
+    return capitalized;
+  }
+
+  return undefined;
+}
+
+function mapChurchServiceToRegular(service: ChurchServiceApi): RegularService {
+  const dayName = normalizeDayName(service.day);
+  const daysFromArray = Array.isArray((service as any).days)
+    ? (service as any).days
+        .map((day: string) => normalizeDayName(day))
+        .filter(Boolean)
+    : [];
+
+  const days =
+    dayName && daysFromArray.length === 0 ? [dayName] : daysFromArray;
+  return {
+    id: service._id,
+    serviceName: service.serviceName,
+    days,
+    startTime: service.startTime,
+    endTime: service.endTime,
+    location: service.location,
+    frequency: "weekly",
+    attendanceRecords: [],
+  };
+}
+
+export async function fetchServices(_month: string): Promise<RegularService[]> {
+  const response = await authenticatedFetch<
+    PaginatedResponse<ChurchServiceApi>
+  >("/church-services?page=1&limit=100", { method: "GET" });
+
+  return (response.data || [])
+    .filter(
+      (service) =>
+        typeof service.type === "string" &&
+        service.type.toUpperCase() === "REGULAR",
+    )
+    .map(mapChurchServiceToRegular);
 }
 
 export async function fetchTotalMembers(): Promise<{
@@ -350,93 +463,85 @@ export async function fetchMembers(
   total: number;
   pages: number;
 }> {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      let filtered = MOCK_MEMBERS_FULL;
-
-      if (search) {
-        filtered = MOCK_MEMBERS_FULL.filter(
-          (m) =>
-            m.fullName.toLowerCase().includes(search.toLowerCase()) ||
-            m.email.toLowerCase().includes(search.toLowerCase()),
-        );
-      }
-
-      const start = (page - 1) * limit;
-      const end = start + limit;
-      const paginated = filtered.slice(start, end);
-
-      const members = paginated.map((m) => ({
-        id: m.id,
-        name: m.fullName,
-        email: m.email,
-        initials: m.initials,
-      }));
-
-      resolve({
-        members,
-        total: filtered.length,
-        pages: Math.ceil(filtered.length / limit),
-      });
-    }, 300);
+  const query = new URLSearchParams({
+    page: String(page),
+    limit: String(limit),
+    ...(search ? { search } : {}),
   });
+
+  const response = await authenticatedFetch<
+    PaginatedResponse<{
+      _id: string;
+      fullName: string;
+      email?: string;
+    }>
+  >(`/members?${query.toString()}`, { method: "GET" });
+
+  const members =
+    response.data?.map((member) => ({
+      id: member._id,
+      name: member.fullName,
+      email: member.email || "",
+      initials: getInitials(member.fullName || ""),
+    })) || [];
+
+  return {
+    members,
+    total: response.pagination?.itemCount || 0,
+    pages: response.pagination?.totalPages || 1,
+  };
 }
+
+type AttendanceApiRecord = {
+  _id: string;
+  churchServiceId: string;
+  date: string;
+  attendees: string[];
+  recordedBy: string;
+};
+
+export type AttendanceApiResult = {
+  attendance: AttendanceApiRecord | null;
+  stats: {
+    present: { male: number; female: number; total: number };
+    absent: { male: number; female: number; total: number };
+  } | null;
+};
 
 export async function getAttendanceRecord(
   serviceId: string,
   date: string,
-): Promise<AttendanceRecord | null> {
-  const service = MOCK_SERVICES.find((s) => s.id === serviceId);
-  const record = service?.attendanceRecords?.find((r) => r.date === date);
-
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve(record || null);
-    }, 300);
+): Promise<AttendanceApiResult> {
+  const query = new URLSearchParams({
+    serviceId,
+    date,
   });
+
+  return authenticatedFetch<AttendanceApiResult>(
+    `/attendance?${query.toString()}`,
+    { method: "GET" },
+  );
 }
 
-export async function saveAttendance(
-  data: Omit<AttendanceRecord, "absentMembers">,
-): Promise<{
-  success: boolean;
-  recordId: string;
-}> {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      const allMemberIds = MOCK_MEMBERS_FULL.map((m) => m.id);
-      const absentMembers = allMemberIds.filter(
-        (id) => !data.presentMembers.includes(id),
-      );
-
-      const service = MOCK_SERVICES.find((s) => s.id === data.serviceId);
-      if (service) {
-        if (!service.attendanceRecords) {
-          service.attendanceRecords = [];
-        }
-
-        const existingIndex = service.attendanceRecords.findIndex(
-          (r) => r.date === data.date,
-        );
-
-        const record: AttendanceRecord = {
-          ...data,
-          absentMembers,
-        };
-
-        if (existingIndex >= 0) {
-          service.attendanceRecords[existingIndex] = record;
-        } else {
-          service.attendanceRecords.push(record);
-        }
-      }
-
-      resolve({
-        success: true,
-        recordId: `record-${Date.now()}`,
-      });
-    }, 500);
+export async function saveAttendance(data: {
+  serviceId: string;
+  date: string;
+  presentMembers: string[];
+}): Promise<AttendanceApiRecord> {
+  const query = new URLSearchParams({
+    serviceId: data.serviceId,
   });
+
+  return authenticatedFetch<AttendanceApiRecord>(
+    `/attendance/mark?${query.toString()}`,
+    {
+      method: "POST",
+      body: JSON.stringify({
+        date: data.date,
+        attendees: data.presentMembers,
+      }),
+    },
+  );
 }
 
 export async function updateAttendance(

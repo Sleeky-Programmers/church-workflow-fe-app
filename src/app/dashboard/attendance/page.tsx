@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo } from "react";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { RegularService } from "@/types";
+import { RegularService, SpecialServiceEvent } from "@/types";
 import { AttendanceEmptyState } from "@/components/features/dashboard/attendance/attendance-empty-state";
 import { ServiceTypeModal } from "@/components/features/dashboard/attendance/service-type";
 import { CreateRegularServiceModal } from "@/components/features/dashboard/attendance/create-regular-service";
@@ -15,10 +15,12 @@ import { CalendarGrid } from "@/components/features/dashboard/attendance/calenda
 import { GivingRecordModal } from "@/components/features/dashboard/attendance/giving-record-modal";
 import { ServiceDetailModal } from "@/components/features/dashboard/attendance/service-detail-modal";
 import { GivingValues } from "@/components/features/dashboard/attendance/giving-record-modal";
-import { SpecialServiceEvent } from "@/components/features/dashboard/attendance/types";
 import Heading from "@/components/ui/typography/Heading";
+import { Text } from "@/components/ui/typography/Text";
 import { DEFAULT_ORDER } from "@/lib/data";
 import { ServiceFrequency, ServiceType } from "@/lib/enums";
+import { fetchServices } from "@/lib/api";
+import { format } from "date-fns";
 
 function useIsMobile() {
   const [isMobile, setIsMobile] = useState(false);
@@ -40,6 +42,7 @@ export default function AttendancePage() {
   const { toast } = useToast();
   const isMobile = useIsMobile();
   const [services, setServices] = useState<RegularService[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [isTypeModalOpen, setIsTypeModalOpen] = useState(false);
   const [isRegularModalOpen, setIsRegularModalOpen] = useState(false);
   const [isSpecialModalOpen, setIsSpecialModalOpen] = useState(false);
@@ -61,6 +64,26 @@ export default function AttendancePage() {
   const [specialServices, setSpecialServices] = useState<SpecialServiceEvent[]>(
     [],
   );
+
+  useEffect(() => {
+    const loadServices = async () => {
+      setIsLoading(true);
+      try {
+        const data = await fetchServices(format(new Date(), "yyyy-MM"));
+        setServices(data);
+      } catch (error: any) {
+        toast({
+          title: "Error",
+          description: error.message || "Failed to load services",
+          variant: "destructive",
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadServices();
+  }, [toast]);
 
   const setServiceContext = (service: RegularService, date: string) => {
     setSelectedService(service);
@@ -139,10 +162,6 @@ export default function AttendancePage() {
 
   const handleCreateServices = (newServices: RegularService[]) => {
     setServices((prev) => [...prev, ...newServices]);
-    toast({
-      title: "Success",
-      description: `${newServices.length} service(s) created successfully`,
-    });
   };
 
   const handleAddService = () => {
@@ -295,7 +314,16 @@ export default function AttendancePage() {
       </div>
 
       <div className="p-6">
-        {!hasServices ? (
+        {isLoading ? (
+          <div className="flex items-center justify-center min-h-[320px]">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600 mx-auto" />
+              <Text variant="default" className="mt-3">
+                Loading services...
+              </Text>
+            </div>
+          </div>
+        ) : !hasServices ? (
           <AttendanceEmptyState onCreateService={handleCreateServiceClick} />
         ) : (
           <div>

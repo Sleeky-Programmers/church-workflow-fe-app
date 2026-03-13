@@ -5,6 +5,17 @@ export interface SignupPayload {
   password: string;
 }
 
+export interface AdminRegisterPayload {
+  firstName: string;
+  lastName: string;
+  password: string;
+}
+
+export interface AdminRegisterResponse {
+  message: string;
+  accessToken: string;
+}
+
 export interface VerifyOtpPayload {
   email: string;
   otp: number;

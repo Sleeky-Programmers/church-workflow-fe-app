@@ -7,7 +7,6 @@ import * as z from "zod";
 import { Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Checkbox } from "@/components/ui/checkbox";
 import {
   Form,
   FormControl,
@@ -20,10 +19,9 @@ import GoogleSignupButton from "../oauth/google-signup-button";
 import Heading from "@/components/ui/typography/Heading";
 import { Text, Span } from "@/components/ui/typography/Text";
 import { Loader } from "@/components/ui/loader";
-import { Link } from "@/components/ui/link";
 import { adminSignupSchema } from "@/types/schema";
 import { RouteConfig } from "@/config/routes";
-import { googleAuth } from "@/lib/api";
+import { adminRegister, googleAuth } from "@/lib/api";
 import { initializeAuthSession } from "@/lib/auth/session";
 
 type AdminSignupFormValues = z.infer<typeof adminSignupSchema>;
@@ -42,7 +40,6 @@ export default function AdminSignupForm({
   invitedRole,
 }: AdminSignupFormProps) {
   const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -54,22 +51,65 @@ export default function AdminSignupForm({
       lastName: preFilledName?.lastName || "",
       email: preFilledEmail || "",
       password: "",
-      confirmPassword: "",
-      agreeToTerms: false,
     },
     mode: "onChange",
   });
 
   const handleSubmit = async (data: AdminSignupFormValues) => {
-    setIsLoading(true);
-    setTimeout(() => {
-      setIsLoading(false);
+    const inviteToken =
+      searchParams.get("invite") || searchParams.get("token") || "";
+
+    if (!inviteToken) {
+      form.setError("email", {
+        message: "Invite token is missing. Please use your invite link.",
+      });
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      const response = await adminRegister(inviteToken, {
+        firstName: data.firstName,
+        lastName: data.lastName,
+        password: data.password,
+      });
+
+      initializeAuthSession({
+        accessToken: response.accessToken,
+        emailHint: data.email,
+        user: {
+          email: data.email,
+          firstName: data.firstName,
+          lastName: data.lastName,
+        },
+      });
+
       onSubmit(data.email, { ...data, role: invitedRole } as any);
-    }, 1000);
+    } catch (error: any) {
+      const backendMessage =
+        error?.response?.data?.message ||
+        error?.message ||
+        "Something went wrong. Please try again.";
+
+      if (backendMessage.includes("already exists")) {
+        form.setError("email", {
+          type: "manual",
+          message: "An account with this email already exists.",
+        });
+      } else {
+        form.setError("root", {
+          type: "manual",
+          message: backendMessage,
+        });
+      }
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleGoogleSignup = async (idToken: string) => {
-    const inviteToken = searchParams.get("invite") || undefined;
+    const inviteToken =
+      searchParams.get("invite") || searchParams.get("token") || undefined;
     try {
       setIsLoading(true);
       const data = await googleAuth(idToken, inviteToken);
@@ -108,7 +148,17 @@ export default function AdminSignupForm({
                 <FormItem>
                   <FormLabel>First Name</FormLabel>
                   <FormControl>
-                    <Input placeholder="Enter your first name" {...field} />
+                    <Input
+                      placeholder="Enter your first name"
+                      {...field}
+                      disabled={!!preFilledName?.firstName}
+                      readOnly={!!preFilledName?.firstName}
+                      className={
+                        preFilledName?.firstName
+                          ? "bg-gray-100 cursor-not-allowed"
+                          : ""
+                      }
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -121,7 +171,17 @@ export default function AdminSignupForm({
                 <FormItem>
                   <FormLabel>Last Name</FormLabel>
                   <FormControl>
-                    <Input placeholder="Enter your last name" {...field} />
+                    <Input
+                      placeholder="Enter your last name"
+                      {...field}
+                      disabled={!!preFilledName?.lastName}
+                      readOnly={!!preFilledName?.lastName}
+                      className={
+                        preFilledName?.lastName
+                          ? "bg-gray-100 cursor-not-allowed"
+                          : ""
+                      }
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -183,56 +243,6 @@ export default function AdminSignupForm({
                   Must contain 8+ characters, uppercase, lowercase, and a number
                 </Text>
                 <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="confirmPassword"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Confirm Password</FormLabel>
-                <FormControl>
-                  <div className="relative">
-                    <Input
-                      type={showConfirmPassword ? "text" : "password"}
-                      placeholder="Confirm password"
-                      {...field}
-                    />
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      onClick={() =>
-                        setShowConfirmPassword(!showConfirmPassword)
-                      }
-                      className="absolute right-3 top-1/2 -translate-y-1/2"
-                    >
-                      {showConfirmPassword ? <EyeOff /> : <Eye />}
-                    </Button>
-                  </div>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="agreeToTerms"
-            render={({ field }) => (
-              <FormItem className="flex flex-row items-start space-x-2 space-y-0">
-                <FormControl>
-                  <Checkbox
-                    checked={field.value}
-                    onCheckedChange={field.onChange}
-                  />
-                </FormControl>
-                <div className="space-y-1 leading-none">
-                  <FormLabel>
-                    I agree to the <Link href="/terms">Terms & Conditions</Link>
-                  </FormLabel>
-                  <FormMessage />
-                </div>
               </FormItem>
             )}
           />

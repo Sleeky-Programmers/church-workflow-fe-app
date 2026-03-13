@@ -1,11 +1,10 @@
 "use client";
 
 import { format } from "date-fns";
-import { CalendarDay, RegularService } from "@/types";
+import { CalendarDay, RegularService, SpecialServiceEvent } from "@/types";
 import { ServicePopover } from "./service-popover";
 import { ServiceItem } from "./service";
 import { Button } from "@/components/ui/button";
-import { SpecialServiceEvent } from "./types";
 import { Star } from "lucide-react";
 import { Text } from "@/components/ui/typography/Text";
 
