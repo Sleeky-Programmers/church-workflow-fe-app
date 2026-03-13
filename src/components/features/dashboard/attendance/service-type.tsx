@@ -3,6 +3,7 @@
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -40,6 +41,9 @@ export function ServiceTypeModal({
           <DialogTitle className="text-center text-xl font-semibold">
             Service Type
           </DialogTitle>
+          <DialogDescription className="sr-only">
+            Choose whether to create a regular or special service.
+          </DialogDescription>
         </DialogHeader>
 
         <div className="grid grid-cols-2 gap-4 py-6">

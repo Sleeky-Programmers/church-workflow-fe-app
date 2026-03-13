@@ -1,4 +1,4 @@
-import { apiFetch } from "@/lib/api";
+import { authenticatedFetch } from "@/lib/api";
 import { MemberProfile, NewMemberData } from "@/types";
 import { mapMember } from "@/mappers/member.mapper";
 
@@ -27,14 +27,17 @@ export async function fetchMembers(
   if (search) {
     params.append("search", search);
   }
-  
+
   if (filter && filter !== "all") {
     params.append("filter", filter);
   }
 
-  const response = await apiFetch<FetchMembersResponse>(`/members?${params}`, {
-    method: "GET",
-  });
+  const response = await authenticatedFetch<FetchMembersResponse>(
+    `/members?${params}`,
+    {
+      method: "GET",
+    },
+  );
 
   return {
     data: response.data.map(mapMember),
@@ -43,11 +46,8 @@ export async function fetchMembers(
 }
 
 export async function createMember(data: NewMemberData) {
-  return apiFetch("/members/add", {
+  const response = await authenticatedFetch<any>("/members/add", {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
     body: JSON.stringify({
       title: data.title,
       fullName: data.fullName,
@@ -59,19 +59,27 @@ export async function createMember(data: NewMemberData) {
       dateOfMarriage: data.dateOfMarriage,
       spouseFirstName: data.spouseFirstName,
       spouseLastName: data.spouseLastName,
+      occupation: data.occupation,
+      educationalBackground: data.education,
       membershipStatus: data.membershipStatus,
       dateJoined: data.dateJoined,
+      previousChurchMembership: data.previousChurchMembership,
       isBaptized: data.baptized,
+      ministries: data.ministriesInvolved,
       volunteerPreferences: data.volunteersPreference,
+      cellGroupName:
+        data.smallGroupMember === "Yes" ? data.smallGroupName : undefined,
     }),
   });
+
+  return mapMember(response);
 }
 
 export async function uploadMembersCsv(file: File) {
   const formData = new FormData();
   formData.append("file", file);
 
-  return apiFetch("/members/csv/create", {
+  return authenticatedFetch("/members/csv/create", {
     method: "POST",
     body: formData,
   });

@@ -1,20 +1,20 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search, Plus, Edit, MoreVertical } from "lucide-react";
 import Heading from "@/components/ui/typography/Heading";
 import { MembersTable } from "@/components/features/dashboard/membership/members-table";
 import { fetchMembers } from "@/services/memberService";
-import { MemberProfile, NewMemberData } from "@/types";
+import { MemberProfile } from "@/types";
 import { MemberDetailsPage } from "@/components/features/dashboard/membership/member-details-page";
 import { AddMemberModal } from "@/components/features/dashboard/membership/add-member-modal";
 import { AddMemberFormatModal } from "@/components/features/dashboard/membership/select-modal";
 import { useToast } from "@/hooks/use-toast";
 import { uploadMembersCsv } from "@/services/memberService";
 import { useDebounce } from "@/hooks/use-debounce";
-import { MemberTitle, MemberFormType } from "@/lib/enums";
+import { MemberFormType } from "@/lib/enums";
 
 import {
   Select,
@@ -42,18 +42,29 @@ export default function MembershipPage() {
   const [page, setPage] = useState(1);
   const [pagination, setPagination] = useState<any>(null);
 
-  useEffect(() => {
-    const loadMembers = async () => {
-      try {
-        const response = await fetchMembers(
-          page,
-          10,
-          debouncedSearch,
-          filterValue,
-        );
+  const loadMembers = useCallback(
+    async (
+      pageOverride: number = page,
+      searchOverride: string = debouncedSearch,
+      filterOverride: string = filterValue,
+    ) => {
+      const response = await fetchMembers(
+        pageOverride,
+        10,
+        searchOverride,
+        filterOverride,
+      );
 
-        setMembers(response.data);
-        setPagination(response.pagination);
+      setMembers(response.data);
+      setPagination(response.pagination);
+    },
+    [page, debouncedSearch, filterValue],
+  );
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        await loadMembers();
       } catch (err) {
         toast({
           title: "Cannot fetch members data",
@@ -61,51 +72,24 @@ export default function MembershipPage() {
       }
     };
 
-    loadMembers();
-  }, [page, debouncedSearch, filterValue]);
+    load();
+  }, [page, debouncedSearch, filterValue, loadMembers]);
 
   useEffect(() => {
     setPage(1);
   }, [debouncedSearch, filterValue]);
 
-  const handleAddMember = (newMember: NewMemberData) => {
-    const nameParts = newMember.fullName.trim().split(/\s+/);
-    const firstName = nameParts[0] || "";
-    const lastName = nameParts.slice(1).join(" ") || "";
-    const initials = nameParts
-      .slice(0, 2)
-      .map((part) => part[0]?.toUpperCase() ?? "")
-      .join("");
-
-    const memberProfile: MemberProfile = {
-      id: crypto.randomUUID(),
-      title: (newMember.title || "MR.") as MemberTitle,
-      fullName: newMember.fullName,
-      firstName,
-      lastName,
-      email: newMember.email,
-      phone: newMember.phone,
-      gender: newMember.gender,
-      birthday: newMember.birthday,
-      address: newMember.address,
-      maritalStatus: newMember.maritalStatus,
-      dateOfMarriage: newMember.dateOfMarriage,
-      spouseFirstName: newMember.spouseFirstName,
-      spouseLastName: newMember.spouseLastName,
-      membershipStatus: newMember.membershipStatus,
-      dateJoined: newMember.dateJoined,
-      baptized: newMember.baptized,
-      volunteersPreference: newMember.volunteersPreference,
-      servicesAttended: 0,
-      servicesMissed: 0,
-      attendanceRate: 0,
-      attendanceRecords: [],
-      initials,
-    };
-
-    setMembers((prev) => [...prev, memberProfile]);
-    setIsAddModalOpen(false);
-    setSelectedFormat(null);
+  const handleAddMember = async (_member: MemberProfile) => {
+    try {
+      await loadMembers(1);
+      setPage(1);
+      setIsAddModalOpen(false);
+      setSelectedFormat(null);
+    } catch (err) {
+      toast({
+        title: "Cannot fetch members data",
+      });
+    }
   };
   const handleFormatSelect = (
     format: MemberFormType.FORM | MemberFormType.CSV,

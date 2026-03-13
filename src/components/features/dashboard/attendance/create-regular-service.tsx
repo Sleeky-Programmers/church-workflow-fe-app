@@ -4,6 +4,7 @@ import { useState } from "react";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -13,6 +14,9 @@ import { Label } from "@/components/ui/label";
 import { Plus, Trash2, Info, X } from "lucide-react";
 import { Span, Text } from "@/components/ui/typography/Text";
 import { RegularService } from "@/types";
+import { useToast } from "@/hooks/use-toast";
+import { convertTo12Hour } from "@/lib/utils";
+import { createWeeklyService } from "@/lib/api";
 
 type CreateRegularServiceModalProps = {
   open: boolean;
@@ -30,13 +34,25 @@ const daysOfWeek = [
   { short: "Sat", full: "Saturday" },
 ];
 
+const SERVICE_DAY_ENUM_MAP: Record<string, string> = {
+  Sunday: "SUNDAY",
+  Monday: "MONDAY",
+  Tuesday: "TUESDAY",
+  Wednesday: "WEDNESDAY",
+  Thursday: "THURSDAY",
+  Friday: "FRIDAY",
+  Saturday: "SATURDAY",
+};
+
 export function CreateRegularServiceModal({
   open,
   onOpenChange,
   onCreateServices,
 }: CreateRegularServiceModalProps) {
+  const { toast } = useToast();
   const [services, setServices] = useState<RegularService[]>([]);
   const [showTooltip, setShowTooltip] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
 
   const [formData, setFormData] = useState<RegularService>({
     id: "",
@@ -70,13 +86,12 @@ export function CreateRegularServiceModal({
       alert("Please set a start time");
       return;
     }
+    if (!formData.endTime) {
+      alert("Please set an end time");
+      return;
+    }
 
-    const generatedId =
-      typeof crypto !== "undefined" && crypto.randomUUID
-        ? crypto.randomUUID()
-        : `service-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-
-    setServices((prev) => [...prev, { ...formData, id: generatedId }]);
+    setServices((prev) => [...prev, { ...formData }]);
 
     setFormData({
       id: "",
@@ -93,23 +108,70 @@ export function CreateRegularServiceModal({
     setServices((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const handleCreateServices = () => {
+  const handleCreateServices = async () => {
     if (services.length === 0) {
       alert("Please add at least one service");
       return;
     }
-    onCreateServices(services);
-    onOpenChange(false);
-    setServices([]);
-    setFormData({
-      id: "",
-      serviceName: "",
-      days: [],
-      startTime: "",
-      endTime: "",
-      location: "",
-      frequency: "weekly",
-    });
+    setIsCreating(true);
+    try {
+      const created: RegularService[] = [];
+
+      for (const service of services) {
+        const startTime = convertTo12Hour(service.startTime);
+        const endTime = convertTo12Hour(service.endTime || "");
+
+        for (const day of service.days) {
+          const dayEnum = SERVICE_DAY_ENUM_MAP[day];
+          if (!dayEnum) continue;
+
+          const createdService: any = await createWeeklyService({
+            serviceName: service.serviceName,
+            type: "REGULAR",
+            day: dayEnum,
+            startTime,
+            endTime,
+            location: service.location || "",
+          });
+
+          created.push({
+            id: createdService._id,
+            serviceName: createdService.serviceName,
+            days: [day],
+            startTime: createdService.startTime,
+            endTime: createdService.endTime,
+            location: createdService.location,
+            frequency: "weekly",
+            attendanceRecords: [],
+          });
+        }
+      }
+
+      onCreateServices(created);
+      toast({
+        title: "Success",
+        description: `${created.length} service(s) created successfully`,
+      });
+      onOpenChange(false);
+      setServices([]);
+      setFormData({
+        id: "",
+        serviceName: "",
+        days: [],
+        startTime: "",
+        endTime: "",
+        location: "",
+        frequency: "weekly",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to create services",
+        variant: "destructive",
+      });
+    } finally {
+      setIsCreating(false);
+    }
   };
 
   const handleClose = () => {
@@ -135,6 +197,9 @@ export function CreateRegularServiceModal({
       >
         <DialogHeader className="relative">
           <DialogTitle>Create Regular Service</DialogTitle>
+          <DialogDescription className="sr-only">
+            Create one or more weekly services by day and time.
+          </DialogDescription>
           <Button
             onClick={handleClose}
             type="button"
@@ -267,9 +332,9 @@ export function CreateRegularServiceModal({
                   <div className="flex-1">
                     <Text variant="default">{service.serviceName}</Text>
                     <Text variant="muted">
-                      {service.days.join(", ")} · {service.startTime}
+                      {service.days.join(", ")} - {service.startTime}
                       {service.endTime && ` - ${service.endTime}`}
-                      {service.location && ` · ${service.location}`}
+                      {service.location && ` - ${service.location}`}
                     </Text>
                   </div>
                   <div className="flex items-center gap-2">
@@ -295,9 +360,9 @@ export function CreateRegularServiceModal({
             variant="default"
             className="w-full"
             size="lg"
-            disabled={services.length === 0}
+            disabled={services.length === 0 || isCreating}
           >
-            Create Service
+            {isCreating ? "Creating..." : "Create Service"}
           </Button>
         </div>
       </DialogContent>

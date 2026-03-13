@@ -16,6 +16,7 @@ interface UseAdminInviteReturn {
 
 export function useAdminInvite(): UseAdminInviteReturn {
   const searchParams = useSearchParams();
+  const inviteToken = searchParams.get("invite") || searchParams.get("token");
   const [inviteData, setInviteData] = useState<AdminInviteData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -24,8 +25,6 @@ export function useAdminInvite(): UseAdminInviteReturn {
   useEffect(() => {
     const loadInviteData = async () => {
       try {
-        const inviteToken = searchParams.get("invite");
-
         if (!inviteToken) {
           setIsLoading(false);
           return;
@@ -59,7 +58,7 @@ export function useAdminInvite(): UseAdminInviteReturn {
   }, [searchParams]);
 
   return {
-    isAdmin: !!inviteData,
+    isAdmin: !!inviteToken,
     inviteData,
     isValidInvite,
     isLoading,

@@ -28,6 +28,7 @@ import {
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -35,7 +36,7 @@ import { generateCalendarDays, mapServicesToCalendar } from "@/lib/utils";
 import { RegularService } from "@/types";
 import { CalendarDayCell } from "./calendar-day-cell";
 import { Span, Text } from "@/components/ui/typography/Text";
-import { SpecialServiceEvent } from "./types";
+import { SpecialServiceEvent } from "@/types";
 
 type CalendarGridProps = {
   services: RegularService[];
@@ -570,6 +571,9 @@ export function CalendarGrid({
               <DialogTitle className="text-base">
                 {infoDate ? format(infoDate, "EEE, MMM d") : "Service Info"}
               </DialogTitle>
+              <DialogDescription className="sr-only">
+                Services scheduled for the selected date.
+              </DialogDescription>
               <Button
                 variant="ghost"
                 size="icon"

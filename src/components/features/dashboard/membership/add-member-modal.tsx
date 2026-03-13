@@ -1,9 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import { User, Phone, CrossIcon } from "lucide-react";
-import { AddMemberStep2Data, NewMemberData } from "@/types";
+import { AddMemberStep2Data, MemberProfile, NewMemberData } from "@/types";
 import { ProfileDetailsStep } from "./profile-details-step";
 import { ContactDetailsStep } from "./contact-details-step";
 import { ChurchActivityStep } from "./church-activity-step";
@@ -16,7 +20,7 @@ import { MembershipStatus } from "@/lib/enums";
 type AddMemberModalProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onMemberAdded?: (member: NewMemberData) => void;
+  onMemberAdded?: (member: MemberProfile) => void;
   onClose?: () => void;
   onSave?: (member: NewMemberData) => void;
 };
@@ -105,6 +109,7 @@ export function AddMemberModal({
   const { toast } = useToast();
   const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
   const [formData, setFormData] = useState<Partial<NewMemberData>>({});
+  const [isSaving, setIsSaving] = useState(false);
 
   const handleStep1Next = (data: any) => {
     setFormData((prev) => ({ ...prev, ...data }));
@@ -116,23 +121,70 @@ export function AddMemberModal({
     setStep(3);
   };
 
-  const handleSaveImmediately = (data: AddMemberStep2Data) => {
-    const finalData: NewMemberData = {
-      ...(formData as Partial<NewMemberData>),
-      ...data,
-      membershipStatus: formData.membershipStatus || MembershipStatus.MEMBER,
-      dateJoined: formData.dateJoined || new Date().toISOString().slice(0, 10),
-      baptized: formData.baptized ?? false,
-      volunteersPreference: formData.volunteersPreference || "Not Interested",
-    } as NewMemberData;
+  const requireMemberData: (
+    data: Partial<NewMemberData>,
+  ) => asserts data is NewMemberData = (data) => {
+    if (
+      !data.title ||
+      !data.fullName ||
+      !data.gender ||
+      !data.birthday ||
+      !data.maritalStatus ||
+      !data.email ||
+      !data.phone ||
+      !data.address ||
+      !data.occupation ||
+      !data.education ||
+      !data.membershipStatus ||
+      !data.dateJoined ||
+      data.baptized === undefined ||
+      !data.volunteersPreference
+    ) {
+      throw new Error("Member form is incomplete.");
+    }
+  };
 
-    onMemberAdded?.(finalData);
-    toast({
-      title: "Success",
-      description: "Member added successfully",
-    });
+  const buildFinalData = (
+    extraData?: Partial<NewMemberData>,
+  ): NewMemberData => {
+    const merged: Partial<NewMemberData> = {
+      ...formData,
+      ...(extraData || {}),
+    };
 
-    handleClose();
+    const finalData: Partial<NewMemberData> = {
+      ...merged,
+      membershipStatus: merged.membershipStatus ?? MembershipStatus.MEMBER,
+      dateJoined: merged.dateJoined ?? new Date().toISOString().slice(0, 10),
+      baptized: merged.baptized ?? false,
+      volunteersPreference: merged.volunteersPreference ?? "Not Interested",
+    };
+
+    requireMemberData(finalData);
+    return finalData;
+  };
+
+  const handleSaveImmediately = async (data: AddMemberStep2Data) => {
+    const finalData = buildFinalData(data);
+
+    setIsSaving(true);
+    try {
+      const created = await createMember(finalData);
+      onMemberAdded?.(created);
+      toast({
+        title: "Success",
+        description: "Member added successfully",
+      });
+      handleClose();
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to add member",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const handleStep3Next = (data: any) => {
@@ -142,7 +194,9 @@ export function AddMemberModal({
 
   const handleSaveMember = async () => {
     try {
-      await createMember(formData as NewMemberData);
+      setIsSaving(true);
+      const created = await createMember(buildFinalData());
+      onMemberAdded?.(created);
 
       toast({
         title: "Success",
@@ -156,6 +210,8 @@ export function AddMemberModal({
         description: "Failed to add member",
         variant: "destructive",
       });
+    } finally {
+      setIsSaving(false);
     }
   };
   const handleBack = () => {
@@ -178,6 +234,10 @@ export function AddMemberModal({
         onPointerDownOutside={(e) => e.preventDefault()}
         className="w-full sm:max-w-3xl max-sm:max-h-[90vh] overflow-y-auto p-4 sm:p-6"
       >
+        <DialogDescription className="sr-only">
+          Add a member by completing the profile, contact, and church activity
+          steps.
+        </DialogDescription>
         <MembershipStepIndicator step={step === 4 ? 3 : step} />
 
         <div className="flex-1 px-0 sm:px-6 py-3 sm:py-6">
