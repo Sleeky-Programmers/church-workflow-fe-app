@@ -20,7 +20,11 @@ import Link from "next/link";
 import { TrendChart } from "@/components/features/dashboard/trend-chart";
 import { IncomeVsExpenses } from "@/components/features/dashboard/income-expense";
 import { IncomeBreakdown } from "@/components/features/dashboard/income-breakdown";
-import { fetchTotalMembers, getMyChurch } from "@/lib/api";
+import {
+  fetchAttendanceStats,
+  fetchTotalMembers,
+  getMyChurch,
+} from "@/lib/api";
 import type { ChurchResponse } from "@/types/payload";
 import { getCurrentUserProfile } from "@/lib/auth/session";
 
@@ -64,6 +68,9 @@ export default function Dashboard() {
   const [totalMembersGrowth, setTotalMembersGrowth] = useState<string>(
     DashboardData.stats.totalMembersGrowth,
   );
+  const [serviceAttendance, setServiceAttendance] = useState<string>(
+    DashboardData.stats.serviceAttendance,
+  );
 
   useEffect(() => {
     async function loadStats() {
@@ -72,6 +79,18 @@ export default function Dashboard() {
       setTotalMembersGrowth(growth);
     }
     loadStats();
+  }, []);
+
+  useEffect(() => {
+    async function loadAttendance() {
+      try {
+        const { totalAttendance } = await fetchAttendanceStats();
+        setServiceAttendance(totalAttendance.toLocaleString());
+      } catch {
+        setServiceAttendance(DashboardData.stats.serviceAttendance);
+      }
+    }
+    loadAttendance();
   }, []);
 
   return (
@@ -116,7 +135,7 @@ export default function Dashboard() {
             <StatCard
               compact
               title="Service Attendance"
-              count={DashboardData.stats.serviceAttendance}
+              count={serviceAttendance}
               growth={DashboardData.stats.attendanceGrowth}
               growthText="Last Event"
             />

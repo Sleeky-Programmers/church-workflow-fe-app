@@ -22,7 +22,6 @@ import {
 import { SelectMembersView } from "./select-member-view";
 import { AttendanceStatsView } from "./attendance-stats";
 import { Span } from "@/components/ui/typography/Text";
-import Heading from "@/components/ui/typography/Heading";
 import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
 
