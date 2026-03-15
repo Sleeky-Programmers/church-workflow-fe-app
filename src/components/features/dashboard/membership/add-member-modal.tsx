@@ -14,6 +14,7 @@ import { ChurchActivityStep } from "./church-activity-step";
 import { ReviewMemberStep } from "./review-member-step";
 import { useToast } from "@/hooks/use-toast";
 import { Text } from "@/components/ui/typography/Text";
+import { Button } from "@/components/ui/button";
 import { createMember } from "@/services/memberService";
 import { MembershipStatus } from "@/lib/enums";
 
@@ -232,7 +233,7 @@ export function AddMemberModal({
         showClose={false}
         mobileSheet
         onPointerDownOutside={(e) => e.preventDefault()}
-        className="w-full sm:max-w-3xl max-sm:max-h-[90vh] overflow-y-auto p-4 sm:p-6"
+        className="w-full sm:max-w-2xl max-h-[85vh] overflow-hidden p-4 sm:p-6 flex flex-col"
       >
         <DialogDescription className="sr-only">
           Add a member by completing the profile, contact, and church activity
@@ -240,7 +241,7 @@ export function AddMemberModal({
         </DialogDescription>
         <MembershipStepIndicator step={step === 4 ? 3 : step} />
 
-        <div className="flex-1 px-0 sm:px-6 py-3 sm:py-6">
+        <div className="flex-1 overflow-y-auto px-0 sm:px-6 py-3 sm:py-6">
           {step === 1 && (
             <ProfileDetailsStep
               onNext={handleStep1Next}
@@ -262,14 +263,29 @@ export function AddMemberModal({
               initialData={formData}
             />
           )}
-          {step === 4 && (
-            <ReviewMemberStep
-              data={formData}
-              onBack={handleBack}
-              onSave={handleSaveMember}
-            />
-          )}
+          {step === 4 && <ReviewMemberStep data={formData} />}
         </div>
+
+        {step === 4 && (
+          <div className="border-t border-gray-200 pt-4">
+            <div className="flex justify-between">
+              <Button
+                variant="outline"
+                onClick={handleBack}
+                disabled={isSaving}
+              >
+                Back
+              </Button>
+              <Button
+                onClick={handleSaveMember}
+                variant="secondary"
+                disabled={isSaving}
+              >
+                {isSaving ? "Saving..." : "Save Member"}
+              </Button>
+            </div>
+          </div>
+        )}
       </DialogContent>
     </Dialog>
   );

@@ -26,6 +26,10 @@ export interface VerifyOtpResponse {
   accessToken: string;
 }
 
+export interface AttendanceStatsResponse {
+  totalAttendance: number;
+}
+
 export interface LoginPayload {
   email: string;
   password: string;

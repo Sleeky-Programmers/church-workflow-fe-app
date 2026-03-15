@@ -4,6 +4,7 @@ import {
   SignupPayload,
   AdminRegisterPayload,
   AdminRegisterResponse,
+  AttendanceStatsResponse,
   VerifyOtpPayload,
   VerifyOtpResponse,
   LoginPayload,
@@ -452,6 +453,12 @@ export async function fetchTotalMembers(): Promise<{
 }> {
   const res = await apiFetch<any>("/members/stats", { method: "GET" });
   return { totalMembers: res.totalMembers || 0, growth: res.growth || "0%" };
+}
+
+export async function fetchAttendanceStats(): Promise<AttendanceStatsResponse> {
+  return authenticatedFetch<AttendanceStatsResponse>("/attendance/stats", {
+    method: "GET",
+  });
 }
 
 export async function fetchMembers(

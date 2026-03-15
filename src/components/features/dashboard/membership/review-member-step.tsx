@@ -8,9 +8,6 @@ import { Text } from "@/components/ui/typography/Text";
 
 type ReviewMemberStepProps = {
   data: Partial<NewMemberData>;
-  onSave: () => void;
-  onBack: () => void;
-  isSaving?: boolean;
 };
 
 function ReviewSection({
@@ -39,22 +36,15 @@ function ReviewField({
 }) {
   return (
     <div className="flex items-center justify-between border-b py-2 last:border-0">
-      <Text variant="muted" className="text-sm">
-        {label}
-      </Text>
-      <Text variant="default" className="text-sm font-medium">
+      <Text variant="muted">{label}</Text>
+      <Text variant="default">
         {typeof value === "boolean" ? (value ? "Yes" : "No") : value || "-"}
       </Text>
     </div>
   );
 }
 
-export function ReviewMemberStep({
-  data,
-  onSave,
-  onBack,
-  isSaving = false,
-}: ReviewMemberStepProps) {
+export function ReviewMemberStep({ data }: ReviewMemberStepProps) {
   return (
     <div className="space-y-6">
       <ReviewSection title="Profile Details">
@@ -104,15 +94,6 @@ export function ReviewMemberStep({
         />
         <ReviewField label="Small Group Name" value={data.smallGroupName} />
       </ReviewSection>
-
-      <div className="flex justify-between pt-4">
-        <Button variant="outline" onClick={onBack} disabled={isSaving}>
-          Back
-        </Button>
-        <Button onClick={onSave} variant="secondary" disabled={isSaving}>
-          {isSaving ? "Saving..." : "Save Member"}
-        </Button>
-      </div>
     </div>
   );
 }
