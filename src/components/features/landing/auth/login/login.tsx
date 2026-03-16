@@ -61,8 +61,20 @@ export default function LoginForm({ onForgotPassword }: LoginFormProps) {
       }
     } catch (error: any) {
       const status = error?.response?.status;
+      const message = String(error?.message || "");
 
       if (status === 401) {
+        if (/verify/i.test(message)) {
+          if (typeof window !== "undefined") {
+            sessionStorage.setItem("pendingVerificationEmail", values.email);
+          }
+          router.push(
+            `${RouteConfig.auth.signUp}?verify=1&email=${encodeURIComponent(
+              values.email,
+            )}`,
+          );
+          return;
+        }
         form.setError("password", {
           type: "manual",
           message: "Invalid credentials",

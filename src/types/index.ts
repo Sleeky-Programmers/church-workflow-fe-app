@@ -240,8 +240,6 @@ export type MemberProfile = {
   address?: string;
   maritalStatus: MaritalStatus;
   dateOfMarriage?: string;
-  spouseFirstName?: string;
-  spouseLastName?: string;
 
   membershipStatus: MembershipStatus;
   dateJoined: string;
@@ -265,8 +263,6 @@ export type AddMemberStep1Data = {
   birthday: string;
   maritalStatus: MaritalStatus;
   dateOfMarriage?: string;
-  spouseFirstName?: string;
-  spouseLastName?: string;
 };
 
 export type AddMemberStep2Data = {

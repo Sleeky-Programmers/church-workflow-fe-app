@@ -56,12 +56,6 @@ export function ReviewMemberStep({ data }: ReviewMemberStepProps) {
         {data.dateOfMarriage && (
           <ReviewField label="Date of Marriage" value={data.dateOfMarriage} />
         )}
-        {data.spouseFirstName && (
-          <ReviewField
-            label="Spouse Name"
-            value={`${data.spouseFirstName} ${data.spouseLastName}`}
-          />
-        )}
       </ReviewSection>
 
       <ReviewSection title="Contact Information">

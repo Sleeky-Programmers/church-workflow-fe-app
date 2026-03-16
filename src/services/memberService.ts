@@ -57,8 +57,6 @@ export async function createMember(data: NewMemberData) {
       birthday: data.birthday,
       maritalStatus: data.maritalStatus,
       dateOfMarriage: data.dateOfMarriage,
-      spouseFirstName: data.spouseFirstName,
-      spouseLastName: data.spouseLastName,
       occupation: data.occupation,
       educationalBackground: data.education,
       membershipStatus: data.membershipStatus,

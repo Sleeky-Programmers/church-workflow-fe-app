@@ -15,8 +15,6 @@ export function mapMember(member: any) {
     birthday: member.birthday,
     maritalStatus: member.maritalStatus,
     dateOfMarriage: member.dateOfMarriage,
-    spouseFirstName: member.spouseFirstName,
-    spouseLastName: member.spouseLastName,
     membershipStatus: member.membershipStatus,
     dateJoined: member.dateJoined,
     baptized: member.isBaptized,

@@ -65,6 +65,25 @@ export function ChurchIdentityStep({
 
     if (currentCountry || currentCurrency || currentTimeZone) return;
 
+    const isFieldDirty = (name: keyof ChurchIdentityValues) =>
+      form.getFieldState(name).isDirty;
+
+    const setIfAllowed = (
+      name: keyof ChurchIdentityValues,
+      value: string | undefined,
+    ) => {
+      if (!value) return;
+      if (!isFieldDirty(name)) {
+        form.setValue(name, value, { shouldDirty: false });
+      }
+    };
+
+    const applyCountryDefaults = (country: (typeof COUNTRIES)[number]) => {
+      setIfAllowed("country", country.name);
+      setIfAllowed("defaultCurrency", country.currency);
+      setIfAllowed("timeZone", country.timeZone);
+    };
+
     const browserTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
     const locale = navigator.language || "";
     const localeRegion = locale.split("-")[1]?.toUpperCase();
@@ -81,14 +100,44 @@ export function ChurchIdentityStep({
         (country) => country.name === matchedCountryName,
       );
       if (matchedCountry) {
-        form.setValue("country", matchedCountry.name);
-        form.setValue("defaultCurrency", matchedCountry.currency);
+        applyCountryDefaults(matchedCountry);
       }
     }
 
     if (browserTimeZone && TIME_ZONES.includes(browserTimeZone)) {
-      form.setValue("timeZone", browserTimeZone);
+      setIfAllowed("timeZone", browserTimeZone);
     }
+
+    const controller = new AbortController();
+
+    const hydrateFromGeo = async () => {
+      try {
+        const response = await fetch("https://ipapi.co/json/", {
+          signal: controller.signal,
+        });
+
+        if (!response.ok) return;
+        const data = await response.json();
+        const countryCode = String(data?.country_code || "").toUpperCase();
+        const matchedCountry = COUNTRIES.find(
+          (country) => country.code === countryCode,
+        );
+
+        if (matchedCountry) {
+          applyCountryDefaults(matchedCountry);
+        }
+
+        if (data?.timezone && TIME_ZONES.includes(data.timezone)) {
+          setIfAllowed("timeZone", data.timezone);
+        }
+      } catch {
+        return;
+      }
+    };
+
+    void hydrateFromGeo();
+
+    return () => controller.abort();
   }, [form]);
   const [selectedLogoName, setSelectedLogoName] = useState<string | null>(null);
   const [logoPreviewUrl, setLogoPreviewUrl] = useState<string | null>(null);

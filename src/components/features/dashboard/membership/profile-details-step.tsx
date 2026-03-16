@@ -33,6 +33,9 @@ export function ProfileDetailsStep({
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
 
+    if (!formData.title) {
+      newErrors.title = "Title is required";
+    }
     if (!formData.fullName?.trim()) {
       newErrors.fullName = "Full name is required";
     }
@@ -41,6 +44,9 @@ export function ProfileDetailsStep({
     }
     if (!formData.birthday) {
       newErrors.birthday = "Birthday is required";
+    }
+    if (!formData.maritalStatus) {
+      newErrors.maritalStatus = "Marital status is required";
     }
 
     setErrors(newErrors);
@@ -76,7 +82,9 @@ export function ProfileDetailsStep({
                   setFormData({ ...formData, title: value as MemberTitle })
                 }
               >
-                <SelectTrigger>
+                <SelectTrigger
+                  className={errors.title ? "border-destructive-600" : ""}
+                >
                   <SelectValue placeholder="Select" />
                 </SelectTrigger>
                 <SelectContent>
@@ -88,6 +96,11 @@ export function ProfileDetailsStep({
                   <SelectItem value={MemberTitle.REV}>Rev.</SelectItem>
                 </SelectContent>
               </Select>
+              {errors.title && (
+                <Text variant="error" className="mt-1">
+                  {errors.title}
+                </Text>
+              )}
             </div>
 
             <div className="col-span-2">
@@ -169,7 +182,11 @@ export function ProfileDetailsStep({
                   })
                 }
               >
-                <SelectTrigger>
+                <SelectTrigger
+                  className={
+                    errors.maritalStatus ? "border-destructive-600" : ""
+                  }
+                >
                   <SelectValue placeholder="Select" />
                 </SelectTrigger>
                 <SelectContent>
@@ -181,6 +198,11 @@ export function ProfileDetailsStep({
                   <SelectItem value={MaritalStatus.WIDOWED}>Widowed</SelectItem>
                 </SelectContent>
               </Select>
+              {errors.maritalStatus && (
+                <Text variant="error" className="mt-1">
+                  {errors.maritalStatus}
+                </Text>
+              )}
             </div>
 
             {formData.maritalStatus === MaritalStatus.MARRIED && (
@@ -199,38 +221,6 @@ export function ProfileDetailsStep({
               </div>
             )}
           </div>
-
-          {formData.maritalStatus === MaritalStatus.MARRIED && (
-            <div className="grid grid-cols-2 gap-6">
-              <div>
-                <Label>Spouse's First Name</Label>
-                <Input
-                  placeholder="Enter first name"
-                  value={formData.spouseFirstName || ""}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      spouseFirstName: e.target.value,
-                    })
-                  }
-                />
-              </div>
-
-              <div>
-                <Label>Spouse's Last Name</Label>
-                <Input
-                  placeholder="Enter last name"
-                  value={formData.spouseLastName || ""}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      spouseLastName: e.target.value,
-                    })
-                  }
-                />
-              </div>
-            </div>
-          )}
         </div>
 
         <div className="flex justify-end pt-4">
