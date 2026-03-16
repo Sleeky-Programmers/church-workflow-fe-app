@@ -56,7 +56,7 @@ const DialogContent = React.forwardRef<
         <VisuallyHidden>
           <DialogTitle>Add Member</DialogTitle>
         </VisuallyHidden>
-        <div className="relative">
+        <div className="relative flex h-full min-h-0 flex-col">
           {children}
 
           {showClose && (

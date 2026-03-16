@@ -28,7 +28,7 @@ import {
 import { InviteFormData, PendingInvite } from "@/types/user";
 import { PendingInvitesList } from "./mini-components/pending-invite";
 import { RolePermissionsView } from "./role-permission";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { RouteConfig } from "@/config/routes";
 import { backendToFrontendModule } from "@/lib/role-constants";
 import { useToast } from "@/hooks/use-toast";
@@ -43,6 +43,8 @@ type InviteUserDialogProps = {
   title?: string;
 };
 
+const CREATE_ROLE_VALUE = "__create_role__";
+
 export function InviteUserDialog({
   open,
   onOpenChange,
@@ -55,6 +57,7 @@ export function InviteUserDialog({
   const [showPermissions, setShowPermissions] = useState(false);
   const [selectedRole, setSelectedRole] = useState("");
   const [localInvites, setLocalInvites] = useState<PendingInvite[]>([]);
+  const router = useRouter();
 
   const [formData, setFormData] = useState<InviteFormData>({
     title: "",
@@ -250,9 +253,13 @@ export function InviteUserDialog({
                 </Label>
                 <Select
                   value={formData.role}
-                  onValueChange={(value) =>
-                    setFormData({ ...formData, role: value })
-                  }
+                  onValueChange={(value) => {
+                    if (value === CREATE_ROLE_VALUE) {
+                      router.push(RouteConfig.dashboard.admin.createRole);
+                      return;
+                    }
+                    setFormData({ ...formData, role: value });
+                  }}
                   required
                 >
                   <SelectTrigger id="role" className="h-9">
@@ -270,16 +277,15 @@ export function InviteUserDialog({
                             {role}
                           </SelectItem>
                         ))}
-                    <div className="px-2 py-2 border-t mt-1">
-                      <Link
-                        href={RouteConfig.dashboard.admin.createRole}
-                        className="text-primary text-xs flex justify-between items-center hover:underline cursor-pointer"
-                        style={{ pointerEvents: "auto" }}
-                      >
+                    <SelectItem
+                      value={CREATE_ROLE_VALUE}
+                      className="text-primary text-xs mt-1 border-t pt-2"
+                    >
+                      <span className="flex items-center gap-2">
                         <span>Create a new role</span>
                         <ExternalLink className="h-3 w-3" />
-                      </Link>
-                    </div>
+                      </span>
+                    </SelectItem>
                   </SelectContent>
                 </Select>
               </div>

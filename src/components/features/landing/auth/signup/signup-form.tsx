@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -30,9 +30,13 @@ type SignupFormValues = z.infer<typeof signupSchema>;
 
 interface SignupFormProps {
   onSubmit: (email: string, data?: SignupFormValues) => void;
+  preFilledEmail?: string;
 }
 
-export default function SignupForm({ onSubmit }: SignupFormProps) {
+export default function SignupForm({
+  onSubmit,
+  preFilledEmail,
+}: SignupFormProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
@@ -42,11 +46,20 @@ export default function SignupForm({ onSubmit }: SignupFormProps) {
     defaultValues: {
       firstName: "",
       lastName: "",
-      email: "",
+      email: preFilledEmail || "",
       password: "",
       agreeToTerms: false,
     },
   });
+
+  useEffect(() => {
+    if (preFilledEmail) {
+      form.setValue("email", preFilledEmail, {
+        shouldDirty: false,
+        shouldValidate: true,
+      });
+    }
+  }, [form, preFilledEmail]);
 
   const handleSubmit = async (data: SignupFormValues) => {
     try {
@@ -153,8 +166,18 @@ export default function SignupForm({ onSubmit }: SignupFormProps) {
                     type="email"
                     placeholder="example@gmail.com"
                     {...field}
+                    disabled={!!preFilledEmail}
+                    readOnly={!!preFilledEmail}
+                    className={
+                      preFilledEmail ? "bg-gray-100 cursor-not-allowed" : ""
+                    }
                   />
                 </FormControl>
+                {preFilledEmail && (
+                  <Text variant="muted" className="text-xs">
+                    Email address from your invitation
+                  </Text>
+                )}
                 <FormMessage />
               </FormItem>
             )}

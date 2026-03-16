@@ -97,6 +97,16 @@ export async function apiFetch<T>(
     },
   });
 
+  const text = await response.text();
+  let data: unknown = null;
+  if (text) {
+    try {
+      data = JSON.parse(text);
+    } catch {
+      data = text;
+    }
+  }
+
   if (response.status === 401) {
     if (typeof window !== "undefined") {
       localStorage.removeItem("accessToken");
@@ -104,21 +114,28 @@ export async function apiFetch<T>(
         window.location.href = "/auth/login";
       }
     }
-    const error: any = new Error("Unauthorized");
-    error.response = { status: 401 };
+    const message =
+      typeof data === "object" && data && "message" in data
+        ? String((data as { message?: unknown }).message || "Unauthorized")
+        : "Unauthorized";
+    const error: any = new Error(message);
+    error.response = { status: 401, data };
     error.status = 401;
     throw error;
   }
 
   if (!response.ok) {
-    const error: any = new Error(await response.text());
-    error.response = { status: response.status };
+    const message =
+      typeof data === "object" && data && "message" in data
+        ? String((data as { message?: unknown }).message || "Request failed")
+        : text || "Request failed";
+    const error: any = new Error(message);
+    error.response = { status: response.status, data };
     error.status = response.status;
     throw error;
   }
 
-  const text = await response.text();
-  return text ? JSON.parse(text) : (null as unknown as T);
+  return (data ?? null) as T;
 }
 
 export function signup(payload: SignupPayload) {

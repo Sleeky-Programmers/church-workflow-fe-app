@@ -28,6 +28,22 @@ export function ContactDetailsStep({
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
 
+    if (!formData.email?.trim()) {
+      newErrors.email = "Email is required";
+    }
+    if (!formData.phone?.trim()) {
+      newErrors.phone = "Phone number is required";
+    }
+    if (!formData.address?.trim()) {
+      newErrors.address = "Address is required";
+    }
+    if (!formData.occupation?.trim()) {
+      newErrors.occupation = "Occupation is required";
+    }
+    if (!formData.education?.trim()) {
+      newErrors.education = "Educational background is required";
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -92,6 +108,22 @@ export function ContactDetailsStep({
       </div>
 
       <div className="grid grid-cols-2 gap-4">
+        <div className="col-span-2">
+          <Label className="mb-2">Address</Label>
+          <Input
+            placeholder="Enter address"
+            value={formData.address || ""}
+            onChange={(e) =>
+              setFormData({ ...formData, address: e.target.value })
+            }
+            className={errors.address ? "border-destructive-600" : ""}
+          />
+          {errors.address && (
+            <Text variant="error" className="mt-1">
+              {errors.address}
+            </Text>
+          )}
+        </div>
         <div>
           <Label className="mb-2">Occupation</Label>
           <Input
@@ -100,7 +132,13 @@ export function ContactDetailsStep({
             onChange={(e) =>
               setFormData({ ...formData, occupation: e.target.value })
             }
+            className={errors.occupation ? "border-destructive-600" : ""}
           />
+          {errors.occupation && (
+            <Text variant="error" className="mt-1">
+              {errors.occupation}
+            </Text>
+          )}
         </div>
         <div>
           <Label className="mb-2">Educational Background</Label>
@@ -110,7 +148,13 @@ export function ContactDetailsStep({
             onChange={(e) =>
               setFormData({ ...formData, education: e.target.value })
             }
+            className={errors.education ? "border-destructive-600" : ""}
           />
+          {errors.education && (
+            <Text variant="error" className="mt-1">
+              {errors.education}
+            </Text>
+          )}
         </div>
       </div>
       <div className="flex justify-between">

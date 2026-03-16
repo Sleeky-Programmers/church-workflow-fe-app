@@ -166,10 +166,9 @@ export function AddMemberModal({
   };
 
   const handleSaveImmediately = async (data: AddMemberStep2Data) => {
-    const finalData = buildFinalData(data);
-
     setIsSaving(true);
     try {
+      const finalData = buildFinalData(data);
       const created = await createMember(finalData);
       onMemberAdded?.(created);
       toast({
@@ -180,7 +179,8 @@ export function AddMemberModal({
     } catch (error) {
       toast({
         title: "Error",
-        description: "Failed to add member",
+        description:
+          error instanceof Error ? error.message : "Failed to add member",
         variant: "destructive",
       });
     } finally {
@@ -208,7 +208,8 @@ export function AddMemberModal({
     } catch (error) {
       toast({
         title: "Error",
-        description: "Failed to add member",
+        description:
+          error instanceof Error ? error.message : "Failed to add member",
         variant: "destructive",
       });
     } finally {
@@ -221,18 +222,23 @@ export function AddMemberModal({
     }
   };
 
+  const handleOpenChange = (nextOpen: boolean) => {
+    if (!nextOpen) {
+      setStep(1);
+      setFormData({});
+    }
+    onOpenChange(nextOpen);
+  };
+
   const handleClose = () => {
-    setStep(1);
-    setFormData({});
-    onOpenChange(false);
+    handleOpenChange(false);
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent
         showClose={false}
         mobileSheet
-        onPointerDownOutside={(e) => e.preventDefault()}
         className="w-full sm:max-w-2xl max-h-[85vh] overflow-hidden p-4 sm:p-6 flex flex-col"
       >
         <DialogDescription className="sr-only">
@@ -241,7 +247,7 @@ export function AddMemberModal({
         </DialogDescription>
         <MembershipStepIndicator step={step === 4 ? 3 : step} />
 
-        <div className="flex-1 overflow-y-auto px-0 sm:px-6 py-3 sm:py-6">
+        <div className="flex-1 min-h-0 overflow-y-auto px-0 sm:px-6 py-3 sm:py-6">
           {step === 1 && (
             <ProfileDetailsStep
               onNext={handleStep1Next}

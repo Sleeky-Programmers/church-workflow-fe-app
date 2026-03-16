@@ -26,6 +26,10 @@ export default function ChurchOnboarding() {
   const [services, setServices] = useState<WeeklyServicesValues>([]);
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [isSubmittingIdentity, setIsSubmittingIdentity] = useState(false);
+  const [uploadErrorSummary, setUploadErrorSummary] = useState<string | null>(
+    null,
+  );
+  const [uploadErrorMessages, setUploadErrorMessages] = useState<string[]>([]);
 
   const { toast } = useToast();
 
@@ -187,12 +191,27 @@ export default function ChurchOnboarding() {
     }
 
     try {
+      setUploadErrorSummary(null);
+      setUploadErrorMessages([]);
       await uploadMembersCsv(data.csvFile);
       router.push(RouteConfig.dashboard.home);
     } catch (error: any) {
+      const summary =
+        error?.response?.data?.message ||
+        error?.message ||
+        "Members upload failed";
+      const details = Array.isArray(error?.response?.data?.errors)
+        ? error.response.data.errors.map(
+            (entry: { row?: number; column?: string; reason?: string }) =>
+              `Row ${entry.row ?? "?"}, ${entry.column ?? "field"}: ${entry.reason ?? "Invalid value"}`,
+          )
+        : [];
+
+      setUploadErrorSummary(summary);
+      setUploadErrorMessages(details);
       toast({
         title: "Error",
-        description: error.message || "Members upload failed",
+        description: summary,
         variant: "destructive",
       });
     }
@@ -256,6 +275,12 @@ export default function ChurchOnboarding() {
             onSubmit={onUploadSubmit}
             onBack={handleBack}
             onSkip={handleSkip}
+            errorSummary={uploadErrorSummary}
+            errorMessages={uploadErrorMessages}
+            onClearError={() => {
+              setUploadErrorSummary(null);
+              setUploadErrorMessages([]);
+            }}
             step={step}
             totalSteps={3}
           />

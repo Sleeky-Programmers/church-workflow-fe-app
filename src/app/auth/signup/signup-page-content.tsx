@@ -1,9 +1,9 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import SignupForm from "@/components/features/landing/auth/signup/signup-form";
 import AdminSignupForm from "@/components/features/landing/auth/signup/admin-signup-form";
 import VerifyOtpForm from "@/components/features/landing/auth/signup/verify-code";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useAdminInvite } from "@/hooks/use-admin-invite";
 import { Loader } from "@/components/ui/loader";
 import { Text } from "@/components/ui/typography/Text";
@@ -17,12 +17,50 @@ import { initializeAuthSession } from "@/lib/auth/session";
 
 export function SignupPageContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { isAdmin, inviteData, isLoading, error } = useAdminInvite();
   const [currentStep, setCurrentStep] = useState<SignUpStep>(SignUpStep.SIGNUP);
   const [email, setEmail] = useState("");
   const [signupData, setSignupData] = useState<any>(null);
+  const preFilledSignupEmail = searchParams?.get("email") || "";
 
   const { toast } = useToast();
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const pendingEmail = sessionStorage.getItem("pendingVerificationEmail");
+    const paramEmail = searchParams?.get("email") || "";
+    const shouldVerify =
+      searchParams?.get("step") === "verify" ||
+      searchParams?.get("verify") === "1";
+
+    let storedSignup: any = null;
+    try {
+      const stored = sessionStorage.getItem("signupData");
+      if (stored) storedSignup = JSON.parse(stored);
+    } catch {
+      storedSignup = null;
+    }
+
+    const resolvedEmail =
+      paramEmail || pendingEmail || storedSignup?.email || "";
+
+    if (shouldVerify && resolvedEmail) {
+      setEmail(resolvedEmail);
+      setCurrentStep(SignUpStep.VERIFY_OTP);
+
+      if (!storedSignup) {
+        const minimalData = { email: resolvedEmail };
+        setSignupData(minimalData);
+        sessionStorage.setItem("signupData", JSON.stringify(minimalData));
+      }
+    }
+
+    if (pendingEmail) {
+      sessionStorage.removeItem("pendingVerificationEmail");
+    }
+  }, [searchParams]);
 
   if (isLoading) {
     return (
@@ -120,7 +158,10 @@ export function SignupPageContent() {
     <AuthLayout variant={layoutVariant}>
       <div className="relative">
         {currentStep === SignUpStep.SIGNUP && !isAdmin && (
-          <SignupForm onSubmit={handleSignupSuccess} />
+          <SignupForm
+            onSubmit={handleSignupSuccess}
+            preFilledEmail={preFilledSignupEmail}
+          />
         )}
         {currentStep === SignUpStep.SIGNUP && isAdmin && inviteData && (
           <AdminSignupForm

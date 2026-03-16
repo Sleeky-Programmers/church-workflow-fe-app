@@ -11,7 +11,7 @@ import Heading from "@/components/ui/typography/Heading";
 import { Text, Span } from "@/components/ui/typography/Text";
 import { UseFormReturn } from "react-hook-form";
 import { UploadMembersValues } from "@/types/type";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Pause, X, Download } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { MEMBERS_CSV_TEMPLATE } from "./constants";
@@ -28,6 +28,9 @@ type UploadMembersStepProps = {
   onSubmit: (data: UploadMembersValues) => void;
   onBack: () => void;
   onSkip: () => void;
+  errorSummary?: string | null;
+  errorMessages?: string[];
+  onClearError?: () => void;
   step?: number;
   totalSteps?: number;
 };
@@ -37,6 +40,9 @@ export function UploadMembersStep({
   onSubmit,
   onBack,
   onSkip,
+  errorSummary,
+  errorMessages = [],
+  onClearError,
   step = 3,
   totalSteps = 3,
 }: UploadMembersStepProps) {
@@ -73,6 +79,7 @@ export function UploadMembersStep({
   const handleRemoveFile = (index: number) => {
     setUploadedFiles((prev) => prev.filter((_, i) => i !== index));
     form.setValue("csvFile", undefined);
+    onClearError?.();
   };
 
   const handleSubmit = () => {
@@ -112,6 +119,7 @@ export function UploadMembersStep({
     const file = files[0];
 
     onChange(file);
+    onClearError?.();
 
     const upload: UploadFile = {
       name: file.name,
@@ -123,6 +131,17 @@ export function UploadMembersStep({
 
     simulateUpload(file.name);
   };
+
+  useEffect(() => {
+    if (!errorSummary && errorMessages.length === 0) return;
+    setUploadedFiles((prev) =>
+      prev.map((file) => ({
+        ...file,
+        status: "error",
+        message: errorSummary || "Upload failed",
+      })),
+    );
+  }, [errorSummary, errorMessages.length]);
 
   const handleDownloadTemplate = () => {
     const blob = new Blob([MEMBERS_CSV_TEMPLATE], {
@@ -188,6 +207,28 @@ export function UploadMembersStep({
             </FormItem>
           )}
         />
+
+        {(errorSummary || errorMessages.length > 0) && (
+          <div className="rounded-lg border border-red-200 bg-red-50 p-4 space-y-2">
+            <Text variant="error" className="font-medium">
+              {errorSummary || "Upload failed"}
+            </Text>
+            {errorMessages.length > 0 && (
+              <ul className="list-disc pl-5 space-y-1">
+                {errorMessages.map((message, index) => (
+                  <li key={`${message}-${index}`}>
+                    <Text variant="error" className="text-sm">
+                      {message}
+                    </Text>
+                  </li>
+                ))}
+              </ul>
+            )}
+            <Text variant="muted" className="text-xs">
+              Tip: wrap any field that contains commas in double quotes.
+            </Text>
+          </div>
+        )}
 
         {uploadedFiles.length > 0 && (
           <div className="space-y-4">
