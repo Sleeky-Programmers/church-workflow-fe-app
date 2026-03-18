@@ -30,7 +30,12 @@ type AttendanceModalProps = {
   onClose: () => void;
   service: RegularService | null;
   date: string | null;
-  onSave: () => void;
+  onSave: (payload: {
+    serviceId: string;
+    date: string;
+    presentMembers: string[];
+    absentMembers: string[];
+  }) => void;
 };
 
 export function AttendanceModal({
@@ -120,15 +125,6 @@ export function AttendanceModal({
             endTime: service.endTime,
           };
           setAttendanceRecord(record);
-          if (!service.attendanceRecords) service.attendanceRecords = [];
-          const recordIndex = service.attendanceRecords.findIndex(
-            (item) => item.date === date,
-          );
-          if (recordIndex >= 0) {
-            service.attendanceRecords[recordIndex] = record;
-          } else {
-            service.attendanceRecords.push(record);
-          }
           setIsEditMode(false);
         } else {
           setAttendanceRecord(null);
@@ -258,16 +254,6 @@ export function AttendanceModal({
         endTime: service.endTime,
       };
 
-      if (!service.attendanceRecords) service.attendanceRecords = [];
-      const recordIndex = service.attendanceRecords.findIndex(
-        (record) => record.date === date,
-      );
-      if (recordIndex >= 0) {
-        service.attendanceRecords[recordIndex] = nextRecord;
-      } else {
-        service.attendanceRecords.push(nextRecord);
-      }
-
       setAttendanceRecord(nextRecord);
       if (state.allMembers.length) {
         setAttendanceStats({
@@ -276,7 +262,12 @@ export function AttendanceModal({
         });
       }
 
-      onSave();
+      onSave({
+        serviceId: service.id,
+        date,
+        presentMembers: nextRecord.presentMembers,
+        absentMembers: nextRecord.absentMembers,
+      });
       handleClose();
     } catch (error: any) {
       toast({

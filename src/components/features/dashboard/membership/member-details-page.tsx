@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { MemberProfile } from "@/types";
+import { useEffect, useState } from "react";
+import { MemberAttendanceRecord, MemberProfile } from "@/types";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Edit, ChevronDown } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -16,6 +16,8 @@ import Heading from "@/components/ui/typography/Heading";
 import { Span, Text } from "@/components/ui/typography/Text";
 import { MemberOverviewTab } from "./member-overview-tab";
 import { MemberAttendanceTab } from "./member-attendance-tab";
+import { fetchMemberAttendanceHistory } from "@/lib/api";
+import { useToast } from "@/hooks/use-toast";
 
 type MemberDetailsPageProps = {
   member: MemberProfile;
@@ -23,10 +25,58 @@ type MemberDetailsPageProps = {
 };
 
 export function MemberDetailsPage({ member, onBack }: MemberDetailsPageProps) {
+  const { toast } = useToast();
   const [activeTab, setActiveTab] = useState<"overview" | "attendance">(
     "overview",
   );
   const [filterValue, setFilterValue] = useState("all");
+  const [isAttendanceLoading, setIsAttendanceLoading] = useState(false);
+  const [attendanceRecords, setAttendanceRecords] = useState<
+    MemberAttendanceRecord[]
+  >([]);
+  const [attendanceStats, setAttendanceStats] = useState({
+    attended: member.servicesAttended || 0,
+    missed: member.servicesMissed || 0,
+    total: (member.servicesAttended || 0) + (member.servicesMissed || 0),
+    rate: member.attendanceRate || 0,
+  });
+  const [attendanceTrends, setAttendanceTrends] = useState<
+    { month: string; attended: number; total: number; rate: number }[]
+  >([]);
+
+  useEffect(() => {
+    const loadAttendance = async () => {
+      setIsAttendanceLoading(true);
+      try {
+        const response = await fetchMemberAttendanceHistory(member.id);
+        const normalizedRecords: MemberAttendanceRecord[] = (
+          response.records || []
+        ).map((record) => ({
+          ...record,
+          date: (() => {
+            const parsed = new Date(record.date);
+            return Number.isNaN(parsed.getTime())
+              ? record.date
+              : parsed.toISOString().split("T")[0];
+          })(),
+        }));
+        setAttendanceRecords(normalizedRecords);
+        setAttendanceStats(response.stats);
+        setAttendanceTrends(response.trends || []);
+      } catch (error: any) {
+        toast({
+          title: "Unable to load attendance",
+          description: error?.message || "Please try again.",
+          variant: "destructive",
+        });
+        setAttendanceRecords(member.attendanceRecords || []);
+      } finally {
+        setIsAttendanceLoading(false);
+      }
+    };
+
+    loadAttendance();
+  }, [member.id, toast]);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -109,11 +159,19 @@ export function MemberDetailsPage({ member, onBack }: MemberDetailsPageProps) {
         </div>
       </div>
       <div className="bg-gray-50 p-3 sm:p-6">
-        {activeTab === "overview" && <MemberOverviewTab member={member} />}
+        {activeTab === "overview" && (
+          <MemberOverviewTab
+            member={member}
+            attendanceStats={attendanceStats}
+          />
+        )}
         {activeTab === "attendance" && (
           <MemberAttendanceTab
-            records={member.attendanceRecords}
+            records={attendanceRecords}
             filterValue={filterValue}
+            stats={attendanceStats}
+            trends={attendanceTrends}
+            isLoading={isAttendanceLoading}
           />
         )}
       </div>

@@ -8,6 +8,11 @@ import { AttendanceStatsCards } from "./attendance-stats-cards";
 
 type MemberOverviewTabProps = {
   member: MemberProfile;
+  attendanceStats?: {
+    attended: number;
+    missed: number;
+    rate: number;
+  };
 };
 
 function DetailField({
@@ -17,27 +22,49 @@ function DetailField({
   label: string;
   value: string | boolean | undefined;
 }) {
+  const formatDateLikeValue = (input: string) => {
+    const parsed = new Date(input);
+    if (Number.isNaN(parsed.getTime())) return input;
+    return parsed.toISOString().split("T")[0];
+  };
+
+  const normalizedValue =
+    typeof value === "string" && value
+      ? /T\d{2}:\d{2}:\d{2}/.test(value) || /^\d{4}-\d{2}-\d{2}/.test(value)
+        ? formatDateLikeValue(value)
+        : value
+      : value;
+
   return (
     <div className="mb-3">
       <Text variant="default">
         {label}:{" "}
         <Span variant="muted">
           {" "}
-          {typeof value === "boolean" ? (value ? "Yes" : "No") : value || "-"}
+          {typeof normalizedValue === "boolean"
+            ? normalizedValue
+              ? "Yes"
+              : "No"
+            : normalizedValue || "-"}
         </Span>
       </Text>
     </div>
   );
 }
 
-export function MemberOverviewTab({ member }: MemberOverviewTabProps) {
+export function MemberOverviewTab({
+  member,
+  attendanceStats,
+}: MemberOverviewTabProps) {
   return (
     <div className="p-1 sm:p-6 space-y-4 sm:space-y-6">
       <div className="hidden sm:block">
         <AttendanceStatsCards
-          servicesAttended={member.servicesAttended}
-          servicesMissed={member.servicesMissed}
-          attendanceRate={member.attendanceRate}
+          servicesAttended={
+            attendanceStats?.attended ?? member.servicesAttended
+          }
+          servicesMissed={attendanceStats?.missed ?? member.servicesMissed}
+          attendanceRate={attendanceStats?.rate ?? member.attendanceRate}
         />
       </div>
 

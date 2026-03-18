@@ -1,7 +1,8 @@
 "use client";
 
+import { useEffect } from "react";
+import { createPortal } from "react-dom";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { TeamRow } from "@/types";
 import Heading from "@/components/ui/typography/Heading";
 import { Text } from "@/components/ui/typography/Text";
@@ -26,17 +27,29 @@ export default function TeamActionsSheet({
   onViewReport,
   onDelete,
 }: Props) {
-  if (!team) return null;
+  useEffect(() => {
+    if (open) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [open]);
 
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent
-        showClose={false}
-        mobileSheet
-        className="w-full max-w-[520px] p-0 overflow-hidden max-sm:max-h-[88vh]"
-      >
-        <div className="rounded-xl shadow-lg w-full flex flex-col overflow-hidden bg-gray-50">
-          <div className="flex items-center justify-between border-b px-4 py-3">
+  if (!open || !team) return null;
+
+  return createPortal(
+    <>
+      <div
+        className="fixed inset-0 z-[100] bg-black/40"
+        onClick={() => onOpenChange(false)}
+      />
+
+      <div className="fixed bottom-0 left-0 right-0 z-[101] flex justify-center">
+        <div className="w-full max-w-[520px] rounded-t-2xl shadow-xl bg-gray-50 flex flex-col overflow-hidden max-h-[88vh]">
+          <div className="flex items-center justify-between border-b px-4 py-3 bg-white">
             <Heading level={3}>{team.name}</Heading>
             <Button
               variant="ghost"
@@ -46,8 +59,7 @@ export default function TeamActionsSheet({
               <X className="h-4 w-4" />
             </Button>
           </div>
-
-          <div className="p-4 space-y-3">
+          <div className="p-4 space-y-3 overflow-y-auto">
             <div className="rounded-lg border bg-white px-3 py-2 flex items-center gap-3">
               <User className="h-4 w-4 text-gray-500" />
               <div>
@@ -110,6 +122,7 @@ export default function TeamActionsSheet({
               <BarChart3 className="h-4 w-4" />
               View Reports
             </Button>
+
             <Button
               variant="destructive"
               className="w-full justify-center gap-2"
@@ -120,7 +133,8 @@ export default function TeamActionsSheet({
             </Button>
           </div>
         </div>
-      </DialogContent>
-    </Dialog>
+      </div>
+    </>,
+    document.body,
   );
 }
