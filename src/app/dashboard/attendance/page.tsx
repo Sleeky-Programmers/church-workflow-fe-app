@@ -191,6 +191,44 @@ export default function AttendancePage() {
     setIsServiceDetailModalOpen(true);
   };
 
+  const handleAttendanceSaved = (payload: {
+    serviceId: string;
+    date: string;
+    presentMembers: string[];
+    absentMembers: string[];
+  }) => {
+    setServices((prev) =>
+      prev.map((service) => {
+        if (service.id !== payload.serviceId) return service;
+        const attendanceRecords = [...(service.attendanceRecords || [])];
+        const nextRecord = {
+          serviceId: payload.serviceId,
+          date: payload.date,
+          presentMembers: payload.presentMembers,
+          absentMembers: payload.absentMembers,
+          recordedBy: "Admin",
+          location: service.location || "",
+          startTime: service.startTime,
+          endTime: service.endTime,
+        };
+        const existingIndex = attendanceRecords.findIndex(
+          (record) => record.date === payload.date,
+        );
+        if (existingIndex >= 0) attendanceRecords[existingIndex] = nextRecord;
+        else attendanceRecords.push(nextRecord);
+
+        return {
+          ...service,
+          attendanceRecords,
+        };
+      }),
+    );
+    toast({
+      title: "Success",
+      description: "Attendance saved successfully",
+    });
+  };
+
   const hasServices = services.length > 0 || specialServices.length > 0;
 
   if (isMobile) {
@@ -235,12 +273,7 @@ export default function AttendancePage() {
           onClose={() => setIsAttendanceModalOpen(false)}
           service={selectedService}
           date={selectedDate}
-          onSave={() => {
-            toast({
-              title: "Success",
-              description: "Attendance saved successfully",
-            });
-          }}
+          onSave={handleAttendanceSaved}
         />
 
         <GivingRecordModal
@@ -364,12 +397,7 @@ export default function AttendancePage() {
         onClose={() => setIsAttendanceModalOpen(false)}
         service={selectedService}
         date={selectedDate}
-        onSave={() => {
-          toast({
-            title: "Success",
-            description: "Attendance saved successfully",
-          });
-        }}
+        onSave={handleAttendanceSaved}
       />
 
       <GivingRecordModal

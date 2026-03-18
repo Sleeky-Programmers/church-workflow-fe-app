@@ -90,7 +90,12 @@ export function AttendanceCalendarPage() {
     setServices((prev) => [...prev, ...newServices]);
   };
 
-  const handleAttendanceSaved = () => {
+  const handleAttendanceSaved = (_payload: {
+    serviceId: string;
+    date: string;
+    presentMembers: string[];
+    absentMembers: string[];
+  }) => {
     loadServices();
     toast({
       title: "Success",

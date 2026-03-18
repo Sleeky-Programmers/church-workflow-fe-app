@@ -12,7 +12,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { MemberProfile } from "@/types";
-import { MOCK_MEMBERS_FULL } from "@/lib/data";
 import { Textarea } from "@/components/ui/textarea";
 import Heading from "@/components/ui/typography/Heading";
 import {
@@ -34,13 +33,14 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 interface Props {
+  members: MemberProfile[];
   onSave?: (payload: {
     name: string;
     leaderId: string;
     memberIds: string[];
     status: string;
     description: string;
-  }) => void;
+  }) => void | Promise<void>;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
   hideTrigger?: boolean;
@@ -48,6 +48,7 @@ interface Props {
 }
 
 export default function AddSmallTeamDialog({
+  members,
   onSave,
   open: controlledOpen,
   onOpenChange,
@@ -64,11 +65,10 @@ export default function AddSmallTeamDialog({
   const [inviteOpen, setInviteOpen] = useState(false);
   const [pendingInvites, setPendingInvites] = useState<PendingInvite[]>([]);
   const [isInviteLoading, setIsInviteLoading] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [showSelectedPanel, setShowSelectedPanel] = useState(false);
   const [panelQuery, setPanelQuery] = useState("");
   const inviteDialogTitle = "Invite New Leader";
-
-  const members: MemberProfile[] = MOCK_MEMBERS_FULL;
 
   const selectedMembers = useMemo(() => {
     if (!memberIds.length) return [];
@@ -103,24 +103,29 @@ export default function AddSmallTeamDialog({
     }, 600);
   }
 
-  function handleSave() {
-    if (onSave) {
-      onSave({
-        name: teamName,
-        leaderId,
-        memberIds,
-        status,
-        description,
-      });
+  async function handleSave() {
+    setIsSaving(true);
+    try {
+      if (onSave) {
+        await onSave({
+          name: teamName,
+          leaderId,
+          memberIds,
+          status,
+          description,
+        });
+      }
+      setTeamName("");
+      setLeaderId("");
+      setMemberIds([]);
+      setStatus("active");
+      setDescription("");
+      setShowSelectedPanel(false);
+      setPanelQuery("");
+      setIsOpen(false);
+    } finally {
+      setIsSaving(false);
     }
-    setTeamName("");
-    setLeaderId("");
-    setMemberIds([]);
-    setStatus("active");
-    setDescription("");
-    setShowSelectedPanel(false);
-    setPanelQuery("");
-    setIsOpen(false);
   }
 
   function handleResetLeader() {
@@ -300,10 +305,10 @@ export default function AddSmallTeamDialog({
               <div className="flex justify-end border-t border-gray-200 px-6 py-4">
                 <Button
                   onClick={handleSave}
-                  disabled={!teamName.trim()}
+                  disabled={!teamName.trim() || isSaving}
                   className="px-6"
                 >
-                  Add Team
+                  {isSaving ? "Saving..." : "Add Team"}
                 </Button>
               </div>
             </div>
@@ -370,11 +375,11 @@ export default function AddSmallTeamDialog({
                     Previous
                   </Button>
                   <div className="flex items-center gap-2">
-                    <span className="px-2 py-1 rounded bg-gray-200 text-gray-800">
+                    <Span className="px-2 py-1 rounded bg-gray-200 text-gray-800">
                       1
-                    </span>
-                    <span>2</span>
-                    <span>Next</span>
+                    </Span>
+                    <Span>2</Span>
+                    <Span>Next</Span>
                   </div>
                   <Button variant="ghost" size="sm" className="h-7 px-2">
                     Next

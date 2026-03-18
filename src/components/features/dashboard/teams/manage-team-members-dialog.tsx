@@ -7,7 +7,6 @@ import { Dialog, DialogContent, DialogClose } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { MemberProfile, TeamRow } from "@/types";
-import { MOCK_MEMBERS_FULL } from "@/lib/data";
 import Heading from "@/components/ui/typography/Heading";
 import { MemberMultiSelect } from "@/components/features/dashboard/departments/member-selectors";
 import { Span, Text } from "@/components/ui/typography/Text";
@@ -19,14 +18,16 @@ interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   team: TeamRow | null;
+  members: MemberProfile[];
   memberIds: string[];
-  onSave: (nextMemberIds: string[]) => void;
+  onSave: (nextMemberIds: string[]) => void | Promise<void>;
 }
 
 export default function ManageTeamMembersDialog({
   open,
   onOpenChange,
   team,
+  members,
   memberIds,
   onSave,
 }: Props) {
@@ -34,8 +35,7 @@ export default function ManageTeamMembersDialog({
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [showSelectedPanel, setShowSelectedPanel] = useState(false);
   const [panelQuery, setPanelQuery] = useState("");
-
-  const members: MemberProfile[] = MOCK_MEMBERS_FULL;
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     if (!open) return;
@@ -95,9 +95,7 @@ export default function ManageTeamMembersDialog({
                   {selectedIds.length > 0 && (
                     <div className="space-y-2">
                       <div className="flex items-center justify-between">
-                        <span className="text-xs font-medium text-gray-700">
-                          Selected Members
-                        </span>
+                        <Span>Selected Members</Span>
                         <Button
                           variant="outline"
                           size="sm"
@@ -151,8 +149,19 @@ export default function ManageTeamMembersDialog({
               </div>
 
               <div className="flex justify-end border-t border-gray-200 px-6 py-4">
-                <Button onClick={() => onSave(selectedIds)} className="px-6">
-                  Update Members
+                <Button
+                  onClick={async () => {
+                    setIsSaving(true);
+                    try {
+                      await onSave(selectedIds);
+                    } finally {
+                      setIsSaving(false);
+                    }
+                  }}
+                  className="px-6"
+                  disabled={isSaving}
+                >
+                  {isSaving ? "Updating..." : "Update Members"}
                 </Button>
               </div>
             </div>

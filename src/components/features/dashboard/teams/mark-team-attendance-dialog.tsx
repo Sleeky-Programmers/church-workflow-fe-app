@@ -21,8 +21,7 @@ import {
 } from "@/components/ui/select";
 import { Span, Text } from "@/components/ui/typography/Text";
 import Heading from "@/components/ui/typography/Heading";
-import { RegularService, TeamRow } from "@/types";
-import { MOCK_MEMBERS_FULL, MOCK_SERVICES } from "@/lib/data";
+import { MemberProfile, RegularService, TeamRow } from "@/types";
 import { SelectMembersView } from "@/components/features/dashboard/attendance/select-member-view";
 import { useAttendanceModal } from "@/hooks/useAttendanceModal";
 import { cn, convertTo12Hour } from "@/lib/utils";
@@ -32,7 +31,14 @@ type Props = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   team: TeamRow | null;
+  members: MemberProfile[];
+  services: RegularService[];
   teamMemberIds: string[];
+  onSaveAttendance: (payload: {
+    serviceId: string;
+    date: string;
+    memberIds: string[];
+  }) => Promise<void> | void;
 };
 
 const getServiceLabel = (service: RegularService) => {
@@ -43,7 +49,10 @@ export default function MarkTeamAttendanceDialog({
   open,
   onOpenChange,
   team,
+  members,
+  services,
   teamMemberIds,
+  onSaveAttendance,
 }: Props) {
   const isMobile = useIsMobile();
   const {
@@ -76,8 +85,8 @@ export default function MarkTeamAttendanceDialog({
   );
 
   const selectedService = useMemo(
-    () => MOCK_SERVICES.find((service) => service.id === serviceId) || null,
-    [serviceId],
+    () => services.find((service) => service.id === serviceId) || null,
+    [serviceId, services],
   );
 
   useEffect(() => {
@@ -95,14 +104,14 @@ export default function MarkTeamAttendanceDialog({
     if (hasMembersLoaded) return;
     setLoading(true);
     try {
-      const filtered = MOCK_MEMBERS_FULL.filter((member) =>
-        teamMemberIds.includes(member.id),
-      ).map((member) => ({
-        id: member.id,
-        name: member.fullName,
-        email: member.email,
-        initials: member.initials,
-      }));
+      const filtered = members
+        .filter((member) => teamMemberIds.includes(member.id))
+        .map((member) => ({
+          id: member.id,
+          name: member.fullName,
+          email: member.email,
+          initials: member.initials,
+        }));
       setMembers(filtered);
       setHasMembersLoaded(true);
     } finally {
@@ -174,10 +183,16 @@ export default function MarkTeamAttendanceDialog({
 
   const handleSave = async () => {
     setIsSaving(true);
-    setTimeout(() => {
-      setIsSaving(false);
+    try {
+      await onSaveAttendance({
+        serviceId,
+        date,
+        memberIds: state.presentMembers,
+      });
       setIsEditMode(false);
-    }, 600);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const presentMembers = getPresentMembers();
@@ -228,7 +243,7 @@ export default function MarkTeamAttendanceDialog({
                   <SelectValue placeholder="Select or search" />
                 </SelectTrigger>
                 <SelectContent>
-                  {MOCK_SERVICES.map((service) => (
+                  {services.map((service) => (
                     <SelectItem key={service.id} value={service.id}>
                       <div className="flex flex-col">
                         <Span>{getServiceLabel(service)}</Span>

@@ -516,10 +516,15 @@ export async function fetchMembers(
   };
 }
 
-type AttendanceApiRecord = {
+type RawAttendanceApiRecord = {
   _id: string;
   churchServiceId: string;
   date: string;
+  memberId?: string;
+  recordedBy?: string;
+};
+
+type AttendanceApiRecord = {
   attendees: string[];
   recordedBy: string;
 };
@@ -541,45 +546,237 @@ export async function getAttendanceRecord(
     date,
   });
 
-  return authenticatedFetch<AttendanceApiResult>(
-    `/attendance?${query.toString()}`,
-    { method: "GET" },
-  );
+  const raw = await authenticatedFetch<{
+    attendance: RawAttendanceApiRecord[] | null;
+    stats: AttendanceApiResult["stats"];
+  }>(`/attendance?${query.toString()}`, { method: "GET" });
+
+  if (!raw.attendance || raw.attendance.length === 0) {
+    return { attendance: null, stats: raw.stats || null };
+  }
+
+  return {
+    attendance: {
+      attendees: raw.attendance
+        .map((record) => record.memberId)
+        .filter((id): id is string => Boolean(id)),
+      recordedBy: raw.attendance[0]?.recordedBy || "",
+    },
+    stats: raw.stats || null,
+  };
 }
 
 export async function saveAttendance(data: {
   serviceId: string;
   date: string;
   presentMembers: string[];
-}): Promise<AttendanceApiRecord> {
+}): Promise<{ message: string }> {
   const query = new URLSearchParams({
     serviceId: data.serviceId,
   });
 
-  return authenticatedFetch<AttendanceApiRecord>(
+  return authenticatedFetch<{ message: string }>(
     `/attendance/mark?${query.toString()}`,
     {
       method: "POST",
       body: JSON.stringify({
         date: data.date,
-        attendees: data.presentMembers,
+        memberIds: data.presentMembers,
       }),
     },
   );
 }
 
-export async function updateAttendance(
-  recordId: string,
-  updates: {
-    addToPresent?: string[];
-    removeFromPresent?: string[];
-  },
-): Promise<{ success: boolean }> {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve({ success: true });
-    }, 500);
+type SmallTeamMemberApi = {
+  id: string;
+  fullName: string;
+  email: string;
+};
+
+type SmallTeamApi = {
+  _id: string;
+  name: string;
+  status: "ACTIVE" | "INACTIVE";
+  description: string;
+  leader: {
+    id: string;
+    fullName: string;
+  } | null;
+  members: SmallTeamMemberApi[];
+  membersCount: number;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type SmallTeamListResponse = {
+  data: SmallTeamApi[];
+  pagination: {
+    page: number;
+    limit: number;
+    itemCount: number;
+    totalPages: number;
+    hasPreviousPage: boolean;
+    hasNextPage: boolean;
+  };
+};
+
+export async function fetchSmallTeams(
+  page: number = 1,
+  limit: number = 100,
+  search: string = "",
+): Promise<SmallTeamListResponse> {
+  const query = new URLSearchParams({
+    page: String(page),
+    limit: String(limit),
+    ...(search ? { search } : {}),
   });
+
+  return authenticatedFetch<SmallTeamListResponse>(
+    `/small-teams?${query.toString()}`,
+    { method: "GET" },
+  );
+}
+
+export async function createSmallTeam(payload: {
+  name: string;
+  leaderId?: string;
+  memberIds: string[];
+  status: "ACTIVE" | "INACTIVE";
+  description?: string;
+}): Promise<SmallTeamApi> {
+  return authenticatedFetch<SmallTeamApi>("/small-teams", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function updateSmallTeam(payload: {
+  teamId: string;
+  name?: string;
+  leaderId?: string;
+  memberIds?: string[];
+  status?: "ACTIVE" | "INACTIVE";
+  description?: string;
+}): Promise<SmallTeamApi> {
+  const { teamId, ...body } = payload;
+  return authenticatedFetch<SmallTeamApi>(`/small-teams/${teamId}`, {
+    method: "PUT",
+    body: JSON.stringify(body),
+  });
+}
+
+export async function updateSmallTeamMembers(
+  teamId: string,
+  memberIds: string[],
+): Promise<SmallTeamApi> {
+  return authenticatedFetch<SmallTeamApi>(`/small-teams/${teamId}/members`, {
+    method: "PUT",
+    body: JSON.stringify({ memberIds }),
+  });
+}
+
+export async function deleteSmallTeam(
+  teamId: string,
+): Promise<{ message: string }> {
+  return authenticatedFetch<{ message: string }>(`/small-teams/${teamId}`, {
+    method: "DELETE",
+  });
+}
+
+export async function markSmallTeamAttendance(payload: {
+  teamId: string;
+  serviceId: string;
+  date: string;
+  memberIds: string[];
+}): Promise<{
+  message: string;
+  presentCount: number;
+  totalTeamMembers: number;
+}> {
+  const { teamId, serviceId, date, memberIds } = payload;
+  const query = new URLSearchParams({ serviceId });
+  return authenticatedFetch(
+    `/small-teams/${teamId}/attendance?${query.toString()}`,
+    {
+      method: "POST",
+      body: JSON.stringify({ date, memberIds }),
+    },
+  );
+}
+
+export type SmallTeamReportResponse = {
+  team: SmallTeamApi;
+  attendancePercentage: number;
+  sessions: number;
+  lowAttendanceMembers: {
+    id: string;
+    fullName: string;
+    email: string;
+    presentCount: number;
+    sessions: number;
+    attendancePercentage: number;
+  }[];
+};
+
+export async function fetchSmallTeamReport(
+  teamId: string,
+  params?: {
+    from?: string;
+    to?: string;
+    lowAttendanceThreshold?: number;
+  },
+): Promise<SmallTeamReportResponse> {
+  const query = new URLSearchParams();
+  if (params?.from) query.set("from", params.from);
+  if (params?.to) query.set("to", params.to);
+  if (typeof params?.lowAttendanceThreshold === "number") {
+    query.set("lowAttendanceThreshold", String(params.lowAttendanceThreshold));
+  }
+
+  const suffix = query.toString() ? `?${query.toString()}` : "";
+  return authenticatedFetch<SmallTeamReportResponse>(
+    `/small-teams/${teamId}/report${suffix}`,
+    { method: "GET" },
+  );
+}
+
+export type MemberAttendanceHistoryResponse = {
+  memberId: string;
+  records: {
+    id: string;
+    service: string;
+    date: string;
+    status: "Present" | "Absent";
+    recordedBy: string;
+    time: string;
+  }[];
+  stats: {
+    attended: number;
+    missed: number;
+    total: number;
+    rate: number;
+  };
+  trends: {
+    month: string;
+    attended: number;
+    total: number;
+    rate: number;
+  }[];
+};
+
+export async function fetchMemberAttendanceHistory(
+  memberId: string,
+  params?: { from?: string; to?: string },
+): Promise<MemberAttendanceHistoryResponse> {
+  const query = new URLSearchParams();
+  if (params?.from) query.set("from", params.from);
+  if (params?.to) query.set("to", params.to);
+  const suffix = query.toString() ? `?${query.toString()}` : "";
+
+  return authenticatedFetch<MemberAttendanceHistoryResponse>(
+    `/attendance/member/${memberId}${suffix}`,
+    { method: "GET" },
+  );
 }
 
 export function getCurrentAdmin() {
