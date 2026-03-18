@@ -152,8 +152,6 @@ export const COUNTRIES = [
     currency: "MAD",
     timeZone: "Africa/Casablanca",
   },
-  { code: "NG", name: "Nigeria", currency: "NGN", timeZone: "Africa/Lagos" },
-  { code: "KE", name: "Kenya", currency: "KES", timeZone: "Africa/Nairobi" },
   {
     code: "TZ",
     name: "Tanzania",

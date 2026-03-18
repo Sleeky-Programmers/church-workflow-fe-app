@@ -14,7 +14,7 @@ export default function SettingsLayout({
         </div>
       </header>
 
-      <div className="flex">
+      <div className="flex flex-col md:flex-row">
         <Sidebar />
         <main className="flex-1 p-8">{children}</main>
       </div>
