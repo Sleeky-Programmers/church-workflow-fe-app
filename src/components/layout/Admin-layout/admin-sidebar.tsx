@@ -43,7 +43,7 @@ export function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <nav className="w-52 border-r bg-white">
+    <nav className="md:w-52 w-full border-r bg-white">
       <div className="space-y-1 p-4">
         {NAV_ITEMS.map((item) => {
           const Icon = item.icon;
