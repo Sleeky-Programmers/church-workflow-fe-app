@@ -38,6 +38,7 @@ export default function MembershipPage() {
   const [selectedFormat, setSelectedFormat] = useState<"form" | "csv" | null>(
     null,
   );
+  const [isCsvUploading, setIsCsvUploading] = useState(false);
   const [filterValue, setFilterValue] = useState("all");
   const [page, setPage] = useState(1);
   const [pagination, setPagination] = useState<any>(null);
@@ -94,6 +95,14 @@ export default function MembershipPage() {
   const handleFormatSelect = (
     format: MemberFormType.FORM | MemberFormType.CSV,
   ) => {
+    if (format === MemberFormType.CSV && isCsvUploading) {
+      toast({
+        title: "Upload in progress",
+        description: "Please wait for the current CSV upload to finish.",
+      });
+      return;
+    }
+
     setSelectedFormat(format);
 
     if (format === MemberFormType.FORM) {
@@ -104,30 +113,44 @@ export default function MembershipPage() {
     if (format === MemberFormType.CSV) {
       const input = document.createElement("input");
       input.type = "file";
-      input.accept = ".csv";
+      input.accept = ".csv,text/csv";
 
       input.onchange = async (e: any) => {
         const file = e.target.files[0];
         if (!file) return;
 
         try {
-          await uploadMembersCsv(file);
+          setIsCsvUploading(true);
+          toast({
+            title: "Uploading members...",
+            description: "Your CSV is being processed.",
+          });
+
+          const result: any = await uploadMembersCsv(file);
+          const inserted = Number(result?.inserted || 0);
 
           toast({
             title: "Success",
-            description: "Members imported successfully",
+            description: `${inserted.toLocaleString()} member${inserted === 1 ? "" : "s"} imported successfully`,
           });
 
           const response = await fetchMembers(1, 10);
           setMembers(response.data);
           setPagination(response.pagination);
           setPage(1);
-        } catch (error) {
+        } catch (error: any) {
+          const errorMessage =
+            error?.message ||
+            error?.response?.data?.message ||
+            "CSV upload failed";
           toast({
             title: "Error",
-            description: "CSV upload failed",
+            description: errorMessage,
             variant: "destructive",
           });
+        } finally {
+          setIsCsvUploading(false);
+          setSelectedFormat(null);
         }
       };
 
@@ -181,9 +204,10 @@ export default function MembershipPage() {
             <Button
               onClick={() => setIsFormatModalOpen(true)}
               variant="default"
+              disabled={isCsvUploading}
             >
               <Plus className="h-4 w-4 mr-2" />
-              Add a member
+              {isCsvUploading ? "Uploading..." : "Add a member"}
             </Button>
           </div>
           {isMobile && (

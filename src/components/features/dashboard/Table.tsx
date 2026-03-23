@@ -179,11 +179,6 @@ export default function Table<T extends Record<string, any>>({
   const controlled = Array.isArray(selectedRowKeys);
   const selectedKeys = controlled ? selectedRowKeys! : internalSelected;
 
-  const visibleRowKeys = useMemo(
-    () => paginatedData.map((r, i) => getRowKey(r, i)),
-    [paginatedData],
-  );
-
   const visibleColumnCount = columns.length + (showCheckbox ? 1 : 0);
 
   return (
@@ -197,7 +192,7 @@ export default function Table<T extends Record<string, any>>({
                   {columns.map((col) => (
                     <TableHead
                       key={col.key}
-                      className={`${col.width ?? ""} ${col.align === "center" ? "text-center" : col.align === "right" ? "text-right" : "text-left"} cursor-pointer select-none text-black font-bold px-4`}
+                      className={`${col.width ?? ""} ${col.align === "center" ? "text-center" : col.align === "right" ? "text-right" : "text-left"} cursor-pointer select-none font-bold px-4`}
                       onClick={() => toggleSort(col)}
                     >
                       <div className="flex items-center gap-2">
@@ -220,7 +215,7 @@ export default function Table<T extends Record<string, any>>({
                 ) : paginatedData.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={Math.max(1, visibleColumnCount)}>
-                      <div className="py-8 text-center text-sm text-muted-foreground">
+                      <div className="py-8 text-center text-xs text-muted-foreground">
                         {emptyState ?? "No records found."}
                       </div>
                     </TableCell>

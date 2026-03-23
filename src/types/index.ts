@@ -229,20 +229,20 @@ export type MemberAttendanceRecord = {
 
 export type MemberProfile = {
   id: string;
-  title: MemberTitle;
+  title?: MemberTitle;
   fullName: string;
   firstName: string;
   lastName: string;
   email: string;
   phone: string;
   gender: Gender;
-  birthday: string;
+  birthday?: string;
   address?: string;
   maritalStatus: MaritalStatus;
   dateOfMarriage?: string;
 
   membershipStatus: MembershipStatus;
-  dateJoined: string;
+  dateJoined?: string;
   baptized: boolean;
   volunteersPreference: string;
 
@@ -257,10 +257,10 @@ export type MemberProfile = {
 };
 
 export type AddMemberStep1Data = {
-  title: MemberTitle;
+  title?: MemberTitle;
   fullName: string;
   gender: Gender;
-  birthday: string;
+  birthday?: string;
   maritalStatus: MaritalStatus;
   dateOfMarriage?: string;
 };
@@ -274,8 +274,8 @@ export type AddMemberStep2Data = {
 };
 
 export type AddMemberStep3Data = {
-  membershipStatus: MembershipStatus;
-  dateJoined: string;
+  membershipStatus?: MembershipStatus;
+  dateJoined?: string;
   previousChurchMembership?: string;
   baptized: boolean;
   ministriesInvolved?: string;

@@ -18,7 +18,13 @@ import { createChurch, createWeeklyService, uploadMembersCsv } from "@/lib/api";
 import { RouteConfig } from "@/config/routes";
 import { convertTo12Hour } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
-import { getAccessToken } from "@/lib/auth/session";
+import {
+  getAccessToken,
+  getCurrentUserKey,
+  markChurchIdentityComplete,
+  markMembersUploaded,
+  markWeeklyServicesComplete,
+} from "@/lib/auth/session";
 import Image from "next/image";
 
 export default function ChurchOnboarding() {
@@ -30,6 +36,7 @@ export default function ChurchOnboarding() {
     null,
   );
   const [uploadErrorMessages, setUploadErrorMessages] = useState<string[]>([]);
+  const [servicesSynced, setServicesSynced] = useState(false);
 
   const { toast } = useToast();
 
@@ -52,6 +59,10 @@ export default function ChurchOnboarding() {
     resolver: zodResolver(uploadMembersSchema),
     defaultValues: { csvFile: undefined },
   });
+  const currentUserKey = getCurrentUserKey();
+  const identityDraftKey = currentUserKey
+    ? `onboarding:church-identity-draft:${currentUserKey}`
+    : "onboarding:church-identity-draft";
 
   useEffect(() => {
     if (!getAccessToken()) {
@@ -61,9 +72,7 @@ export default function ChurchOnboarding() {
 
     if (typeof window === "undefined") return;
 
-    const savedDraft = window.localStorage.getItem(
-      "onboarding:church-identity-draft",
-    );
+    const savedDraft = window.localStorage.getItem(identityDraftKey);
 
     if (!savedDraft) return;
 
@@ -85,7 +94,7 @@ export default function ChurchOnboarding() {
         variant: "destructive",
       });
     }
-  }, [identityForm, router]);
+  }, [identityDraftKey, identityForm, router, toast]);
 
   const onIdentitySubmit = async (data: ChurchIdentityValues) => {
     setIsSubmittingIdentity(true);
@@ -105,11 +114,18 @@ export default function ChurchOnboarding() {
       );
 
       if (typeof window !== "undefined") {
-        window.localStorage.setItem(
-          "onboarding:church-identity-draft",
-          JSON.stringify(data),
-        );
+        window.localStorage.setItem(identityDraftKey, JSON.stringify(data));
       }
+
+      markChurchIdentityComplete({
+        name: data.name,
+        alias: data.alias || "",
+        address: data.address,
+        country: data.country,
+        state: data.state || "",
+        defaultCurrency: data.defaultCurrency,
+        timeZone: data.timeZone,
+      });
 
       setStep(2);
     } catch (error: any) {
@@ -140,11 +156,18 @@ export default function ChurchOnboarding() {
       );
 
       if (typeof window !== "undefined") {
-        window.localStorage.setItem(
-          "onboarding:church-identity-draft",
-          JSON.stringify(data),
-        );
+        window.localStorage.setItem(identityDraftKey, JSON.stringify(data));
       }
+
+      markChurchIdentityComplete({
+        name: data.name,
+        alias: data.alias || "",
+        address: data.address,
+        country: data.country,
+        state: data.state || "",
+        defaultCurrency: data.defaultCurrency,
+        timeZone: data.timeZone,
+      });
 
       router.push(RouteConfig.dashboard.home);
     } catch (error: any) {
@@ -158,22 +181,62 @@ export default function ChurchOnboarding() {
     }
   };
 
-  const onServiceSubmit = async () => {
-    try {
-      for (const service of services) {
-        for (const day of service.days) {
-          const normalizedDay = day.toUpperCase();
-          await createWeeklyService({
+  const persistWeeklyServices = async () => {
+    if (servicesSynced || services.length === 0) {
+      return;
+    }
+
+    const uniqueServices = new Map<
+      string,
+      {
+        serviceName: string;
+        day: string;
+        startTime: string;
+        endTime: string;
+        location?: string;
+      }
+    >();
+    services.forEach((service) => {
+      service.days.forEach((day) => {
+        const startTime = convertTo12Hour(service.startTime || "");
+        const endTime = convertTo12Hour(service.endTime || service.startTime);
+        const normalizedDay = day.trim().toUpperCase();
+        const location = (service.location || "").trim();
+        const key = [
+          service.serviceName.trim().toLowerCase(),
+          normalizedDay,
+          startTime.trim().toUpperCase(),
+          location.toLowerCase(),
+        ].join("|");
+        if (!uniqueServices.has(key)) {
+          uniqueServices.set(key, {
             serviceName: service.serviceName,
-            type: "REGULAR",
             day: normalizedDay,
-            startTime: convertTo12Hour(service.startTime),
-            endTime: convertTo12Hour(service.endTime || service.startTime),
-            location: service.location,
+            startTime,
+            endTime,
+            location,
           });
         }
-      }
+      });
+    });
 
+    for (const service of uniqueServices.values()) {
+      await createWeeklyService({
+        serviceName: service.serviceName,
+        type: "REGULAR",
+        day: service.day,
+        startTime: service.startTime,
+        endTime: service.endTime,
+        location: service.location,
+      });
+    }
+
+    setServicesSynced(true);
+    markWeeklyServicesComplete();
+  };
+
+  const onServiceSubmit = async () => {
+    try {
       setStep(3);
     } catch (error: any) {
       toast({
@@ -193,7 +256,9 @@ export default function ChurchOnboarding() {
     try {
       setUploadErrorSummary(null);
       setUploadErrorMessages([]);
+      await persistWeeklyServices();
       await uploadMembersCsv(data.csvFile);
+      markMembersUploaded();
       router.push(RouteConfig.dashboard.home);
     } catch (error: any) {
       const summary =

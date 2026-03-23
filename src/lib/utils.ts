@@ -10,11 +10,8 @@ import {
   endOfWeek,
   eachDayOfInterval,
   format,
-  isSameDay,
   isToday,
   isSameMonth,
-  addMonths,
-  subMonths,
 } from "date-fns";
 import {
   FileText,
@@ -87,9 +84,24 @@ export function formatEventDate(dateStr: string) {
 
 export function getNextBirthdayDate(dateStr: string) {
   const today = new Date();
-  const birthday = new Date(dateStr);
-  birthday.setFullYear(today.getFullYear());
-  if (birthday < today) birthday.setFullYear(today.getFullYear() + 1);
+  const parsed = new Date(dateStr);
+
+  if (Number.isNaN(parsed.getTime())) {
+    return new Date(today.getFullYear() + 100, 0, 1);
+  }
+
+  const month = parsed.getUTCMonth();
+  const day = parsed.getUTCDate();
+
+  const birthday = new Date(today.getFullYear(), month, day);
+  birthday.setHours(0, 0, 0, 0);
+
+  const startOfToday = new Date(today);
+  startOfToday.setHours(0, 0, 0, 0);
+
+  if (birthday < startOfToday) {
+    birthday.setFullYear(today.getFullYear() + 1);
+  }
 
   return birthday;
 }
@@ -167,9 +179,9 @@ export function getActionItemClasses(
 ): string {
   switch (variant) {
     case "primary":
-      return "text-blue-600 hover:text-blue-700";
+      return "text-primary-600 hover:text-primary-700";
     case "warning":
-      return "text-orange-600 hover:text-orange-700";
+      return "text-secondary-600 hover:text-secondary-700";
     case "danger":
       return "text-red-600 hover:text-red-700";
     default:
@@ -274,13 +286,13 @@ type NotificationMeta = {
 export const notificationConfig: Record<NotificationType, NotificationMeta> = {
   [NotificationType.REQUISITION]: {
     icon: FileText,
-    color: "text-blue-500",
-    background: "bg-blue-50",
+    color: "text-primary-500",
+    background: "bg-primary-50",
   },
   [NotificationType.MESSAGE]: {
     icon: MessageCircle,
-    color: "text-green-500",
-    background: "bg-green-50",
+    color: "text-success-500",
+    background: "bg-success-50",
   },
   [NotificationType.ROLE_UPDATE]: {
     icon: ShieldCheck,
@@ -294,8 +306,8 @@ export const notificationConfig: Record<NotificationType, NotificationMeta> = {
   },
   [NotificationType.SUBSCRIPTION]: {
     icon: CreditCard,
-    color: "text-orange-500",
-    background: "bg-orange-50",
+    color: "text-secondary-500",
+    background: "bg-secondary-50",
   },
   [NotificationType.MEMBER]: {
     icon: Users,

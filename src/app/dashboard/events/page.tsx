@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { EventRecurrence, EventReminderType, EventType } from "@/lib/enums";
 import { useToast } from "@/hooks/use-toast";
 import { ChurchEvent, EventFormData } from "@/types";
@@ -10,6 +10,8 @@ import { EventFormModal } from "@/components/features/dashboard/events/event-for
 import { EventsCalendar } from "@/components/features/dashboard/events/events-calendar";
 import { EventsEmptyState } from "@/components/features/dashboard/events/events-empty-state";
 import { getEventTypeMeta } from "@/components/features/dashboard/events/constants";
+
+const EVENT_STORAGE_KEY = "dashboard:events";
 
 const createDefaultFormData = (date = ""): EventFormData => ({
   title: "",
@@ -49,6 +51,26 @@ export default function EventsPage() {
   const [formInitialData, setFormInitialData] = useState<EventFormData | null>(
     null,
   );
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    try {
+      const stored = window.localStorage.getItem(EVENT_STORAGE_KEY);
+      if (!stored) return;
+      const parsed = JSON.parse(stored) as ChurchEvent[];
+      if (Array.isArray(parsed)) {
+        setEvents(parsed);
+      }
+    } catch {
+      setEvents([]);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    window.localStorage.setItem(EVENT_STORAGE_KEY, JSON.stringify(events));
+  }, [events]);
 
   const hasEvents = useMemo(() => events.length > 0, [events]);
 

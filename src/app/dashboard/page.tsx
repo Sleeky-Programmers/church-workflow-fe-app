@@ -13,6 +13,7 @@ import {
   cn,
   formatEventDate,
   formatUpcomingBirthday,
+  getNextBirthdayDate,
   isInFuture,
   sortBirthdaysByNearest,
 } from "@/lib/utils";
@@ -25,8 +26,21 @@ import {
   fetchTotalMembers,
   getMyChurch,
 } from "@/lib/api";
+import { fetchMembers as fetchMemberProfiles } from "@/services/memberService";
 import type { ChurchResponse } from "@/types/payload";
 import { getCurrentUserProfile } from "@/lib/auth/session";
+import { EventCategory, EventType } from "@/lib/enums";
+import { ChurchEvent } from "@/types";
+
+const EVENT_STORAGE_KEY = "dashboard:events";
+
+const EVENT_CATEGORY_BY_TYPE: Partial<Record<EventType, EventCategory>> = {
+  [EventType.WORSHIP_SERVICE]: EventCategory.GENERAL,
+  [EventType.BIRTHDAY]: EventCategory.GENERAL,
+  [EventType.MEETING]: EventCategory.LEADERSHIP,
+  [EventType.WEDDING_ANNIVERSARY]: EventCategory.SPECIAL,
+  [EventType.OTHER]: EventCategory.SPECIAL,
+};
 
 export default function Dashboard() {
   const [displayName, setDisplayName] = useState("Super Admin");
@@ -62,21 +76,34 @@ export default function Dashboard() {
     loadChurch();
   }, []);
 
-  const [totalMembers, setTotalMembers] = useState<string>(
-    DashboardData.stats.totalMembers,
-  );
-  const [totalMembersGrowth, setTotalMembersGrowth] = useState<string>(
-    DashboardData.stats.totalMembersGrowth,
-  );
-  const [serviceAttendance, setServiceAttendance] = useState<string>(
-    DashboardData.stats.serviceAttendance,
+  const [totalMembers, setTotalMembers] = useState<string>("0");
+  const [totalMembersGrowth, setTotalMembersGrowth] = useState<string>("0%");
+  const [serviceAttendance, setServiceAttendance] = useState<string>("0");
+  const [serviceAttendanceGrowth, setServiceAttendanceGrowth] =
+    useState<string>("0%");
+  const [attendanceTrendData, setAttendanceTrendData] = useState<
+    { month: string; thisMonth: number; lastMonth: number }[]
+  >([]);
+  const [incomeTrendData, setIncomeTrendData] = useState<
+    { month: string; thisMonth: number; lastMonth: number }[]
+  >([]);
+  const [upcomingBirthdays, setUpcomingBirthdays] = useState<
+    { name: string; date: string }[]
+  >([]);
+  const [upcomingEvents, setUpcomingEvents] = useState(
+    DashboardData.upcomingEvents,
   );
 
   useEffect(() => {
     async function loadStats() {
-      const { totalMembers: count, growth } = await fetchTotalMembers();
-      setTotalMembers(count.toLocaleString());
-      setTotalMembersGrowth(growth);
+      try {
+        const { totalMembers: count, growth } = await fetchTotalMembers();
+        setTotalMembers(count.toLocaleString());
+        setTotalMembersGrowth(growth || "0%");
+      } catch {
+        setTotalMembers("0");
+        setTotalMembersGrowth("0%");
+      }
     }
     loadStats();
   }, []);
@@ -84,13 +111,93 @@ export default function Dashboard() {
   useEffect(() => {
     async function loadAttendance() {
       try {
-        const { totalAttendance } = await fetchAttendanceStats();
+        const { totalAttendance, attendanceGrowth, monthlyAttendanceTrends } =
+          await fetchAttendanceStats();
         setServiceAttendance(totalAttendance.toLocaleString());
+        setServiceAttendanceGrowth(attendanceGrowth || "0%");
+        const trends = monthlyAttendanceTrends || [];
+        setAttendanceTrendData(trends);
+        setIncomeTrendData(
+          trends.map((item) => ({
+            month: item.month,
+            thisMonth: 0,
+            lastMonth: 0,
+          })),
+        );
       } catch {
-        setServiceAttendance(DashboardData.stats.serviceAttendance);
+        setServiceAttendance("0");
+        setServiceAttendanceGrowth("0%");
+        setAttendanceTrendData([]);
+        setIncomeTrendData([]);
       }
     }
     loadAttendance();
+  }, []);
+
+  useEffect(() => {
+    async function loadBirthdays() {
+      try {
+        const members = [];
+        let currentPage = 1;
+
+        while (true) {
+          const response = await fetchMemberProfiles(currentPage, 100);
+          members.push(...response.data);
+          if (!response.pagination?.hasNextPage) break;
+          currentPage += 1;
+        }
+
+        const mappedBirthdays = members
+          .filter((member) => {
+            if (!member.birthday) return false;
+            return !Number.isNaN(new Date(member.birthday).getTime());
+          })
+          .map((member) => ({
+            name: member.fullName,
+            date: member.birthday as string,
+          }))
+          .filter((member) => {
+            const nextBirthday = getNextBirthdayDate(member.date);
+            nextBirthday.setHours(0, 0, 0, 0);
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const nextThreeMonths = new Date(today);
+            nextThreeMonths.setMonth(today.getMonth() + 3);
+            nextThreeMonths.setHours(23, 59, 59, 999);
+            return nextBirthday >= today && nextBirthday <= nextThreeMonths;
+          });
+
+        setUpcomingBirthdays(sortBirthdaysByNearest(mappedBirthdays));
+      } catch {
+        setUpcomingBirthdays([]);
+      }
+    }
+
+    loadBirthdays();
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    try {
+      const stored = window.localStorage.getItem(EVENT_STORAGE_KEY);
+      if (!stored) return;
+
+      const parsed = JSON.parse(stored) as ChurchEvent[];
+      const normalized = parsed
+        .filter((event) => event?.date)
+        .map((event) => ({
+          title: event.title,
+          date: event.date,
+          category: EVENT_CATEGORY_BY_TYPE[event.type] || EventCategory.GENERAL,
+        }));
+
+      if (normalized.length > 0) {
+        setUpcomingEvents(normalized);
+      }
+    } catch {
+      setUpcomingEvents(DashboardData.upcomingEvents);
+    }
   }, []);
 
   return (
@@ -136,7 +243,7 @@ export default function Dashboard() {
               compact
               title="Service Attendance"
               count={serviceAttendance}
-              growth={DashboardData.stats.attendanceGrowth}
+              growth={serviceAttendanceGrowth}
               growthText="Last Event"
             />
 
@@ -144,19 +251,15 @@ export default function Dashboard() {
               compact
               title="Total Income"
               statFilter="This Month"
-              count={DashboardData.stats.totalIncome}
-              growth={DashboardData.stats.incomeGrowth}
+              count="0"
+              growth="0%"
             />
           </div>
 
           <div>
             <TrendChart
-              attendanceData={DashboardData.attendanceData}
-              incomeData={DashboardData.incomeExpenses.map((item) => ({
-                month: item.month,
-                thisMonth: item.income,
-                lastMonth: item.expenses,
-              }))}
+              attendanceData={attendanceTrendData}
+              incomeData={incomeTrendData}
             />
           </div>
         </div>
@@ -172,7 +275,7 @@ export default function Dashboard() {
 
               <Text text="Services" variant="blue" />
               <div className="mt-3 space-y-3">
-                {DashboardData.upcomingEvents
+                {upcomingEvents
                   .filter((event) => isInFuture(event.date))
                   .sort(
                     (a, b) =>
@@ -215,25 +318,32 @@ export default function Dashboard() {
 
               <Text text="Birthdays" variant="blue" />
               <div className="mt-3 space-y-2">
-                {sortBirthdaysByNearest(DashboardData.birthdays).map((b, i) => (
-                  <div
-                    key={i}
-                    className="flex items-center justify-between gap-3"
-                  >
-                    <div className="flex items-center gap-2 min-w-0">
-                      <Avatar>
-                        <AvatarFallback>
-                          <User className="w-4 h-4 text-primary" />
-                        </AvatarFallback>
-                      </Avatar>
-                      <Text text={b.name} className="truncate" />
+                {upcomingBirthdays.length === 0 ? (
+                  <Text
+                    variant="muted"
+                    text="No upcoming birthdays to display"
+                  />
+                ) : (
+                  upcomingBirthdays.map((b, i) => (
+                    <div
+                      key={`${b.name}-${i}`}
+                      className="flex items-center justify-between gap-3"
+                    >
+                      <div className="flex items-center gap-2 min-w-0">
+                        <Avatar>
+                          <AvatarFallback>
+                            <User className="w-4 h-4 text-primary" />
+                          </AvatarFallback>
+                        </Avatar>
+                        <Text text={b.name} className="truncate" />
+                      </div>
+                      <Span
+                        text={formatUpcomingBirthday(b.date)}
+                        variant="default"
+                      />
                     </div>
-                    <Span
-                      text={formatUpcomingBirthday(b.date)}
-                      variant="default"
-                    />
-                  </div>
-                ))}
+                  ))
+                )}
               </div>
 
               <Button asChild className="w-full mt-4">

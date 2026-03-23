@@ -33,17 +33,11 @@ export function ProfileDetailsStep({
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
 
-    if (!formData.title) {
-      newErrors.title = "Title is required";
-    }
     if (!formData.fullName?.trim()) {
       newErrors.fullName = "Full name is required";
     }
     if (!formData.gender) {
       newErrors.gender = "Gender is required";
-    }
-    if (!formData.birthday) {
-      newErrors.birthday = "Birthday is required";
     }
     if (!formData.maritalStatus) {
       newErrors.maritalStatus = "Marital status is required";
@@ -77,14 +71,12 @@ export function ProfileDetailsStep({
             <div>
               <Label>Title</Label>
               <Select
-                value={formData.title || ""}
+                value={formData.title}
                 onValueChange={(value) =>
                   setFormData({ ...formData, title: value as MemberTitle })
                 }
               >
-                <SelectTrigger
-                  className={errors.title ? "border-destructive-600" : ""}
-                >
+                <SelectTrigger>
                   <SelectValue placeholder="Select" />
                 </SelectTrigger>
                 <SelectContent>
@@ -96,10 +88,15 @@ export function ProfileDetailsStep({
                   <SelectItem value={MemberTitle.REV}>Rev.</SelectItem>
                 </SelectContent>
               </Select>
-              {errors.title && (
-                <Text variant="error" className="mt-1">
-                  {errors.title}
-                </Text>
+              {formData.title && (
+                <Button
+                  type="button"
+                  variant="link"
+                  className="h-auto p-0 text-xs"
+                  onClick={() => setFormData({ ...formData, title: undefined })}
+                >
+                  Clear selection
+                </Button>
               )}
             </div>
 
@@ -152,22 +149,14 @@ export function ProfileDetailsStep({
             </div>
 
             <div className="col-span-2">
-              <Label>
-                Birthday <Span variant="error">*</Span>
-              </Label>
+              <Label>Birthday</Label>
               <Input
                 type="date"
                 value={formData.birthday || ""}
                 onChange={(e) =>
                   setFormData({ ...formData, birthday: e.target.value })
                 }
-                className={errors.birthday ? "border-destructive-600" : ""}
               />
-              {errors.birthday && (
-                <Text variant="error" className="mt-1">
-                  {errors.birthday}
-                </Text>
-              )}
             </div>
           </div>
           <div className="grid grid-cols-2 gap-6">

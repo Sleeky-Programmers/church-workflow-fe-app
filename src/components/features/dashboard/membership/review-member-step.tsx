@@ -82,11 +82,6 @@ export function ReviewMemberStep({ data }: ReviewMemberStepProps) {
           label="Volunteers Preference"
           value={data.volunteersPreference}
         />
-        <ReviewField
-          label="In a Small Group/Cell Group"
-          value={data.smallGroupMember}
-        />
-        <ReviewField label="Small Group Name" value={data.smallGroupName} />
       </ReviewSection>
     </div>
   );
