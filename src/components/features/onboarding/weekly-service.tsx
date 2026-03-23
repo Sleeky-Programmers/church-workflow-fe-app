@@ -44,7 +44,7 @@ export function WeeklyServicesStep({
   step = 2,
   totalSteps = 3,
 }: WeeklyServicesStepProps) {
-  const [isSaving, setIsSaving] = useState(false);
+  const [isContinuing, setIsContinuing] = useState(false);
   const [newService, setNewService] = useState<{
     serviceName: string;
     days: string[];
@@ -92,14 +92,14 @@ export function WeeklyServicesStep({
     });
   };
 
-  const handleSaveAndContinue = async () => {
-    if (isSaving) return;
+  const handleContinue = async () => {
+    if (isContinuing) return;
 
-    setIsSaving(true);
+    setIsContinuing(true);
     try {
       await Promise.resolve(onSubmit());
     } finally {
-      setIsSaving(false);
+      setIsContinuing(false);
     }
   };
 
@@ -224,7 +224,7 @@ export function WeeklyServicesStep({
                   </Heading>
                   <div className="space-y-1">
                     <Text variant="muted" className="text-sm">
-                      {service.days.join(", ") || "No days selected"} ·{" "}
+                      {service.days.join(", ") || "No days selected"} -{" "}
                       {service.startTime || "--:--"} -{" "}
                       {service.endTime || "--:--"}
                     </Text>
@@ -280,11 +280,11 @@ export function WeeklyServicesStep({
         </Button>
         <Button
           type="button"
-          onClick={handleSaveAndContinue}
+          onClick={handleContinue}
           className="w-full"
-          disabled={isSaving}
+          disabled={isContinuing}
         >
-          {isSaving ? "Saving..." : "Save & Continue"}
+          {isContinuing ? "Continuing..." : "Continue"}
         </Button>
       </div>
     </div>

@@ -1,22 +1,20 @@
-import { MemberTitle } from "@/lib/enums";
-
 export function mapMember(member: any) {
   const nameParts = member.fullName.split(" ");
 
   return {
     id: member._id,
-    title: (member.title || MemberTitle.MR) as MemberTitle,
+    title: member.title || undefined,
     fullName: member.fullName,
     firstName: nameParts[0] || "",
     lastName: nameParts.slice(1).join(" "),
     email: member.email || "",
     phone: member.phoneNumber || "",
     gender: member.gender,
-    birthday: member.birthday,
+    birthday: member.birthday || undefined,
     maritalStatus: member.maritalStatus,
     dateOfMarriage: member.dateOfMarriage,
     membershipStatus: member.membershipStatus,
-    dateJoined: member.dateJoined,
+    dateJoined: member.dateJoined || undefined,
     baptized: member.isBaptized,
     volunteersPreference: member.volunteerPreferences,
     servicesAttended: 0,

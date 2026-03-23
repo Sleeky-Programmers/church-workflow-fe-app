@@ -6,7 +6,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import Heading from "@/components/ui/typography/Heading";
 import { Span, Text } from "@/components/ui/typography/Text";
 import { ChartContainer, ChartTooltipContent } from "@/components/ui/chart";
-import { DashboardData } from "@/lib/data";
 
 function getDateRange(data: { month: string }[]) {
   if (!data.length) return "";
@@ -14,7 +13,17 @@ function getDateRange(data: { month: string }[]) {
 }
 
 export function IncomeVsExpenses() {
-  const range = getDateRange(DashboardData.incomeExpenses);
+  const zeroIncomeData = Array.from({ length: 6 }, (_, index) => {
+    const date = new Date();
+    date.setMonth(date.getMonth() - (5 - index));
+    return {
+      month: date.toLocaleDateString("en-US", { month: "short" }),
+      income: 0,
+      expenses: 0,
+    };
+  });
+
+  const range = getDateRange(zeroIncomeData);
 
   return (
     <Card className="rounded-3xl p-3 h-full w-full">
@@ -33,7 +42,7 @@ export function IncomeVsExpenses() {
             }}
           >
             <BarChart
-              data={DashboardData.incomeExpenses}
+              data={zeroIncomeData}
               margin={{ top: 10, right: 4, left: 0, bottom: 0 }}
             >
               <CartesianGrid strokeDasharray="3 3" stroke="#E6E6E6" />

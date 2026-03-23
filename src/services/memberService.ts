@@ -46,28 +46,32 @@ export async function fetchMembers(
 }
 
 export async function createMember(data: NewMemberData) {
+  const normalizedPayload = {
+    title: data.title || undefined,
+    fullName: data.fullName,
+    email: data.email || undefined,
+    phoneNumber: data.phone || undefined,
+    gender: data.gender,
+    birthday: data.birthday || undefined,
+    maritalStatus: data.maritalStatus,
+    dateOfMarriage: data.dateOfMarriage || undefined,
+    occupation: data.occupation || undefined,
+    educationalBackground: data.education || undefined,
+    membershipStatus: data.membershipStatus,
+    dateJoined: data.dateJoined || undefined,
+    previousChurchMembership: data.previousChurchMembership || undefined,
+    isBaptized: data.baptized,
+    ministries: data.ministriesInvolved || undefined,
+    volunteerPreferences: data.volunteersPreference || undefined,
+    cellGroupName:
+      data.smallGroupMember === "Yes"
+        ? data.smallGroupName || undefined
+        : undefined,
+  };
+
   const response = await authenticatedFetch<any>("/members/add", {
     method: "POST",
-    body: JSON.stringify({
-      title: data.title,
-      fullName: data.fullName,
-      email: data.email,
-      phoneNumber: data.phone,
-      gender: data.gender,
-      birthday: data.birthday,
-      maritalStatus: data.maritalStatus,
-      dateOfMarriage: data.dateOfMarriage,
-      occupation: data.occupation,
-      educationalBackground: data.education,
-      membershipStatus: data.membershipStatus,
-      dateJoined: data.dateJoined,
-      previousChurchMembership: data.previousChurchMembership,
-      isBaptized: data.baptized,
-      ministries: data.ministriesInvolved,
-      volunteerPreferences: data.volunteersPreference,
-      cellGroupName:
-        data.smallGroupMember === "Yes" ? data.smallGroupName : undefined,
-    }),
+    body: JSON.stringify(normalizedPayload),
   });
 
   return mapMember(response);

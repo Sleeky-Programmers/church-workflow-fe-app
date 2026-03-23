@@ -28,20 +28,8 @@ export function ContactDetailsStep({
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
 
-    if (!formData.email?.trim()) {
-      newErrors.email = "Email is required";
-    }
-    if (!formData.phone?.trim()) {
-      newErrors.phone = "Phone number is required";
-    }
-    if (!formData.address?.trim()) {
-      newErrors.address = "Address is required";
-    }
-    if (!formData.occupation?.trim()) {
-      newErrors.occupation = "Occupation is required";
-    }
-    if (!formData.education?.trim()) {
-      newErrors.education = "Educational background is required";
+    if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      newErrors.email = "Please enter a valid email address";
     }
 
     setErrors(newErrors);

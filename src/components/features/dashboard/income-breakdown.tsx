@@ -4,18 +4,19 @@ import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
 import { Card, CardContent } from "@/components/ui/card";
 import Heading from "@/components/ui/typography/Heading";
 import { ChartContainer } from "@/components/ui/chart";
-import { DashboardData } from "@/lib/data";
-import { Span } from "@/components/ui/typography/Text";
+import { Span, Text } from "@/components/ui/typography/Text";
 
-const getTopIncome = () =>
-  [...DashboardData.incomeBreakdown].sort(
-    (incomeA, incomeB) => incomeB.value - incomeA.value,
-  )[0];
+const ZERO_INCOME_BREAKDOWN = [
+  { name: "Tithes", value: 0, color: "#2563EB" },
+  { name: "Offering", value: 0, color: "#F97316" },
+  { name: "Seeds", value: 0, color: "#10B981" },
+  { name: "Donations", value: 0, color: "#EF4444" },
+];
 
 export function IncomeBreakdown() {
-  const top = getTopIncome();
+  const top = ZERO_INCOME_BREAKDOWN[0];
 
-  const config = DashboardData.incomeBreakdown.reduce(
+  const config = ZERO_INCOME_BREAKDOWN.reduce(
     (acc, item) => {
       acc[item.name] = { color: item.color };
       return acc;
@@ -36,7 +37,7 @@ export function IncomeBreakdown() {
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
-                  data={DashboardData.incomeBreakdown}
+                  data={ZERO_INCOME_BREAKDOWN}
                   dataKey="value"
                   innerRadius={50}
                   outerRadius={70}
@@ -44,7 +45,7 @@ export function IncomeBreakdown() {
                   cx="50%"
                   cy="50%"
                 >
-                  {DashboardData.incomeBreakdown.map((entry, i) => (
+                  {ZERO_INCOME_BREAKDOWN.map((entry, i) => (
                     <Cell key={i} fill={entry.color} />
                   ))}
                 </Pie>
@@ -76,7 +77,10 @@ export function IncomeBreakdown() {
           </ChartContainer>
 
           <div className="space-y-2">
-            {DashboardData.incomeBreakdown.map((item) => (
+            <Text variant="muted" className="text-sm">
+              No income records yet.
+            </Text>
+            {ZERO_INCOME_BREAKDOWN.map((item) => (
               <div
                 key={item.name}
                 className="flex items-center justify-between gap-3 text-sm"

@@ -126,20 +126,11 @@ export function AddMemberModal({
     data: Partial<NewMemberData>,
   ) => asserts data is NewMemberData = (data) => {
     if (
-      !data.title ||
       !data.fullName ||
       !data.gender ||
-      !data.birthday ||
       !data.maritalStatus ||
-      !data.email ||
-      !data.phone ||
-      !data.address ||
-      !data.occupation ||
-      !data.education ||
       !data.membershipStatus ||
-      !data.dateJoined ||
-      data.baptized === undefined ||
-      !data.volunteersPreference
+      data.baptized === undefined
     ) {
       throw new Error("Member form is incomplete.");
     }
@@ -156,9 +147,9 @@ export function AddMemberModal({
     const finalData: Partial<NewMemberData> = {
       ...merged,
       membershipStatus: merged.membershipStatus ?? MembershipStatus.MEMBER,
-      dateJoined: merged.dateJoined ?? new Date().toISOString().slice(0, 10),
+      dateJoined: merged.dateJoined || undefined,
       baptized: merged.baptized ?? false,
-      volunteersPreference: merged.volunteersPreference ?? "Not Interested",
+      volunteersPreference: merged.volunteersPreference ?? "",
     };
 
     requireMemberData(finalData);

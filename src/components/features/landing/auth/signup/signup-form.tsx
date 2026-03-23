@@ -238,7 +238,7 @@ export default function SignupForm({
             {isLoading ? (
               <Span variant="default" className="flex items-center gap-2">
                 <Loader />
-                Creating account…
+                Creating account...
               </Span>
             ) : (
               "Continue"

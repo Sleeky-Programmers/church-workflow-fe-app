@@ -1,23 +1,15 @@
-export function Loader() {
+type LoaderProps = {
+  className?: string;
+};
+
+export function Loader({ className = "h-5 w-5" }: LoaderProps) {
   return (
-    <svg
-      className="h-5 w-5 animate-spin"
-      viewBox="0 0 24 24"
-      fill="none"
+    <span
+      className={`relative inline-flex items-center justify-center ${className}`}
     >
-      <circle
-        className="opacity-25"
-        cx="12"
-        cy="12"
-        r="10"
-        stroke="currentColor"
-        strokeWidth="4"
-      />
-      <path
-        className="opacity-75"
-        fill="currentColor"
-        d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
-      />
-    </svg>
+      <span className="absolute inset-0 rounded-full border-2 border-current/25" />
+      <span className="absolute inset-0 rounded-full border-2 border-transparent border-t-current animate-spin" />
+      <span className="h-1.5 w-1.5 rounded-full bg-current animate-pulse" />
+    </span>
   );
 }

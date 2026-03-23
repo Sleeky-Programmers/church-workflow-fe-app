@@ -27,8 +27,10 @@ export function ChurchActivityStep({
   onBack,
   initialData = {},
 }: ChurchActivityStepProps) {
-  const [formData, setFormData] =
-    useState<Partial<AddMemberStep3Data>>(initialData);
+  const [formData, setFormData] = useState<Partial<AddMemberStep3Data>>({
+    membershipStatus: MembershipStatus.MEMBER,
+    ...initialData,
+  });
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const validateForm = () => {
@@ -36,9 +38,6 @@ export function ChurchActivityStep({
 
     if (!formData.membershipStatus) {
       newErrors.membershipStatus = "Membership status is required";
-    }
-    if (!formData.dateJoined) {
-      newErrors.dateJoined = "Date joined is required";
     }
     if (formData.baptized === undefined) {
       newErrors.baptized = "Baptism status is required";
@@ -106,22 +105,14 @@ export function ChurchActivityStep({
         </div>
 
         <div>
-          <Label className="mb-2">
-            Date Joined the Church <Span variant="error">*</Span>
-          </Label>
+          <Label className="mb-2">Date Joined the Church</Label>
           <Input
             type="date"
             value={formData.dateJoined || ""}
             onChange={(e) =>
               setFormData({ ...formData, dateJoined: e.target.value })
             }
-            className={errors.dateJoined ? "border-destructive-600" : ""}
           />
-          {errors.dateJoined && (
-            <Text variant="error" className="mt-1">
-              {errors.dateJoined}
-            </Text>
-          )}
         </div>
 
         <div>
@@ -193,28 +184,6 @@ export function ChurchActivityStep({
               <SelectItem value="Interested">Interested</SelectItem>
               <SelectItem value="Not Interested">Not Interested</SelectItem>
               <SelectItem value="Maybe Later">Maybe Later</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className="sm:col-span-2">
-          <Label className="mb-2">Are you in a small Group/Cell Group?</Label>
-          <Select
-            value={formData.smallGroupMember || ""}
-            onValueChange={(value) =>
-              setFormData({
-                ...formData,
-                smallGroupMember: value as "Yes" | "No",
-                smallGroupName: value === "No" ? "" : formData.smallGroupName,
-              })
-            }
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Select" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="Yes">Yes</SelectItem>
-              <SelectItem value="No">No</SelectItem>
             </SelectContent>
           </Select>
         </div>

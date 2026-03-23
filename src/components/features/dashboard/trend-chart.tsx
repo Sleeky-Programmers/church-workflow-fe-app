@@ -28,6 +28,7 @@ export function TrendChart({ attendanceData, incomeData }: TrendChartProps) {
 
   const isAttendance = trend === "attendance";
   const data = isAttendance ? attendanceData : incomeData;
+  const hasData = data.length > 0;
 
   return (
     <Card className="rounded-3xl p-3">
@@ -61,40 +62,46 @@ export function TrendChart({ attendanceData, incomeData }: TrendChartProps) {
         </div>
 
         <div className="mt-4">
-          <ChartContainer
-            className="w-full aspect-auto h-[260px] sm:h-[300px] overflow-hidden p-2 sm:p-4"
-            config={{
-              thisMonth: { color: "#2563EB" },
-              lastMonth: { color: "#93C5FD" },
-            }}
-          >
-            <LineChart
-              data={data}
-              margin={{ top: 10, right: 8, left: -16, bottom: 0 }}
+          {hasData ? (
+            <ChartContainer
+              className="w-full aspect-auto h-[260px] sm:h-[300px] overflow-hidden p-2 sm:p-4"
+              config={{
+                thisMonth: { color: "#2563EB" },
+                lastMonth: { color: "#93C5FD" },
+              }}
             >
-              <CartesianGrid strokeDasharray="3 3" stroke="#E6E6E6" />
-              <XAxis dataKey="month" tickLine={false} axisLine={false} />
-              <YAxis tickLine={false} axisLine={false} width={32} />
-              <Tooltip content={<ChartTooltipContent />} />
+              <LineChart
+                data={data}
+                margin={{ top: 10, right: 8, left: -16, bottom: 0 }}
+              >
+                <CartesianGrid strokeDasharray="3 3" stroke="#E6E6E6" />
+                <XAxis dataKey="month" tickLine={false} axisLine={false} />
+                <YAxis tickLine={false} axisLine={false} width={32} />
+                <Tooltip content={<ChartTooltipContent />} />
 
-              <Line
-                type="monotone"
-                dataKey="thisMonth"
-                stroke="var(--color-thisMonth)"
-                strokeWidth={2.5}
-                dot={false}
-              />
+                <Line
+                  type="monotone"
+                  dataKey="thisMonth"
+                  stroke="var(--color-thisMonth)"
+                  strokeWidth={2.5}
+                  dot={false}
+                />
 
-              <Line
-                type="monotone"
-                dataKey="lastMonth"
-                stroke="var(--color-lastMonth)"
-                strokeWidth={2}
-                strokeDasharray="4 4"
-                dot={false}
-              />
-            </LineChart>
-          </ChartContainer>
+                <Line
+                  type="monotone"
+                  dataKey="lastMonth"
+                  stroke="var(--color-lastMonth)"
+                  strokeWidth={2}
+                  strokeDasharray="4 4"
+                  dot={false}
+                />
+              </LineChart>
+            </ChartContainer>
+          ) : (
+            <div className="h-[260px] sm:h-[300px] flex items-center justify-center text-sm text-muted-foreground">
+              No trend data available yet.
+            </div>
+          )}
         </div>
       </CardContent>
     </Card>

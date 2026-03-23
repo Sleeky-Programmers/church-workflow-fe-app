@@ -28,6 +28,12 @@ export interface VerifyOtpResponse {
 
 export interface AttendanceStatsResponse {
   totalAttendance: number;
+  attendanceGrowth?: string;
+  monthlyAttendanceTrends?: {
+    month: string;
+    thisMonth: number;
+    lastMonth: number;
+  }[];
 }
 
 export interface LoginPayload {
@@ -97,5 +103,5 @@ export interface CreateWeeklyServicePayload {
   day: string;
   startTime: string;
   endTime: string;
-  location: string;
+  location?: string;
 }
