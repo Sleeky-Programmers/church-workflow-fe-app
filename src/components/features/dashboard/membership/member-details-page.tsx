@@ -48,7 +48,6 @@ export function MemberDetailsPage({ member, onBack }: MemberDetailsPageProps) {
     { month: string; attended: number; total: number; rate: number }[]
   >([]);
 
-  // Load attendance history
   useEffect(() => {
     const loadAttendance = async () => {
       setIsAttendanceLoading(true);
@@ -84,7 +83,6 @@ export function MemberDetailsPage({ member, onBack }: MemberDetailsPageProps) {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
       <div className="bg-white border-b">
         <div className="px-4 sm:px-6 py-4 flex items-center justify-center relative">
           <Button
@@ -102,7 +100,6 @@ export function MemberDetailsPage({ member, onBack }: MemberDetailsPageProps) {
         </div>
       </div>
 
-      {/* Member Info */}
       <div className="bg-white border-b px-4 sm:px-6 py-4 sm:py-6">
         <div className="flex items-start gap-4">
           <Avatar className="h-16 w-16">
@@ -121,7 +118,6 @@ export function MemberDetailsPage({ member, onBack }: MemberDetailsPageProps) {
         </div>
       </div>
 
-      {/* Tabs */}
       <div className="border-b bg-white">
         <div className="flex items-center justify-between px-4 sm:px-6 gap-2">
           <div className="flex gap-1">
@@ -184,7 +180,6 @@ export function MemberDetailsPage({ member, onBack }: MemberDetailsPageProps) {
         )}
       </div>
 
-      {/* Edit Modal */}
       {openEdit && (
         <EditMemberModal
           member={currentMember}

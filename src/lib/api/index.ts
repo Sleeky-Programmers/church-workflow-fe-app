@@ -60,8 +60,9 @@ export async function authenticatedFetch<T>(
         },
       });
 
-      if (!retryResponse.ok) throw new Error("Retry failed");
-
+      if (!retryResponse.ok) {
+        throw new Error("Retry failed");
+      }
       return retryResponse.json();
     } catch (err) {
       localStorage.removeItem("accessToken");
@@ -447,14 +448,18 @@ function normalizeDayName(value?: string): string | undefined {
 }
 
 export function getRefreshToken(): string | null {
-  if (typeof window === "undefined") return null;
+  if (typeof window === "undefined") {
+    return null;
+  }
   return localStorage.getItem("refreshToken");
 }
 
 export async function refreshAuthToken() {
   const refreshToken = getRefreshToken();
 
-  if (!refreshToken) throw new Error("No refresh token");
+  if (!refreshToken) {
+    throw new Error("No refresh token");
+  }
 
   const response = await fetch(`${BASE_URL}/auth/refresh-token`, {
     method: "POST",

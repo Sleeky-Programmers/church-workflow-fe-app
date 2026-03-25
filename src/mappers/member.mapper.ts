@@ -10,7 +10,7 @@ export function mapMember(member: any) {
     email: member.email || "",
     phone: member.phoneNumber || "",
     gender: member.gender,
-    birthday: member.birthday ? member.birthday.split("T")[0] : undefined, // format date
+    birthday: member.birthday ? member.birthday.split("T")[0] : undefined,
     maritalStatus: member.maritalStatus,
     dateOfMarriage: member.dateOfMarriage
       ? member.dateOfMarriage.split("T")[0]

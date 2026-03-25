@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import Heading from "@/components/ui/typography/Heading";
 import { Text } from "@/components/ui/typography/Text";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -76,14 +77,13 @@ export function EditMemberModal({ member, onClose, onSave }: Props) {
         <Card className="p-6 space-y-6 max-h-[90vh] overflow-y-auto">
           <Heading level={3}>Edit Member</Heading>
 
-          {/* Profile Section */}
           <div>
             <Text className="mb-2 font-medium">Profile</Text>
 
             <Text className="mb-1 text-sm text-muted-foreground">
               Full Name
             </Text>
-            <input
+            <Input
               className="border rounded px-3 py-2 w-full mb-3"
               placeholder="Full Name"
               value={formData.fullName || ""}
@@ -107,7 +107,7 @@ export function EditMemberModal({ member, onClose, onSave }: Props) {
             <Text className="mb-1 text-sm text-muted-foreground">
               Date of Birth
             </Text>
-            <input
+            <Input
               type="date"
               className="border rounded px-3 py-2 w-full mb-3"
               value={formData.birthday || ""}
@@ -115,7 +115,6 @@ export function EditMemberModal({ member, onClose, onSave }: Props) {
             />
           </div>
 
-          {/* Contact Section */}
           <div>
             <Text className="mb-2 font-medium">Contact</Text>
 
@@ -143,8 +142,6 @@ export function EditMemberModal({ member, onClose, onSave }: Props) {
               onChange={(e) => handleChange("address", e.target.value)}
             />
           </div>
-
-          {/* Church Section */}
           <div>
             <Text className="mb-2 font-medium">Church Info</Text>
 
@@ -179,9 +176,9 @@ export function EditMemberModal({ member, onClose, onSave }: Props) {
             <Text className="mb-1 text-sm text-muted-foreground">
               Date Joined
             </Text>
-            <input
+            <Input
               type="date"
-              className="border rounded px-3 py-2 w-full mb-3"
+              className="border rounded h-11 px-3 py-2 w-full mb-3"
               value={formData.dateJoined || ""}
               onChange={(e) => handleChange("dateJoined", e.target.value)}
             />
@@ -235,7 +232,6 @@ export function EditMemberModal({ member, onClose, onSave }: Props) {
             </Select>
           </div>
 
-          {/* Actions */}
           <div className="flex justify-end gap-2 pt-4">
             <Button variant="outline" onClick={onClose}>
               Cancel
