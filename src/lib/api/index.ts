@@ -1,5 +1,6 @@
 import { InviteFormData, PendingInvite, User, UserAction } from "@/types/user";
 import { MOCK_USERS } from "../user-data";
+
 import {
   SignupPayload,
   AdminRegisterPayload,
@@ -45,16 +46,33 @@ export async function authenticatedFetch<T>(
   });
 
   if (response.status === 401) {
-    if (typeof window !== "undefined") {
+    try {
+      const refreshData = await refreshAuthToken();
+      localStorage.setItem("accessToken", refreshData.accessToken);
+      localStorage.setItem("refreshToken", refreshData.refreshToken);
+
+      const retryResponse = await fetch(`${BASE_URL}${endpoint}`, {
+        ...options,
+        headers: {
+          Authorization: `Bearer ${refreshData.accessToken}`,
+          ...(isFormData ? {} : { "Content-Type": "application/json" }),
+          ...options.headers,
+        },
+      });
+
+      if (!retryResponse.ok) throw new Error("Retry failed");
+
+      return retryResponse.json();
+    } catch (err) {
       localStorage.removeItem("accessToken");
+      localStorage.removeItem("refreshToken");
+
       if (!window.location.pathname.includes("/auth/login")) {
         window.location.href = "/auth/login";
       }
+
+      throw err;
     }
-    const error: any = new Error("Unauthorized");
-    error.response = { status: 401 };
-    error.status = 401;
-    throw error;
   }
 
   const text = await response.text();
@@ -426,6 +444,31 @@ function normalizeDayName(value?: string): string | undefined {
   }
 
   return undefined;
+}
+
+export function getRefreshToken(): string | null {
+  if (typeof window === "undefined") return null;
+  return localStorage.getItem("refreshToken");
+}
+
+export async function refreshAuthToken() {
+  const refreshToken = getRefreshToken();
+
+  if (!refreshToken) throw new Error("No refresh token");
+
+  const response = await fetch(`${BASE_URL}/auth/refresh-token`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ refreshToken }),
+  });
+
+  if (!response.ok) {
+    throw new Error("Refresh failed");
+  }
+
+  return response.json();
 }
 
 function mapChurchServiceToRegular(service: ChurchServiceApi): RegularService {

@@ -10,19 +10,26 @@ export function mapMember(member: any) {
     email: member.email || "",
     phone: member.phoneNumber || "",
     gender: member.gender,
-    birthday: member.birthday || undefined,
+    birthday: member.birthday ? member.birthday.split("T")[0] : undefined, // format date
     maritalStatus: member.maritalStatus,
-    dateOfMarriage: member.dateOfMarriage,
+    dateOfMarriage: member.dateOfMarriage
+      ? member.dateOfMarriage.split("T")[0]
+      : undefined,
     membershipStatus: member.membershipStatus,
-    dateJoined: member.dateJoined || undefined,
+    dateJoined: member.dateJoined ? member.dateJoined.split("T")[0] : undefined,
     baptized: member.isBaptized,
     volunteersPreference: member.volunteerPreferences,
-    servicesAttended: 0,
-    servicesMissed: 0,
-    attendanceRate: 0,
-    attendanceRecords: [],
+    address: member.address || "",
+    occupation: member.occupation || "",
+    education: member.educationalBackground || "",
+    ministriesInvolved: member.ministries || "",
+    cellGroupName: member.cellGroupName || "",
+    servicesAttended: member.servicesAttended || 0,
+    servicesMissed: member.servicesMissed || 0,
+    attendanceRate: member.attendanceRate || 0,
+    attendanceRecords: member.attendanceRecords || [],
     initials:
-      nameParts[0]?.[0]?.toUpperCase() +
+      (nameParts[0]?.[0]?.toUpperCase() || "") +
       (nameParts[1]?.[0]?.toUpperCase() || ""),
   };
 }

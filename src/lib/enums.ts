@@ -141,6 +141,7 @@ export enum MembershipStatus {
   VISITOR = "VISITOR",
   MEMBER = "MEMBER",
   VOLUNTEER = "VOLUNTEER",
+  WORKER = "WORKER",
   LEADER = "LEADER",
   CONVERT = "NEW CONVERT",
 }
