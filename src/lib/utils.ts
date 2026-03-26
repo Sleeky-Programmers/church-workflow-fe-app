@@ -33,6 +33,12 @@ const HOURS_IN_DAY = 24;
 const MILLISECONDS_IN_DAY =
   MILLISECONDS_IN_SECOND * SECONDS_IN_MINUTE * MINUTES_IN_HOUR * HOURS_IN_DAY;
 
+type Member = {
+  id: string;
+  name: string;
+  gender?: "male" | "female" | "other";
+};
+
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
@@ -266,17 +272,30 @@ export function getInitials(name: string): string {
   return name.slice(0, 2).toUpperCase();
 }
 
-export function calculateGenderSplit(memberIds: string[]): {
+export function calculateGenderSplit(members: Member[]): {
   males: number;
   females: number;
+  others: number;
 } {
-  const total = memberIds.length;
-  const males = Math.floor(total * 0.64);
-  const females = total - males;
+  let males = 0;
+  let females = 0;
+  let others = 0;
 
-  return { males, females };
+  for (const member of members) {
+    switch (member.gender?.toLowerCase()) {
+      case "male":
+        males += 1;
+        break;
+      case "female":
+        females += 1;
+        break;
+      default:
+        others += 1;
+    }
+  }
+
+  return { males, females, others };
 }
-
 type NotificationMeta = {
   icon: LucideIcon;
   color: string;

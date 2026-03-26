@@ -24,8 +24,6 @@ type AttendanceStatsViewProps = {
 export function AttendanceStatsView({
   presentMembers,
   absentMembers,
-  presentCount,
-  absentCount,
   isMembersLoaded,
   isAttendanceMarked,
   showLoadMembersButton = true,
@@ -34,17 +32,10 @@ export function AttendanceStatsView({
   onOpenPresentMembers,
   onOpenAbsentMembers,
 }: AttendanceStatsViewProps) {
-  const presentIds =
-    presentCount !== undefined
-      ? Array.from({ length: presentCount }, (_, i) => `present-${i}`)
-      : presentMembers.map((m) => m.id);
-  const absentIds =
-    absentCount !== undefined
-      ? Array.from({ length: absentCount }, (_, i) => `absent-${i}`)
-      : absentMembers.map((m) => m.id);
+  console.log(presentMembers);
 
-  const presentSplit = calculateGenderSplit(presentIds);
-  const absentSplit = calculateGenderSplit(absentIds);
+  const presentSplit = calculateGenderSplit(presentMembers);
+  const absentSplit = calculateGenderSplit(absentMembers);
 
   return (
     <div className="flex-1 flex flex-col">

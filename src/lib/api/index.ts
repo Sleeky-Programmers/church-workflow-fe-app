@@ -613,7 +613,6 @@ export async function getAttendanceRecord(
     stats: raw.stats || null,
   };
 }
-
 export async function saveAttendance(data: {
   serviceId: string;
   date: string;
@@ -635,6 +634,28 @@ export async function saveAttendance(data: {
   );
 }
 
+export async function saveAbsentAttendance(data: {
+  serviceId: string;
+  date: string;
+  absentMembers: string[];
+}): Promise<{ message: string }> {
+  if (!data.absentMembers || data.absentMembers.length === 0) {
+    return { message: "No absent members to save" };
+  }
+
+  const query = new URLSearchParams({ serviceId: data.serviceId });
+
+  return authenticatedFetch<{ message: string }>(
+    `/attendance/mark-absent?${query.toString()}`,
+    {
+      method: "POST",
+      body: JSON.stringify({
+        date: data.date,
+        memberIds: data.absentMembers,
+      }),
+    },
+  );
+}
 type SmallTeamMemberApi = {
   id: string;
   fullName: string;
