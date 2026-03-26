@@ -546,6 +546,7 @@ export async function fetchMembers(
       _id: string;
       fullName: string;
       email?: string;
+      gender?: string;
     }>
   >(`/members?${query.toString()}`, { method: "GET" });
 
@@ -555,6 +556,7 @@ export async function fetchMembers(
       name: member.fullName,
       email: member.email || "",
       initials: getInitials(member.fullName || ""),
+      gender: member.gender,
     })) || [];
 
   return {
