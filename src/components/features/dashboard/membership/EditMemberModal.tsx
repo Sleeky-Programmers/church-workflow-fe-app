@@ -80,13 +80,11 @@ export function EditMemberModal({ member, onClose, onSave }: Props) {
     >
       <div className="w-full max-w-3xl" onClick={(e) => e.stopPropagation()}>
         <Card className="p-6 space-y-6 max-h-[90vh] overflow-y-auto">
-          {/* Header */}
           <div>
             <Heading level={2}>Edit Member Profile</Heading>
             <Text className="mt-1">Update member information</Text>
           </div>
 
-          {/* Profile */}
           <div className="space-y-6">
             <div className="grid grid-cols-2 gap-4">
               <div>
@@ -140,7 +138,6 @@ export function EditMemberModal({ member, onClose, onSave }: Props) {
               </div>
             </div>
 
-            {/* Contact */}
             <div>
               <Heading level={4}>Contact</Heading>
               <div className="grid grid-cols-2 gap-4 mt-2">
@@ -170,7 +167,6 @@ export function EditMemberModal({ member, onClose, onSave }: Props) {
               </div>
             </div>
 
-            {/* Church Info */}
             <div>
               <Heading level={4}>Church Info</Heading>
 
@@ -252,7 +248,6 @@ export function EditMemberModal({ member, onClose, onSave }: Props) {
             </div>
           </div>
 
-          {/* Actions */}
           <div className="flex justify-end gap-2">
             <Button variant="outline" onClick={onClose}>
               Cancel
