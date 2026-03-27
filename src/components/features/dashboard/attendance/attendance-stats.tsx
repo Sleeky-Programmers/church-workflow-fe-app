@@ -32,8 +32,6 @@ export function AttendanceStatsView({
   onOpenPresentMembers,
   onOpenAbsentMembers,
 }: AttendanceStatsViewProps) {
-  console.log(presentMembers);
-
   const presentSplit = calculateGenderSplit(presentMembers);
   const absentSplit = calculateGenderSplit(absentMembers);
 
