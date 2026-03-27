@@ -161,7 +161,6 @@ export function MemberDetailsPage({ member, onBack }: MemberDetailsPageProps) {
         </div>
       </div>
 
-      {/* Tab Content */}
       <div className="bg-gray-50 p-3 sm:p-6">
         {activeTab === "overview" && (
           <MemberOverviewTab
