@@ -3,19 +3,18 @@
 import { useState, useEffect, useCallback } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, Plus, Edit, MoreVertical } from "lucide-react";
+import { Search, Plus, MoreVertical } from "lucide-react";
 import Heading from "@/components/ui/typography/Heading";
 import { MembersTable } from "@/components/features/dashboard/membership/members-table";
-import { fetchMembers } from "@/services/memberService";
+import { fetchMembers, uploadMembersCsv } from "@/services/memberService";
 import { MemberProfile } from "@/types";
 import { MemberDetailsPage } from "@/components/features/dashboard/membership/member-details-page";
 import { AddMemberModal } from "@/components/features/dashboard/membership/add-member-modal";
 import { AddMemberFormatModal } from "@/components/features/dashboard/membership/select-modal";
 import { useToast } from "@/hooks/use-toast";
-import { uploadMembersCsv } from "@/services/memberService";
 import { useDebounce } from "@/hooks/use-debounce";
 import { MemberFormType } from "@/lib/enums";
-
+import { Text } from "@/components/ui/typography/Text";
 import {
   Select,
   SelectContent,
@@ -55,7 +54,6 @@ export default function MembershipPage() {
         searchOverride,
         filterOverride,
       );
-
       setMembers(response.data);
       setPagination(response.pagination);
     },
@@ -67,12 +65,9 @@ export default function MembershipPage() {
       try {
         await loadMembers();
       } catch (err) {
-        toast({
-          title: "Cannot fetch members data",
-        });
+        toast({ title: "Cannot fetch members data" });
       }
     };
-
     load();
   }, [page, debouncedSearch, filterValue, loadMembers]);
 
@@ -87,11 +82,10 @@ export default function MembershipPage() {
       setIsAddModalOpen(false);
       setSelectedFormat(null);
     } catch (err) {
-      toast({
-        title: "Cannot fetch members data",
-      });
+      toast({ title: "Cannot fetch members data" });
     }
   };
+
   const handleFormatSelect = (
     format: MemberFormType.FORM | MemberFormType.CSV,
   ) => {
@@ -186,21 +180,31 @@ export default function MembershipPage() {
                 className="pl-10"
               />
             </div>
-            <div>
-              {" "}
-              <Select value={filterValue} onValueChange={setFilterValue}>
-                <SelectTrigger className="w-[120px]">
-                  <SelectValue placeholder="Filter" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Filter</SelectItem>
-                  <SelectItem value="male">Male</SelectItem>
-                  <SelectItem value="female">Female</SelectItem>
-                  <SelectItem value="isBaptized">Baptized</SelectItem>
-                  <SelectItem value="new-members">New Members</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+
+            <Select value={filterValue} onValueChange={setFilterValue}>
+              <SelectTrigger className="w-[160px] border border-gray-300 rounded-lg shadow-sm hover:shadow-md transition-all duration-150 focus:ring-2 focus:ring-blue-400">
+                <SelectValue placeholder="Filter Members" />
+              </SelectTrigger>
+
+              <SelectContent className="bg-white shadow-lg border border-gray-200 rounded-lg">
+                <SelectItem value="all">
+                  <Text text="All Members" variant="default" />
+                </SelectItem>
+                <SelectItem value="male">
+                  <Text text="Male" variant="default" />
+                </SelectItem>
+                <SelectItem value="female">
+                  <Text text="Female" variant="default" />
+                </SelectItem>
+                <SelectItem value="isBaptized">
+                  <Text text="Baptized" variant="default" />
+                </SelectItem>
+                <SelectItem value="new-members">
+                  <Text text="New Members" variant="default" />
+                </SelectItem>
+              </SelectContent>
+            </Select>
+
             <Button
               onClick={() => setIsFormatModalOpen(true)}
               variant="default"
@@ -210,6 +214,7 @@ export default function MembershipPage() {
               {isCsvUploading ? "Uploading..." : "Add a member"}
             </Button>
           </div>
+
           {isMobile && (
             <Button variant="ghost" size="icon" className="h-8 w-8">
               <MoreVertical className="h-4 w-4" />

@@ -28,7 +28,9 @@ type Props = {
 
 export function EditMemberModal({ member, onClose, onSave }: Props) {
   const normalizeDate = (dateStr?: string) => {
-    if (!dateStr) return "";
+    if (!dateStr) {
+      return "";
+    }
     const date = new Date(dateStr);
     return !isNaN(date.getTime()) ? date.toISOString().split("T")[0] : "";
   };
@@ -62,7 +64,9 @@ export function EditMemberModal({ member, onClose, onSave }: Props) {
   };
 
   const handleSubmit = async () => {
-    if (!validateForm()) return;
+    if (!validateForm()) {
+      return;
+    }
 
     try {
       setIsSaving(true);

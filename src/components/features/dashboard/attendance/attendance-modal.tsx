@@ -231,7 +231,9 @@ export function AttendanceModal({
   };
 
   const handleSave = async () => {
-    if (!service || !date) return;
+    if (!service || !date) {
+      return;
+    }
     setIsSaving(true);
 
     try {
@@ -281,7 +283,9 @@ export function AttendanceModal({
     onClose();
   };
 
-  if (!service || !date) return null;
+  if (!service || !date) {
+    return null;
+  }
 
   const parsedDate = new Date(date);
   const presentMembers = getPresentMembers();

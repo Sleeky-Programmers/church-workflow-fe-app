@@ -46,12 +46,12 @@ export function MembersTable({
           <div className="flex items-center justify-between px-3 py-3">
             <div className="flex items-center gap-3">
               <Checkbox />
-              <Text variant="default">All Members</Text>
+              <Text text="All Members" variant="default" />
             </div>
 
             {onAddMember && (
               <Button size="sm" className="h-8 px-4" onClick={onAddMember}>
-                Add
+                <Text text="Add" variant="default" />
               </Button>
             )}
           </div>
@@ -59,13 +59,15 @@ export function MembersTable({
           {members.map((member) => (
             <div
               key={member.id}
-              className="flex items-center justify-between px-3 py-3"
+              className="flex items-center justify-between px-3 py-3 hover:bg-gray-50 cursor-pointer"
             >
               <div className="flex items-center gap-3 min-w-0">
                 <Checkbox />
-                <Text variant="default" className="truncate">
-                  {member.fullName}
-                </Text>
+                <Text
+                  text={member.fullName}
+                  variant="default"
+                  className="truncate"
+                />
               </div>
 
               <Button
@@ -74,7 +76,7 @@ export function MembersTable({
                 className="h-8"
                 onClick={() => onRowClick(member.id)}
               >
-                View Profile
+                <Text text="View Profile" variant="default" />
               </Button>
             </div>
           ))}
@@ -82,29 +84,30 @@ export function MembersTable({
 
         {members.length === 0 && (
           <div className="p-6 text-center">
-            <Text variant="muted">No members found</Text>
+            <Text text="No members found" variant="muted" />
           </div>
         )}
 
         {pagination && members.length > 0 && (
           <div className="flex items-center justify-between px-4 py-3 border-t">
-            <Span>
-              Page {currentPage} of {totalPages}
-            </Span>
+            <Span
+              text={`Page ${currentPage} of ${totalPages}`}
+              variant="default"
+            />
             <div className="flex items-center gap-2">
               <Button
                 variant="outline"
                 disabled={!pagination.hasPreviousPage}
                 onClick={() => onPageChange(currentPage - 1)}
               >
-                Previous
+                <Text text="Previous" variant="default" />
               </Button>
               <Button
                 variant="outline"
                 disabled={!pagination.hasNextPage}
                 onClick={() => onPageChange(currentPage + 1)}
               >
-                Next
+                <Text text="Next" variant="default" />
               </Button>
             </div>
           </div>
@@ -122,11 +125,24 @@ export function MembersTable({
               <TableHead>
                 <Checkbox />
               </TableHead>
-              <TableHead>Name</TableHead>
-              <TableHead>Birthday</TableHead>
-              <TableHead>Gender</TableHead>
-              <TableHead>Phone</TableHead>
-              <TableHead>Email</TableHead>
+              <TableHead>
+                <Text text="Name" variant="default" />
+              </TableHead>
+              <TableHead>
+                <Text text="Birthday" variant="default" />
+              </TableHead>
+              <TableHead>
+                <Text text="Gender" variant="default" />
+              </TableHead>
+              <TableHead>
+                <Text text="Phone" variant="default" />
+              </TableHead>
+              <TableHead>
+                <Text text="Email" variant="default" />
+              </TableHead>
+              <TableHead>
+                <Text text="Action" variant="default" />
+              </TableHead>
             </TableRow>
           </TableHeader>
 
@@ -134,7 +150,6 @@ export function MembersTable({
             {members.map((member) => (
               <TableRow
                 key={member.id}
-                onClick={() => onRowClick(member.id)}
                 className="cursor-pointer hover:bg-gray-50"
               >
                 <TableCell onClick={(e) => e.stopPropagation()}>
@@ -142,25 +157,37 @@ export function MembersTable({
                 </TableCell>
 
                 <TableCell>
-                  <Text variant="default">{member.fullName}</Text>
+                  <Text text={member.fullName} variant="default" />
                 </TableCell>
 
                 <TableCell>
-                  <Text variant="default">{formatDate(member.birthday)}</Text>
+                  <Text text={formatDate(member.birthday)} variant="default" />
                 </TableCell>
 
                 <TableCell>
-                  <Text variant="default">{member.gender}</Text>
+                  <Text text={member.gender} variant="default" />
                 </TableCell>
 
                 <TableCell>
-                  <Text variant="default">{member.phone}</Text>
+                  <Text text={member.phone} variant="default" />
                 </TableCell>
 
                 <TableCell>
-                  <Text variant="default" className="truncate">
-                    {member.email}
-                  </Text>
+                  <Text
+                    text={member.email}
+                    variant="default"
+                    className="truncate"
+                  />
+                </TableCell>
+
+                <TableCell>
+                  <Button
+                    onClick={() => onRowClick(member.id)}
+                    variant="outline"
+                    size="sm"
+                  >
+                    <Text text="View Profile" variant="default" />
+                  </Button>
                 </TableCell>
               </TableRow>
             ))}
@@ -170,29 +197,30 @@ export function MembersTable({
 
       {members.length === 0 && (
         <div className="p-8 text-center">
-          <Text variant="muted">No members found</Text>
+          <Text text="No members found" variant="muted" />
         </div>
       )}
 
       {pagination && members.length > 0 && (
         <div className="flex items-center justify-between px-4 py-3 border-t">
-          <Span>
-            Page {currentPage} of {totalPages}
-          </Span>
+          <Span
+            text={`Page ${currentPage} of ${totalPages}`}
+            variant="default"
+          />
           <div className="flex items-center gap-2">
             <Button
               variant="outline"
               disabled={!pagination.hasPreviousPage}
               onClick={() => onPageChange(currentPage - 1)}
             >
-              Previous
+              <Text text="Previous" variant="default" />
             </Button>
             <Button
               variant="outline"
               disabled={!pagination.hasNextPage}
               onClick={() => onPageChange(currentPage + 1)}
             >
-              Next
+              <Text text="Next" variant="default" />
             </Button>
           </div>
         </div>

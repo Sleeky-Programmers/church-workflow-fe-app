@@ -275,11 +275,9 @@ export function getInitials(name: string): string {
 export function calculateGenderSplit(members: Member[]): {
   males: number;
   females: number;
-  others: number;
 } {
   let males = 0;
   let females = 0;
-  let others = 0;
 
   for (const member of members) {
     switch (member.gender?.toLowerCase()) {
@@ -289,12 +287,10 @@ export function calculateGenderSplit(members: Member[]): {
       case "female":
         females += 1;
         break;
-      default:
-        others += 1;
     }
   }
 
-  return { males, females, others };
+  return { males, females };
 }
 type NotificationMeta = {
   icon: LucideIcon;
