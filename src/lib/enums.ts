@@ -161,5 +161,5 @@ export enum MemberFilter {
   LEADER = "leader",
   CONVERT = "new-convert",
   NEW_MEMBERS = "new-members",
-  IS_BAPTIZED = "isBaptized",
+  IS_BAPTIZED = "is-baptized",
 }

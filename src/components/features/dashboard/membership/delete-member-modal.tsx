@@ -67,8 +67,8 @@ export function DeleteMembersModal({
         </DialogDescription>
 
         <div className="flex-1 min-h-0 overflow-y-auto px-0 sm:px-6 py-3 sm:py-6">
-          <Text variant="menuActive" className="text-lg sm:text-xl mb-2">
-            Confirm Deletion
+          <Text className="text-lg sm:text-xl mb-2">
+            Remove {memberIds.length === 1 ? "member" : "members"}?
           </Text>
           <Text variant="default">
             Are you sure you want to remove these selected{" "}
