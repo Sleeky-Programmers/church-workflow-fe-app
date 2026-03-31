@@ -102,7 +102,7 @@ export function AddMemberFormatModal({
             >
               <UploadIcon className="h-12 w-12 text-primary-600" />
               <Text variant="blue" className="uppercase">
-                Upload CVS
+                Upload CSV
               </Text>
             </Button>
           </div>

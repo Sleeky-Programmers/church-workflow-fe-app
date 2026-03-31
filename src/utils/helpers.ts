@@ -8,3 +8,10 @@ export function formatDate(isoDate?: string): string {
 
   return `${day}/${month}/${year}`;
 }
+
+export const formatLabel = (value: string) => {
+  return value
+    .toLowerCase()
+    .replace(/_/g, " ")
+    .replace(/\b\w/g, (c) => c.toUpperCase());
+};

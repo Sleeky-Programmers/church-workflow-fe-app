@@ -22,6 +22,10 @@ const buttonVariants = cva(
         primary:
           "bg-primary text-primary-foreground px-6 shadow hover:bg-primary/90",
         starred: "bg-primary/15 text-primary hover:bg-primary/20",
+        filter:
+          "bg-transparent border border-gray-300 text-gray-700 hover:bg-transparent active:bg-transparent focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1",
+        filterHeader:
+          "bg-transparent hover:bg-transparent text-sm  px-0 py-1 justify-between w-full focus-visible:ring-0 focus:outline-none",
       },
       size: {
         default: "h-9 px-4 py-2",

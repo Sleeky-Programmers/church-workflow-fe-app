@@ -18,7 +18,7 @@ import { MemberOverviewTab } from "./member-overview-tab";
 import { MemberAttendanceTab } from "./member-attendance-tab";
 import { fetchMemberAttendanceHistory } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
-import { EditMemberModal } from "./EditMemberModal";
+import { EditMemberModal } from "./edit-member-modal";
 import { updateMember } from "@/services/memberService";
 
 type MemberDetailsPageProps = {
