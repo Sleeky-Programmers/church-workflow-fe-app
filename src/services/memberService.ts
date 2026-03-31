@@ -142,7 +142,6 @@ export function uploadMembersCsv(
       reject(new Error("Network error"));
     };
 
-    // ✅ Abort support (cancel upload)
     if (signal) {
       signal.addEventListener("abort", () => {
         xhr.abort();
@@ -150,7 +149,6 @@ export function uploadMembersCsv(
       });
     }
 
-    // ✅ Send file
     const formData = new FormData();
     formData.append("file", file);
 
