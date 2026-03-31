@@ -13,6 +13,33 @@ export interface FetchMembersResponse {
     hasNextPage: boolean;
   };
 }
+
+function normalizeMemberPayload(data: Partial<NewMemberData>) {
+  return {
+    title: data.title || undefined,
+    fullName: data.fullName,
+    email: data.email || undefined,
+    phoneNumber: data.phone || undefined,
+    gender: data.gender,
+    birthday: data.birthday || undefined,
+    maritalStatus: data.maritalStatus,
+    dateOfMarriage: data.dateOfMarriage || undefined,
+    occupation: data.occupation || undefined,
+    address: data.address || undefined,
+    educationalBackground: data.education || undefined,
+    membershipStatus: data.membershipStatus,
+    dateJoined: data.dateJoined || undefined,
+    previousChurchMembership: data.previousChurchMembership || undefined,
+    isBaptized: data.baptized,
+    ministries: data.ministriesInvolved || undefined,
+    volunteerPreferences: data.volunteersPreference || undefined,
+    cellGroupName:
+      data.smallGroupMember === "Yes"
+        ? data.smallGroupName || undefined
+        : undefined,
+  };
+}
+
 export async function fetchMembers(
   page = 1,
   limit = 10,
@@ -27,7 +54,6 @@ export async function fetchMembers(
   if (search) {
     params.append("search", search);
   }
-
   if (filter && filter !== "all") {
     params.append("filter", filter);
   }
@@ -46,32 +72,22 @@ export async function fetchMembers(
 }
 
 export async function createMember(data: NewMemberData) {
-  const normalizedPayload = {
-    title: data.title || undefined,
-    fullName: data.fullName,
-    email: data.email || undefined,
-    phoneNumber: data.phone || undefined,
-    gender: data.gender,
-    birthday: data.birthday || undefined,
-    maritalStatus: data.maritalStatus,
-    dateOfMarriage: data.dateOfMarriage || undefined,
-    occupation: data.occupation || undefined,
-    educationalBackground: data.education || undefined,
-    membershipStatus: data.membershipStatus,
-    dateJoined: data.dateJoined || undefined,
-    previousChurchMembership: data.previousChurchMembership || undefined,
-    isBaptized: data.baptized,
-    ministries: data.ministriesInvolved || undefined,
-    volunteerPreferences: data.volunteersPreference || undefined,
-    cellGroupName:
-      data.smallGroupMember === "Yes"
-        ? data.smallGroupName || undefined
-        : undefined,
-  };
+  const payload = normalizeMemberPayload(data);
 
   const response = await authenticatedFetch<any>("/members/add", {
     method: "POST",
-    body: JSON.stringify(normalizedPayload),
+    body: JSON.stringify(payload),
+  });
+
+  return mapMember(response);
+}
+
+export async function updateMember(id: string, data: Partial<NewMemberData>) {
+  const payload = normalizeMemberPayload(data);
+
+  const response = await authenticatedFetch<any>(`/members/${id}`, {
+    method: "PUT",
+    body: JSON.stringify(payload),
   });
 
   return mapMember(response);

@@ -62,6 +62,7 @@ export interface GoogleAuthPayload {
 export interface GoogleAuthResponse {
   message: string;
   accessToken: string;
+  refreshToken: string;
   user?: AuthUserSummary;
 }
 

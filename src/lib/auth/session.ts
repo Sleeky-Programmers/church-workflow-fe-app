@@ -1,4 +1,5 @@
 const ACCESS_TOKEN_KEY = "accessToken";
+const REFRESH_TOKEN_KEY = "refreshToken";
 const CURRENT_USER_KEY = "auth:current-user";
 const USER_PROFILE_PREFIX = "auth:user-profile:";
 const ONBOARDING_PREFIX = "onboarding:state:";
@@ -130,6 +131,7 @@ export function getCurrentUserKey(): string | null {
 
 export function initializeAuthSession(args: {
   accessToken: string;
+  refreshToken?: string;
   emailHint?: string;
   user?: SessionUser;
 }): UserProfile {
@@ -164,6 +166,10 @@ export function initializeAuthSession(args: {
   };
 
   window.localStorage.setItem(ACCESS_TOKEN_KEY, args.accessToken);
+
+  if (args.refreshToken) {
+    window.localStorage.setItem(REFRESH_TOKEN_KEY, args.refreshToken);
+  }
   window.localStorage.setItem(CURRENT_USER_KEY, resolvedUserKey);
   window.localStorage.setItem(
     profileStorageKey(resolvedUserKey),

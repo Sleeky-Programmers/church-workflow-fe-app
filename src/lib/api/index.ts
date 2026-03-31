@@ -1,5 +1,6 @@
 import { InviteFormData, PendingInvite, User, UserAction } from "@/types/user";
 import { MOCK_USERS } from "../user-data";
+
 import {
   SignupPayload,
   AdminRegisterPayload,
@@ -45,16 +46,34 @@ export async function authenticatedFetch<T>(
   });
 
   if (response.status === 401) {
-    if (typeof window !== "undefined") {
+    try {
+      const refreshData = await refreshAuthToken();
+      localStorage.setItem("accessToken", refreshData.accessToken);
+      localStorage.setItem("refreshToken", refreshData.refreshToken);
+
+      const retryResponse = await fetch(`${BASE_URL}${endpoint}`, {
+        ...options,
+        headers: {
+          Authorization: `Bearer ${refreshData.accessToken}`,
+          ...(isFormData ? {} : { "Content-Type": "application/json" }),
+          ...options.headers,
+        },
+      });
+
+      if (!retryResponse.ok) {
+        throw new Error("Retry failed");
+      }
+      return retryResponse.json();
+    } catch (err) {
       localStorage.removeItem("accessToken");
+      localStorage.removeItem("refreshToken");
+
       if (!window.location.pathname.includes("/auth/login")) {
         window.location.href = "/auth/login";
       }
+
+      throw err;
     }
-    const error: any = new Error("Unauthorized");
-    error.response = { status: 401 };
-    error.status = 401;
-    throw error;
   }
 
   const text = await response.text();
@@ -428,6 +447,35 @@ function normalizeDayName(value?: string): string | undefined {
   return undefined;
 }
 
+export function getRefreshToken(): string | null {
+  if (typeof window === "undefined") {
+    return null;
+  }
+  return localStorage.getItem("refreshToken");
+}
+
+export async function refreshAuthToken() {
+  const refreshToken = getRefreshToken();
+
+  if (!refreshToken) {
+    throw new Error("No refresh token");
+  }
+
+  const response = await fetch(`${BASE_URL}/auth/refresh-token`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ refreshToken }),
+  });
+
+  if (!response.ok) {
+    throw new Error("Refresh failed");
+  }
+
+  return response.json();
+}
+
 function mapChurchServiceToRegular(service: ChurchServiceApi): RegularService {
   const dayName = normalizeDayName(service.day);
   const daysFromArray = Array.isArray((service as any).days)
@@ -498,6 +546,7 @@ export async function fetchMembers(
       _id: string;
       fullName: string;
       email?: string;
+      gender?: string;
     }>
   >(`/members?${query.toString()}`, { method: "GET" });
 
@@ -507,6 +556,7 @@ export async function fetchMembers(
       name: member.fullName,
       email: member.email || "",
       initials: getInitials(member.fullName || ""),
+      gender: member.gender,
     })) || [];
 
   return {
@@ -565,7 +615,6 @@ export async function getAttendanceRecord(
     stats: raw.stats || null,
   };
 }
-
 export async function saveAttendance(data: {
   serviceId: string;
   date: string;
@@ -587,6 +636,28 @@ export async function saveAttendance(data: {
   );
 }
 
+export async function saveAbsentAttendance(data: {
+  serviceId: string;
+  date: string;
+  absentMembers: string[];
+}): Promise<{ message: string }> {
+  if (!data.absentMembers || data.absentMembers.length === 0) {
+    return { message: "No absent members to save" };
+  }
+
+  const query = new URLSearchParams({ serviceId: data.serviceId });
+
+  return authenticatedFetch<{ message: string }>(
+    `/attendance/mark-absent?${query.toString()}`,
+    {
+      method: "POST",
+      body: JSON.stringify({
+        date: data.date,
+        memberIds: data.absentMembers,
+      }),
+    },
+  );
+}
 type SmallTeamMemberApi = {
   id: string;
   fullName: string;

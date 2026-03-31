@@ -16,14 +16,15 @@ import { useAttendanceModal } from "@/hooks/useAttendanceModal";
 import {
   fetchMembers,
   getAttendanceRecord,
-  getCurrentAdmin,
   saveAttendance,
+  saveAbsentAttendance,
 } from "@/lib/api";
 import { SelectMembersView } from "./select-member-view";
 import { AttendanceStatsView } from "./attendance-stats";
 import { Span } from "@/components/ui/typography/Text";
 import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { getCurrentUserProfile } from "@/lib/auth/session";
 
 type AttendanceModalProps = {
   isOpen: boolean;
@@ -62,6 +63,8 @@ export function AttendanceModal({
     initializeAttendance,
   } = useAttendanceModal();
 
+  const userProfile = getCurrentUserProfile();
+  const admin = userProfile?.fullName || "Unknown";
   const [isSaving, setIsSaving] = useState(false);
   const [hasMembersLoaded, setHasMembersLoaded] = useState(false);
   const [isMembersDialogOpen, setIsMembersDialogOpen] = useState(false);
@@ -231,43 +234,32 @@ export function AttendanceModal({
     if (!service || !date) {
       return;
     }
-
     setIsSaving(true);
+
     try {
-      await saveAttendance({
-        serviceId: service.id,
-        date,
-        presentMembers: state.presentMembers,
-      });
+      if (state.presentMembers.length > 0) {
+        await saveAttendance({
+          serviceId: service.id,
+          date,
+          presentMembers: state.presentMembers,
+        });
+      }
 
-      const admin = getCurrentAdmin();
-      const nextRecord = {
-        serviceId: service.id,
-        date,
-        presentMembers: state.presentMembers,
-        absentMembers: state.allMembers
-          .map((member) => member.id)
-          .filter((id) => !state.presentMembers.includes(id)),
-        recordedBy: admin.name,
-        location: service.location || "",
-        startTime: service.startTime,
-        endTime: service.endTime,
-      };
-
-      setAttendanceRecord(nextRecord);
-      if (state.allMembers.length) {
-        setAttendanceStats({
-          presentCount: nextRecord.presentMembers.length,
-          absentCount: nextRecord.absentMembers.length,
+      if (absentSelections.length > 0) {
+        await saveAbsentAttendance({
+          serviceId: service.id,
+          date,
+          absentMembers: absentSelections,
         });
       }
 
       onSave({
         serviceId: service.id,
         date,
-        presentMembers: nextRecord.presentMembers,
-        absentMembers: nextRecord.absentMembers,
+        presentMembers: state.presentMembers,
+        absentMembers: absentSelections,
       });
+
       handleClose();
     } catch (error: any) {
       toast({
@@ -291,9 +283,10 @@ export function AttendanceModal({
     onClose();
   };
 
-  if (!service || !date) return null;
+  if (!service || !date) {
+    return null;
+  }
 
-  const admin = getCurrentAdmin();
   const parsedDate = new Date(date);
   const presentMembers = getPresentMembers();
   const absentMembers = getAbsentMembers();
@@ -364,7 +357,7 @@ export function AttendanceModal({
           </div>
           <div className="flex items-center gap-2">
             <User className="h-4 w-4" />
-            <Span>Recorded by: {admin.name}</Span>
+            <Span>Recorded by: {admin}</Span>
           </div>
           <div className="flex items-center gap-2">
             <Clock className="h-4 w-4" />

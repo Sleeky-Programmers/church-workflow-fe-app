@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { MemberAttendanceRecord, MemberProfile } from "@/types";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Edit, ChevronDown } from "lucide-react";
+import { ArrowLeft, Edit } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   Select,
@@ -18,6 +18,8 @@ import { MemberOverviewTab } from "./member-overview-tab";
 import { MemberAttendanceTab } from "./member-attendance-tab";
 import { fetchMemberAttendanceHistory } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
+import { EditMemberModal } from "./EditMemberModal";
+import { updateMember } from "@/services/memberService";
 
 type MemberDetailsPageProps = {
   member: MemberProfile;
@@ -31,6 +33,8 @@ export function MemberDetailsPage({ member, onBack }: MemberDetailsPageProps) {
   );
   const [filterValue, setFilterValue] = useState("all");
   const [isAttendanceLoading, setIsAttendanceLoading] = useState(false);
+  const [openEdit, setOpenEdit] = useState(false);
+  const [currentMember, setCurrentMember] = useState(member);
   const [attendanceRecords, setAttendanceRecords] = useState<
     MemberAttendanceRecord[]
   >([]);
@@ -74,7 +78,6 @@ export function MemberDetailsPage({ member, onBack }: MemberDetailsPageProps) {
         setIsAttendanceLoading(false);
       }
     };
-
     loadAttendance();
   }, [member.id, toast]);
 
@@ -93,7 +96,6 @@ export function MemberDetailsPage({ member, onBack }: MemberDetailsPageProps) {
               Back
             </Span>
           </Button>
-
           <Heading level={2}>Member Details</Heading>
         </div>
       </div>
@@ -102,16 +104,15 @@ export function MemberDetailsPage({ member, onBack }: MemberDetailsPageProps) {
         <div className="flex items-start gap-4">
           <Avatar className="h-16 w-16">
             <AvatarFallback className="bg-gray-900 text-white text-lg font-semibold">
-              {member.initials}
+              {currentMember.initials}
             </AvatarFallback>
           </Avatar>
-
           <div>
             <Heading level={3} className="mb-1">
-              {member.fullName}
+              {currentMember.fullName}
             </Heading>
             <Text variant="muted" className="text-sm">
-              {member.email}
+              {currentMember.email}
             </Text>
           </div>
         </div>
@@ -138,6 +139,7 @@ export function MemberDetailsPage({ member, onBack }: MemberDetailsPageProps) {
             <Button
               variant="outline"
               className="flex items-center gap-2 h-8 sm:h-9"
+              onClick={() => setOpenEdit(true)}
             >
               <Edit className="h-4 w-4" />
               <Span className="hidden sm:inline">Edit</Span>
@@ -158,10 +160,11 @@ export function MemberDetailsPage({ member, onBack }: MemberDetailsPageProps) {
           )}
         </div>
       </div>
+
       <div className="bg-gray-50 p-3 sm:p-6">
         {activeTab === "overview" && (
           <MemberOverviewTab
-            member={member}
+            member={currentMember}
             attendanceStats={attendanceStats}
           />
         )}
@@ -175,6 +178,35 @@ export function MemberDetailsPage({ member, onBack }: MemberDetailsPageProps) {
           />
         )}
       </div>
+
+      {openEdit && (
+        <EditMemberModal
+          member={currentMember}
+          onClose={() => setOpenEdit(false)}
+          onSave={async (data) => {
+            try {
+              const updated = await updateMember(currentMember.id, data);
+
+              setCurrentMember((prev) => ({
+                ...prev,
+                ...updated,
+              }));
+              toast({
+                title: "Member updated",
+                description: "Changes saved successfully",
+              });
+
+              setOpenEdit(false);
+            } catch (error: any) {
+              toast({
+                title: "Update failed",
+                description: error?.message || "Something went wrong",
+                variant: "destructive",
+              });
+            }
+          }}
+        />
+      )}
     </div>
   );
 }

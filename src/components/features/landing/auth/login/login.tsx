@@ -44,6 +44,7 @@ export default function LoginForm({ onForgotPassword }: LoginFormProps) {
       const data = await login(values);
       const profile = initializeAuthSession({
         accessToken: data.accessToken,
+        refreshToken: data.refreshToken,
         emailHint: values.email,
         user: data.user,
       });
