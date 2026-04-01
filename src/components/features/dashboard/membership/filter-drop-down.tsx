@@ -13,26 +13,14 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search } from "lucide-react";
 import { formatLabel } from "@/utils/helpers";
-
-interface FilterState {
-  gender: Gender | null;
-  maritalStatus: MaritalStatus | null;
-  membershipStatus: MembershipStatus | null;
-}
-
-interface Props {
-  filters: FilterState;
-  setFilters: (filters: FilterState) => void;
-  searchQuery: string;
-  setSearchQuery: (value: string) => void;
-}
+import { FilterProps } from "@/lib/interface";
 
 const FilterDropdown = ({
   filters,
   setFilters,
   searchQuery,
   setSearchQuery,
-}: Props) => {
+}: FilterProps) => {
   const [openSection, setOpenSection] = useState("gender");
   const [open, setOpen] = useState(false);
 
@@ -98,18 +86,18 @@ const FilterDropdown = ({
 
           {openSection === "gender" && (
             <div className="flex gap-2 mt-3">
-              {Object.values(Gender).map((g) => (
+              {Object.values(Gender).map((gender) => (
                 <Button
-                  key={g}
+                  key={gender}
                   onClick={() =>
                     setFilters({
                       ...filters,
-                      gender: filters.gender === g ? null : g,
+                      gender: filters.gender === gender ? null : gender,
                     })
                   }
-                  className={pillClass(filters.gender === g)}
+                  className={pillClass(filters.gender === gender)}
                 >
-                  {formatLabel(g)}
+                  {formatLabel(gender)}
                 </Button>
               ))}
             </div>

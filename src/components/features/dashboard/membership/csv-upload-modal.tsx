@@ -8,64 +8,24 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+
 import Heading from "@/components/ui/typography/Heading";
 import { Text, Span } from "@/components/ui/typography/Text";
-import { Card } from "@/components/ui/card";
+
 import { useToast } from "@/hooks/use-toast";
 import { uploadMembersCsv } from "@/services/memberService";
 import { getAccessToken } from "@/lib/auth/session";
 import Papa from "papaparse";
 import { FaPause, FaPlay, FaTimes } from "react-icons/fa";
+import { MemberTitle, MembershipStatus } from "@/lib/enums";
 import {
-  Gender,
-  MemberTitle,
-  MaritalStatus,
-  MembershipStatus,
-} from "@/lib/enums";
-import { csvContent } from "@/lib/data";
+  GENDER_MAP,
+  MEMBERSHIP_MAP,
+  MARITAL_MAP,
+  TITLE_MAP,
+} from "@/lib/constant";
 
-type UploadFile = {
-  file: File;
-  progress: number;
-  status: "uploading" | "paused" | "success" | "error";
-  error?: string;
-  controller?: AbortController;
-};
-
-type CsvUploadModalProps = {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  onSuccess: () => void;
-  onClose: () => void;
-};
-
-const GENDER_MAP: Record<string, Gender> = {
-  male: Gender.MALE,
-  female: Gender.FEMALE,
-};
-const TITLE_MAP: Record<string, MemberTitle> = {
-  mr: MemberTitle.MR,
-  mrs: MemberTitle.MRS,
-  miss: MemberTitle.MISS,
-  dr: MemberTitle.DR,
-  pastor: MemberTitle.PASTOR,
-  rev: MemberTitle.REV,
-};
-const MARITAL_MAP: Record<string, MaritalStatus> = {
-  single: MaritalStatus.SINGLE,
-  married: MaritalStatus.MARRIED,
-  divorced: MaritalStatus.DIVORCED,
-  widowed: MaritalStatus.WIDOWED,
-};
-const MEMBERSHIP_MAP: Record<string, MembershipStatus> = {
-  member: MembershipStatus.MEMBER,
-  visitor: MembershipStatus.VISITOR,
-  volunteer: MembershipStatus.VOLUNTEER,
-  worker: MembershipStatus.WORKER,
-  leader: MembershipStatus.LEADER,
-  "new convert": MembershipStatus.CONVERT,
-};
+import { UploadFile, CsvUploadModalProps } from "@/types";
 
 export function CsvUploadModal({
   open,
@@ -268,14 +228,18 @@ export function FileInput({
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFiles = e.target.files;
-    if (!selectedFiles) return;
+    if (!selectedFiles) {
+      return;
+    }
     Array.from(selectedFiles).forEach((file) => onUpload(file));
     e.target.value = "";
   };
 
   const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
-    if (!e.dataTransfer.files) return;
+    if (!e.dataTransfer.files) {
+      return;
+    }
     Array.from(e.dataTransfer.files).forEach((file) => onUpload(file));
   };
 
@@ -283,6 +247,18 @@ export function FileInput({
     file.controller?.abort();
     onRemove(file);
   };
+
+  const csvContent = `churchId,title,fullName,gender,birthday,maritalStatus,dateOfMarriage,phoneNumber,email,occupation,educationalBackground,address,membershipStatus,dateJoined,previousChurchMembership,isBaptized,ministries,volunteerPreferences,cellGroupName
+60f71b2f9f1b2c001c8e4b22,MR.,Anthony Carter,MALE,1991-01-12,SINGLE,,+14155667788,anthony.carter@example.com,Developer,Bachelor,"101 Spruce St, City, Country",MEMBER,2022-07-15,,true,"Music","Outreach",Iota Group
+60f71b2f9f1b2c001c8e4b23,MRS.,Rebecca Allen,FEMALE,1984-04-25,MARRIED,2009-05-10,+14156778899,rebecca.allen@example.com,Teacher,Master,"202 Cherry Ln, City, Country",MEMBER,2021-02-18,Grace Church,false,"Hospitality","Teaching",Kappa Group
+60f71b2f9f1b2c001c8e4b24,MISS,Olivia Parker,FEMALE,1995-07-07,SINGLE,,+14157889901,olivia.parker@example.com,Designer,Bachelor,"303 Willow Rd, City, Country",VOLUNTEER,2023-03-22,,true,"Drama","Event Planning",Lambda Group
+60f71b2f9f1b2c001c8e4b25,DR,Steven Hughes,MALE,1982-10-15,MARRIED,2007-12-03,+14158990123,steven.hughes@example.com,Pastor,PhD,"404 Poplar Blvd, City, Country",LEADER,2019-11-05,New Hope Church,true,"Teaching","Youth Ministry",Mu Group
+60f71b2f9f1b2c001c8e4b26,MR.,Joshua Ramirez,MALE,1990-06-21,SINGLE,,+14159011234,joshua.ramirez@example.com,Engineer,Bachelor,"505 Aspen St, City, Country",MEMBER,2022-09-10,,true,"Music","Teaching",Nu Group
+60f71b2f9f1b2c001c8e4b27,MRS.,Megan Foster,FEMALE,1987-11-11,MARRIED,2012-03-18,+14150122345,megan.foster@example.com,Nurse,Master,"606 Elmwood Ave, City, Country",MEMBER,2020-12-15,First Light Church,false,"Hospitality","Outreach",Xi Group
+60f71b2f9f1b2c001c8e4b28,MISS,Chloe Bennett,FEMALE,1992-03-03,SINGLE,,+14151233456,chloe.bennett@example.com,Architect,Bachelor,"707 Pinecrest Rd, City, Country",VOLUNTEER,2023-06-01,,true,"Choir","Event Planning",Omicron Group
+60f71b2f9f1b2c001c8e4b29,DR,Edward Simmons,MALE,1980-08-28,MARRIED,2004-09-14,+14152344567,edward.simmons@example.com,Engineer,PhD,"808 Cedar Blvd, City, Country",LEADER,2018-10-20,Faith Life Church,true,"Teaching","Youth Ministry",Pi Group
+60f71b2f9f1b2c001c8e4b2a,MR.,Brian Reed,MALE,1989-12-05,SINGLE,,+14153455678,brian.reed@example.com,Developer,Bachelor,"909 Maple Ave, City, Country",MEMBER,2022-11-11,,true,"Music","Outreach",Rho Group
+60f71b2f9f1b2c001c8e4b2b,MRS.,Angela Kelly,FEMALE,1985-05-19,MARRIED,2010-06-25,+14154566789,angela.kelly@example.com,Teacher,Master,"111 Birch Rd, City, Country",MEMBER,2021-01-08,Hope Church,false,"Hospitality","Teaching",Sigma Group`;
 
   return (
     <div className="space-y-4">
@@ -337,24 +313,25 @@ export function FileInput({
         <div className="space-y-4">
           <Text>Uploaded files</Text>
 
-          {files.map((f, i) => (
-            <div key={i} className="space-y-1">
+          {files.map((file, index) => (
+            <div key={index} className="space-y-1">
               <div className="flex justify-between items-center text-sm">
-                <Span className="truncate max-w-[200px]">{f.file.name}</Span>
+                <Span className="truncate max-w-[200px]">{file.file.name}</Span>
 
                 <div className="flex items-center gap-3">
-                  <Span>{f.progress}%</Span>
+                  <Span>{file.progress}%</Span>
 
-                  {(f.status === "uploading" || f.status === "paused") && (
-                    <Button variant="ghost" onClick={() => onPauseResume(f)}>
-                      {f.status === "paused" ? <FaPlay /> : <FaPause />}
+                  {(file.status === "uploading" ||
+                    file.status === "paused") && (
+                    <Button variant="ghost" onClick={() => onPauseResume(file)}>
+                      {file.status === "paused" ? <FaPlay /> : <FaPause />}
                     </Button>
                   )}
 
-                  {(f.status === "uploading" ||
-                    f.status === "paused" ||
-                    f.status === "error") && (
-                    <Button variant="ghost" onClick={() => handleCancel(f)}>
+                  {(file.status === "uploading" ||
+                    file.status === "paused" ||
+                    file.status === "error") && (
+                    <Button variant="ghost" onClick={() => handleCancel(file)}>
                       <FaTimes className="text-red-500" />
                     </Button>
                   )}
@@ -364,32 +341,32 @@ export function FileInput({
               <div className="h-2 bg-gray-200 rounded">
                 <div
                   className={`h-2 rounded transition-all ${
-                    f.status === "error"
+                    file.status === "error"
                       ? "bg-red-500"
-                      : f.status === "success"
+                      : file.status === "success"
                         ? "bg-blue-500"
-                        : f.status === "paused"
+                        : file.status === "paused"
                           ? "bg-yellow-500"
                           : "bg-gray-500"
                   }`}
-                  style={{ width: `${f.progress}%` }}
+                  style={{ width: `${file.progress}%` }}
                 />
               </div>
 
-              {f.status === "uploading" && (
+              {file.status === "uploading" && (
                 <Text className="text-xs text-gray-500">Uploading...</Text>
               )}
-              {f.status === "paused" && (
+              {file.status === "paused" && (
                 <Text className="text-xs text-gray-500">Paused</Text>
               )}
-              {f.status === "success" && (
+              {file.status === "success" && (
                 <Text className="text-xs text-blue-600">
                   Successfully Uploaded!
                 </Text>
               )}
-              {f.status === "error" && (
+              {file.status === "error" && (
                 <Text className="text-xs text-red-500">
-                  {f.error || "Error uploading"}
+                  {file.error || "Error uploading"}
                 </Text>
               )}
             </div>

@@ -100,8 +100,12 @@ export default function MembershipPage() {
       return;
     }
     setSelectedFormat(format);
-    if (format === MemberFormType.FORM) setIsAddModalOpen(true);
-    if (format === MemberFormType.CSV) setIsCsvModalOpen(true);
+    if (format === MemberFormType.FORM) {
+      setIsAddModalOpen(true);
+    }
+    if (format === MemberFormType.CSV) {
+      setIsCsvModalOpen(true);
+    }
   };
 
   if (selectedMemberId) {

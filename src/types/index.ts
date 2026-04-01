@@ -333,3 +333,18 @@ export type SpecialServiceEvent = {
   recurrence: "none" | "monthly-first-sunday";
   daySchedules: SpecialServiceDaySchedule[];
 };
+
+export type UploadFile = {
+  file: File;
+  progress: number;
+  status: "uploading" | "paused" | "success" | "error";
+  error?: string;
+  controller?: AbortController;
+};
+
+export type CsvUploadModalProps = {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onSuccess: () => void;
+  onClose: () => void;
+};
