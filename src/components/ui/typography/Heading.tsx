@@ -21,7 +21,7 @@ const sizeClasses: Record<HeadingLevel, string> = {
 };
 
 const variantStyles: Record<HeadingVariant, string> = {
-  default: "text-gray-900",
+  default: "text-inherit",
   primary: "text-blue-600",
   muted: "text-gray-500",
 };
@@ -43,7 +43,7 @@ const Heading = React.forwardRef<HTMLHeadingElement, HeadingProps>(
     const classes = [
       sizeClasses[level],
       variantStyles[variant],
-      "font-semibold whitespace-nowrap flex-shrink-0",
+      "font-semibold ",
       className,
     ]
       .filter(Boolean)
