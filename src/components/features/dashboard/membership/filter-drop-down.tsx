@@ -7,7 +7,12 @@ import {
   DropdownMenuContent,
 } from "@/components/ui/dropdown-menu";
 
-import { MaritalStatus, MembershipStatus, Gender } from "@/lib/enums";
+import {
+  MaritalStatus,
+  MembershipStatus,
+  Gender,
+  FilterSection,
+} from "@/lib/enums";
 import { Span, Text } from "@/components/ui/typography/Text";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -84,7 +89,7 @@ const FilterDropdown = ({
             <Span>{openSection === "gender" ? "▴" : "▾"}</Span>
           </Button>
 
-          {openSection === "gender" && (
+          {openSection === FilterSection.GENDER && (
             <div className="flex gap-2 mt-3">
               {Object.values(Gender).map((gender) => (
                 <Button
@@ -114,7 +119,7 @@ const FilterDropdown = ({
             <Span>{openSection === "marital" ? "▴" : "▾"}</Span>
           </Button>
 
-          {openSection === "marital" && (
+          {openSection === FilterSection.MARITAL && (
             <div className="grid grid-cols-2 gap-2 mt-3">
               {Object.values(MaritalStatus).map((status) => (
                 <Button
@@ -145,7 +150,7 @@ const FilterDropdown = ({
             <Span>{openSection === "membership" ? "▴" : "▾"}</Span>
           </Button>
 
-          {openSection === "membership" && (
+          {openSection === FilterSection.MEMBERSHIP && (
             <div className="grid grid-cols-2 gap-2 mt-3">
               {Object.values(MembershipStatus).map((status) => (
                 <Button

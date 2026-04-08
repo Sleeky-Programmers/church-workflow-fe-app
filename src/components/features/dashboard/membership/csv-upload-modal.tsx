@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { FileInputProps } from "@/types/index";
 import {
   Dialog,
   DialogContent,
@@ -206,15 +207,6 @@ export function CsvUploadModal({
     </Dialog>
   );
 }
-
-type FileInputProps = {
-  accept?: string;
-  multiple?: boolean;
-  files: UploadFile[];
-  onUpload: (file: File) => void;
-  onRemove: (file: UploadFile) => void;
-  onPauseResume: (file: UploadFile) => void;
-};
 
 export function FileInput({
   accept,

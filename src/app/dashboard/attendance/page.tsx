@@ -22,6 +22,7 @@ import { ServiceFrequency, ServiceType } from "@/lib/enums";
 import { fetchServices } from "@/lib/api";
 import { format } from "date-fns";
 
+import { getCurrentUserProfile } from "@/lib/auth/session";
 function useIsMobile() {
   const [isMobile, setIsMobile] = useState(false);
 
@@ -41,6 +42,8 @@ function useIsMobile() {
 export default function AttendancePage() {
   const { toast } = useToast();
   const isMobile = useIsMobile();
+  const userProfile = getCurrentUserProfile();
+  const Admin = userProfile?.fullName || "Unknown";
   const [services, setServices] = useState<RegularService[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isTypeModalOpen, setIsTypeModalOpen] = useState(false);
@@ -206,7 +209,7 @@ export default function AttendancePage() {
           date: payload.date,
           presentMembers: payload.presentMembers,
           absentMembers: payload.absentMembers,
-          recordedBy: "Admin",
+          recordedBy: Admin,
           location: service.location || "",
           startTime: service.startTime,
           endTime: service.endTime,

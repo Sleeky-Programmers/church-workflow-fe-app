@@ -10,15 +10,16 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Calendar, CircleDollarSign, Clock, MapPin, Route } from "lucide-react";
+import { Calendar, Clock, MapPin, Route } from "lucide-react";
 import { RegularService } from "@/types";
-
+import { getMyChurch } from "@/lib/api";
 export type GivingValues = {
   tithe: string;
   offering: string;
   specialOffering: string;
   thanksgivingOffering: string;
 };
+import { getCurrencySymbol } from "@/utils/currency";
 
 type GivingRecordModalProps = {
   open: boolean;
@@ -56,6 +57,23 @@ export function GivingRecordModal({
       );
     }
   }, [open, initialValues]);
+
+  const [currency, setCurrency] = useState("NGN");
+
+  useEffect(() => {
+    const loadChurch = async () => {
+      try {
+        const church = await getMyChurch();
+        if (church?.defaultCurrency) {
+          setCurrency(church.defaultCurrency);
+        }
+      } catch {}
+    };
+
+    if (open) {
+      loadChurch();
+    }
+  }, [open]);
 
   if (!service || !date) return null;
 
@@ -114,7 +132,9 @@ export function GivingRecordModal({
                   value={values.tithe}
                   onChange={(e) => updateValue("tithe", e.target.value)}
                   leftIcon={
-                    <CircleDollarSign className="h-4 w-4 text-gray-500" />
+                    <span className="text-sm text-gray-500">
+                      {getCurrencySymbol(currency)}
+                    </span>
                   }
                 />
               </div>
@@ -128,7 +148,9 @@ export function GivingRecordModal({
                   value={values.offering}
                   onChange={(e) => updateValue("offering", e.target.value)}
                   leftIcon={
-                    <CircleDollarSign className="h-4 w-4 text-gray-500" />
+                    <span className="text-sm text-gray-500">
+                      {getCurrencySymbol(currency)}
+                    </span>
                   }
                 />
               </div>
@@ -144,7 +166,9 @@ export function GivingRecordModal({
                     updateValue("specialOffering", e.target.value)
                   }
                   leftIcon={
-                    <CircleDollarSign className="h-4 w-4 text-gray-500" />
+                    <span className="text-sm text-gray-500">
+                      {getCurrencySymbol(currency)}
+                    </span>
                   }
                 />
               </div>
@@ -160,7 +184,9 @@ export function GivingRecordModal({
                     updateValue("thanksgivingOffering", e.target.value)
                   }
                   leftIcon={
-                    <CircleDollarSign className="h-4 w-4 text-gray-500" />
+                    <span className="text-sm text-gray-500">
+                      {getCurrencySymbol(currency)}
+                    </span>
                   }
                 />
               </div>

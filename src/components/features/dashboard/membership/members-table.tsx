@@ -1,5 +1,5 @@
 "use client";
-
+import { Plus } from "lucide-react";
 import { MemberProfile } from "@/types";
 import {
   Table,
@@ -29,6 +29,9 @@ type MembersTableProps = {
   selectedMemberIds?: string[];
   onSelectMember?: (id: string, checked: boolean) => void;
   onSelectAll?: (checked: boolean) => void;
+  setIsDeleteModalOpen: any;
+  setIsFormatModalOpen: any;
+  isCsvUploading: boolean;
 };
 
 export function MembersTable({
@@ -40,6 +43,9 @@ export function MembersTable({
   selectedMemberIds = [],
   onSelectMember,
   onSelectAll,
+  setIsDeleteModalOpen,
+  setIsFormatModalOpen,
+  isCsvUploading,
 }: MembersTableProps) {
   const isMobile = useIsMobile();
   const currentPage = pagination?.page || 1;
@@ -61,9 +67,17 @@ export function MembersTable({
               />
               <Text text="All Members" variant="default" />
             </div>
-
-            {onAddMember && (
-              <Button size="sm" className="h-8 px-4" onClick={onAddMember}>
+            {selectedMemberIds.length > 0 ? (
+              <Button
+                variant="destructive"
+                size="sm"
+                className="h-8 px-4"
+                onClick={() => setIsDeleteModalOpen(true)}
+              >
+                <Text text="Remove" variant="default" />
+              </Button>
+            ) : (
+              <Button size="sm" className="h-8  px-4" onClick={onAddMember}>
                 <Text text="Add" variant="default" />
               </Button>
             )}

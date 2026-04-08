@@ -10,6 +10,8 @@ import { EventFormModal } from "@/components/features/dashboard/events/event-for
 import { EventsCalendar } from "@/components/features/dashboard/events/events-calendar";
 import { EventsEmptyState } from "@/components/features/dashboard/events/events-empty-state";
 import { getEventTypeMeta } from "@/components/features/dashboard/events/constants";
+import { useIsMobile } from "@/hooks/use-mobile";
+import EventsMobile from "@/components/features/dashboard/events/event-mobile";
 
 const EVENT_STORAGE_KEY = "dashboard:events";
 
@@ -51,7 +53,7 @@ export default function EventsPage() {
   const [formInitialData, setFormInitialData] = useState<EventFormData | null>(
     null,
   );
-
+  const isMobile = useIsMobile();
   useEffect(() => {
     if (typeof window === "undefined") return;
 
@@ -134,7 +136,32 @@ export default function EventsPage() {
     setIsDetailModalOpen(false);
     setIsFormModalOpen(true);
   };
+  if (isMobile) {
+    return (
+      <>
+        <EventsMobile
+          events={events}
+          onCreateEvent={handleCreateEvent}
+          onSelectEvent={handleSelectEvent}
+        />
 
+        <EventFormModal
+          open={isFormModalOpen}
+          onOpenChange={setIsFormModalOpen}
+          onSubmit={handleSubmitEvent}
+          initialData={formInitialData}
+        />
+
+        <EventDetailModal
+          open={isDetailModalOpen}
+          event={selectedEvent}
+          onOpenChange={setIsDetailModalOpen}
+          onDelete={handleDeleteEvent}
+          onEdit={handleEditEvent}
+        />
+      </>
+    );
+  }
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="bg-white border-b">

@@ -8,6 +8,7 @@ import Heading from "@/components/ui/typography/Heading";
 import { MembersTable } from "@/components/features/dashboard/membership/members-table";
 import { fetchMembers } from "@/services/memberService";
 import { MemberProfile } from "@/types";
+import { SidebarTrigger } from "@/components/ui/sidebar";
 import { MemberDetailsPage } from "@/components/features/dashboard/membership/member-details-page";
 import { AddMemberModal } from "@/components/features/dashboard/membership/add-member-modal";
 import { AddMemberFormatModal } from "@/components/features/dashboard/membership/select-modal";
@@ -124,8 +125,16 @@ export default function MembershipPage() {
     <div className="min-h-screen bg-gray-50">
       <div className="bg-white">
         <div className="px-4 sm:px-6 py-4 flex items-center justify-between gap-2">
-          <Heading level={3}>Membership</Heading>
-
+          <div className="flex items-center gap-2 h-8">
+            {isMobile && (
+              <div className="flex items-center justify-center h-8 w-8">
+                <SidebarTrigger />
+              </div>
+            )}
+            <Heading level={3} className="leading-none m-0">
+              Membership
+            </Heading>
+          </div>
           <div className="hidden sm:flex items-center gap-3">
             <div className="relative w-72 md:w-96">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -187,6 +196,9 @@ export default function MembershipPage() {
           onSelectAll={(checked) =>
             setSelectedMemberIds(checked ? members.map((m) => m.id) : [])
           }
+          setIsDeleteModalOpen={setIsDeleteModalOpen}
+          setIsFormatModalOpen={setIsFormatModalOpen}
+          isCsvUploading={isCsvUploading}
         />
       </div>
 

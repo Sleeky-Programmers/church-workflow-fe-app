@@ -71,6 +71,12 @@ export async function fetchMembers(
   };
 }
 
+export async function fetchAllMembers() {
+  const members = await authenticatedFetch<MemberProfile[]>("/members/all");
+
+  return members.map(mapMember);
+}
+
 export async function createMember(data: NewMemberData) {
   const payload = normalizeMemberPayload(data);
 

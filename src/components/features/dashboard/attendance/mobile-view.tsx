@@ -14,6 +14,8 @@ import { RegularService } from "@/types";
 import Heading from "@/components/ui/typography/Heading";
 import { Text, Span } from "@/components/ui/typography/Text";
 import { getAttendanceCount } from "@/lib/utils";
+import { SidebarTrigger } from "@/components/ui/sidebar";
+import MobileHeader from "@/components/layout/mobile-header";
 
 type MobileAttendanceViewProps = {
   services: RegularService[];
@@ -138,17 +140,7 @@ export function MobileAttendanceView({
 
   return (
     <div className="min-h-screen bg-white">
-      <div className="flex items-center justify-between p-4 border-b">
-        <div className="flex items-center gap-3">
-          <Button variant="ghost" size="icon">
-            <Menu className="h-5 w-5" />
-          </Button>
-          <Heading level={2}>Attendance Overview</Heading>
-        </div>
-        <Button variant="ghost" size="icon">
-          <MoreVertical className="h-5 w-5" />
-        </Button>
-      </div>
+      <MobileHeader title="Attendance Overview" />
 
       <div className="p-4">
         <div className="flex items-center justify-between mb-4">

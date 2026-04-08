@@ -50,6 +50,12 @@ export enum EventCategory {
   SPECIAL = "SPECIAL",
 }
 
+export enum FilterSection {
+  MARITAL = "marital",
+  MEMBERSHIP = "membership",
+  GENDER = "gender",
+}
+
 export enum ActiveTab {
   FAVOURITES = "favourites",
   RECENT = "recent",

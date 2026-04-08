@@ -12,3 +12,23 @@ export interface FilterProps {
   searchQuery: string;
   setSearchQuery: (value: string) => void;
 }
+
+export interface AdminResponse {
+  id: string;
+  firstName: string;
+  lastName: string;
+  fullName: string;
+  email: string;
+}
+
+export interface AdminListResponse {
+  data: AdminResponse[];
+  pagination: {
+    page: number;
+    limit: number;
+    itemCount: number;
+    totalPages: number;
+    hasPreviousPage: boolean;
+    hasNextPage: boolean;
+  };
+}

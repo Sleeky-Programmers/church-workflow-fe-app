@@ -1,7 +1,11 @@
 "use client";
+
 import { useState } from "react";
 import { Plus, RefreshCw, ExternalLink, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { fetchMembers } from "@/services/memberService";
+import { fetchAdmins } from "@/services/adminServices";
+import { useToast } from "@/hooks/use-toast";
 import {
   Dialog,
   DialogTrigger,
@@ -11,7 +15,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { MemberProfile } from "@/types";
-import { MOCK_MEMBERS_FULL } from "@/lib/data";
 import { Textarea } from "@/components/ui/textarea";
 import Heading from "@/components/ui/typography/Heading";
 import {
@@ -25,7 +28,7 @@ import {
   MemberMultiSelect,
   MemberSingleSelect,
 } from "@/components/features/dashboard/departments/member-selectors";
-import { InviteUserDialog } from "./admin/invite-user";
+import { InviteUserDialog } from "../admin/invite-user";
 import { InviteFormData, PendingInvite } from "@/types/user";
 import { Span } from "@/components/ui/typography/Text";
 
@@ -40,21 +43,23 @@ interface Props {
 }
 
 export default function AddDepartmentDialog({ onSave }: Props) {
+  const { toast } = useToast();
+
   const [open, setOpen] = useState(false);
   const [departmentName, setDepartmentName] = useState("");
   const [hodId, setHodId] = useState("");
   const [memberIds, setMemberIds] = useState<string[]>([]);
+  const [memberMap, setMemberMap] = useState<Record<string, MemberProfile>>({});
   const [status, setStatus] = useState("active");
   const [description, setDescription] = useState("");
+
   const [inviteOpen, setInviteOpen] = useState(false);
   const [pendingInvites, setPendingInvites] = useState<PendingInvite[]>([]);
   const [isInviteLoading, setIsInviteLoading] = useState(false);
-  const inviteDialogTitle = "Invite New HOD";
-
-  const members: MemberProfile[] = MOCK_MEMBERS_FULL;
 
   function handleInviteSubmit(formData: InviteFormData) {
     setIsInviteLoading(true);
+
     setTimeout(() => {
       const newInvite: PendingInvite = {
         id: crypto.randomUUID(),
@@ -66,30 +71,56 @@ export default function AddDepartmentDialog({ onSave }: Props) {
         role: formData.role,
         status: "pending",
       };
+
       setPendingInvites((prev) => [...prev, newInvite]);
       setIsInviteLoading(false);
     }, 600);
   }
 
   function handleSave() {
-    if (onSave) {
-      onSave({ name: departmentName, hodId, memberIds, status, description });
+    if (!departmentName.trim() || !hodId) {
+      toast({
+        title: "Missing fields",
+        description: "Department name and HOD are required",
+        variant: "destructive",
+      });
+      return;
     }
+
+    onSave?.({
+      name: departmentName,
+      hodId,
+      memberIds,
+      status,
+      description,
+    });
+
+    toast({
+      title: "Success",
+      description: "Department created successfully",
+    });
+
     setDepartmentName("");
     setHodId("");
     setMemberIds([]);
+    setMemberMap({});
     setStatus("active");
     setDescription("");
     setOpen(false);
   }
 
-  function handleReset() {
+  function handleResetHod() {
     setHodId("");
-    setMemberIds([]);
   }
 
   function removeSelectedMember(id: string) {
-    setMemberIds((prev) => prev.filter((memberId) => memberId !== id));
+    setMemberIds((prev) => prev.filter((mid) => mid !== id));
+
+    setMemberMap((prev) => {
+      const updated = { ...prev };
+      delete updated[id];
+      return updated;
+    });
   }
 
   return (
@@ -106,16 +137,11 @@ export default function AddDepartmentDialog({ onSave }: Props) {
           showClose={false}
           className="sm:max-w-[480px] overflow-hidden p-0"
         >
-          <div className="flex justify-between items-center border-b mb-2 p-3">
+          <div className="flex justify-between items-center border-b p-3">
             <Heading level={2}>Add a department</Heading>
 
             <DialogClose asChild>
-              <Button
-                className="p-2"
-                size="icon"
-                variant="outline"
-                aria-label="Close dialog"
-              >
+              <Button size="icon" variant="outline">
                 <X className="w-4 h-4" />
               </Button>
             </DialogClose>
@@ -133,77 +159,76 @@ export default function AddDepartmentDialog({ onSave }: Props) {
 
             <div className="space-y-1.5">
               <Label>Assign HOD</Label>
-              <div className="flex items-center gap-2">
+
+              <div className="flex gap-2">
                 <div className="flex-1">
                   <MemberSingleSelect
-                    options={members}
+                    fetchOptions={fetchAdmins}
                     value={hodId}
                     onChange={setHodId}
-                    placeholder="Select or search"
+                    placeholder="Search member..."
                   />
                 </div>
-                <Button
-                  type="button"
-                  size="icon"
-                  title="Reset HOD"
-                  variant="outline"
-                  onClick={handleReset}
-                >
-                  <RefreshCw className="h-4 w-4 text-gray-500" />
+
+                <Button size="icon" variant="outline" onClick={handleResetHod}>
+                  <RefreshCw className="h-4 w-4" />
                 </Button>
               </div>
+
               <a
-                href="/dashboard/members/invite"
+                href="#"
                 onClick={(e) => {
                   e.preventDefault();
                   setInviteOpen(true);
                 }}
-                className="mt-0.5 inline-flex items-center gap-1 text-xs text-primary hover:underline"
+                className="text-xs text-primary flex items-center gap-1"
               >
-                Invite new HOD
-                <ExternalLink className="h-3 w-3" />
+                Invite new HOD <ExternalLink className="h-3 w-3" />
               </a>
             </div>
 
-            <div className="space-y-2">
-              {memberIds.length > 0 && (
-                <div className="rounded-xl shadow-lg w-full sm:w-[480px] h-[80vh] flex flex-col overflow-hidden bg-gray-50">
-                  <div className="flex items-center justify-between">
-                    <Span variant="default">Selected Members</Span>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    {memberIds.map((id) => {
-                      const member = members.find((m) => m.id === id);
-                      if (!member) return null;
+            {memberIds.length > 0 && (
+              <div className="space-y-2">
+                <Label>Selected Members</Label>
+                <div className="flex flex-wrap gap-2">
+                  {memberIds.map((id) => {
+                    const member = memberMap[id];
+                    if (!member) return null;
 
-                      return (
-                        <Span
-                          key={id}
-                          variant="chip"
-                          className="inline-flex items-center gap-1 "
+                    return (
+                      <Span key={id} variant="chip">
+                        {member.fullName}
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          onClick={() => removeSelectedMember(id)}
                         >
-                          {member.fullName}
-                          <Button
-                            type="button"
-                            size="icon"
-                            variant="ghost"
-                            onClick={() => removeSelectedMember(id)}
-                            aria-label={`Remove ${member.fullName}`}
-                          >
-                            <X className="h-3 w-3" />
-                          </Button>
-                        </Span>
-                      );
-                    })}
-                  </div>
+                          <X className="h-3 w-3" />
+                        </Button>
+                      </Span>
+                    );
+                  })}
                 </div>
-              )}
+              </div>
+            )}
+
+            <div className="space-y-1.5">
               <Label>Add Members</Label>
               <MemberMultiSelect
-                options={members}
+                fetchOptions={fetchMembers}
                 value={memberIds}
-                onChange={setMemberIds}
-                placeholder="Select or search"
+                onChange={(ids, members) => {
+                  setMemberIds(ids);
+
+                  setMemberMap((prev) => {
+                    const updated = { ...prev };
+                    members.forEach((m) => {
+                      updated[m.id] = m;
+                    });
+                    return updated;
+                  });
+                }}
+                placeholder="Search members..."
               />
             </div>
 
@@ -227,29 +252,25 @@ export default function AddDepartmentDialog({ onSave }: Props) {
                 placeholder="Add description"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                className="flex w-full px-3 py-2"
               />
             </div>
           </div>
 
-          <div className="flex justify-end border-t border-gray-100 px-6 py-4">
-            <Button
-              onClick={handleSave}
-              disabled={!departmentName.trim()}
-              className="px-6"
-            >
+          <div className="flex justify-end border-t px-6 py-4">
+            <Button onClick={handleSave} disabled={!departmentName.trim()}>
               Save
             </Button>
           </div>
         </DialogContent>
       </Dialog>
+
       <InviteUserDialog
         open={inviteOpen}
         onOpenChange={setInviteOpen}
         onSubmit={handleInviteSubmit}
         pendingInvites={pendingInvites}
         isLoading={isInviteLoading}
-        title={inviteDialogTitle}
+        title="Invite New HOD"
       />
     </>
   );

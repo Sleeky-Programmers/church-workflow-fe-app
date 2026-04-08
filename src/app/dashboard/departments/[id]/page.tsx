@@ -23,7 +23,7 @@ import {
 } from "@/lib/data";
 import Heading from "@/components/ui/typography/Heading";
 import { DepartmentTabs, RequisitionStatus } from "@/lib/enums";
-import DepartmentSidebar from "@/components/features/dashboard/DepartmentSidebar";
+import DepartmentSidebar from "@/components/features/dashboard/departments/DepartmentSidebar";
 import { Input } from "@/components/ui/input";
 import { ChevronDown, Search } from "lucide-react";
 
