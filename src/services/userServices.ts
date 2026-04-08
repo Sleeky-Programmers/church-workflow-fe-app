@@ -35,5 +35,8 @@ export async function updateProfile(data: {
   return await authenticatedFetch("/admin/me", {
     method: "PATCH",
     body: JSON.stringify(data),
+    headers: {
+      "Content-Type": "application/json",
+    },
   });
 }

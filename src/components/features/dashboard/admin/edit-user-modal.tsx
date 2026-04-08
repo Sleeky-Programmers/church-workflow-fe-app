@@ -14,6 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { updateProfile } from "@/services/userServices";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 type FormValues = {
   firstName: string;
@@ -45,7 +46,7 @@ export function EditPersonalInfoModal({
       });
     }
   }, [open, user, reset]);
-
+  const isMobile = useIsMobile();
   const onSubmit = async (data: FormValues) => {
     try {
       const updated = await updateProfile(data);
@@ -68,7 +69,7 @@ export function EditPersonalInfoModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent mobileSheet className="sm:max-w-lg p-0">
+      <DialogContent mobileSheet={isMobile} className="sm:max-w-lg p-0">
         <DialogHeader className="px-6 pt-6 pb-2">
           <DialogTitle>Update Personal Information</DialogTitle>
         </DialogHeader>
@@ -128,6 +129,7 @@ export function EditPersonalInfoModal({
               type="button"
               variant="destructive"
               onClick={() => onOpenChange(false)}
+              size="sm"
             >
               Cancel
             </Button>

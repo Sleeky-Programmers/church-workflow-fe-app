@@ -61,7 +61,7 @@ export default function DashboardMobile({
         <div className="grid grid-cols-2 gap-3">
           <StatCard
             compact
-            title="Members"
+            title="Total Members"
             count={totalMembers}
             growth={totalMembersGrowth}
           />

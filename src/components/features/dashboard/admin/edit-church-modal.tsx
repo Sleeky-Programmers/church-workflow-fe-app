@@ -14,6 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { updateChurch } from "@/services/churchService";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 type FormValues = {
   name: string;
@@ -50,7 +51,7 @@ export function EditChurchModal({
       });
     }
   }, [open, church, reset]);
-
+  const isMobile = useIsMobile();
   const onSubmit = async (data: FormValues) => {
     try {
       const updated = await updateChurch(data, file || undefined);
@@ -73,7 +74,7 @@ export function EditChurchModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent mobileSheet className="sm:max-w-lg p-0">
+      <DialogContent mobileSheet={isMobile} className="sm:max-w-lg p-0">
         <DialogHeader className="px-6 pt-6 pb-2">
           <DialogTitle>Edit Church</DialogTitle>
         </DialogHeader>

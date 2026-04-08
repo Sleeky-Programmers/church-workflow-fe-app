@@ -1,9 +1,8 @@
 "use client";
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState } from "react";
 import Table from "@/components/features/dashboard/Table";
 import Heading from "@/components/ui/typography/Heading";
 import { Input } from "@/components/ui/input";
-import { fetchAllMembers } from "@/services/memberService";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -18,27 +17,17 @@ import { Search, ChevronDown } from "lucide-react";
 import { useRouter } from "next/navigation";
 import AddDepartmentDialog from "@/components/features/dashboard/departments/AddDepartmentDialog";
 import { DepartmentRow } from "@/types";
-
+import { departmentData, MOCK_MEMBERS_FULL } from "@/lib/data";
 import { Button } from "@/components/ui/button";
 import { getDepartmentColumns } from "@/components/features/dashboard/departments/department-columns";
 import { RouteConfig } from "@/config/routes";
-import { MemberProfile } from "@/types";
 
 export default function DepartmentPage() {
   const [query, setQuery] = useState("");
-  const [data, setData] = useState<DepartmentRow[]>([]);
-  const [members, setMembers] = useState<MemberProfile[]>([]);
+  const [data, setData] = useState<DepartmentRow[]>(departmentData);
   const [deleteTarget, setDeleteTarget] = useState<DepartmentRow | null>(null);
   const router = useRouter();
 
-  useEffect(() => {
-    const load = async () => {
-      const members = await fetchAllMembers();
-      setMembers(members);
-    };
-
-    load();
-  }, []);
   const filtered = useMemo(() => {
     if (!query) return data;
     const q = query.toLowerCase();
@@ -72,7 +61,7 @@ export default function DepartmentPage() {
     status: string;
     description: string;
   }) => {
-    const hod = members.find((member) => member.id === payload.hodId);
+    const hod = MOCK_MEMBERS_FULL.find((member) => member.id === payload.hodId);
     const normalizedStatus =
       payload.status.toLowerCase() === "active" ? "Active" : "Inactive";
 

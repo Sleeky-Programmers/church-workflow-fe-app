@@ -61,7 +61,6 @@ export const StatCard = ({
     );
   }
 
-  // ================= DESKTOP (UNCHANGED) =================
   return (
     <Card
       className={cn(

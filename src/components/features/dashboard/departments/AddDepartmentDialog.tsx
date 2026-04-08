@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Plus, RefreshCw, ExternalLink, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { fetchMembers } from "@/services/memberService";
-import { fetchAdmins } from "@/services/adminServices";
+import { fetchAdmins } from "@/services/userServices";
 import { useToast } from "@/hooks/use-toast";
 import {
   Dialog,

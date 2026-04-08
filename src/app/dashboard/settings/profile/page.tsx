@@ -6,6 +6,9 @@ import { Text } from "@/components/ui/typography/Text";
 import { Button } from "@/components/ui/button";
 import { Loader } from "@/components/ui/loader";
 import { useToast } from "@/hooks/use-toast";
+import { Span } from "@/components/ui/typography/Text";
+import { Edit } from "lucide-react";
+import { Label } from "@/components/ui/label";
 
 import { getCurrentUserProfile } from "@/lib/auth/session";
 import { getMyChurch } from "@/lib/api";
@@ -13,7 +16,7 @@ import { getMyChurch } from "@/lib/api";
 import { EditPersonalInfoModal } from "@/components/features/dashboard/admin/edit-user-modal";
 import { EditChurchModal } from "@/components/features/dashboard/admin/edit-church-modal";
 import { UpdatePasswordModal } from "@/components/features/dashboard/admin/update-password-modal";
-
+import Image from "next/image";
 export default function UserProfilePage() {
   const { toast } = useToast();
 
@@ -60,22 +63,44 @@ export default function UserProfilePage() {
 
   return (
     <div className="space-y-6">
-      <Heading level={2}>Profile</Heading>
+      <Heading level={2}>User & Church Info</Heading>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-6">
-          {/* Avatar + Edit */}
           <div className="bg-black border rounded-xl p-4 flex items-center justify-between">
             <div className="w-12 h-12 rounded-full bg-gray-700 flex items-center justify-center text-white">
-              {user?.firstName?.[0] || "U"}
+              {user?.logo || (
+                <Image
+                  src="/assets/avatar/Image.png"
+                  alt="Profile"
+                  width={200}
+                  height={200}
+                />
+              )}
             </div>
 
-            <Button size="sm" onClick={() => setOpenPersonalModal(true)}>
-              Edit
+            <div className="flex flex-col">
+              <div>
+                <Text variant="label">{user?.fullName}</Text>
+              </div>
+              <div>
+                <Text>{user?.email}</Text>
+              </div>
+            </div>
+
+            <Button
+              variant="outline"
+              className="flex items-center gap-2 h-8 sm:h-9"
+              size="sm"
+              onClick={() => setOpenPersonalModal(true)}
+            >
+              <Edit className="h-4 w-4" />
+              <Span className="hidden sm:inline">Edit</Span>
             </Button>
           </div>
 
           <div className="bg-black border rounded-xl p-6 space-y-6">
+            <Text variant="label">Personal Information</Text>
             <div className="grid grid-cols-2 gap-6">
               <div>
                 <Text className="text-gray-400">First Name</Text>
@@ -105,16 +130,42 @@ export default function UserProfilePage() {
 
         <div className="space-y-6">
           <div className="bg-black border rounded-xl p-4 flex items-center justify-between">
-            <div className="w-12 h-12 rounded-full bg-blue-600 flex items-center justify-center text-white">
-              {church?.name?.[0] || "C"}
+            <div className="w-12 h-12 rounded-full bg-gray-700 flex items-center justify-center text-white">
+              {church?.logo || (
+                <Image
+                  src="/assets/avatar/Avatar.png"
+                  alt="Profile"
+                  width={200}
+                  height={200}
+                />
+              )}
             </div>
 
-            <Button size="sm" onClick={() => setOpenChurchModal(true)}>
-              Edit
+            <div className="flex flex-col">
+              <div>
+                <Text variant="label">{church?.alias}</Text>
+              </div>
+              <div>
+                <Text>
+                  {" "}
+                  {church?.state}, {church?.country}
+                </Text>
+              </div>
+            </div>
+
+            <Button
+              variant="outline"
+              className="flex items-center gap-2 h-8 sm:h-9"
+              onClick={() => setOpenChurchModal(true)}
+              size="sm"
+            >
+              <Edit className="h-4 w-4" />
+              <Span className="hidden sm:inline">Edit</Span>
             </Button>
           </div>
 
           <div className="bg-black border rounded-xl p-6">
+            <Text variant="label">Church Information</Text>
             <div className="grid grid-cols-2 gap-6">
               <div>
                 <Text className="text-gray-400">Church Name</Text>
@@ -145,69 +196,32 @@ export default function UserProfilePage() {
       </div>
 
       <EditPersonalInfoModal
-        onOpenChange={openPasswordModal}
         open={openPersonalModal}
-        onClose={() => setOpenPersonalModal(false)}
+        onOpenChange={setOpenPersonalModal}
         user={user}
-        onSave={async (data: any) => {
-          try {
-            setUser((prev: any) => ({ ...prev, ...data }));
-
-            toast({
-              title: "Success",
-              description: "Profile updated",
-            });
-          } catch (error: any) {
-            toast({
-              title: "Error",
-              description: error.message || "Update failed",
-              variant: "destructive",
-            });
-          }
+        onUpdated={(updated: any) => {
+          setUser((prev: any) => ({
+            ...prev,
+            ...updated,
+          }));
         }}
       />
 
       <EditChurchModal
-        onOpenChange={openChurchModal}
         open={openChurchModal}
-        onClose={() => setOpenChurchModal(false)}
+        onOpenChange={setOpenChurchModal}
         church={church}
-        onSave={async (data: any) => {
-          try {
-            setChurch((prev: any) => ({ ...prev, ...data }));
-
-            toast({
-              title: "Success",
-              description: "Church updated",
-            });
-          } catch (error: any) {
-            toast({
-              title: "Error",
-              description: error.message || "Update failed",
-              variant: "destructive",
-            });
-          }
+        onUpdated={(updated: any) => {
+          setChurch((prev: any) => ({
+            ...prev,
+            ...updated,
+          }));
         }}
       />
 
       <UpdatePasswordModal
-        onOpenChange={openPasswordModal}
         open={openPasswordModal}
-        onClose={() => setOpenPasswordModal(false)}
-        onSave={async (data: any) => {
-          try {
-            toast({
-              title: "Success",
-              description: "Password updated successfully",
-            });
-          } catch (error: any) {
-            toast({
-              title: "Error",
-              description: error.message || "Failed to update password",
-              variant: "destructive",
-            });
-          }
-        }}
+        onOpenChange={setOpenPasswordModal}
       />
     </div>
   );

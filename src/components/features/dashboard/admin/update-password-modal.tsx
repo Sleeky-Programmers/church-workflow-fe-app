@@ -1,6 +1,7 @@
 "use client";
 
 import { useForm } from "react-hook-form";
+import { useIsMobile } from "@/hooks/use-mobile";
 import {
   Dialog,
   DialogContent,
@@ -16,12 +17,14 @@ import { useToast } from "@/hooks/use-toast";
 import { updatePassword } from "@/services/authService";
 
 type FormValues = {
+  currentPassword: string;
   newPassword: string;
   confirmPassword: string;
 };
 
 export function UpdatePasswordModal({ open, onOpenChange }: any) {
   const { toast } = useToast();
+  const isMobile = useIsMobile();
 
   const {
     register,
@@ -34,6 +37,7 @@ export function UpdatePasswordModal({ open, onOpenChange }: any) {
   const onSubmit = async (data: FormValues) => {
     try {
       await updatePassword({
+        currentPassword: data.currentPassword,
         newPassword: data.newPassword,
         confirmNewPassword: data.confirmPassword,
       });
@@ -56,12 +60,28 @@ export function UpdatePasswordModal({ open, onOpenChange }: any) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent mobileSheet className="sm:max-w-md p-0">
+      <DialogContent mobileSheet={isMobile} className="sm:max-w-md p-0">
         <DialogHeader className="px-6 pt-6 pb-2">
           <DialogTitle>Update Password</DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="px-6 space-y-4">
+          <div>
+            <Label>Current Password</Label>
+            <Input
+              type="password"
+              {...register("currentPassword", {
+                required: "Current password is required",
+              })}
+              className="bg-gray-100"
+            />
+            {errors.currentPassword && (
+              <p className="text-red-500 text-sm">
+                {errors.currentPassword.message}
+              </p>
+            )}
+          </div>
+
           <div>
             <Label>New Password</Label>
             <div className="relative">
@@ -79,7 +99,7 @@ export function UpdatePasswordModal({ open, onOpenChange }: any) {
               <EyeOff className="absolute right-3 top-3 w-4 h-4 text-gray-500" />
             </div>
             {errors.newPassword && (
-              <p className="text-red-500 text-sm mt-1">
+              <p className="text-red-500 text-sm">
                 {errors.newPassword.message}
               </p>
             )}
@@ -87,20 +107,17 @@ export function UpdatePasswordModal({ open, onOpenChange }: any) {
 
           <div>
             <Label>Confirm Password</Label>
-            <div className="relative">
-              <Input
-                type="password"
-                {...register("confirmPassword", {
-                  required: "Confirm password is required",
-                  validate: (val) =>
-                    val === watch("newPassword") || "Passwords do not match",
-                })}
-                className="bg-gray-100 pr-10"
-              />
-              <EyeOff className="absolute right-3 top-3 w-4 h-4 text-gray-500" />
-            </div>
+            <Input
+              type="password"
+              {...register("confirmPassword", {
+                required: "Confirm password is required",
+                validate: (val) =>
+                  val === watch("newPassword") || "Passwords do not match",
+              })}
+              className="bg-gray-100"
+            />
             {errors.confirmPassword && (
-              <p className="text-red-500 text-sm mt-1">
+              <p className="text-red-500 text-sm">
                 {errors.confirmPassword.message}
               </p>
             )}
