@@ -1,9 +1,11 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState, useEffect } from "react";
 import { Check, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { FetchMembersResponse } from "@/services/memberService";
+import { AdminListResponse, AdminResponse } from "@/lib/interface";
+import { useDebounce } from "@/hooks/use-debounce";
 import {
   Command,
   CommandEmpty,
@@ -18,106 +20,117 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { MemberProfile } from "@/types";
-import { AVATAR_COLORS } from "@/lib/data";
-import { cn } from "@/lib/utils";
-import { Span } from "@/components/ui/typography/Text";
 import { Checkbox } from "@/components/ui/checkbox";
 
-function getAvatarColor(name: string) {
-  if (!name) return AVATAR_COLORS[0];
-  return AVATAR_COLORS[name.charCodeAt(0) % AVATAR_COLORS.length];
-}
+type FetchOptionsParams = {
+  page?: number;
+  limit?: number;
+  search?: string;
+};
 
-function getInitials(name: string) {
-  if (!name) return "?";
-  const parts = name.trim().split(" ").filter(Boolean).slice(0, 2);
-  return parts.map((p) => p[0]?.toUpperCase() ?? "").join("");
-}
-
-function MemberAvatar({ name }: { name: string }) {
-  const color = getAvatarColor(name);
-
-  return (
-    <Avatar className="h-5 w-5">
-      <AvatarFallback
-        className={cn("text-[10px] font-semibold", color.bg, color.text)}
-      >
-        {getInitials(name)}
-      </AvatarFallback>
-    </Avatar>
-  );
-}
+type SelectOption = {
+  id: string;
+  fullName: string;
+};
 
 interface MemberSingleSelectProps {
-  options: MemberProfile[];
+  fetchOptions: (params: FetchOptionsParams) => Promise<{
+    data: { id: string; fullName: string }[];
+    pagination?: any;
+  }>;
   value: string;
   onChange: (id: string) => void;
   placeholder?: string;
 }
 
 export function MemberSingleSelect({
-  options,
+  fetchOptions,
   value,
   onChange,
   placeholder = "Select or search",
 }: MemberSingleSelectProps) {
   const [open, setOpen] = useState(false);
-  const selected = useMemo(
-    () => options.find((member) => member.id === value),
-    [options, value],
-  );
+  const [options, setOptions] = useState<SelectOption[]>([]);
+  const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
+
+  const debouncedSearch = useDebounce(search, 400);
+
+  useEffect(() => {
+    const load = async () => {
+      const response = await fetchOptions({
+        page: 1,
+        limit: 10,
+        search: debouncedSearch,
+      });
+
+      setOptions(response.data);
+      setPage(1);
+    };
+
+    load();
+  }, [debouncedSearch, fetchOptions]);
+
+  const loadMore = async () => {
+    const next = page + 1;
+
+    const response = await fetchOptions({
+      page: next,
+      limit: 10,
+      search: debouncedSearch,
+    });
+
+    setOptions((prev) => [...prev, ...response.data]);
+    setPage(next);
+  };
+
+  const selected = options.find((m) => m.id === value);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button
-          type="button"
-          variant="outline"
-          role="combobox"
-          aria-expanded={open}
-          className="h-10 w-full justify-between"
-        >
-          {selected ? (
-            <span className="flex items-center gap-2 truncate">
-              <MemberAvatar name={selected.fullName} />
-              <span className="truncate">{selected.fullName}</span>
-            </span>
-          ) : (
-            <span className="text-muted-foreground">{placeholder}</span>
-          )}
-          <ChevronDown className="h-4 w-4 shrink-0 opacity-50" />
+        <Button variant="ghost" className="w-full border justify-between">
+          {selected ? selected.fullName : placeholder}
+          <ChevronDown className="w-4 h-4 opacity-50" />
         </Button>
       </PopoverTrigger>
 
-      <PopoverContent
-        align="start"
-        className="w-[var(--radix-popover-trigger-width)] p-0"
-      >
+      <PopoverContent className="p-0 w-full">
         <Command>
-          <CommandInput placeholder="Search members..." />
+          <CommandInput onValueChange={setSearch} placeholder="Search..." />
+
           <CommandList>
-            <CommandEmpty>No results.</CommandEmpty>
+            <CommandEmpty>No results</CommandEmpty>
+
             <CommandGroup>
-              {options.map((member) => (
+              {options.map((m, index) => (
                 <CommandItem
-                  key={member.id}
-                  value={`${member.fullName}-${member.id}`}
+                  key={m.id || `${m.fullName}-${index}`}
                   onSelect={() => {
-                    onChange(member.id);
+                    onChange(m.id);
                     setOpen(false);
                   }}
                 >
-                  <MemberAvatar name={member.fullName} />
-                  <span className="truncate">{member.fullName}</span>
+                  {m.fullName}
                   <Check
-                    className={cn(
-                      "ml-auto h-4 w-4",
-                      value === member.id ? "opacity-100" : "opacity-0",
-                    )}
+                    className={`ml-auto ${
+                      value === m.id ? "opacity-100" : "opacity-0"
+                    }`}
                   />
                 </CommandItem>
               ))}
             </CommandGroup>
+
+            <div className="p-2">
+              <Button
+                onClick={loadMore}
+                variant="ghost"
+                size="sm"
+                className="w-full"
+              >
+                Load more
+              </Button>
+            </div>
           </CommandList>
         </Command>
       </PopoverContent>
@@ -126,97 +139,104 @@ export function MemberSingleSelect({
 }
 
 interface MemberMultiSelectProps {
-  options: MemberProfile[];
+  fetchOptions: (
+    page: number,
+    limit: number,
+    search?: string,
+  ) => Promise<FetchMembersResponse>;
   value: string[];
-  onChange: (ids: string[]) => void;
+  onChange: (ids: string[], members: MemberProfile[]) => void; // ✅ EXTENDED
   placeholder?: string;
 }
 
 export function MemberMultiSelect({
-  options,
+  fetchOptions,
   value,
   onChange,
   placeholder = "Select or search",
 }: MemberMultiSelectProps) {
   const [open, setOpen] = useState(false);
-  const selectedMembers = useMemo(
-    () => options.filter((member) => value.includes(member.id)),
-    [options, value],
-  );
+  const [options, setOptions] = useState<MemberProfile[]>([]);
+  const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
+
+  const debouncedSearch = useDebounce(search, 400);
+
+  useEffect(() => {
+    const load = async () => {
+      const response = await fetchOptions(1, 10, debouncedSearch);
+      setOptions(response.data);
+      setPage(1);
+    };
+    load();
+  }, [debouncedSearch, fetchOptions]);
+
+  const loadMore = async () => {
+    const next = page + 1;
+    const response = await fetchOptions(next, 10, debouncedSearch);
+    setOptions((prev) => [...prev, ...response.data]);
+    setPage(next);
+  };
 
   const summary =
-    selectedMembers.length === 0
+    value.length === 0
       ? placeholder
-      : selectedMembers.length <= 2
-        ? selectedMembers.map((member) => member.fullName).join(", ")
-        : `${selectedMembers.length} members selected`;
+      : value.length <= 2
+        ? options
+            .filter((m) => value.includes(m.id))
+            .map((m) => m.fullName)
+            .join(", ")
+        : `${value.length} members selected`;
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button
-          type="button"
-          variant="outline"
-          role="combobox"
-          aria-expanded={open}
-          className="h-auto min-h-10 w-full justify-between py-2"
-        >
-          <Span
-            className={cn(
-              "truncate text-left",
-              value.length === 0 && "text-muted-foreground",
-            )}
-          >
-            {summary}
-          </Span>
-          <ChevronDown className="h-4 w-4 shrink-0 opacity-50" />
+        <Button variant="ghost" className="w-full border justify-between">
+          {summary}
+          <ChevronDown className="w-4 h-4 opacity-50" />
         </Button>
       </PopoverTrigger>
 
-      <PopoverContent
-        align="start"
-        className="w-[var(--radix-popover-trigger-width)] p-0"
-      >
+      <PopoverContent className="p-0 w-full">
         <Command>
-          <CommandInput placeholder="Search members..." />
+          <CommandInput onValueChange={setSearch} placeholder="Search..." />
+
           <CommandList>
-            <CommandEmpty>No results.</CommandEmpty>
+            <CommandEmpty>No results</CommandEmpty>
+
             <CommandGroup>
-              {options.map((member) => {
-                const isSelected = value.includes(member.id);
+              {options.map((m) => {
+                const selected = value.includes(m.id);
+
                 return (
                   <CommandItem
-                    key={member.id}
-                    value={`${member.fullName}-${member.id}`}
+                    key={m.id}
                     onSelect={() => {
-                      onChange(
-                        isSelected
-                          ? value.filter((id) => id !== member.id)
-                          : [...value, member.id],
-                      );
+                      const newIds = selected
+                        ? value.filter((id) => id !== m.id)
+                        : [...value, m.id];
+
+                      onChange(newIds, [m]); // ✅ send selected member
                     }}
-                    className="gap-2"
                   >
-                    <div className="flex items-center gap-2 flex-1 min-w-0">
-                      <MemberAvatar name={member.fullName} />
-                      <div className="min-w-0">
-                        <Span className="truncate">{member.fullName}</Span>
-                        <Span className="block text-xs text-muted-foreground truncate">
-                          {member.email}
-                        </Span>
-                      </div>
-                    </div>
-                    <Checkbox checked={isSelected} className="ml-auto" />
+                    {m.fullName}
+                    <Checkbox checked={selected} className="ml-auto" />
                   </CommandItem>
                 );
               })}
             </CommandGroup>
-          </CommandList>
-          {value.length > 0 && (
-            <div className="border-t px-3 py-2 text-xs text-muted-foreground">
-              {value.length} member{value.length > 1 ? "s" : ""} selected
+
+            <div className="p-2">
+              <Button
+                onClick={loadMore}
+                variant="ghost"
+                size="sm"
+                className="w-full"
+              >
+                Load more
+              </Button>
             </div>
-          )}
+          </CommandList>
         </Command>
       </PopoverContent>
     </Popover>

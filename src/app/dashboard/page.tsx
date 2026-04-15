@@ -31,6 +31,8 @@ import type { ChurchResponse } from "@/types/payload";
 import { getCurrentUserProfile } from "@/lib/auth/session";
 import { EventCategory, EventType } from "@/lib/enums";
 import { ChurchEvent } from "@/types";
+import { useIsMobile } from "@/hooks/use-mobile";
+import DashboardMobile from "@/components/features/dashboard/dashboard-mobile";
 
 const EVENT_STORAGE_KEY = "dashboard:events";
 
@@ -48,7 +50,7 @@ export default function Dashboard() {
   const [churchIdentity, setChurchIdentity] = useState<ChurchResponse | null>(
     null,
   );
-
+  const isMobile = useIsMobile();
   useEffect(() => {
     const profile = getCurrentUserProfile();
 
@@ -199,6 +201,24 @@ export default function Dashboard() {
       setUpcomingEvents(DashboardData.upcomingEvents);
     }
   }, []);
+
+  if (isMobile) {
+    return (
+      <DashboardMobile
+        displayName={displayName}
+        churchName={churchName}
+        // churchIdentity={churchIdentity}
+        totalMembers={totalMembers}
+        totalMembersGrowth={totalMembersGrowth}
+        serviceAttendance={serviceAttendance}
+        serviceAttendanceGrowth={serviceAttendanceGrowth}
+        attendanceTrendData={attendanceTrendData}
+        incomeTrendData={incomeTrendData}
+        upcomingEvents={upcomingEvents}
+        upcomingBirthdays={upcomingBirthdays}
+      />
+    );
+  }
 
   return (
     <>

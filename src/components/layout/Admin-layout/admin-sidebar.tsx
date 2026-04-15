@@ -1,6 +1,12 @@
 "use client";
 
-import { Users, Shield, Settings as SettingsIcon, Lock } from "lucide-react";
+import {
+  Users,
+  User,
+  Shield,
+  Settings as SettingsIcon,
+  Lock,
+} from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -13,6 +19,12 @@ type NavItem = {
 };
 
 const NAV_ITEMS: NavItem[] = [
+  {
+    id: "user-profile",
+    label: "User & Church Info",
+    icon: User,
+    href: "/dashboard/settings/profile",
+  },
   {
     id: "user-management",
     label: "User Management",

@@ -54,31 +54,39 @@ export function AddMemberFormatModal({
               className="w-full h-auto justify-between p-4"
             >
               <div className="flex items-center gap-3 text-left">
-                <Span className="h-10 w-10 rounded-md bg-primary-50 flex items-center justify-center">
+                <span className="h-10 w-10 rounded-md bg-primary-50 flex items-center justify-center">
                   <BookPlus className="h-5 w-5 text-primary-600" />
-                </Span>
-                <Span>
+                </span>
+
+                <div className="flex flex-col">
                   <Text variant="default">Create a Form</Text>
-                  <Text variant="muted">Add a new member manually.</Text>
-                </Span>
+                  <Text variant="muted" className="text-xs">
+                    Add a new member manually.
+                  </Text>
+                </div>
               </div>
+
               <ChevronRight className="h-4 w-4 text-muted-foreground" />
             </Button>
 
             <Button
               variant="outline"
               onClick={() => handleFormatSelect(MemberFormType.CSV)}
-              className=" p-4"
+              className="w-full h-auto justify-between p-4"
             >
               <div className="flex items-center gap-3 text-left">
-                <Span className="h-10 w-10 rounded-md bg-primary-50 flex items-center justify-center">
+                <span className="h-10 w-10 rounded-md bg-primary-50 flex items-center justify-center">
                   <UploadIcon className="h-5 w-5 text-primary-600" />
-                </Span>
-                <Span>
+                </span>
+
+                <div className="flex flex-col">
                   <Text variant="default">Upload CSV</Text>
-                  <Text variant="muted">Import multiple members at once.</Text>
-                </Span>
+                  <Text variant="muted" className="text-xs">
+                    Import multiple members at once.
+                  </Text>
+                </div>
               </div>
+
               <ChevronRight className="h-4 w-4 text-muted-foreground" />
             </Button>
           </div>
@@ -102,7 +110,7 @@ export function AddMemberFormatModal({
             >
               <UploadIcon className="h-12 w-12 text-primary-600" />
               <Text variant="blue" className="uppercase">
-                Upload CVS
+                Upload CSV
               </Text>
             </Button>
           </div>

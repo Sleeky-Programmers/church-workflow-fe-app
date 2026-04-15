@@ -14,6 +14,7 @@ import MarkTeamAttendanceDialog from "@/components/features/dashboard/teams/mark
 import TeamActionsSheet from "@/components/features/dashboard/teams/team-actions-sheet";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { TeamStatus } from "@/lib/enums";
+import { SidebarTrigger } from "@/components/ui/sidebar";
 import {
   createSmallTeam,
   deleteSmallTeam,
@@ -280,7 +281,10 @@ export default function TeamsPage() {
       <div className="min-h-screen bg-gray-50">
         <div className="bg-white">
           <div className="px-4 py-4 flex items-center justify-between gap-2">
-            <Heading level={3}>Small Teams</Heading>
+            <div className="flex items-center gap-3">
+              <SidebarTrigger />
+              <Heading level={3}>Small Teams</Heading>
+            </div>
             <Button variant="ghost" size="icon" className="h-8 w-8">
               <MoreVertical className="h-4 w-4" />
             </Button>

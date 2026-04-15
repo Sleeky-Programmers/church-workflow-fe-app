@@ -10,6 +10,7 @@ import {
   MaritalStatus,
   Gender,
   MembershipStatus,
+  EventCategory,
 } from "@/lib/enums";
 import { LucideIcon } from "lucide-react";
 
@@ -332,4 +333,34 @@ export type SpecialServiceEvent = {
   description?: string;
   recurrence: "none" | "monthly-first-sunday";
   daySchedules: SpecialServiceDaySchedule[];
+};
+
+export type UploadFile = {
+  file: File;
+  progress: number;
+  status: "uploading" | "paused" | "success" | "error";
+  error?: string;
+  controller?: AbortController;
+};
+
+export type FileInputProps = {
+  accept?: string;
+  multiple?: boolean;
+  files: UploadFile[];
+  onUpload: (file: File) => void;
+  onRemove: (file: UploadFile) => void;
+  onPauseResume: (file: UploadFile) => void;
+};
+
+export type CsvUploadModalProps = {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onSuccess: () => void;
+  onClose: () => void;
+};
+
+export type Event = {
+  title: string;
+  date: string;
+  category: EventCategory;
 };

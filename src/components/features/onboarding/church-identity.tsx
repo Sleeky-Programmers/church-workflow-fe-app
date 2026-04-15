@@ -63,7 +63,9 @@ export function ChurchIdentityStep({
     const currentCurrency = form.getValues("defaultCurrency");
     const currentTimeZone = form.getValues("timeZone");
 
-    if (currentCountry || currentCurrency || currentTimeZone) return;
+    if (currentCountry || currentCurrency || currentTimeZone) {
+      return;
+    }
 
     const isFieldDirty = (name: keyof ChurchIdentityValues) =>
       form.getFieldState(name).isDirty;
@@ -72,7 +74,9 @@ export function ChurchIdentityStep({
       name: keyof ChurchIdentityValues,
       value: string | undefined,
     ) => {
-      if (!value) return;
+      if (!value) {
+        return;
+      }
       if (!isFieldDirty(name)) {
         form.setValue(name, value, { shouldDirty: false });
       }

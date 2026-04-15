@@ -71,6 +71,12 @@ export async function fetchMembers(
   };
 }
 
+export async function fetchAllMembers() {
+  const members = await authenticatedFetch<MemberProfile[]>("/members/all");
+
+  return members.map(mapMember);
+}
+
 export async function createMember(data: NewMemberData) {
   const payload = normalizeMemberPayload(data);
 
@@ -93,12 +99,71 @@ export async function updateMember(id: string, data: Partial<NewMemberData>) {
   return mapMember(response);
 }
 
-export async function uploadMembersCsv(file: File) {
-  const formData = new FormData();
-  formData.append("file", file);
+export function uploadMembersCsv(
+  file: File,
+  options?: {
+    onProgress?: (progress: number) => void;
+    signal?: AbortSignal;
+    token?: string;
+  },
+): Promise<any> {
+  const { onProgress, signal, token } = options || {};
 
-  return authenticatedFetch("/members/csv/create", {
-    method: "POST",
-    body: formData,
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+
+    xhr.open("POST", `${process.env.NEXT_PUBLIC_API_URL}/members/csv/create`);
+
+    if (token) {
+      xhr.setRequestHeader("Authorization", `Bearer ${token}`);
+    }
+
+    if (onProgress) {
+      xhr.upload.onprogress = (event) => {
+        if (event.lengthComputable) {
+          const percent = Math.round((event.loaded / event.total) * 100);
+          onProgress(percent);
+        }
+      };
+    }
+    xhr.onload = () => {
+      let response: any = null;
+
+      try {
+        response = xhr.responseText ? JSON.parse(xhr.responseText) : null;
+      } catch {
+        response = {
+          message: xhr.responseText || "Unknown server response",
+        };
+      }
+
+      if (xhr.status >= 200 && xhr.status < 300) {
+        resolve(response);
+      } else {
+        reject(response);
+      }
+    };
+
+    xhr.onerror = () => {
+      reject(new Error("Network error"));
+    };
+
+    if (signal) {
+      signal.addEventListener("abort", () => {
+        xhr.abort();
+        reject(new Error("Upload aborted"));
+      });
+    }
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    xhr.send(formData);
+  });
+}
+
+export async function deleteMember(id: string): Promise<void> {
+  await authenticatedFetch(`/members/${id}`, {
+    method: "DELETE",
   });
 }

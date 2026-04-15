@@ -3,22 +3,17 @@
 import { useEffect, useState } from "react";
 import { MemberAttendanceRecord, MemberProfile } from "@/types";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Edit } from "lucide-react";
+import { ChevronLeft, Edit } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Pills } from "@/components/ui/pills";
+
 import Heading from "@/components/ui/typography/Heading";
 import { Span, Text } from "@/components/ui/typography/Text";
 import { MemberOverviewTab } from "./member-overview-tab";
 import { MemberAttendanceTab } from "./member-attendance-tab";
 import { fetchMemberAttendanceHistory } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
-import { EditMemberModal } from "./EditMemberModal";
+import { EditMemberModal } from "./edit-member-modal";
 import { updateMember } from "@/services/memberService";
 
 type MemberDetailsPageProps = {
@@ -91,7 +86,7 @@ export function MemberDetailsPage({ member, onBack }: MemberDetailsPageProps) {
             onClick={onBack}
             className="absolute left-2 sm:left-6 gap-1"
           >
-            <ArrowLeft className="h-4 w-4" />
+            <ChevronLeft className="h-4 w-4" />
             <Span variant="default" className="hidden sm:inline">
               Back
             </Span>
@@ -117,48 +112,26 @@ export function MemberDetailsPage({ member, onBack }: MemberDetailsPageProps) {
           </div>
         </div>
       </div>
+      <div className="flex items-center justify-between px-4 sm:px-6 py-3 bg-white border-b">
+        <Pills
+          value={activeTab}
+          onChange={(val) => setActiveTab(val)}
+          options={[
+            { label: "Overview", value: "overview" },
+            { label: "Attendance", value: "attendance" },
+          ]}
+        />
 
-      <div className="border-b bg-white">
-        <div className="flex items-center justify-between px-4 sm:px-6 gap-2">
-          <div className="flex gap-1">
-            <Button
-              variant={activeTab === "overview" ? "default" : "ghost"}
-              onClick={() => setActiveTab("overview")}
-            >
-              Overview
-            </Button>
-            <Button
-              variant={activeTab === "attendance" ? "default" : "ghost"}
-              onClick={() => setActiveTab("attendance")}
-            >
-              Attendance
-            </Button>
-          </div>
-
-          {activeTab === "overview" ? (
-            <Button
-              variant="outline"
-              className="flex items-center gap-2 h-8 sm:h-9"
-              onClick={() => setOpenEdit(true)}
-            >
-              <Edit className="h-4 w-4" />
-              <Span className="hidden sm:inline">Edit</Span>
-            </Button>
-          ) : (
-            <Select value={filterValue} onValueChange={setFilterValue}>
-              <SelectTrigger className="w-[110px] sm:w-[120px] h-8 sm:h-9">
-                <SelectValue placeholder="Filter" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All</SelectItem>
-                <SelectItem value="present">Present</SelectItem>
-                <SelectItem value="absent">Absent</SelectItem>
-                <SelectItem value="this-month">This Month</SelectItem>
-                <SelectItem value="last-month">Last Month</SelectItem>
-              </SelectContent>
-            </Select>
-          )}
-        </div>
+        {activeTab === "overview" && (
+          <Button
+            variant="outline"
+            className="flex items-center gap-2 h-8 sm:h-9"
+            onClick={() => setOpenEdit(true)}
+          >
+            <Edit className="h-4 w-4" />
+            <Span className="hidden sm:inline">Edit</Span>
+          </Button>
+        )}
       </div>
 
       <div className="bg-gray-50 p-3 sm:p-6">

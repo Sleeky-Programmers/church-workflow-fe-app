@@ -33,7 +33,9 @@ const DEFAULT_START_TIME = "";
 const DEFAULT_END_TIME = "";
 
 function listDates(startDate: string, endDate?: string): string[] {
-  if (!startDate) return [];
+  if (!startDate) {
+    return [];
+  }
   const start = new Date(startDate);
   const end = new Date(endDate || startDate);
 

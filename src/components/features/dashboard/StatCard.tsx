@@ -1,10 +1,12 @@
-import React from "react";
+"use client";
+
 import { Card, CardContent } from "@/components/ui/card";
 import { TrendingUp, TrendingDown, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import Heading from "@/components/ui/typography/Heading";
 import { Span } from "@/components/ui/typography/Text";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export const StatCard = ({
   title,
@@ -23,12 +25,41 @@ export const StatCard = ({
   compact?: boolean;
   className?: string;
 }) => {
+  const isMobile = useIsMobile();
+
   const isPositiveGrowth = growth.startsWith("+");
   const Icon = isPositiveGrowth ? TrendingUp : TrendingDown;
 
   const sizeClasses = compact
     ? "w-full min-w-0 sm:min-w-[220px] h-[120px]"
     : "w-full min-w-0 sm:min-w-[260px] h-[150px]";
+
+  if (isMobile) {
+    return (
+      <Card className="bg-[#E7EFF7] shadow-none rounded-2xl">
+        <CardContent className="p-3">
+          <div className="flex items-center justify-between">
+            <div className="flex flex-col">
+              <Span text={title} className="text-xs" />
+              <Heading level={4} text={count} />
+            </div>
+
+            <div className="flex items-center gap-2">
+              <Span text={growth} className="text-xs" />
+
+              <div
+                className={`${
+                  isPositiveGrowth ? "bg-success-500" : "bg-destructive-500"
+                } rounded-lg p-1.5 flex items-center justify-center`}
+              >
+                <Icon className="w-3 h-3" color="#ffffff" strokeWidth={2.5} />
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card
@@ -63,7 +94,9 @@ export const StatCard = ({
               </div>
 
               <div
-                className={`${isPositiveGrowth ? "bg-success-500" : "bg-destructive-500"} rounded-xl p-2 flex items-center justify-center`}
+                className={`${
+                  isPositiveGrowth ? "bg-success-500" : "bg-destructive-500"
+                } rounded-xl p-2 flex items-center justify-center`}
               >
                 <Icon className="w-4 h-4" color="#ffffff" strokeWidth={2.5} />
               </div>

@@ -21,10 +21,12 @@ import { RouteConfig } from "@/config/routes";
 import { useFavoritesStore } from "@/stores/useFavoritesStore";
 import { useAuthStore } from "@/stores/useAuthStore";
 import { getCurrentUserProfile } from "@/lib/auth/session";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export function Navbar() {
   const pathname = usePathname() || RouteConfig.dashboard.home;
   const router = useRouter();
+  const isMobile = useIsMobile();
 
   const [search, setSearch] = useState("");
   const [fallbackName, setFallbackName] = useState("John Doe");
@@ -62,8 +64,9 @@ export function Navbar() {
     setSearch("");
   };
 
+  if (isMobile) return null;
   return (
-    <header className="w-full flex items-center h-16 gap-2 px-3 md:px-6 border-b">
+    <header className="w-full hidden md:flex flex items-center h-16 gap-2 px-3 md:px-6 border-b">
       <div className="flex items-center gap-2 min-w-0">
         <SidebarTrigger className="-ml-1" />
         <Button

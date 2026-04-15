@@ -1,6 +1,9 @@
 import { EventCategory } from "@/lib/enums";
 
-export const EVENT_CATEGORY_CONFIG = {
+export const EVENT_CATEGORY_CONFIG: Record<
+  EventCategory,
+  { label: string; dotClass: string }
+> = {
   [EventCategory.GENERAL]: {
     label: "Service",
     dotClass: "bg-primary",

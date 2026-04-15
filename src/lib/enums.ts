@@ -50,6 +50,12 @@ export enum EventCategory {
   SPECIAL = "SPECIAL",
 }
 
+export enum FilterSection {
+  MARITAL = "marital",
+  MEMBERSHIP = "membership",
+  GENDER = "gender",
+}
+
 export enum ActiveTab {
   FAVOURITES = "favourites",
   RECENT = "recent",
@@ -144,4 +150,22 @@ export enum MembershipStatus {
   WORKER = "WORKER",
   LEADER = "LEADER",
   CONVERT = "NEW CONVERT",
+}
+
+export enum MemberFilter {
+  ALL = "all",
+  MALE = "male",
+  FEMALE = "female",
+  MARRIED = "married",
+  SINGLE = "single",
+  DIVORCED = "divorced",
+  WIDOWED = "widowed",
+  VISITOR = "visitor",
+  MEMBER = "member",
+  WORKER = "worker",
+  VOLUNTEER = "volunteer",
+  LEADER = "leader",
+  CONVERT = "new-convert",
+  NEW_MEMBERS = "new-members",
+  IS_BAPTIZED = "is-baptized",
 }

@@ -237,6 +237,7 @@ export default function ChurchOnboarding() {
 
   const onServiceSubmit = async () => {
     try {
+      await persistWeeklyServices();
       setStep(3);
     } catch (error: any) {
       toast({
@@ -257,7 +258,6 @@ export default function ChurchOnboarding() {
       setUploadErrorSummary(null);
       setUploadErrorMessages([]);
       await persistWeeklyServices();
-      await uploadMembersCsv(data.csvFile);
       markMembersUploaded();
       router.push(RouteConfig.dashboard.home);
     } catch (error: any) {
@@ -284,6 +284,7 @@ export default function ChurchOnboarding() {
 
   const handleBack = () => step > 1 && setStep(step - 1);
   const handleSkip = () => {
+    persistWeeklyServices();
     router.push(RouteConfig.dashboard.home);
   };
 
@@ -337,15 +338,8 @@ export default function ChurchOnboarding() {
         return (
           <UploadMembersStep
             form={uploadForm}
-            onSubmit={onUploadSubmit}
             onBack={handleBack}
             onSkip={handleSkip}
-            errorSummary={uploadErrorSummary}
-            errorMessages={uploadErrorMessages}
-            onClearError={() => {
-              setUploadErrorSummary(null);
-              setUploadErrorMessages([]);
-            }}
             step={step}
             totalSteps={3}
           />

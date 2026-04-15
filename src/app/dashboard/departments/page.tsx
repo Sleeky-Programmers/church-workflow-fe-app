@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Search, ChevronDown } from "lucide-react";
 import { useRouter } from "next/navigation";
-import AddDepartmentDialog from "@/components/features/dashboard/AddDepartmentDialog";
+import AddDepartmentDialog from "@/components/features/dashboard/departments/AddDepartmentDialog";
 import { DepartmentRow } from "@/types";
 import { departmentData, MOCK_MEMBERS_FULL } from "@/lib/data";
 import { Button } from "@/components/ui/button";

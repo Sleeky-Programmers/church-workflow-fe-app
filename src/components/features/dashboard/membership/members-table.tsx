@@ -1,5 +1,5 @@
 "use client";
-
+import { Plus } from "lucide-react";
 import { MemberProfile } from "@/types";
 import {
   Table,
@@ -26,6 +26,12 @@ type MembersTableProps = {
     hasNextPage: boolean;
   } | null;
   onPageChange: (page: number) => void;
+  selectedMemberIds?: string[];
+  onSelectMember?: (id: string, checked: boolean) => void;
+  onSelectAll?: (checked: boolean) => void;
+  setIsDeleteModalOpen: any;
+  setIsFormatModalOpen: any;
+  isCsvUploading: boolean;
 };
 
 export function MembersTable({
@@ -34,10 +40,20 @@ export function MembersTable({
   onAddMember,
   pagination,
   onPageChange,
+  selectedMemberIds = [],
+  onSelectMember,
+  onSelectAll,
+  setIsDeleteModalOpen,
+  setIsFormatModalOpen,
+  isCsvUploading,
 }: MembersTableProps) {
   const isMobile = useIsMobile();
   const currentPage = pagination?.page || 1;
   const totalPages = pagination?.totalPages || 1;
+
+  const allSelected =
+    members.length > 0 && selectedMemberIds.length === members.length;
+  const someSelected = selectedMemberIds.length > 0 && !allSelected;
 
   if (isMobile) {
     return (
@@ -45,12 +61,23 @@ export function MembersTable({
         <div className="divide-y">
           <div className="flex items-center justify-between px-3 py-3">
             <div className="flex items-center gap-3">
-              <Checkbox />
+              <Checkbox
+                checked={someSelected ? "indeterminate" : allSelected}
+                onCheckedChange={(checked) => onSelectAll?.(checked === true)}
+              />
               <Text text="All Members" variant="default" />
             </div>
-
-            {onAddMember && (
-              <Button size="sm" className="h-8 px-4" onClick={onAddMember}>
+            {selectedMemberIds.length > 0 ? (
+              <Button
+                variant="destructive"
+                size="sm"
+                className="h-8 px-4"
+                onClick={() => setIsDeleteModalOpen(true)}
+              >
+                <Text text="Remove" variant="default" />
+              </Button>
+            ) : (
+              <Button size="sm" className="h-8  px-4" onClick={onAddMember}>
                 <Text text="Add" variant="default" />
               </Button>
             )}
@@ -62,7 +89,12 @@ export function MembersTable({
               className="flex items-center justify-between px-3 py-3 hover:bg-gray-50 cursor-pointer"
             >
               <div className="flex items-center gap-3 min-w-0">
-                <Checkbox />
+                <Checkbox
+                  checked={selectedMemberIds.includes(member.id)}
+                  onCheckedChange={(checked) =>
+                    onSelectMember?.(member.id, !!checked)
+                  }
+                />
                 <Text
                   text={member.fullName}
                   variant="default"
@@ -123,7 +155,10 @@ export function MembersTable({
           <TableHeader>
             <TableRow>
               <TableHead>
-                <Checkbox />
+                <Checkbox
+                  checked={someSelected ? "indeterminate" : allSelected}
+                  onCheckedChange={(checked) => onSelectAll?.(checked === true)}
+                />
               </TableHead>
               <TableHead>
                 <Text text="Name" variant="default" />
@@ -153,25 +188,25 @@ export function MembersTable({
                 className="cursor-pointer hover:bg-gray-50"
               >
                 <TableCell onClick={(e) => e.stopPropagation()}>
-                  <Checkbox />
+                  <Checkbox
+                    checked={selectedMemberIds.includes(member.id)}
+                    onCheckedChange={(checked) =>
+                      onSelectMember?.(member.id, !!checked)
+                    }
+                  />
                 </TableCell>
-
                 <TableCell>
                   <Text text={member.fullName} variant="default" />
                 </TableCell>
-
                 <TableCell>
                   <Text text={formatDate(member.birthday)} variant="default" />
                 </TableCell>
-
                 <TableCell>
                   <Text text={member.gender} variant="default" />
                 </TableCell>
-
                 <TableCell>
                   <Text text={member.phone} variant="default" />
                 </TableCell>
-
                 <TableCell>
                   <Text
                     text={member.email}
@@ -179,7 +214,6 @@ export function MembersTable({
                     className="truncate"
                   />
                 </TableCell>
-
                 <TableCell>
                   <Button
                     onClick={() => onRowClick(member.id)}
