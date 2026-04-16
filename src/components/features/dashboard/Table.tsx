@@ -1,6 +1,6 @@
 "use client";
-import { useEffect } from "react";
-import React, { useMemo, useState } from "react";
+
+import React, { useEffect, useMemo, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   Table as TableComponent,
@@ -68,14 +68,14 @@ export default function Table<T extends Record<string, any>>({
   emptyState,
   onRowClick,
   className = "",
-  showCheckbox = false,
   selectedRowKeys,
 }: CustomTableProps<T>) {
   const [sort, setSort] = useState<SortState>({
     key: "timestamp",
     direction: "desc",
   });
-  const [internalSelected, setInternalSelected] = useState<string[]>([]);
+
+  const [internalSelected] = useState<string[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(defaultPageSize);
 
@@ -84,51 +84,27 @@ export default function Table<T extends Record<string, any>>({
   }, [data, pageSize]);
 
   const getRowKey = (row: T, idx: number) => {
-    if (!rowKey) {
-      return String(idx);
-    }
-
-    if (typeof rowKey === "function") {
-      return rowKey(row);
-    }
-
+    if (!rowKey) return String(idx);
+    if (typeof rowKey === "function") return rowKey(row);
     return String(row[rowKey]);
   };
 
   const getCellValue = (col: Column<T>, row: T) => {
-    if (col.render) {
-      return col.render(row);
-    }
-
-    if (typeof col.accessor === "function") {
-      return col.accessor(row);
-    }
-
-    if (typeof col.accessor === "string") {
-      return row[col.accessor as string];
-    }
-
+    if (col.render) return col.render(row);
+    if (typeof col.accessor === "function") return col.accessor(row);
+    if (typeof col.accessor === "string") return row[col.accessor];
     return null;
   };
 
   const sortedData = useMemo(() => {
-    if (!enableSorting || !sort.key || !sort.direction) {
-      return data.slice();
-    }
+    if (!enableSorting || !sort.key || !sort.direction) return data.slice();
 
     const col = columns.find((c) => c.key === sort.key);
-    if (!col) {
-      return data.slice();
-    }
+    if (!col || typeof col.accessor !== "string") return data.slice();
 
-    if (typeof col.accessor !== "string") {
-      return data.slice();
-    }
+    const key = col.accessor;
 
-    const key = col.accessor as string;
-
-    const copy = data.slice();
-    copy.sort((a, b) => {
+    return data.slice().sort((a, b) => {
       const va = col.sortAccessor ? col.sortAccessor(a) : a[key];
       const vb = col.sortAccessor ? col.sortAccessor(b) : b[key];
 
@@ -144,17 +120,13 @@ export default function Table<T extends Record<string, any>>({
         ? String(va).localeCompare(String(vb))
         : String(vb).localeCompare(String(va));
     });
-
-    return copy;
   }, [data, sort, enableSorting, columns]);
 
   const paginatedData = useMemo(() => {
-    if (!enablePagination) {
-      return sortedData;
-    }
-    const startIndex = (currentPage - 1) * pageSize;
-    const endIndex = startIndex + pageSize;
-    return sortedData.slice(startIndex, endIndex);
+    if (!enablePagination) return sortedData;
+
+    const start = (currentPage - 1) * pageSize;
+    return sortedData.slice(start, start + pageSize);
   }, [sortedData, enablePagination, currentPage, pageSize]);
 
   const totalPages = enablePagination
@@ -163,136 +135,144 @@ export default function Table<T extends Record<string, any>>({
 
   const toggleSort = (col: Column<T>) => {
     if (!enableSorting || !col.sortable) return;
+
     setSort((prev) => {
       if (prev.key !== col.key) {
         return { key: col.key, direction: "asc" };
       }
-
       if (prev.direction === "asc") {
         return { key: col.key, direction: "desc" };
       }
-
       return { key: null, direction: null };
     });
   };
 
-  const controlled = Array.isArray(selectedRowKeys);
-  const selectedKeys = controlled ? selectedRowKeys! : internalSelected;
+  const selectedKeys = Array.isArray(selectedRowKeys)
+    ? selectedRowKeys
+    : internalSelected;
 
-  const visibleColumnCount = columns.length + (showCheckbox ? 1 : 0);
+  const visibleColumnCount = columns.length;
+
+  const alignClass = (align?: Align) => {
+    if (align === "center") return "text-center";
+    if (align === "right") return "text-right";
+    return "text-left";
+  };
 
   return (
     <Card className={className}>
       <CardContent className="p-0">
-        <div className="overflow-x-auto w-full max-w-full">
-          <div className="min-w-max">
-            <TableComponent>
-              <TableHeader>
+        <div className="overflow-x-auto w-full">
+          <TableComponent className="w-full table-fixed">
+            <TableHeader>
+              <TableRow>
+                {columns.map((col) => (
+                  <TableHead
+                    key={col.key}
+                    className={`px-4 font-semibold cursor-pointer select-none whitespace-nowrap ${alignClass(
+                      col.align,
+                    )}`}
+                    onClick={() => toggleSort(col)}
+                  >
+                    {col.header}
+                  </TableHead>
+                ))}
+              </TableRow>
+            </TableHeader>
+
+            <TableBody>
+              {isLoading ? (
                 <TableRow>
-                  {columns.map((col) => (
-                    <TableHead
-                      key={col.key}
-                      className={`${col.width ?? ""} ${col.align === "center" ? "text-center" : col.align === "right" ? "text-right" : "text-left"} cursor-pointer select-none font-bold px-4`}
-                      onClick={() => toggleSort(col)}
-                    >
-                      <div className="flex items-center gap-2">
-                        <Span className="truncate max-w-[18rem]">
-                          {col.header}
-                        </Span>
-                      </div>
-                    </TableHead>
-                  ))}
+                  <TableCell colSpan={visibleColumnCount}>
+                    <div className="py-6 text-center">Loading...</div>
+                  </TableCell>
                 </TableRow>
-              </TableHeader>
+              ) : paginatedData.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={visibleColumnCount}>
+                    <div className="py-8 text-center text-muted-foreground text-sm">
+                      {emptyState ?? "No records found."}
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ) : (
+                paginatedData.map((row, rIdx) => {
+                  const key = getRowKey(row, rIdx);
 
-              <TableBody>
-                {isLoading ? (
-                  <TableRow>
-                    <TableCell colSpan={Math.max(1, visibleColumnCount)}>
-                      <div className="py-6 text-center">Loading...</div>
-                    </TableCell>
-                  </TableRow>
-                ) : paginatedData.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={Math.max(1, visibleColumnCount)}>
-                      <div className="py-8 text-center text-xs text-muted-foreground">
-                        {emptyState ?? "No records found."}
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  paginatedData.map((row: T, rIdx: number) => {
-                    const key = getRowKey(row, rIdx);
-                    return (
-                      <TableRow
-                        key={key}
-                        className={`${onRowClick ? "hover:bg-surface/60 cursor-pointer" : ""}`}
-                        onClick={() => onRowClick?.(row)}
-                      >
-                        {columns.map((col) => (
-                          <TableCell
-                            key={col.key}
-                            className={`${col.align === "center" ? "text-center" : col.align === "right" ? "text-right" : "text-left"} align-top ${col.width ?? ""} px-4`}
+                  return (
+                    <TableRow
+                      key={key}
+                      className={
+                        onRowClick ? "cursor-pointer hover:bg-muted/40" : ""
+                      }
+                      onClick={() => onRowClick?.(row)}
+                    >
+                      {columns.map((col) => (
+                        <TableCell
+                          key={col.key}
+                          className={`px-4 align-top ${alignClass(
+                            col.align,
+                          )} overflow-hidden`}
+                        >
+                          <div
+                            className={`w-full ${
+                              col.contentClassName ?? "truncate"
+                            }`}
                           >
-                            <div
-                              className={`${col.contentClassName ?? "truncate"} sm:whitespace-normal`}
-                            >
-                              {getCellValue(col, row)}
-                            </div>
-                          </TableCell>
-                        ))}
-                      </TableRow>
-                    );
-                  })
-                )}
-              </TableBody>
-            </TableComponent>
-            {enablePagination && totalPages > 1 && (
-              <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-4 py-3 border-t">
-                <Span variant="default">
-                  Page {currentPage} of {totalPages}
-                </Span>
-                <Select
-                  value={String(pageSize)}
-                  onValueChange={(value) => setPageSize(Number(value))}
+                            {getCellValue(col, row)}
+                          </div>
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  );
+                })
+              )}
+            </TableBody>
+          </TableComponent>
+
+          {enablePagination && totalPages > 1 && (
+            <div className="flex items-center justify-between px-4 py-3 border-t">
+              <Span>
+                Page {currentPage} of {totalPages}
+              </Span>
+
+              <Select
+                value={String(pageSize)}
+                onValueChange={(v) => setPageSize(Number(v))}
+              >
+                <SelectTrigger className="w-[110px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {pageSizeOptions.map((size) => (
+                    <SelectItem key={size} value={String(size)}>
+                      {size} / page
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  disabled={currentPage === 1}
+                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                 >
-                  <SelectTrigger className="w-[110px]">
-                    <SelectValue placeholder="Page size" />
-                  </SelectTrigger>
+                  Prev
+                </Button>
 
-                  <SelectContent>
-                    {pageSizeOptions.map((size) => (
-                      <SelectItem key={size} value={String(size)}>
-                        {size} / page
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-
-                <div className="flex items-center gap-2">
-                  <Button
-                    className="px-3 py-1 rounded-md border disabled:opacity-50"
-                    variant="outline"
-                    disabled={currentPage === 1}
-                    onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                  >
-                    Previous
-                  </Button>
-
-                  <Button
-                    className="px-3 py-1 rounded-md border disabled:opacity-50"
-                    variant="outline"
-                    disabled={currentPage === totalPages}
-                    onClick={() =>
-                      setCurrentPage((p) => Math.min(totalPages, p + 1))
-                    }
-                  >
-                    Next
-                  </Button>
-                </div>
+                <Button
+                  variant="outline"
+                  disabled={currentPage === totalPages}
+                  onClick={() =>
+                    setCurrentPage((p) => Math.min(totalPages, p + 1))
+                  }
+                >
+                  Next
+                </Button>
               </div>
-            )}
-          </div>
+            </div>
+          )}
         </div>
       </CardContent>
     </Card>

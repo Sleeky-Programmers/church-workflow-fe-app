@@ -29,40 +29,48 @@ const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export async function authenticatedFetch<T>(
   endpoint: string,
-  options: RequestInit = {},
+  options: RequestInit & { responseType?: "json" | "blob" | "text" } = {},
 ): Promise<T> {
   const token = localStorage.getItem("accessToken");
   if (!token) throw new Error("No authentication token");
 
   const isFormData = options.body instanceof FormData;
 
+  const getHeaders = (authToken: string) => ({
+    Authorization: `Bearer ${authToken}`,
+    ...(isFormData || options.responseType === "blob"
+      ? {}
+      : { "Content-Type": "application/json" }),
+    ...options.headers,
+  });
+
   const response = await fetch(`${BASE_URL}${endpoint}`, {
     ...options,
-    headers: {
-      Authorization: `Bearer ${token}`,
-      ...(isFormData ? {} : { "Content-Type": "application/json" }),
-      ...options.headers,
-    },
+    headers: getHeaders(token),
   });
 
   if (response.status === 401) {
     try {
       const refreshData = await refreshAuthToken();
+
       localStorage.setItem("accessToken", refreshData.accessToken);
       localStorage.setItem("refreshToken", refreshData.refreshToken);
 
       const retryResponse = await fetch(`${BASE_URL}${endpoint}`, {
         ...options,
-        headers: {
-          Authorization: `Bearer ${refreshData.accessToken}`,
-          ...(isFormData ? {} : { "Content-Type": "application/json" }),
-          ...options.headers,
-        },
+        headers: getHeaders(refreshData.accessToken),
       });
 
-      if (!retryResponse.ok) {
-        throw new Error("Retry failed");
+      if (!retryResponse.ok) throw new Error("Retry failed");
+
+      if (options.responseType === "blob") {
+        return (await retryResponse.blob()) as T;
       }
+
+      if (options.responseType === "text") {
+        return (await retryResponse.text()) as T;
+      }
+
       return retryResponse.json();
     } catch (err) {
       localStorage.removeItem("accessToken");
@@ -76,28 +84,37 @@ export async function authenticatedFetch<T>(
     }
   }
 
-  const text = await response.text();
-  let data: unknown = null;
-  if (text) {
+  if (!response.ok) {
+    const text = await response.text();
+
+    let data: any;
     try {
       data = JSON.parse(text);
     } catch {
       data = text;
     }
-  }
 
-  if (!response.ok) {
     const message =
-      typeof data === "object" && data && "message" in data
-        ? String((data as { message?: unknown }).message || "Request failed")
+      typeof data === "object" && data?.message
+        ? data.message
         : "Request failed";
+
     const error: any = new Error(message);
-    error.response = { status: response.status };
     error.status = response.status;
+    error.response = { status: response.status, data };
+
     throw error;
   }
 
-  return data as T;
+  if (options.responseType === "blob") {
+    return (await response.blob()) as T;
+  }
+
+  if (options.responseType === "text") {
+    return (await response.text()) as T;
+  }
+
+  return response.json();
 }
 
 export async function apiFetch<T>(

@@ -51,6 +51,9 @@ export function MemberSingleSelect({
 }: MemberSingleSelectProps) {
   const [open, setOpen] = useState(false);
   const [options, setOptions] = useState<SelectOption[]>([]);
+  const [selectedOption, setSelectedOption] = useState<SelectOption | null>(
+    null,
+  );
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
 
@@ -71,6 +74,11 @@ export function MemberSingleSelect({
     load();
   }, [debouncedSearch, fetchOptions]);
 
+  useEffect(() => {
+    const found = options.find((m) => m.id === value);
+    if (found) setSelectedOption(found);
+  }, [options, value]);
+
   const loadMore = async () => {
     const next = page + 1;
 
@@ -84,13 +92,11 @@ export function MemberSingleSelect({
     setPage(next);
   };
 
-  const selected = options.find((m) => m.id === value);
-
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button variant="ghost" className="w-full border justify-between">
-          {selected ? selected.fullName : placeholder}
+          {selectedOption ? selectedOption.fullName : placeholder}
           <ChevronDown className="w-4 h-4 opacity-50" />
         </Button>
       </PopoverTrigger>
@@ -103,11 +109,12 @@ export function MemberSingleSelect({
             <CommandEmpty>No results</CommandEmpty>
 
             <CommandGroup>
-              {options.map((m, index) => (
+              {options.map((m) => (
                 <CommandItem
-                  key={m.id || `${m.fullName}-${index}`}
+                  key={m.id}
                   onSelect={() => {
                     onChange(m.id);
+                    setSelectedOption(m);
                     setOpen(false);
                   }}
                 >
@@ -216,7 +223,11 @@ export function MemberMultiSelect({
                         ? value.filter((id) => id !== m.id)
                         : [...value, m.id];
 
-                      onChange(newIds, [m]); // ✅ send selected member
+                      const selectedMembers = options.filter((opt) =>
+                        newIds.includes(opt.id),
+                      );
+
+                      onChange(newIds, selectedMembers);
                     }}
                   >
                     {m.fullName}

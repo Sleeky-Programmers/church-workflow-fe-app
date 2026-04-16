@@ -1,8 +1,18 @@
 "use client";
-import { useMemo, useState } from "react";
+
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { Search, ChevronDown, MoreVertical } from "lucide-react";
+
 import Table from "@/components/features/dashboard/Table";
 import Heading from "@/components/ui/typography/Heading";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { Loader } from "@/components/ui/loader";
+
+import { mapDepartmentToRow } from "@/mappers/department.mapper";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -13,80 +23,198 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Search, ChevronDown } from "lucide-react";
-import { useRouter } from "next/navigation";
+
 import AddDepartmentDialog from "@/components/features/dashboard/departments/AddDepartmentDialog";
 import { DepartmentRow } from "@/types";
-import { departmentData, MOCK_MEMBERS_FULL } from "@/lib/data";
-import { Button } from "@/components/ui/button";
+
+import {
+  fetchDepartments,
+  deleteDepartment,
+  exportDepartments,
+} from "@/services/departmentService";
+
 import { getDepartmentColumns } from "@/components/features/dashboard/departments/department-columns";
 import { RouteConfig } from "@/config/routes";
-
+import { SidebarTrigger } from "@/components/ui/sidebar";
 export default function DepartmentPage() {
-  const [query, setQuery] = useState("");
-  const [data, setData] = useState<DepartmentRow[]>(departmentData);
-  const [deleteTarget, setDeleteTarget] = useState<DepartmentRow | null>(null);
   const router = useRouter();
+  const isMobile = useIsMobile();
+  const { toast } = useToast();
 
-  const filtered = useMemo(() => {
-    if (!query) return data;
-    const q = query.toLowerCase();
-    return data.filter(
-      (d) =>
-        d.name.toLowerCase().includes(q) ||
-        (d.hod?.name ?? "").toLowerCase().includes(q) ||
-        String(d.members).includes(q) ||
-        d.status.toLowerCase().includes(q),
-    );
-  }, [data, query]);
+  const [query, setQuery] = useState("");
+  const [data, setData] = useState<DepartmentRow[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<DepartmentRow | null>(null);
+  const [exporting, setExporting] = useState(false);
+  const [isAddOpen, setIsAddOpen] = useState(false);
+
+  const loadDepartments = async (searchValue?: string) => {
+    setLoading(true);
+
+    try {
+      const response = await fetchDepartments({
+        page: 1,
+        limit: 20,
+        search: searchValue,
+      });
+
+      setData(response.data.map(mapDepartmentToRow));
+    } catch {
+      toast({
+        title: "Error",
+        description: "Failed to fetch departments",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleAddDepartment = async () => {
+    await loadDepartments();
+  };
+
+  useEffect(() => {
+    loadDepartments();
+  }, []);
+
+  useEffect(() => {
+    const delay = setTimeout(() => {
+      loadDepartments(query);
+    }, 400);
+
+    return () => clearTimeout(delay);
+  }, [query]);
 
   const handleEdit = (row: DepartmentRow) => {
     router.push(RouteConfig.dashboard.departmentEdit(row.id));
   };
 
-  const handleExport = (row: DepartmentRow) => {
-    alert(`Export: ${row.id}`);
+  const handleView = (row: DepartmentRow) => {
+    router.push(RouteConfig.dashboard.departmentDetails(row.id));
   };
 
-  const handleConfirmDelete = () => {
-    if (!deleteTarget) return;
-    setData((prev) => prev.filter((d) => d.id !== deleteTarget.id));
-    setDeleteTarget(null);
+  const handleExport = async () => {
+    setExporting(true);
+
+    try {
+      const blob = await exportDepartments();
+      const url = window.URL.createObjectURL(blob);
+
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "departments.csv";
+      link.click();
+
+      window.URL.revokeObjectURL(url);
+    } catch {
+      toast({
+        title: "Export failed",
+        description: "Please try again",
+        variant: "destructive",
+      });
+    } finally {
+      setExporting(false);
+    }
   };
 
-  const handleAddDepartment = (payload: {
-    name: string;
-    hodId: string;
-    memberIds: string[];
-    status: string;
-    description: string;
-  }) => {
-    const hod = MOCK_MEMBERS_FULL.find((member) => member.id === payload.hodId);
-    const normalizedStatus =
-      payload.status.toLowerCase() === "active" ? "Active" : "Inactive";
+  const handleConfirmDelete = async () => {
+    if (!deleteTarget) {
+      return;
+    }
 
-    const newDepartment: DepartmentRow = {
-      id: crypto.randomUUID(),
-      name: payload.name.trim(),
-      hod: hod ? { name: hod.fullName } : null,
-      members: payload.memberIds.length,
-      status: normalizedStatus,
-    };
+    try {
+      await deleteDepartment(deleteTarget.id);
+      await loadDepartments();
 
-    setData((prev) => [newDepartment, ...prev]);
+      toast({
+        title: "Deleted",
+        description: `${deleteTarget.name} deleted successfully`,
+      });
+    } catch (error: any) {
+      toast({
+        title: "Delete failed",
+        description: error?.message || "Please try again",
+        variant: "destructive",
+      });
+    } finally {
+      setDeleteTarget(null);
+    }
   };
 
   const columns = getDepartmentColumns({
     onEdit: handleEdit,
     onExport: handleExport,
     onDeleteRequest: setDeleteTarget,
+    onView: handleView,
   });
 
+  if (isMobile) {
+    return (
+      <div className="min-h-screen bg-white">
+        <div className="px-4 py-4 flex items-center justify-between gap-2">
+          <div className="flex items-center gap-3">
+            <SidebarTrigger />
+            <Heading level={3}>Department Name</Heading>
+          </div>
+
+          <AddDepartmentDialog onSave={handleAddDepartment} />
+        </div>
+
+        <div className="divide-y">
+          {loading ? (
+            <div className="px-4 py-6 text-sm text-gray-500">
+              Loading departments...
+            </div>
+          ) : (
+            data.map((dept) => (
+              <div
+                key={dept.id}
+                className="flex items-center justify-between px-4 py-4"
+              >
+                <p className="text-sm font-medium text-gray-900">{dept.name}</p>
+
+                <Button
+                  variant="outline"
+                  className="text-sm border-gray-300"
+                  onClick={() => handleView(dept)}
+                >
+                  View Department
+                </Button>
+              </div>
+            ))
+          )}
+        </div>
+
+        <AlertDialog
+          open={!!deleteTarget}
+          onOpenChange={(open) => !open && setDeleteTarget(null)}
+        >
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete department?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This action cannot be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={handleConfirmDelete}>
+                Delete
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      </div>
+    );
+  }
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Heading level={2} text="Departments/Units" />
+
           <Input
             placeholder="Search by HOD, member..."
             leftIcon={<Search className="w-4 h-4" />}
@@ -95,14 +223,18 @@ export default function DepartmentPage() {
             className="w-[300px]"
           />
         </div>
+
         <div className="flex items-center gap-3">
           <Button
             variant="ghost"
             className="hidden sm:flex items-center gap-2 text-gray-600"
+            onClick={handleExport}
+            disabled={exporting}
           >
-            Filter
+            {exporting ? "Exporting..." : "Export"}
             <ChevronDown className="w-4 h-4" />
           </Button>
+
           <AddDepartmentDialog onSave={handleAddDepartment} />
         </div>
       </div>
@@ -110,7 +242,7 @@ export default function DepartmentPage() {
       <div className="max-h-[65vh] overflow-auto">
         <Table
           columns={columns}
-          data={filtered}
+          data={data}
           rowKey={(row) => row.id}
           showCheckbox
           onRowClick={(row) =>
@@ -125,17 +257,17 @@ export default function DepartmentPage() {
       >
         <AlertDialogContent className="max-w-sm rounded-2xl">
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-base font-semibold text-gray-900">
-              Delete department?
-            </AlertDialogTitle>
-            <AlertDialogDescription className="text-sm text-gray-500">
+            <AlertDialogTitle>Delete department?</AlertDialogTitle>
+            <AlertDialogDescription>
               Are you sure you want to delete this department?
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter className="gap-2 sm:gap-2">
+
+          <AlertDialogFooter>
             <AlertDialogCancel onClick={() => setDeleteTarget(null)}>
               Cancel
             </AlertDialogCancel>
+
             <AlertDialogAction onClick={handleConfirmDelete}>
               Delete
             </AlertDialogAction>
