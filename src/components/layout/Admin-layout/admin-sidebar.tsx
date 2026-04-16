@@ -6,6 +6,7 @@ import {
   Shield,
   Settings as SettingsIcon,
   Lock,
+  ParkingMeterIcon,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -48,6 +49,13 @@ const NAV_ITEMS: NavItem[] = [
     label: "Account Settings",
     icon: Lock,
     href: "/dashboard/settings/account",
+  },
+
+  {
+    id: "billing",
+    label: "Billing & Plans",
+    icon: ParkingMeterIcon,
+    href: "/dashboard/settings/billing",
   },
 ];
 

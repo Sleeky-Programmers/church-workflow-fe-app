@@ -75,8 +75,10 @@ export function MemberSingleSelect({
   }, [debouncedSearch, fetchOptions]);
 
   useEffect(() => {
-    const found = options.find((m) => m.id === value);
-    if (found) setSelectedOption(found);
+    const found = options.find((member) => member.id === value);
+    if (found) {
+      setSelectedOption(found);
+    }
   }, [options, value]);
 
   const loadMore = async () => {
@@ -109,19 +111,19 @@ export function MemberSingleSelect({
             <CommandEmpty>No results</CommandEmpty>
 
             <CommandGroup>
-              {options.map((m) => (
+              {options.map((hod) => (
                 <CommandItem
-                  key={m.id}
+                  key={hod.id}
                   onSelect={() => {
-                    onChange(m.id);
-                    setSelectedOption(m);
+                    onChange(hod.id);
+                    setSelectedOption(hod);
                     setOpen(false);
                   }}
                 >
-                  {m.fullName}
+                  {hod.fullName}
                   <Check
                     className={`ml-auto ${
-                      value === m.id ? "opacity-100" : "opacity-0"
+                      value === hod.id ? "opacity-100" : "opacity-0"
                     }`}
                   />
                 </CommandItem>
@@ -152,7 +154,7 @@ interface MemberMultiSelectProps {
     search?: string,
   ) => Promise<FetchMembersResponse>;
   value: string[];
-  onChange: (ids: string[], members: MemberProfile[]) => void; // ✅ EXTENDED
+  onChange: (ids: string[], members: MemberProfile[]) => void;
   placeholder?: string;
 }
 
@@ -190,8 +192,8 @@ export function MemberMultiSelect({
       ? placeholder
       : value.length <= 2
         ? options
-            .filter((m) => value.includes(m.id))
-            .map((m) => m.fullName)
+            .filter((member) => value.includes(member.id))
+            .map((member) => member.fullName)
             .join(", ")
         : `${value.length} members selected`;
 
@@ -212,25 +214,25 @@ export function MemberMultiSelect({
             <CommandEmpty>No results</CommandEmpty>
 
             <CommandGroup>
-              {options.map((m) => {
-                const selected = value.includes(m.id);
+              {options.map((member) => {
+                const selected = value.includes(member.id);
 
                 return (
                   <CommandItem
-                    key={m.id}
+                    key={member.id}
                     onSelect={() => {
                       const newIds = selected
-                        ? value.filter((id) => id !== m.id)
-                        : [...value, m.id];
+                        ? value.filter((id) => id !== member.id)
+                        : [...value, member.id];
 
-                      const selectedMembers = options.filter((opt) =>
-                        newIds.includes(opt.id),
+                      const selectedMembers = options.filter((option) =>
+                        newIds.includes(option.id),
                       );
 
                       onChange(newIds, selectedMembers);
                     }}
                   >
-                    {m.fullName}
+                    {member.fullName}
                     <Checkbox checked={selected} className="ml-auto" />
                   </CommandItem>
                 );

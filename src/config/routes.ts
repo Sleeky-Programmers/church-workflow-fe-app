@@ -71,7 +71,6 @@ export const getRouteWithParams = (
   if (params) {
     Object.entries(params).forEach(([key, value]) => {
       if (!finalRoute.includes(`[${key}]`)) {
-        console.log(`Param ${key} not found in route ${route}`);
       }
 
       finalRoute = finalRoute.replace(`[${key}]`, String(value));

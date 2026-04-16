@@ -22,21 +22,6 @@ export interface DepartmentQueryParams {
   status?: string;
 }
 
-// export interface DepartmentResponse {
-//   id: string;
-//   name: string;
-//   description?: string;
-//   hod?: {
-//     id?: string;
-//     name?: string;
-//     email?: string;
-//   } | null;
-//   members: any[];
-//   membersCount?: number;
-//   status: string;
-//   createdAt?: string;
-// }
-
 export interface DepartmentResponse {
   id: string;
   name: string;
