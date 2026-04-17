@@ -8,16 +8,14 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import Heading from "@/components/ui/typography/Heading";
 import Link from "next/link";
-import { MoreVertical } from "lucide-react";
-import { SidebarTrigger } from "@/components/ui/sidebar";
-import { Event } from "@/types";
+
 import MobileHeader from "@/components/layout/mobile-header";
 import {
   formatEventDate,
   formatUpcomingBirthday,
   isInFuture,
 } from "@/lib/utils";
-
+import { Event } from "@/types";
 import { EVENT_CATEGORY_CONFIG } from "@/config/event-category";
 import { TrendChart } from "@/components/features/dashboard/trend-chart";
 import { IncomeVsExpenses } from "@/components/features/dashboard/income-expense";
@@ -32,7 +30,7 @@ type Props = {
   serviceAttendanceGrowth: string;
   attendanceTrendData: any[];
   incomeTrendData: any[];
-  upcomingEvents: any[];
+  upcomingEvents: Event[];
   upcomingBirthdays: { name: string; date: string }[];
 };
 
