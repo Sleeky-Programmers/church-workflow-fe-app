@@ -49,6 +49,13 @@ const NAV_ITEMS: NavItem[] = [
     icon: Lock,
     href: "/dashboard/settings/account",
   },
+
+  {
+    id: "billing-plans",
+    label: "Billings & Plans",
+    icon: Lock,
+    href: "/dashboard/settings/billing",
+  },
 ];
 
 export function Sidebar() {

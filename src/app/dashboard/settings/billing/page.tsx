@@ -1,12 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Heading from "@/components/ui/typography/Heading";
-import { Text } from "@/components/ui/typography/Text";
+import { Text, Span } from "@/components/ui/typography/Text";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Check } from "lucide-react";
-
+import { Plan } from "@/types";
 import {
   BillingCycle,
   PlanType,
@@ -14,80 +14,71 @@ import {
   ChurchSubscriptionStatus,
 } from "@/lib/enums";
 
-type Plan = {
-  type: PlanType;
-  name: string;
-  monthlyPrice: number;
-  yearlyPrice: number;
-  features: string[];
-  popular?: boolean;
-};
-
-const plans: Plan[] = [
-  {
-    type: PlanType.STARTER,
-    name: "Starter",
-    monthlyPrice: 0,
-    yearlyPrice: 0,
-    features: [
-      "Small teams",
-      "Membership management",
-      "Up to 3 users",
-      "Up to 100 members",
-      "Attendance tracking",
-    ],
-  },
-  {
-    type: PlanType.GROWTH,
-    name: "Growth",
-    monthlyPrice: 20000,
-    yearlyPrice: 20000 * 12 * 0.83, // ~17% discount
-    features: [
-      "Everything in Starter",
-      "Up to 10 users",
-      "Up to 500 members",
-      "Custom roles & permissions",
-    ],
-    popular: true,
-  },
-  {
-    type: PlanType.EXPANSION,
-    name: "Expansion",
-    monthlyPrice: 45000,
-    yearlyPrice: 45000 * 12 * 0.83,
-    features: ["Everything in Growth", "Up to 25 users", "Up to 1,500 members"],
-  },
-  {
-    type: PlanType.ENTERPRISE,
-    name: "Enterprise",
-    monthlyPrice: 100000,
-    yearlyPrice: 100000 * 12 * 0.83,
-    features: [
-      "Everything in Expansion",
-      "Priority support",
-      "Unlimited users",
-      "Advanced controls",
-      "Unlimited members",
-    ],
-  },
-];
+import { getSubscriptionOverview } from "@/services/billingService";
 
 export default function BillingPage() {
   const [billingCycle, setBillingCycle] = useState<BillingCycle>(
     BillingCycle.MONTHLY,
   );
 
-  const currentPlan = PlanType.STARTER;
-  const subscriptionStatus = SubscriptionStatus.ACTIVE;
-  const churchStatus = ChurchSubscriptionStatus.ACTIVE;
+  const [plans, setPlans] = useState<Plan[]>([]);
+  const [currentPlan, setCurrentPlan] = useState<PlanType | null>(null);
+  const [subscriptionStatus, setSubscriptionStatus] =
+    useState<SubscriptionStatus | null>(null);
+  const [churchStatus, setChurchStatus] =
+    useState<ChurchSubscriptionStatus | null>(null);
+
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchBilling() {
+      try {
+        const data = await getSubscriptionOverview();
+
+        setPlans(data.plans);
+        setCurrentPlan(data.currentPlan);
+        setSubscriptionStatus(data.subscriptionStatus);
+        setChurchStatus(data.churchStatus);
+        setBillingCycle(data.billingCycle);
+      } catch (err) {
+        console.error("Failed to fetch billing:", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchBilling();
+  }, []);
 
   const formatPrice = (price: number) => `₦${price.toLocaleString()}`;
 
   const getPrice = (plan: Plan) => {
     return billingCycle === BillingCycle.MONTHLY
       ? plan.monthlyPrice
-      : Math.round(plan.yearlyPrice);
+      : plan.yearlyPrice;
   };
+
+  // const handleUpgrade = async (plan: PlanType) => {
+  //   try {
+  //     await upgradePlan({
+  //       plan,
+  //       billingCycle,
+  //     });
+
+  //     // 🔥 Refetch after upgrade
+  //     const data = await getBillingOverview(churchId);
+
+  //     setCurrentPlan(data.currentPlan);
+  //     setSubscriptionStatus(data.subscriptionStatus);
+  //     setChurchStatus(data.churchStatus);
+  //   } catch (err) {
+  //     console.error("Upgrade failed:", err);
+  //   }
+  // };
+
+  if (loading) {
+    return <div>Loading billing...</div>;
+  }
 
   return (
     <div className="space-y-8">
@@ -100,19 +91,20 @@ export default function BillingPage() {
       </div>
 
       <div className="flex items-center justify-center gap-2">
-        <button
+        <Button
+          variant="ghost"
           onClick={() => setBillingCycle(BillingCycle.MONTHLY)}
           className={cn(
             "px-4 py-2 rounded-full text-sm",
             billingCycle === BillingCycle.MONTHLY
-              ? "bg-muted text-foreground"
+              ? "bg-muted"
               : "text-muted-foreground",
           )}
         >
           Monthly
-        </button>
+        </Button>
 
-        <button
+        <Button
           onClick={() => setBillingCycle(BillingCycle.YEARLY)}
           className={cn(
             "px-4 py-2 rounded-full text-sm",
@@ -122,7 +114,7 @@ export default function BillingPage() {
           )}
         >
           Yearly
-        </button>
+        </Button>
 
         <Text className="text-xs text-muted-foreground ml-2">
           (Save up to 17%)
@@ -139,7 +131,7 @@ export default function BillingPage() {
             <div
               key={plan.type}
               className={cn(
-                "relative rounded-xl border bg-background p-6 flex flex-col justify-between",
+                "relative rounded-xl border p-6 flex flex-col justify-between",
                 plan.popular && "border-primary shadow-md",
               )}
             >
@@ -153,12 +145,12 @@ export default function BillingPage() {
                 <Text className="text-lg font-semibold">{plan.name}</Text>
 
                 <div>
-                  <span className="text-2xl font-bold">
+                  <Span className="text-2xl font-bold">
                     {formatPrice(getPrice(plan))}
-                  </span>
-                  <span className="text-sm text-muted-foreground ml-1">
+                  </Span>
+                  <Span className="text-sm ml-1">
                     /{billingCycle === BillingCycle.MONTHLY ? "month" : "year"}
-                  </span>
+                  </Span>
                 </div>
 
                 <div className="space-y-2">
@@ -180,6 +172,7 @@ export default function BillingPage() {
                   </Button>
                 ) : (
                   <Button
+                    // onClick={() => handleUpgrade(plan.type)}
                     variant={plan.popular ? "default" : "outline"}
                     className="w-full"
                   >

@@ -51,23 +51,18 @@ export default function Dashboard() {
     null,
   );
   const isMobile = useIsMobile();
+
   useEffect(() => {
     const profile = getCurrentUserProfile();
-
-    if (profile?.firstName) {
-      setDisplayName(profile.firstName);
-    } else if (profile?.fullName) {
-      setDisplayName(profile.fullName);
-    }
+    if (profile?.firstName) setDisplayName(profile.firstName);
+    else if (profile?.fullName) setDisplayName(profile.fullName);
   }, []);
 
   useEffect(() => {
     async function loadChurch() {
       try {
         const church = await getMyChurch();
-        if (!church) {
-          return;
-        }
+        if (!church) return;
         setChurchName(church.name);
         setChurchIdentity(church);
       } catch {
@@ -78,17 +73,12 @@ export default function Dashboard() {
     loadChurch();
   }, []);
 
-  const [totalMembers, setTotalMembers] = useState<string>("0");
-  const [totalMembersGrowth, setTotalMembersGrowth] = useState<string>("0%");
-  const [serviceAttendance, setServiceAttendance] = useState<string>("0");
-  const [serviceAttendanceGrowth, setServiceAttendanceGrowth] =
-    useState<string>("0%");
-  const [attendanceTrendData, setAttendanceTrendData] = useState<
-    { month: string; thisMonth: number; lastMonth: number }[]
-  >([]);
-  const [incomeTrendData, setIncomeTrendData] = useState<
-    { month: string; thisMonth: number; lastMonth: number }[]
-  >([]);
+  const [totalMembers, setTotalMembers] = useState("0");
+  const [totalMembersGrowth, setTotalMembersGrowth] = useState("0%");
+  const [serviceAttendance, setServiceAttendance] = useState("0");
+  const [serviceAttendanceGrowth, setServiceAttendanceGrowth] = useState("0%");
+  const [attendanceTrendData, setAttendanceTrendData] = useState<any[]>([]);
+  const [incomeTrendData, setIncomeTrendData] = useState<any[]>([]);
   const [upcomingBirthdays, setUpcomingBirthdays] = useState<
     { name: string; date: string }[]
   >([]);
@@ -97,106 +87,105 @@ export default function Dashboard() {
   );
 
   useEffect(() => {
-    async function loadStats() {
-      try {
-        const { totalMembers: count, growth } = await fetchTotalMembers();
-        setTotalMembers(count.toLocaleString());
+    fetchTotalMembers()
+      .then(({ totalMembers, growth }) => {
+        setTotalMembers(totalMembers.toLocaleString());
         setTotalMembersGrowth(growth || "0%");
-      } catch {
+      })
+      .catch(() => {
         setTotalMembers("0");
         setTotalMembersGrowth("0%");
-      }
-    }
-    loadStats();
+      });
   }, []);
 
   useEffect(() => {
-    async function loadAttendance() {
-      try {
-        const { totalAttendance, attendanceGrowth, monthlyAttendanceTrends } =
-          await fetchAttendanceStats();
-        setServiceAttendance(totalAttendance.toLocaleString());
-        setServiceAttendanceGrowth(attendanceGrowth || "0%");
-        const trends = monthlyAttendanceTrends || [];
-        setAttendanceTrendData(trends);
-        setIncomeTrendData(
-          trends.map((item) => ({
-            month: item.month,
-            thisMonth: 0,
-            lastMonth: 0,
-          })),
-        );
-      } catch {
+    fetchAttendanceStats()
+      .then(
+        ({ totalAttendance, attendanceGrowth, monthlyAttendanceTrends }) => {
+          setServiceAttendance(totalAttendance.toLocaleString());
+          setServiceAttendanceGrowth(attendanceGrowth || "0%");
+          const trends = monthlyAttendanceTrends || [];
+          setAttendanceTrendData(trends);
+          setIncomeTrendData(
+            trends.map((item) => ({
+              month: item.month,
+              thisMonth: 0,
+              lastMonth: 0,
+            })),
+          );
+        },
+      )
+      .catch(() => {
         setServiceAttendance("0");
         setServiceAttendanceGrowth("0%");
         setAttendanceTrendData([]);
         setIncomeTrendData([]);
-      }
-    }
-    loadAttendance();
+      });
   }, []);
 
+  // ✅ FIXED BIRTHDAY LOADER
   useEffect(() => {
+    let isMounted = true;
+
     async function loadBirthdays() {
       try {
-        const members = [];
+        const members: any[] = [];
         let currentPage = 1;
+        const MAX_PAGES = 3; // 🚨 safeguard
 
-        while (true) {
+        while (currentPage <= MAX_PAGES) {
           const response = await fetchMemberProfiles(currentPage, 100);
-          members.push(...response.data);
+
+          members.push(...(response.data || []));
+
           if (!response.pagination?.hasNextPage) break;
+
           currentPage += 1;
         }
 
+        if (!isMounted) return;
+
         const mappedBirthdays = members
-          .filter((member) => {
-            if (!member.birthday) return false;
-            return !Number.isNaN(new Date(member.birthday).getTime());
-          })
-          .map((member) => ({
-            name: member.fullName,
-            date: member.birthday as string,
+          .filter((m) => m?.birthday && !isNaN(new Date(m.birthday).getTime()))
+          .map((m) => ({
+            name: m.fullName,
+            date: m.birthday,
           }))
-          .filter((member) => {
-            const nextBirthday = getNextBirthdayDate(member.date);
-            nextBirthday.setHours(0, 0, 0, 0);
+          .filter((m) => {
+            const next = getNextBirthdayDate(m.date);
             const today = new Date();
-            today.setHours(0, 0, 0, 0);
-            const nextThreeMonths = new Date(today);
-            nextThreeMonths.setMonth(today.getMonth() + 3);
-            nextThreeMonths.setHours(23, 59, 59, 999);
-            return nextBirthday >= today && nextBirthday <= nextThreeMonths;
+            const future = new Date();
+            future.setMonth(today.getMonth() + 3);
+
+            return next >= today && next <= future;
           });
 
         setUpcomingBirthdays(sortBirthdaysByNearest(mappedBirthdays));
       } catch {
-        setUpcomingBirthdays([]);
+        if (isMounted) setUpcomingBirthdays([]);
       }
     }
 
     loadBirthdays();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   useEffect(() => {
-    if (typeof window === "undefined") return;
-
     try {
-      const stored = window.localStorage.getItem(EVENT_STORAGE_KEY);
+      const stored = localStorage.getItem(EVENT_STORAGE_KEY);
       if (!stored) return;
 
       const parsed = JSON.parse(stored) as ChurchEvent[];
-      const normalized = parsed
-        .filter((event) => event?.date)
-        .map((event) => ({
-          title: event.title,
-          date: event.date,
-          category: EVENT_CATEGORY_BY_TYPE[event.type] || EventCategory.GENERAL,
-        }));
+      const normalized = parsed.map((event) => ({
+        title: event.title,
+        date: event.date,
+        category: EVENT_CATEGORY_BY_TYPE[event.type] || EventCategory.GENERAL,
+      }));
 
-      if (normalized.length > 0) {
-        setUpcomingEvents(normalized);
-      }
+      if (normalized.length) setUpcomingEvents(normalized);
     } catch {
       setUpcomingEvents(DashboardData.upcomingEvents);
     }
@@ -207,7 +196,6 @@ export default function Dashboard() {
       <DashboardMobile
         displayName={displayName}
         churchName={churchName}
-        // churchIdentity={churchIdentity}
         totalMembers={totalMembers}
         totalMembersGrowth={totalMembersGrowth}
         serviceAttendance={serviceAttendance}

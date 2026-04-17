@@ -68,14 +68,22 @@ export const getRouteWithParams = (
 ): string => {
   let finalRoute: string = route;
 
-  if (params) {
-    Object.entries(params).forEach(([key, value]) => {
-      if (!finalRoute.includes(`[${key}]`)) {
-        console.log(`Param ${key} not found in route ${route}`);
-      }
+  if (!params) {
+    return finalRoute;
+  }
 
-      finalRoute = finalRoute.replace(`[${key}]`, String(value));
-    });
+  Object.entries(params).forEach(([key, value]) => {
+    const token = `[${key}]`;
+
+    if (!finalRoute.includes(token)) {
+      return;
+    }
+
+    finalRoute = finalRoute.replaceAll(token, String(value));
+  });
+
+  if (finalRoute.match(/\[.*?\]/)) {
+    throw new Error(`Missing params for route: ${route}`);
   }
 
   return finalRoute;
