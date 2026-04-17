@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
+import { formatDate } from "@/utils/helpers";
+
 import {
   Breadcrumb,
   BreadcrumbList,
@@ -11,27 +12,225 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Table, { Column } from "@/components/features/dashboard/Table";
-import { Badge } from "@/components/ui/badge";
-import {
-  departmentData,
-  departmentEvents,
-  departmentMembers,
-  departmentRequisitions,
-} from "@/lib/data";
 import Heading from "@/components/ui/typography/Heading";
-import { DepartmentTabs, RequisitionStatus } from "@/lib/enums";
+import { DepartmentTabs } from "@/lib/enums";
+import { Loader } from "@/components/ui/loader";
 import DepartmentSidebar from "@/components/features/dashboard/departments/DepartmentSidebar";
 import { Input } from "@/components/ui/input";
 import { ChevronDown, Search } from "lucide-react";
+import { Span } from "@/components/ui/typography/Text";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
+
+import { useEffect, useState } from "react";
+import {
+  fetchDepartmentById,
+  removeDepartmentMembers,
+  DepartmentResponse,
+} from "@/services/departmentService";
 
 export default function DepartmentDetailPage() {
-  const params = useParams() as { id?: string };
-  const id = params?.id ?? "";
+  const params = useParams();
 
-  const department = departmentData.find((data) => data.id === id);
+  const id = Array.isArray(params?.id) ? params.id[0] : params?.id;
+  const [department, setDepartment] = useState<DepartmentResponse | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [tab, setTab] = useState<DepartmentTabs>(DepartmentTabs.MEMBERS);
+
+  const [selectedRows, setSelectedRows] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (!id) {
+      return;
+    }
+
+    let isMounted = true;
+
+    async function load() {
+      setLoading(true);
+      setError(null);
+
+      try {
+        const response = await fetchDepartmentById(id);
+        if (isMounted) {
+          setDepartment(response);
+        }
+      } catch (err: any) {
+        if (isMounted) {
+          setError(err.message || "Failed to fetch department");
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    }
+
+    load();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [id]);
+
+  const membersData =
+    department?.members?.map((member) => ({
+      id: member.id,
+      name: member.fullName,
+      joined: formatDate(member.dateJoined),
+      contact: member.phoneNumber || member.email || "-",
+    })) ?? [];
+
+  const toggleRow = (rowId: string) => {
+    setSelectedRows((prev) =>
+      prev.includes(rowId)
+        ? prev.filter((id) => id !== rowId)
+        : [...prev, rowId],
+    );
+  };
+
+  const toggleAll = () => {
+    if (selectedRows.length === membersData.length) {
+      setSelectedRows([]);
+    } else {
+      setSelectedRows(membersData.map((m) => m.id));
+    }
+  };
+
+  const handleBulkRemove = async () => {
+    if (!id || selectedRows.length === 0) {
+      return;
+    }
+    if (!confirm("Remove selected members?")) {
+      return;
+    }
+
+    await removeDepartmentMembers(id, selectedRows);
+
+    setDepartment((prev) => {
+      if (!prev) {
+        return prev;
+      }
+      return {
+        ...prev,
+        members: prev.members.filter((m) => !selectedRows.includes(m.id)),
+      };
+    });
+
+    setSelectedRows([]);
+  };
+
+  const handleSingleRemove = async (memberId: string) => {
+    if (!id) {
+      return;
+    }
+    if (!confirm("Remove this member?")) {
+      return;
+    }
+
+    await removeDepartmentMembers(id, [memberId]);
+
+    setDepartment((prev) => {
+      if (!prev) {
+        return prev;
+      }
+      return {
+        ...prev,
+        members: prev.members.filter((m) => m.id !== memberId),
+      };
+    });
+  };
+
+  const membersColumns: Column<any>[] = [
+    {
+      key: "select",
+      header: (
+        <input
+          type="checkbox"
+          checked={
+            membersData.length > 0 && selectedRows.length === membersData.length
+          }
+          onChange={toggleAll}
+          className="w-4 h-4 rounded border-gray-300 accent-blue-600"
+        />
+      ),
+      render: (row) => (
+        <input
+          type="checkbox"
+          checked={selectedRows.includes(row.id)}
+          onChange={() => toggleRow(row.id)}
+          className="w-4 h-4 rounded border-gray-300 accent-blue-600"
+        />
+      ),
+      width: "w-[50px]",
+    },
+    {
+      key: "name",
+      header: "Name",
+      render: (row) => (
+        <span className="font-medium text-gray-900">{row.name}</span>
+      ),
+      width: "w-[35%]",
+    },
+    {
+      key: "joined",
+      header: "Joined On",
+      render: (row) => <span className="text-gray-600">{row.joined}</span>,
+      width: "w-[25%]",
+    },
+    {
+      key: "contact",
+      header: "Contact",
+      render: (row) => <span className="text-gray-600">{row.contact}</span>,
+      width: "w-[30%]",
+    },
+    {
+      key: "actions",
+      header: "Actions",
+      render: (row) => (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="ghost"
+              className="flex items-center justify-center w-8 h-8 rounded-md "
+            >
+              <Span className="text-xl leading-none">⋮</Span>
+            </Button>
+          </DropdownMenuTrigger>
+
+          <DropdownMenuContent align="end" className="w-40">
+            <DropdownMenuItem
+              onClick={() => handleSingleRemove(row.id)}
+              className="text-red-600 focus:text-red-600 cursor-pointer"
+            >
+              Remove
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      ),
+      width: "w-[80px]",
+      align: "center",
+    },
+  ];
+
+  const tabHeading =
+    tab === DepartmentTabs.MEMBERS ? "Member's List" : "Requisitions";
+
+  if (loading) {
+    return <Loader />;
+  }
+  if (error) {
+    return <div className="p-6 text-red-500">{error}</div>;
+  }
 
   if (!department) {
     return (
@@ -45,108 +244,6 @@ export default function DepartmentDetailPage() {
     );
   }
 
-  const membersColumns: Column<any>[] = [
-    {
-      key: "name",
-      header: "Name",
-      accessor: (row) => row.name,
-      width: "w-1/3",
-    },
-    {
-      key: "role",
-      header: "Role/Position",
-      accessor: (row) => row.role,
-      width: "w-1/3",
-    },
-    {
-      key: "joined",
-      header: "Joined On",
-      accessor: (row) => row.joined,
-      width: "w-1/6",
-    },
-    {
-      key: "contact",
-      header: "Contact",
-      accessor: (row) => row.contact,
-      width: "w-1/6",
-    },
-  ];
-
-  const eventsColumns: Column<any>[] = [
-    {
-      key: "event",
-      header: "Event",
-      accessor: (row) => row.event,
-      width: "w-1/2",
-    },
-    {
-      key: "date",
-      header: "Date",
-      accessor: (row) => row.date,
-      width: "w-1/6",
-    },
-    {
-      key: "status",
-      header: "Status",
-      render: (row) => (
-        <Badge
-          variant="outline"
-          className="border-success-300 text-success-600 bg-transparent"
-        >
-          {row.status}
-        </Badge>
-      ),
-      width: "w-1/6",
-      align: "center",
-    },
-    {
-      key: "assigned",
-      header: "Assigned",
-      accessor: (row) => row.assigned,
-      width: "w-1/6",
-      align: "center",
-    },
-  ];
-
-  const requisitionColumns: Column<any>[] = [
-    {
-      key: "date",
-      header: "Date",
-      accessor: (row) => row.date,
-      width: "w-1/6",
-    },
-    {
-      key: "title",
-      header: "Title",
-      accessor: (row) => row.title,
-      width: "w-1/2",
-    },
-    {
-      key: "amount",
-      header: "Amount",
-      accessor: (row) => row.amount,
-      width: "w-1/6",
-    },
-    {
-      key: "status",
-      header: "Status",
-      render: (row) => (
-        <Badge
-          variant="outline"
-          className={`capitalize ${row.status === RequisitionStatus.PENDING ? "border-secondary-300 text-secondary-600 bg-transparent" : "border-success-300 text-success-600 bg-transparent"}`}
-        >
-          {row.status.toLowerCase()}
-        </Badge>
-      ),
-      width: "w-1/6",
-      align: "center",
-    },
-  ];
-
-  const [tab, setTab] = useState<DepartmentTabs>(DepartmentTabs.MEMBERS);
-  const tabHeading =
-    tab === DepartmentTabs.MEMBERS ? "Member's List" : "Requisitions";
-
   return (
     <div className="space-y-6 p-6">
       <div className="flex items-center justify-between border-b pb-4">
@@ -158,9 +255,18 @@ export default function DepartmentDetailPage() {
                   <Link href="/dashboard/departments">Departments</Link>
                 </BreadcrumbLink>
               </BreadcrumbItem>
+
               <BreadcrumbSeparator />
+
               <BreadcrumbItem>
-                <BreadcrumbPage>{department.name}</BreadcrumbPage>
+                <BreadcrumbPage>
+                  {department.name}{" "}
+                  {department.hod && (
+                    <span className="text-sm text-gray-500">
+                      (HOD: {department.hod.name})
+                    </span>
+                  )}
+                </BreadcrumbPage>
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
@@ -168,7 +274,7 @@ export default function DepartmentDetailPage() {
           <div className="hidden sm:block">
             <Input
               leftIcon={<Search className="w-4 h-4" />}
-              placeholder="Search by HOD, members"
+              placeholder="Search members"
               className="w-48 md:w-64"
             />
           </div>
@@ -178,32 +284,39 @@ export default function DepartmentDetailPage() {
           <Button variant="ghost">
             Filter <ChevronDown className="w-4 h-4" />
           </Button>
-          <Button>New member</Button>
+
+          {selectedRows.length > 0 ? (
+            <Button variant="destructive" onClick={handleBulkRemove}>
+              Remove ({selectedRows.length})
+            </Button>
+          ) : (
+            <Button>New member</Button>
+          )}
         </div>
       </div>
 
       <div className="grid grid-cols-4">
         <DepartmentSidebar tab={tab} setTab={setTab} />
-
-        <main className="col-span-3 ml-2 md:pl-6 md:border-l md:border-neutral-200">
+        <main className="col-span-3 ml-2 md:pl-6 md:border-l md:border-gray-200">
           <Heading level={2} text={tabHeading} className="mb-4" />
-          {tab === DepartmentTabs.MEMBERS && (
-            <Table
-              columns={membersColumns}
-              data={departmentMembers}
-              rowKey={(row) => row.id}
-              showCheckbox
-            />
-          )}
 
-          {tab === DepartmentTabs.REQUISITIONS && (
-            <Table
-              columns={requisitionColumns}
-              data={departmentRequisitions}
-              rowKey={(row) => row.id}
-              showCheckbox
-            />
-          )}
+          <Card className="border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+            <CardContent className="p-0">
+              {tab === DepartmentTabs.MEMBERS && (
+                <Table
+                  columns={membersColumns}
+                  data={membersData}
+                  rowKey={(row) => row.id}
+                />
+              )}
+
+              {tab === DepartmentTabs.REQUISITIONS && (
+                <div className="p-6 text-gray-500">
+                  No requisitions data available
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </main>
       </div>
     </div>

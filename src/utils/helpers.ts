@@ -9,6 +9,13 @@ export function formatDate(isoDate?: string): string {
   return `${day}/${month}/${year}`;
 }
 
+export function formatDateToMonth(date: string) {
+  return new Date(date).toLocaleDateString("en-US", {
+    month: "short", // Jan, Feb
+    year: "numeric",
+  });
+}
+
 export const formatLabel = (value: string) => {
   return value
     .toLowerCase()

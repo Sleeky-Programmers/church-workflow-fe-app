@@ -36,10 +36,11 @@ export default function RowActionsMenu({
   }, [open]);
 
   return (
-    <div className="relative inline-block" ref={ref}>
+    <div className="relative flex justify-end w-full min-w-0" ref={ref}>
       <Button
         variant="ghost"
         size="icon"
+        className="shrink-0"
         onClick={(e) => {
           e.stopPropagation();
           setOpen((prev) => !prev);
@@ -50,33 +51,38 @@ export default function RowActionsMenu({
 
       {open && (
         <div
-          className="absolute right-0 top-9 z-50 text-right rounded-xl border border-gray-100 bg-gray-50 py-1 shadow-lg"
+          className="absolute right-0 top-full mt-2 z-50 w-40 whitespace-nowrap rounded-xl border border-gray-100 bg-gray-50 py-1 shadow-lg"
           onClick={(e) => e.stopPropagation()}
         >
           <Button
             variant="ghost"
-            className="justify-start gap-2 px-3"
-            onClick={() => {
+            className="justify-start gap-2 px-3 w-full"
+            onClick={(e) => {
+              e.stopPropagation();
               onEdit(row);
               setOpen(false);
             }}
           >
             <Text variant="default">Edit</Text>
           </Button>
+
           <Button
             variant="ghost"
-            className="justify-start gap-2 px-3"
-            onClick={() => {
+            className="justify-start gap-2 px-3 w-full"
+            onClick={(e) => {
+              e.stopPropagation();
               onExport(row);
               setOpen(false);
             }}
           >
             <Text variant="default">Export</Text>
           </Button>
+
           <Button
             variant="ghost"
-            className="justify-start gap-2 px-3 "
-            onClick={() => {
+            className="justify-start gap-2 px-3 w-full"
+            onClick={(e) => {
+              e.stopPropagation();
               onDeleteRequest(row);
               setOpen(false);
             }}

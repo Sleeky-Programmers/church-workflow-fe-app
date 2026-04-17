@@ -51,6 +51,9 @@ export function MemberSingleSelect({
 }: MemberSingleSelectProps) {
   const [open, setOpen] = useState(false);
   const [options, setOptions] = useState<SelectOption[]>([]);
+  const [selectedOption, setSelectedOption] = useState<SelectOption | null>(
+    null,
+  );
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
 
@@ -71,6 +74,13 @@ export function MemberSingleSelect({
     load();
   }, [debouncedSearch, fetchOptions]);
 
+  useEffect(() => {
+    const found = options.find((member) => member.id === value);
+    if (found) {
+      setSelectedOption(found);
+    }
+  }, [options, value]);
+
   const loadMore = async () => {
     const next = page + 1;
 
@@ -84,13 +94,11 @@ export function MemberSingleSelect({
     setPage(next);
   };
 
-  const selected = options.find((m) => m.id === value);
-
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button variant="ghost" className="w-full border justify-between">
-          {selected ? selected.fullName : placeholder}
+          {selectedOption ? selectedOption.fullName : placeholder}
           <ChevronDown className="w-4 h-4 opacity-50" />
         </Button>
       </PopoverTrigger>
@@ -103,18 +111,19 @@ export function MemberSingleSelect({
             <CommandEmpty>No results</CommandEmpty>
 
             <CommandGroup>
-              {options.map((m, index) => (
+              {options.map((hod) => (
                 <CommandItem
-                  key={m.id || `${m.fullName}-${index}`}
+                  key={hod.id}
                   onSelect={() => {
-                    onChange(m.id);
+                    onChange(hod.id);
+                    setSelectedOption(hod);
                     setOpen(false);
                   }}
                 >
-                  {m.fullName}
+                  {hod.fullName}
                   <Check
                     className={`ml-auto ${
-                      value === m.id ? "opacity-100" : "opacity-0"
+                      value === hod.id ? "opacity-100" : "opacity-0"
                     }`}
                   />
                 </CommandItem>
@@ -145,7 +154,7 @@ interface MemberMultiSelectProps {
     search?: string,
   ) => Promise<FetchMembersResponse>;
   value: string[];
-  onChange: (ids: string[], members: MemberProfile[]) => void; // ✅ EXTENDED
+  onChange: (ids: string[], members: MemberProfile[]) => void;
   placeholder?: string;
 }
 
@@ -183,8 +192,8 @@ export function MemberMultiSelect({
       ? placeholder
       : value.length <= 2
         ? options
-            .filter((m) => value.includes(m.id))
-            .map((m) => m.fullName)
+            .filter((member) => value.includes(member.id))
+            .map((member) => member.fullName)
             .join(", ")
         : `${value.length} members selected`;
 
@@ -205,21 +214,25 @@ export function MemberMultiSelect({
             <CommandEmpty>No results</CommandEmpty>
 
             <CommandGroup>
-              {options.map((m) => {
-                const selected = value.includes(m.id);
+              {options.map((member) => {
+                const selected = value.includes(member.id);
 
                 return (
                   <CommandItem
-                    key={m.id}
+                    key={member.id}
                     onSelect={() => {
                       const newIds = selected
-                        ? value.filter((id) => id !== m.id)
-                        : [...value, m.id];
+                        ? value.filter((id) => id !== member.id)
+                        : [...value, member.id];
 
-                      onChange(newIds, [m]); // ✅ send selected member
+                      const selectedMembers = options.filter((option) =>
+                        newIds.includes(option.id),
+                      );
+
+                      onChange(newIds, selectedMembers);
                     }}
                   >
-                    {m.fullName}
+                    {member.fullName}
                     <Checkbox checked={selected} className="ml-auto" />
                   </CommandItem>
                 );

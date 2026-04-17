@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { fetchMembers } from "@/services/memberService";
 import { fetchAdmins } from "@/services/userServices";
 import { useToast } from "@/hooks/use-toast";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { createDepartment } from "@/services/departmentService";
 import {
   Dialog,
   DialogTrigger,
@@ -44,7 +46,7 @@ interface Props {
 
 export default function AddDepartmentDialog({ onSave }: Props) {
   const { toast } = useToast();
-
+  const isMobile = useIsMobile();
   const [open, setOpen] = useState(false);
   const [departmentName, setDepartmentName] = useState("");
   const [hodId, setHodId] = useState("");
@@ -52,7 +54,7 @@ export default function AddDepartmentDialog({ onSave }: Props) {
   const [memberMap, setMemberMap] = useState<Record<string, MemberProfile>>({});
   const [status, setStatus] = useState("active");
   const [description, setDescription] = useState("");
-
+  const [loading, setLoading] = useState(false);
   const [inviteOpen, setInviteOpen] = useState(false);
   const [pendingInvites, setPendingInvites] = useState<PendingInvite[]>([]);
   const [isInviteLoading, setIsInviteLoading] = useState(false);
@@ -77,38 +79,36 @@ export default function AddDepartmentDialog({ onSave }: Props) {
     }, 600);
   }
 
-  function handleSave() {
+  async function handleSave() {
     if (!departmentName.trim() || !hodId) {
-      toast({
-        title: "Missing fields",
-        description: "Department name and HOD are required",
-        variant: "destructive",
-      });
       return;
     }
+    setLoading(true);
 
-    onSave?.({
-      name: departmentName,
-      hodId,
-      memberIds,
-      status,
-      description,
-    });
+    try {
+      await createDepartment({
+        name: departmentName,
+        description,
+        hod: hodId,
+        memberIds,
+      });
 
-    toast({
-      title: "Success",
-      description: "Department created successfully",
-    });
+      toast({
+        title: "Success",
+        description: "Department created successfully",
+      });
 
-    setDepartmentName("");
-    setHodId("");
-    setMemberIds([]);
-    setMemberMap({});
-    setStatus("active");
-    setDescription("");
-    setOpen(false);
+      setOpen(false);
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
   }
-
   function handleResetHod() {
     setHodId("");
   }
@@ -129,7 +129,7 @@ export default function AddDepartmentDialog({ onSave }: Props) {
         <DialogTrigger asChild>
           <Button className="flex items-center gap-2">
             <Plus className="w-4 h-4" />
-            Add a department
+            {isMobile ? "Add" : "Add a department"}
           </Button>
         </DialogTrigger>
 
@@ -257,8 +257,8 @@ export default function AddDepartmentDialog({ onSave }: Props) {
           </div>
 
           <div className="flex justify-end border-t px-6 py-4">
-            <Button onClick={handleSave} disabled={!departmentName.trim()}>
-              Save
+            <Button onClick={handleSave} disabled={loading}>
+              {loading ? "Saving..." : "Save"}
             </Button>
           </div>
         </DialogContent>

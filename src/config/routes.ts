@@ -42,8 +42,8 @@ export const RouteConfig = {
     notifications: Routes.Notifications,
     attendance: Routes.Attendance,
     membership: Routes.Membership,
-    departmentDetails: (departmentId: string) =>
-      getRouteWithParams(Routes.DepartmentDetails, { id: departmentId }),
+    departmentDetails: (id: string) =>
+      getRouteWithParams(Routes.DepartmentDetails, { id }),
     departmentEdit: (departmentId: string) =>
       getRouteWithParams(Routes.DepartmentEdit, { id: departmentId }),
     search: Routes.Search,
@@ -68,10 +68,22 @@ export const getRouteWithParams = (
 ): string => {
   let finalRoute: string = route;
 
-  if (params) {
-    Object.entries(params).forEach(([key, value]) => {
-      finalRoute = finalRoute.replace(`[${key}]`, String(value));
-    });
+  if (!params) {
+    return finalRoute;
+  }
+
+  Object.entries(params).forEach(([key, value]) => {
+    const token = `[${key}]`;
+
+    if (!finalRoute.includes(token)) {
+      return;
+    }
+
+    finalRoute = finalRoute.replaceAll(token, String(value));
+  });
+
+  if (finalRoute.match(/\[.*?\]/)) {
+    throw new Error(`Missing params for route: ${route}`);
   }
 
   return finalRoute;

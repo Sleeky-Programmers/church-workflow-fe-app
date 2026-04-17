@@ -44,6 +44,16 @@ export function AppSidebar() {
     }
   };
 
+  const comingSoonTitles = ["Communications", "Requisitions", "Finance"];
+
+  const mainPages = SidebarData.pages.filter(
+    (p) => !comingSoonTitles.includes(p.title),
+  );
+
+  const comingSoonPages = SidebarData.pages.filter((p) =>
+    comingSoonTitles.includes(p.title),
+  );
+
   return (
     <Sidebar>
       <SidebarContent>
@@ -90,6 +100,7 @@ export function AppSidebar() {
             </SidebarMenuItem>
           </SidebarMenu>
         </SidebarHeader>
+
         {activeTab === ActiveTab.FAVOURITES && (
           <SidebarGroup>
             <SidebarGroupLabel>Favourites</SidebarGroupLabel>
@@ -134,7 +145,7 @@ export function AppSidebar() {
 
           <SidebarGroupContent>
             <SidebarMenu>
-              {SidebarData.pages.map((page) => {
+              {mainPages.map((page) => {
                 const active = isActive(page.url);
                 const Icon = page.icon;
 
@@ -156,6 +167,27 @@ export function AppSidebar() {
                         <Text variant="default">{page.title}</Text>
                       </Link>
                     </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              })}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        <SidebarGroup>
+          <SidebarGroupLabel>Coming Soon Pages</SidebarGroupLabel>
+
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {comingSoonPages.map((page) => {
+                const Icon = page.icon;
+
+                return (
+                  <SidebarMenuItem key={page.title}>
+                    <div className="flex items-center gap-2 px-3 py-2 opacity-50 cursor-not-allowed">
+                      <Icon className="h-4 w-4" />
+                      <Text variant="default">{page.title}</Text>
+                    </div>
                   </SidebarMenuItem>
                 );
               })}

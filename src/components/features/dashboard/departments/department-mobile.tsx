@@ -35,7 +35,6 @@ export default function DepartmentMobile({ data }: Props) {
           }
         >
           <CardContent className="p-4 space-y-3">
-            {/* Top row */}
             <div className="flex items-center justify-between">
               <Heading level={4} text={dept.name} className="truncate" />
 
@@ -43,13 +42,12 @@ export default function DepartmentMobile({ data }: Props) {
                 variant="ghost"
                 size="icon"
                 className="h-8 w-8 shrink-0"
-                onClick={(e) => e.stopPropagation()} // prevent card click
+                onClick={(e) => e.stopPropagation()}
               >
                 <MoreVertical className="h-4 w-4" />
               </Button>
             </div>
 
-            {/* Details */}
             <div className="space-y-1">
               <Text text={`HOD: ${dept.hod?.name ?? "—"}`} />
 

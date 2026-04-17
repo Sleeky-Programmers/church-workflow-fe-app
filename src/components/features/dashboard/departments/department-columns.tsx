@@ -1,16 +1,20 @@
+"use client";
+
 import { Column } from "@/components/features/dashboard/Table";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { DepartmentRow } from "@/types";
 import { AVATAR_COLORS } from "@/lib/data";
 import RowActionsMenu from "./row-actions-menu";
+import { Button } from "@/components/ui/button";
 
 export type DepartmentTableColumn = Column<DepartmentRow>;
 
 interface DepartmentColumnHandlers {
   onEdit: (row: DepartmentRow) => void;
-  onExport: (row: DepartmentRow) => void;
+  onExport: () => void;
   onDeleteRequest: (row: DepartmentRow) => void;
+  onView: (row: DepartmentRow) => void;
 }
 
 function getAvatarColor(name: string) {
@@ -19,17 +23,24 @@ function getAvatarColor(name: string) {
   return AVATAR_COLORS[code % AVATAR_COLORS.length];
 }
 
-function getInitials(name: string) {
-  if (!name) return "?";
-  const parts = name.trim().split(" ");
-  if (parts.length === 1) return parts[0][0].toUpperCase();
-  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+export function getInitials(name?: string | null) {
+  const parts = name?.trim().split(" ").filter(Boolean) || [];
+
+  if (parts.length === 0) {
+    return "?";
+  }
+  if (parts.length === 1) {
+    return parts[0][0]?.toUpperCase() || "?";
+  }
+
+  return `${parts[0][0] ?? ""}${parts[parts.length - 1][0] ?? ""}`.toUpperCase();
 }
 
 export function getDepartmentColumns({
   onEdit,
   onExport,
   onDeleteRequest,
+  onView,
 }: DepartmentColumnHandlers): DepartmentTableColumn[] {
   return [
     {
@@ -38,12 +49,14 @@ export function getDepartmentColumns({
       accessor: "name",
       width: "w-72",
     },
+
     {
       key: "hod",
       header: "HOD",
       render: (row) => {
         const name = row.hod?.name ?? "";
         const color = getAvatarColor(name);
+
         return (
           <div className="flex items-center gap-3">
             <Avatar className={`h-8 w-8 ${color.bg}`}>
@@ -59,6 +72,7 @@ export function getDepartmentColumns({
       },
       width: "w-48",
     },
+
     {
       key: "members",
       header: "Members",
@@ -66,6 +80,7 @@ export function getDepartmentColumns({
       width: "w-24",
       align: "center",
     },
+
     {
       key: "status",
       header: "Status",
@@ -84,18 +99,21 @@ export function getDepartmentColumns({
       width: "w-40",
       align: "center",
     },
+
     {
       key: "actions",
       header: "Actions",
       render: (row) => (
-        <RowActionsMenu
-          row={row}
-          onEdit={onEdit}
-          onExport={onExport}
-          onDeleteRequest={onDeleteRequest}
-        />
+        <div className="flex items-center gap-2">
+          <RowActionsMenu
+            row={row}
+            onEdit={onEdit}
+            onExport={onExport}
+            onDeleteRequest={onDeleteRequest}
+          />
+        </div>
       ),
-      width: "w-20",
+      width: "w-28",
       align: "right",
       contentClassName: "overflow-visible",
     },
