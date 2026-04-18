@@ -9,7 +9,7 @@ import { fetchMembers } from "@/services/memberService";
 import { addDepartmentMembers } from "@/services/departmentService";
 import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { Span } from "@/components/ui/typography/Text";
+import { Span, Text } from "@/components/ui/typography/Text";
 import Heading from "@/components/ui/typography/Heading";
 
 export function AddMembersToDepartmentDialog({
@@ -99,7 +99,7 @@ export function AddMembersToDepartmentDialog({
           {memberIds.length > 0 && (
             <div className="space-y-2">
               <div className="flex justify-between items-center">
-                <p className="text-sm font-medium">Selected Members</p>
+                <Text className="text-sm font-medium">Selected Members</Text>
 
                 {isMobile && (
                   <Button variant="outline" size="sm">
@@ -111,8 +111,9 @@ export function AddMembersToDepartmentDialog({
               <div className="flex flex-wrap gap-2">
                 {visibleMembers.map((id) => {
                   const member = memberMap[id];
-                  if (!member) return null;
-
+                  if (!member) {
+                    return null;
+                  }
                   return (
                     <Span key={id} variant="chip">
                       {member.fullName.split(" ")[0]}
@@ -131,7 +132,7 @@ export function AddMembersToDepartmentDialog({
           )}
 
           <div className="space-y-2">
-            <p className="text-sm font-medium">Add Members</p>
+            <Text className="text-sm font-medium">Add Members</Text>
 
             <MemberMultiSelect
               fetchOptions={fetchMembers}
