@@ -162,7 +162,7 @@ export default function Table<T extends Record<string, any>>({
   return (
     <Card className={className}>
       <CardContent className="p-0">
-        <div className="overflow-x-auto w-full">
+        <div className="overflow-x-auto overflow-y-visible w-full">
           <TableComponent className="w-full table-fixed">
             <TableHeader>
               <TableRow>
@@ -205,7 +205,13 @@ export default function Table<T extends Record<string, any>>({
                       className={
                         onRowClick ? "cursor-pointer hover:bg-muted/40" : ""
                       }
-                      onClick={() => onRowClick?.(row)}
+                      onClick={(e) => {
+                        const target = e.target as HTMLElement;
+
+                        if (target.closest("[data-row-action]")) return;
+
+                        onRowClick?.(row);
+                      }}
                     >
                       {columns.map((col) => (
                         <TableCell

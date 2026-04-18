@@ -1,27 +1,5 @@
 import { authenticatedFetch } from "@/lib/api";
-import {
-  BillingCycle,
-  PlanType,
-  SubscriptionStatus,
-  ChurchSubscriptionStatus,
-} from "@/lib/enums";
-
-export type Plan = {
-  type: PlanType;
-  name: string;
-  monthlyPrice: number;
-  yearlyPrice: number;
-  features: string[];
-  popular?: boolean;
-};
-
-export type SubscriptionOverviewResponse = {
-  plans: Plan[];
-  currentPlan: PlanType;
-  subscriptionStatus: SubscriptionStatus;
-  churchStatus: ChurchSubscriptionStatus;
-  billingCycle: BillingCycle;
-};
+import { SubscriptionOverviewResponse, PaymentType } from "@/types";
 
 export async function getSubscriptionOverview(): Promise<SubscriptionOverviewResponse> {
   return await authenticatedFetch(`/subscription/overview`, {
@@ -29,13 +7,7 @@ export async function getSubscriptionOverview(): Promise<SubscriptionOverviewRes
   });
 }
 
-export async function initializePayment(payload: {
-  plan: PlanType;
-  billingCycle: BillingCycle;
-  provider: "PAYSTACK" | "FLUTTERWAVE";
-  promoCode?: string;
-  autoRenew?: boolean;
-}) {
+export async function initializePayment(payload: PaymentType) {
   return await authenticatedFetch("/payment/initialize", {
     method: "POST",
     body: JSON.stringify(payload),

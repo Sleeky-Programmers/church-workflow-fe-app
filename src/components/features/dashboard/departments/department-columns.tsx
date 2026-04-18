@@ -6,13 +6,12 @@ import { Badge } from "@/components/ui/badge";
 import { DepartmentRow } from "@/types";
 import { AVATAR_COLORS } from "@/lib/data";
 import RowActionsMenu from "./row-actions-menu";
-import { Button } from "@/components/ui/button";
 
 export type DepartmentTableColumn = Column<DepartmentRow>;
 
 interface DepartmentColumnHandlers {
   onEdit: (row: DepartmentRow) => void;
-  onExport: () => void;
+  onExport: (row: DepartmentRow) => void;
   onDeleteRequest: (row: DepartmentRow) => void;
   onView: (row: DepartmentRow) => void;
 }
@@ -100,7 +99,7 @@ export function getDepartmentColumns({
       key: "actions",
       header: "Actions",
       render: (row) => (
-        <div className="flex items-center gap-2">
+        <div className="flex justify-end w-full" data-row-action>
           <RowActionsMenu
             row={row}
             onEdit={onEdit}
@@ -109,9 +108,7 @@ export function getDepartmentColumns({
           />
         </div>
       ),
-      width: "w-28",
       align: "right",
-      contentClassName: "overflow-visible",
     },
   ];
 }

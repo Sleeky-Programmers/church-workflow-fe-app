@@ -71,6 +71,14 @@ export async function fetchMembers(
   };
 }
 
+export async function fetchMemberById(id: string): Promise<MemberProfile> {
+  const response = await authenticatedFetch<any>(`/members/${id}`, {
+    method: "GET",
+  });
+
+  return mapMember(response);
+}
+
 export async function fetchAllMembers() {
   const members = await authenticatedFetch<MemberProfile[]>("/members/all");
 

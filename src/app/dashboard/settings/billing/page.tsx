@@ -4,15 +4,18 @@ import { useEffect, useState } from "react";
 import Heading from "@/components/ui/typography/Heading";
 import { Text, Span } from "@/components/ui/typography/Text";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { Check } from "lucide-react";
-import { Plan } from "@/types";
+import { useRouter } from "next/navigation";
 import {
   BillingCycle,
   PlanType,
   SubscriptionStatus,
   ChurchSubscriptionStatus,
 } from "@/lib/enums";
+import { Plan } from "@/types";
+import { useToast } from "@/hooks/use-toast";
 
 import { getSubscriptionOverview } from "@/services/billingService";
 
@@ -20,7 +23,8 @@ export default function BillingPage() {
   const [billingCycle, setBillingCycle] = useState<BillingCycle>(
     BillingCycle.MONTHLY,
   );
-
+  const router = useRouter();
+  const { toast } = useToast();
   const [plans, setPlans] = useState<Plan[]>([]);
   const [currentPlan, setCurrentPlan] = useState<PlanType | null>(null);
   const [subscriptionStatus, setSubscriptionStatus] =
@@ -41,7 +45,10 @@ export default function BillingPage() {
         setChurchStatus(data.churchStatus);
         setBillingCycle(data.billingCycle);
       } catch (err) {
-        console.error("Failed to fetch billing:", err);
+        toast({
+          title: "Error",
+          description: "Failed to fetch billing",
+        });
       } finally {
         setLoading(false);
       }
@@ -58,36 +65,16 @@ export default function BillingPage() {
       : plan.yearlyPrice;
   };
 
-  // const handleUpgrade = async (plan: PlanType) => {
-  //   try {
-  //     await upgradePlan({
-  //       plan,
-  //       billingCycle,
-  //     });
-
-  //     // 🔥 Refetch after upgrade
-  //     const data = await getBillingOverview(churchId);
-
-  //     setCurrentPlan(data.currentPlan);
-  //     setSubscriptionStatus(data.subscriptionStatus);
-  //     setChurchStatus(data.churchStatus);
-  //   } catch (err) {
-  //     console.error("Upgrade failed:", err);
-  //   }
-  // };
-
   if (loading) {
-    return <div>Loading billing...</div>;
+    return <Text>Loading billing...</Text>;
   }
 
   return (
-    <div className="space-y-8">
-      <Heading level={2}>Billing & Plans</Heading>
+    <div className="space-y-10">
+      <div className="flex flex-col items-center gap-3 text-center">
+        <Heading level={2}>Billing & Plans</Heading>
 
-      <div className="flex justify-center">
-        <div className="px-3 py-1 rounded-full text-xs bg-muted text-muted-foreground">
-          {churchStatus}
-        </div>
+        {churchStatus && <Badge variant="secondary">{churchStatus}</Badge>}
       </div>
 
       <div className="flex items-center justify-center gap-2">
@@ -95,7 +82,7 @@ export default function BillingPage() {
           variant="ghost"
           onClick={() => setBillingCycle(BillingCycle.MONTHLY)}
           className={cn(
-            "px-4 py-2 rounded-full text-sm",
+            "px-4 py-2 rounded-full",
             billingCycle === BillingCycle.MONTHLY
               ? "bg-muted"
               : "text-muted-foreground",
@@ -105,9 +92,10 @@ export default function BillingPage() {
         </Button>
 
         <Button
+          variant="ghost"
           onClick={() => setBillingCycle(BillingCycle.YEARLY)}
           className={cn(
-            "px-4 py-2 rounded-full text-sm",
+            "px-4 py-2 rounded-full",
             billingCycle === BillingCycle.YEARLY
               ? "bg-primary text-white"
               : "text-muted-foreground",
@@ -116,7 +104,7 @@ export default function BillingPage() {
           Yearly
         </Button>
 
-        <Text className="text-xs text-muted-foreground ml-2">
+        <Text variant="muted" className="ml-2 text-xs">
           (Save up to 17%)
         </Text>
       </div>
@@ -131,35 +119,33 @@ export default function BillingPage() {
             <div
               key={plan.type}
               className={cn(
-                "relative rounded-xl border p-6 flex flex-col justify-between",
+                "relative rounded-xl border bg-background p-6 flex flex-col justify-between transition",
                 plan.popular && "border-primary shadow-md",
               )}
             >
               {plan.popular && (
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-white text-xs px-3 py-1 rounded-full">
+                <Badge className="absolute -top-3 left-1/2 -translate-x-1/2">
                   MOST POPULAR
-                </div>
+                </Badge>
               )}
 
               <div className="space-y-4">
-                <Text className="text-lg font-semibold">{plan.name}</Text>
+                <Heading level={4}>{plan.name}</Heading>
 
-                <div>
+                <div className="flex items-end gap-1">
                   <Span className="text-2xl font-bold">
                     {formatPrice(getPrice(plan))}
                   </Span>
-                  <Span className="text-sm ml-1">
+                  <Span variant="muted">
                     /{billingCycle === BillingCycle.MONTHLY ? "month" : "year"}
                   </Span>
                 </div>
 
-                <div className="space-y-2">
+                <div className="space-y-2 pt-2">
                   {plan.features.map((feature) => (
-                    <div key={feature} className="flex items-center gap-2">
-                      <Check className="h-4 w-4 text-green-500" />
-                      <Text className="text-sm text-muted-foreground">
-                        {feature}
-                      </Text>
+                    <div key={feature} className="flex items-start gap-2">
+                      <Check className="h-4 w-4 text-green-500 mt-[2px]" />
+                      <Text variant="muted">{feature}</Text>
                     </div>
                   ))}
                 </div>
@@ -172,7 +158,11 @@ export default function BillingPage() {
                   </Button>
                 ) : (
                   <Button
-                    // onClick={() => handleUpgrade(plan.type)}
+                    onClick={() =>
+                      router.push(
+                        `/dashboard/settings/billing/checkout?plan=${plan.type}&cycle=${billingCycle}`,
+                      )
+                    }
                     variant={plan.popular ? "default" : "outline"}
                     className="w-full"
                   >
