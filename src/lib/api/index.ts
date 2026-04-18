@@ -32,7 +32,9 @@ export async function authenticatedFetch<T>(
   options: RequestInit & { responseType?: "json" | "blob" | "text" } = {},
 ): Promise<T> {
   const token = localStorage.getItem("accessToken");
-  if (!token) throw new Error("No authentication token");
+  if (!token) {
+    throw new Error("No authentication token");
+  }
 
   const isFormData = options.body instanceof FormData;
 
@@ -61,8 +63,9 @@ export async function authenticatedFetch<T>(
         headers: getHeaders(refreshData.accessToken),
       });
 
-      if (!retryResponse.ok) throw new Error("Retry failed");
-
+      if (!retryResponse.ok) {
+        throw new Error("Retry failed");
+      }
       if (options.responseType === "blob") {
         return (await retryResponse.blob()) as T;
       }

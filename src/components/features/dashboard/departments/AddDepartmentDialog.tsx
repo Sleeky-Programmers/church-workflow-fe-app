@@ -80,8 +80,9 @@ export default function AddDepartmentDialog({ onSave }: Props) {
   }
 
   async function handleSave() {
-    if (!departmentName.trim() || !hodId) return;
-
+    if (!departmentName.trim() || !hodId) {
+      return;
+    }
     setLoading(true);
 
     try {
@@ -126,17 +127,10 @@ export default function AddDepartmentDialog({ onSave }: Props) {
     <>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger asChild>
-          {isMobile ? (
-            <Button className="flex items-center gap-2">
-              <Plus className="w-4 h-4" />
-              Add
-            </Button>
-          ) : (
-            <Button size="sm" className="flex items-center gap-2">
-              <Plus className="w-4 h-4" />
-              Add a department
-            </Button>
-          )}
+          <Button className="flex items-center gap-2">
+            <Plus className="w-4 h-4" />
+            {isMobile ? "Add" : "Add a department"}
+          </Button>
         </DialogTrigger>
 
         <DialogContent

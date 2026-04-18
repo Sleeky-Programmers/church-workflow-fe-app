@@ -84,23 +84,35 @@ export default function Table<T extends Record<string, any>>({
   }, [data, pageSize]);
 
   const getRowKey = (row: T, idx: number) => {
-    if (!rowKey) return String(idx);
+    if (!rowKey) {
+      return String(idx);
+    }
     if (typeof rowKey === "function") return rowKey(row);
     return String(row[rowKey]);
   };
 
   const getCellValue = (col: Column<T>, row: T) => {
-    if (col.render) return col.render(row);
-    if (typeof col.accessor === "function") return col.accessor(row);
-    if (typeof col.accessor === "string") return row[col.accessor];
+    if (col.render) {
+      return col.render(row);
+    }
+    if (typeof col.accessor === "function") {
+      return col.accessor(row);
+    }
+    if (typeof col.accessor === "string") {
+      return row[col.accessor];
+    }
     return null;
   };
 
   const sortedData = useMemo(() => {
-    if (!enableSorting || !sort.key || !sort.direction) return data.slice();
+    if (!enableSorting || !sort.key || !sort.direction) {
+      return data.slice();
+    }
 
     const col = columns.find((c) => c.key === sort.key);
-    if (!col || typeof col.accessor !== "string") return data.slice();
+    if (!col || typeof col.accessor !== "string") {
+      return data.slice();
+    }
 
     const key = col.accessor;
 
@@ -108,9 +120,15 @@ export default function Table<T extends Record<string, any>>({
       const va = col.sortAccessor ? col.sortAccessor(a) : a[key];
       const vb = col.sortAccessor ? col.sortAccessor(b) : b[key];
 
-      if (va == null && vb == null) return 0;
-      if (va == null) return sort.direction === "asc" ? -1 : 1;
-      if (vb == null) return sort.direction === "asc" ? 1 : -1;
+      if (va == null && vb == null) {
+        return 0;
+      }
+      if (va == null) {
+        return sort.direction === "asc" ? -1 : 1;
+      }
+      if (vb == null) {
+        return sort.direction === "asc" ? 1 : -1;
+      }
 
       if (typeof va === "number" && typeof vb === "number") {
         return sort.direction === "asc" ? va - vb : vb - va;
@@ -123,7 +141,9 @@ export default function Table<T extends Record<string, any>>({
   }, [data, sort, enableSorting, columns]);
 
   const paginatedData = useMemo(() => {
-    if (!enablePagination) return sortedData;
+    if (!enablePagination) {
+      return sortedData;
+    }
 
     const start = (currentPage - 1) * pageSize;
     return sortedData.slice(start, start + pageSize);
@@ -134,7 +154,9 @@ export default function Table<T extends Record<string, any>>({
     : 1;
 
   const toggleSort = (col: Column<T>) => {
-    if (!enableSorting || !col.sortable) return;
+    if (!enableSorting || !col.sortable) {
+      return;
+    }
 
     setSort((prev) => {
       if (prev.key !== col.key) {
@@ -154,8 +176,12 @@ export default function Table<T extends Record<string, any>>({
   const visibleColumnCount = columns.length;
 
   const alignClass = (align?: Align) => {
-    if (align === "center") return "text-center";
-    if (align === "right") return "text-right";
+    if (align === "center") {
+      return "text-center";
+    }
+    if (align === "right") {
+      return "text-right";
+    }
     return "text-left";
   };
 

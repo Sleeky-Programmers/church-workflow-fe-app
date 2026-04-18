@@ -15,7 +15,7 @@ import {
   formatUpcomingBirthday,
   isInFuture,
 } from "@/lib/utils";
-
+import { Event } from "@/types";
 import { EVENT_CATEGORY_CONFIG } from "@/config/event-category";
 import { TrendChart } from "@/components/features/dashboard/trend-chart";
 import { IncomeVsExpenses } from "@/components/features/dashboard/income-expense";

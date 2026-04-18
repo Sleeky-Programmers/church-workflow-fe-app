@@ -6,6 +6,7 @@ import {
   Shield,
   Settings as SettingsIcon,
   Lock,
+  ParkingMeterIcon,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
