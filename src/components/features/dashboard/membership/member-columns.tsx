@@ -1,5 +1,3 @@
-// components/features/dashboard/members/member-columns.ts
-
 import { Column } from "@/components/features/dashboard/Table";
 import { MemberProfile } from "@/types";
 import { Button } from "@/components/ui/button";

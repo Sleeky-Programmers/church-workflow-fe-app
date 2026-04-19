@@ -72,21 +72,18 @@ export default function BillingPage() {
   return (
     <div className="space-y-10">
       <div className="flex flex-col items-center gap-3 text-center">
-        <Heading level={2}>Billing & Plans</Heading>
-
-        {churchStatus && <Badge variant="secondary">{churchStatus}</Badge>}
+        <Heading level={6}>Choose your plan</Heading>
       </div>
 
       <div className="flex items-center justify-center gap-2">
         <Button
           variant="ghost"
           onClick={() => setBillingCycle(BillingCycle.MONTHLY)}
-          className={cn(
-            "px-4 py-2 rounded-full",
+          className={`px-4 py-2 rounded-full ${
             billingCycle === BillingCycle.MONTHLY
-              ? "bg-muted"
-              : "text-muted-foreground",
-          )}
+              ? "bg-primary text-white"
+              : "text-muted-foreground"
+          }`}
         >
           Monthly
         </Button>
@@ -94,12 +91,11 @@ export default function BillingPage() {
         <Button
           variant="ghost"
           onClick={() => setBillingCycle(BillingCycle.YEARLY)}
-          className={cn(
-            "px-4 py-2 rounded-full",
+          className={`px-4 py-2 rounded-full ${
             billingCycle === BillingCycle.YEARLY
               ? "bg-primary text-white"
-              : "text-muted-foreground",
-          )}
+              : "text-muted-foreground"
+          }`}
         >
           Yearly
         </Button>

@@ -234,8 +234,9 @@ export default function Table<T extends Record<string, any>>({
                       onClick={(e) => {
                         const target = e.target as HTMLElement;
 
-                        if (target.closest("[data-row-action]")) return;
-
+                        if (target.closest("[data-row-action]")) {
+                          return;
+                        }
                         onRowClick?.(row);
                       }}
                     >
