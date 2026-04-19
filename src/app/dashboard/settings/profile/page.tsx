@@ -8,7 +8,7 @@ import { Loader } from "@/components/ui/loader";
 import { useToast } from "@/hooks/use-toast";
 import { Span } from "@/components/ui/typography/Text";
 import { Edit } from "lucide-react";
-import { Label } from "@/components/ui/label";
+import { LockOpenIcon } from "lucide-react";
 
 import { getCurrentUserProfile } from "@/lib/auth/session";
 import { getMyChurch } from "@/lib/api";
@@ -123,6 +123,7 @@ export default function UserProfilePage() {
               size="sm"
               onClick={() => setOpenPasswordModal(true)}
             >
+              <LockOpenIcon />
               Change Password
             </Button>
           </div>

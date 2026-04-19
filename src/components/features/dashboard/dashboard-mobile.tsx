@@ -8,7 +8,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import Heading from "@/components/ui/typography/Heading";
 import Link from "next/link";
-
+import { Event } from "@/types";
 import MobileHeader from "@/components/layout/mobile-header";
 import {
   formatEventDate,

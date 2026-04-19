@@ -9,22 +9,22 @@ import { MembersTable } from "@/components/features/dashboard/membership/members
 import { fetchMembers } from "@/services/memberService";
 import { MemberProfile } from "@/types";
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import { MemberDetailsPage } from "@/components/features/dashboard/membership/member-details-page";
 import { AddMemberModal } from "@/components/features/dashboard/membership/add-member-modal";
 import { AddMemberFormatModal } from "@/components/features/dashboard/membership/select-modal";
 import { DeleteMembersModal } from "@/components/features/dashboard/membership/delete-member-modal";
 import { useToast } from "@/hooks/use-toast";
 import { useDebounce } from "@/hooks/use-debounce";
 import { MemberFormType } from "@/lib/enums";
-import { Text } from "@/components/ui/typography/Text";
 import { CsvUploadModal } from "@/components/features/dashboard/membership/csv-upload-modal";
 import FilterDropdown from "@/components/features/dashboard/membership/filter-drop-down";
 import { MaritalStatus, Gender, MembershipStatus } from "@/lib/enums";
 import { mapFiltersToBackend } from "@/mappers/filter.mapper";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useRouter } from "next/navigation";
 
 export default function MembershipPage() {
   const { toast } = useToast();
+  const router = useRouter();
   const isMobile = useIsMobile();
 
   const [filters, setFilters] = useState({
@@ -32,19 +32,21 @@ export default function MembershipPage() {
     maritalStatus: null as MaritalStatus | null,
     membershipStatus: null as MembershipStatus | null,
   });
+
   const [members, setMembers] = useState<MemberProfile[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedMemberId, setSelectedMemberId] = useState<string | null>(null);
   const [selectedMemberIds, setSelectedMemberIds] = useState<string[]>([]);
+
   const [isFormatModalOpen, setIsFormatModalOpen] = useState(false);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isCsvModalOpen, setIsCsvModalOpen] = useState(false);
+
   const [selectedFormat, setSelectedFormat] = useState<"form" | "csv" | null>(
     null,
   );
   const [isCsvUploading, setIsCsvUploading] = useState(false);
-  const [filterValue, setFilterValue] = useState("all");
+
   const [page, setPage] = useState(1);
   const [pagination, setPagination] = useState<any>(null);
 
@@ -52,18 +54,9 @@ export default function MembershipPage() {
   const backendFilter = mapFiltersToBackend(filters);
 
   const loadMembers = useCallback(
-    async (
-      pageOverride: number,
-      searchOverride: string,
-      filterOverride: string,
-    ) => {
+    async (pageOverride: number, search: string, filter: string) => {
       try {
-        const response = await fetchMembers(
-          pageOverride,
-          10,
-          searchOverride,
-          filterOverride,
-        );
+        const response = await fetchMembers(pageOverride, 10, search, filter);
         setMembers(response.data);
         setPagination(response.pagination);
       } catch (error) {
@@ -80,10 +73,10 @@ export default function MembershipPage() {
   }, [debouncedSearch, backendFilter, loadMembers]);
 
   useEffect(() => {
-    loadMembers(page, debouncedSearch, filterValue);
+    loadMembers(page, debouncedSearch, backendFilter);
   }, [page, debouncedSearch, backendFilter, loadMembers]);
 
-  const handleAddMember = async (_member: MemberProfile) => {
+  const handleAddMember = async () => {
     await loadMembers(1, debouncedSearch, backendFilter);
     setPage(1);
     setIsAddModalOpen(false);
@@ -100,29 +93,21 @@ export default function MembershipPage() {
       });
       return;
     }
+
     setSelectedFormat(format);
+
     if (format === MemberFormType.FORM) {
       setIsAddModalOpen(true);
     }
+
     if (format === MemberFormType.CSV) {
       setIsCsvModalOpen(true);
     }
   };
 
-  if (selectedMemberId) {
-    const selectedMember = members.find((m) => m.id === selectedMemberId);
-    if (selectedMember) {
-      return (
-        <MemberDetailsPage
-          member={selectedMember}
-          onBack={() => setSelectedMemberId(null)}
-        />
-      );
-    }
-  }
-
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Header */}
       <div className="bg-white">
         <div className="px-4 sm:px-6 py-4 flex items-center justify-between gap-2">
           <div className="flex items-center gap-2 h-8">
@@ -135,7 +120,9 @@ export default function MembershipPage() {
               Membership
             </Heading>
           </div>
+
           <div className="hidden sm:flex items-center gap-3">
+            {/* Search */}
             <div className="relative w-72 md:w-96">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
               <Input
@@ -146,6 +133,7 @@ export default function MembershipPage() {
               />
             </div>
 
+            {/* Filters */}
             <FilterDropdown
               filters={filters}
               setFilters={setFilters}
@@ -153,6 +141,7 @@ export default function MembershipPage() {
               setSearchQuery={setSearchQuery}
             />
 
+            {/* Actions */}
             {selectedMemberIds.length > 0 ? (
               <Button
                 variant="destructive"
@@ -163,7 +152,6 @@ export default function MembershipPage() {
             ) : (
               <Button
                 onClick={() => setIsFormatModalOpen(true)}
-                variant="default"
                 disabled={isCsvUploading}
               >
                 <Plus className="h-4 w-4 mr-2" />
@@ -180,12 +168,15 @@ export default function MembershipPage() {
         </div>
       </div>
 
+      {/* Table */}
       <div className="py-4 sm:py-6 px-3 sm:px-4">
         <MembersTable
           members={members}
           pagination={pagination}
           onPageChange={setPage}
-          onRowClick={(memberId) => setSelectedMemberId(memberId)}
+          onRowClick={(memberId) =>
+            router.push(`/dashboard/membership/${memberId}`)
+          }
           onAddMember={() => setIsFormatModalOpen(true)}
           selectedMemberIds={selectedMemberIds}
           onSelectMember={(id, checked) =>

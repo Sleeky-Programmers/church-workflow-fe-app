@@ -52,9 +52,9 @@ const NAV_ITEMS: NavItem[] = [
   },
 
   {
-    id: "billing",
-    label: "Billing & Plans",
-    icon: ParkingMeterIcon,
+    id: "billing-plans",
+    label: "Billings & Plans",
+    icon: Lock,
     href: "/dashboard/settings/billing",
   },
 ];

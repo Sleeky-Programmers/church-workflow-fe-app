@@ -92,6 +92,18 @@ export async function exportDepartments(): Promise<Blob> {
   });
 }
 
+export async function addDepartmentMembers(
+  departmentId: string,
+  memberIds: string[],
+) {
+  return authenticatedFetch(`/department/${departmentId}/members`, {
+    method: "PUT",
+    body: JSON.stringify({
+      memberIds,
+      action: "ADD",
+    }),
+  });
+}
 export async function removeDepartmentMembers(
   departmentId: string,
   memberIds: string[],

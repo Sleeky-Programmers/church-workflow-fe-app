@@ -15,7 +15,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { updateProfile } from "@/services/userServices";
 import { useIsMobile } from "@/hooks/use-mobile";
-
+import { Text } from "@/components/ui/typography/Text";
 type FormValues = {
   firstName: string;
   lastName: string;
@@ -85,9 +85,7 @@ export function EditPersonalInfoModal({
                 className="bg-gray-100"
               />
               {errors.firstName && (
-                <p className="text-red-500 text-sm">
-                  {errors.firstName.message}
-                </p>
+                <Text variant="error">{errors.firstName.message}</Text>
               )}
             </div>
 
@@ -100,9 +98,7 @@ export function EditPersonalInfoModal({
                 className="bg-gray-100"
               />
               {errors.lastName && (
-                <p className="text-red-500 text-sm">
-                  {errors.lastName.message}
-                </p>
+                <Text variant="error">{errors.lastName.message}</Text>
               )}
             </div>
           </div>

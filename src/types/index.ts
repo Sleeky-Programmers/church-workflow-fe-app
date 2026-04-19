@@ -11,7 +11,13 @@ import {
   Gender,
   MembershipStatus,
   EventCategory,
+  PlanType,
+  ChurchSubscriptionStatus,
+  PaymentProvider,
+  BillingCycle,
+  SubscriptionStatus,
 } from "@/lib/enums";
+
 import { LucideIcon } from "lucide-react";
 
 export type ActivityRow = {
@@ -363,4 +369,34 @@ export type Event = {
   title: string;
   date: string;
   category: EventCategory;
+};
+
+export type Plan = {
+  type: PlanType;
+  name: string;
+  monthlyPrice: number;
+  yearlyPrice: number;
+  features: string[];
+  popular?: boolean;
+};
+
+export type SubscriptionOverviewResponse = {
+  plans: Plan[];
+  currentPlan: PlanType;
+  subscriptionStatus: SubscriptionStatus;
+  churchStatus: ChurchSubscriptionStatus;
+  billingCycle: BillingCycle;
+};
+
+export type PaymentType = {
+  plan: PlanType;
+  billingCycle: BillingCycle;
+  provider: PaymentProvider.PAYSTACK | PaymentProvider.FLUTTERWAVE;
+  promoCode?: string;
+  autoRenew?: boolean;
+};
+
+export type InitializePaymentResponse = {
+  reference: string;
+  authorization_url: string;
 };

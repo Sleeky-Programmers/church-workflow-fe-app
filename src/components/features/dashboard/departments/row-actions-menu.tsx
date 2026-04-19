@@ -1,12 +1,16 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
 import { MoreVertical } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
 import { DepartmentRow } from "@/types";
-import { Text } from "@/components/ui/typography/Text";
 
-interface RowActionsMenuProps {
+interface Props {
   row: DepartmentRow;
   onEdit: (row: DepartmentRow) => void;
   onExport: (row: DepartmentRow) => void;
@@ -18,79 +22,38 @@ export default function RowActionsMenu({
   onEdit,
   onExport,
   onDeleteRequest,
-}: RowActionsMenuProps) {
-  const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!open) return;
-
-    function handleClick(e: MouseEvent) {
-      if (ref.current && !ref.current.contains(e.target as Node)) {
-        setOpen(false);
-      }
-    }
-
-    document.addEventListener("mousedown", handleClick);
-    return () => document.removeEventListener("mousedown", handleClick);
-  }, [open]);
-
+}: Props) {
   return (
-    <div className="relative flex justify-end w-full min-w-0" ref={ref}>
-      <Button
-        variant="ghost"
-        size="icon"
-        className="shrink-0"
-        onClick={(e) => {
-          e.stopPropagation();
-          setOpen((prev) => !prev);
-        }}
-      >
-        <MoreVertical className="h-4 w-4 text-gray-500" />
-      </Button>
-
-      {open && (
-        <div
-          className="absolute right-0 top-full mt-2 z-50 w-40 whitespace-nowrap rounded-xl border border-gray-100 bg-gray-50 py-1 shadow-lg"
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="relative z-10"
           onClick={(e) => e.stopPropagation()}
         >
-          <Button
-            variant="ghost"
-            className="justify-start gap-2 px-3 w-full"
-            onClick={(e) => {
-              e.stopPropagation();
-              onEdit(row);
-              setOpen(false);
-            }}
-          >
-            <Text variant="default">Edit</Text>
-          </Button>
+          <MoreVertical className="h-4 w-4 text-gray-500" />
+        </Button>
+      </DropdownMenuTrigger>
 
-          <Button
-            variant="ghost"
-            className="justify-start gap-2 px-3 w-full"
-            onClick={(e) => {
-              e.stopPropagation();
-              onExport(row);
-              setOpen(false);
-            }}
-          >
-            <Text variant="default">Export</Text>
-          </Button>
+      <DropdownMenuContent
+        align="end"
+        className="w-40"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <DropdownMenuItem onClick={() => onEdit(row)}>Edit</DropdownMenuItem>
 
-          <Button
-            variant="ghost"
-            className="justify-start gap-2 px-3 w-full"
-            onClick={(e) => {
-              e.stopPropagation();
-              onDeleteRequest(row);
-              setOpen(false);
-            }}
-          >
-            <Text variant="error">Delete</Text>
-          </Button>
-        </div>
-      )}
-    </div>
+        <DropdownMenuItem onClick={() => onExport(row)}>
+          Export
+        </DropdownMenuItem>
+
+        <DropdownMenuItem
+          onClick={() => onDeleteRequest(row)}
+          className="text-red-600"
+        >
+          Delete
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }

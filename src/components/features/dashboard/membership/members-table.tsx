@@ -14,7 +14,7 @@ import { Text, Span } from "@/components/ui/typography/Text";
 import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { formatDate } from "@/utils/helpers";
-
+import { useRouter } from "next/navigation";
 type MembersTableProps = {
   members: MemberProfile[];
   onRowClick: (memberId: string) => void;
@@ -50,7 +50,7 @@ export function MembersTable({
   const isMobile = useIsMobile();
   const currentPage = pagination?.page || 1;
   const totalPages = pagination?.totalPages || 1;
-
+  const router = useRouter();
   const allSelected =
     members.length > 0 && selectedMemberIds.length === members.length;
   const someSelected = selectedMemberIds.length > 0 && !allSelected;
