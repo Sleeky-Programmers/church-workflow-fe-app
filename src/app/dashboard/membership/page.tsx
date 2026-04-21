@@ -21,6 +21,7 @@ import { MaritalStatus, Gender, MembershipStatus } from "@/lib/enums";
 import { mapFiltersToBackend } from "@/mappers/filter.mapper";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useRouter } from "next/navigation";
+import { Loader } from "@/components/ui/loader";
 
 export default function MembershipPage() {
   const { toast } = useToast();
@@ -49,6 +50,7 @@ export default function MembershipPage() {
 
   const [page, setPage] = useState(1);
   const [pagination, setPagination] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const debouncedSearch = useDebounce(searchQuery, 500);
   const backendFilter = mapFiltersToBackend(filters);
@@ -56,11 +58,14 @@ export default function MembershipPage() {
   const loadMembers = useCallback(
     async (pageOverride: number, search: string, filter: string) => {
       try {
+        setIsLoading(true);
         const response = await fetchMembers(pageOverride, 10, search, filter);
         setMembers(response.data);
         setPagination(response.pagination);
       } catch (error) {
         toast({ title: "Failed to load members" });
+      } finally {
+        setIsLoading(false);
       }
     },
     [toast],
@@ -107,7 +112,6 @@ export default function MembershipPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
       <div className="bg-white">
         <div className="px-4 sm:px-6 py-4 flex items-center justify-between gap-2">
           <div className="flex items-center gap-2 h-8">
@@ -122,7 +126,6 @@ export default function MembershipPage() {
           </div>
 
           <div className="hidden sm:flex items-center gap-3">
-            {/* Search */}
             <div className="relative w-72 md:w-96">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
               <Input
@@ -133,7 +136,6 @@ export default function MembershipPage() {
               />
             </div>
 
-            {/* Filters */}
             <FilterDropdown
               filters={filters}
               setFilters={setFilters}
@@ -141,7 +143,6 @@ export default function MembershipPage() {
               setSearchQuery={setSearchQuery}
             />
 
-            {/* Actions */}
             {selectedMemberIds.length > 0 ? (
               <Button
                 variant="destructive"
@@ -168,8 +169,12 @@ export default function MembershipPage() {
         </div>
       </div>
 
-      {/* Table */}
       <div className="py-4 sm:py-6 px-3 sm:px-4">
+        {isLoading && (
+          <div className="absolute inset-0 flex items-center justify-center bg-white/60 z-10">
+            <Loader className="h-6 w-6" />
+          </div>
+        )}
         <MembersTable
           members={members}
           pagination={pagination}

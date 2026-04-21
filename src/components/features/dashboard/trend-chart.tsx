@@ -45,20 +45,15 @@ export function TrendChart({ attendanceData, incomeData }: TrendChartProps) {
             Attendance Trend
           </Button>
 
-          <Button
-            onClick={() => setTrend("income")}
-            variant="link"
-            className={cn(
-              "px-0 font-medium",
-              !isAttendance ? "text-primary-600" : "text-muted-foreground",
-            )}
-          >
-            Income Growth
-          </Button>
-
           <Span text="|" className="text-muted-foreground hidden sm:inline" />
-          <Text text="This month" className="text-muted-foreground" />
-          <Text text="Last month" className="text-muted-foreground" />
+          <div className="flex items-center gap-1.5">
+            <span className="w-2.5 h-2.5 rounded-full bg-blue-600 inline-block" />
+            <Text text="Regular Services" className="text-sm text-gray-600" />
+          </div>
+          <div className="flex items-center gap-1.5">
+            <span className="w-2.5 h-2.5 rounded-full bg-blue-300 inline-block" />
+            <Text text="Special Services" className="text-sm text-gray-600" />
+          </div>
         </div>
 
         <div className="mt-4">

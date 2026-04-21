@@ -123,7 +123,6 @@ export default function Dashboard() {
       });
   }, []);
 
-  // ✅ FIXED BIRTHDAY LOADER
   useEffect(() => {
     let isMounted = true;
 
@@ -131,7 +130,7 @@ export default function Dashboard() {
       try {
         const members: any[] = [];
         let currentPage = 1;
-        const MAX_PAGES = 3; // 🚨 safeguard
+        const MAX_PAGES = 3;
 
         while (currentPage <= MAX_PAGES) {
           const response = await fetchMemberProfiles(currentPage, 100);
@@ -237,47 +236,40 @@ export default function Dashboard() {
         </Card>
       )}
 
+      {/* Main Grid: Left (2/3) + Right sidebar (1/3) */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 mb-6">
-        <div className="lg:col-span-2 space-y-6">
-          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
+        {/* Left Column */}
+        <div className="lg:col-span-2 space-y-3">
+          {/* Stat Cards Row — only Total Members & Attendance, matching the UI screenshot */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <StatCard
-              compact
               title="Total Members"
               count={totalMembers}
               growth={totalMembersGrowth}
             />
-
             <StatCard
-              compact
-              title="Service Attendance"
+              title="Attendance"
               count={serviceAttendance}
               growth={serviceAttendanceGrowth}
               growthText="Last Event"
             />
-
-            <StatCard
-              compact
-              title="Total Income"
-              statFilter="This Month"
-              count="0"
-              growth="0%"
-            />
           </div>
 
-          <div>
-            <TrendChart
-              attendanceData={attendanceTrendData}
-              incomeData={incomeTrendData}
-            />
-          </div>
+          <TrendChart
+            attendanceData={attendanceTrendData}
+            incomeData={incomeTrendData}
+          />
         </div>
 
         <div className="lg:col-span-1">
-          <Card className="rounded-3xl">
+          <Card className="rounded-3xl h-full">
             <CardContent className="w-full">
               <div className="flex items-center justify-between py-3">
-                <Heading level={3} text="Upcoming Events" variant="primary" />
-
+                <Heading
+                  level={3}
+                  text="Upcoming Events Preview"
+                  variant="primary"
+                />
                 <CalendarDays className="w-5 h-5 text-primary-600" />
               </div>
 
@@ -303,7 +295,7 @@ export default function Dashboard() {
                         <div className="flex items-center gap-3 min-w-0">
                           <Span
                             className={cn(
-                              "w-3 h-3 rounded-full block",
+                              "w-3 h-3 rounded-full block shrink-0",
                               categoryConfig.dotClass,
                             )}
                           />
@@ -315,8 +307,11 @@ export default function Dashboard() {
                             />
                           </div>
                         </div>
-
-                        <Span text={displayDate} variant="default" />
+                        <Span
+                          text={displayDate}
+                          variant="default"
+                          className="shrink-0 text-sm text-gray-500"
+                        />
                       </div>
                     );
                   })}
@@ -338,8 +333,8 @@ export default function Dashboard() {
                       className="flex items-center justify-between gap-3"
                     >
                       <div className="flex items-center gap-2 min-w-0">
-                        <Avatar>
-                          <AvatarFallback>
+                        <Avatar className="w-8 h-8">
+                          <AvatarFallback className="bg-blue-50">
                             <User className="w-4 h-4 text-primary" />
                           </AvatarFallback>
                         </Avatar>
@@ -348,13 +343,14 @@ export default function Dashboard() {
                       <Span
                         text={formatUpcomingBirthday(b.date)}
                         variant="default"
+                        className="shrink-0 text-sm text-gray-500"
                       />
                     </div>
                   ))
                 )}
               </div>
 
-              <Button asChild className="w-full mt-4">
+              <Button asChild className="w-full mt-4 rounded-xl">
                 <Link href="/dashboard/membership">View more</Link>
               </Button>
             </CardContent>
@@ -362,11 +358,105 @@ export default function Dashboard() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
-        <IncomeVsExpenses />
+      <Card className="rounded-3xl">
+        <CardContent className="py-12 flex flex-col items-center justify-center text-center gap-4">
+          <div className="w-40 h-40 flex items-center justify-center">
+            <svg
+              viewBox="0 0 160 160"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              className="w-full h-full"
+            >
+              {/* Orbit ring */}
+              <ellipse
+                cx="80"
+                cy="100"
+                rx="50"
+                ry="14"
+                stroke="#E0E7FF"
+                strokeWidth="2"
+                fill="none"
+              />
+              {/* Rocket body */}
+              <rect
+                x="68"
+                y="30"
+                width="24"
+                height="60"
+                rx="12"
+                fill="#1D4ED8"
+              />
+              {/* Rocket nose */}
+              <polygon points="80,10 68,42 92,42" fill="#2563EB" />
+              {/* Rocket window */}
+              <circle cx="80" cy="55" r="7" fill="white" opacity="0.9" />
+              {/* Left fin */}
+              <polygon points="68,75 55,95 68,90" fill="#3B82F6" />
+              {/* Right fin */}
+              <polygon points="92,75 105,95 92,90" fill="#3B82F6" />
+              {/* Flame */}
+              <ellipse
+                cx="80"
+                cy="97"
+                rx="8"
+                ry="12"
+                fill="#FCD34D"
+                opacity="0.9"
+              />
+              <ellipse
+                cx="80"
+                cy="100"
+                rx="5"
+                ry="8"
+                fill="#F97316"
+                opacity="0.8"
+              />
+              {/* Person */}
+              <circle cx="115" cy="88" r="8" fill="#FBBF24" />
+              <rect
+                x="109"
+                y="96"
+                width="12"
+                height="16"
+                rx="4"
+                fill="#2563EB"
+              />
+              <line
+                x1="109"
+                y1="100"
+                x2="100"
+                y2="108"
+                stroke="#2563EB"
+                strokeWidth="3"
+                strokeLinecap="round"
+              />
+              <line
+                x1="121"
+                y1="100"
+                x2="128"
+                y2="106"
+                stroke="#2563EB"
+                strokeWidth="3"
+                strokeLinecap="round"
+              />
+              {/* Dots / stars */}
+              <circle cx="30" cy="40" r="3" fill="#BFDBFE" />
+              <circle cx="140" cy="60" r="3" fill="#FDE68A" />
+              <circle cx="20" cy="90" r="2" fill="#C7D2FE" />
+              <circle cx="148" cy="110" r="2" fill="#C7D2FE" />
+            </svg>
+          </div>
 
-        <IncomeBreakdown />
-      </div>
+          <div className="space-y-2">
+            <Heading level={2} text="More Features Coming Soon!" />
+            <Text
+              variant="muted"
+              text="We're working hard to bring you attendance analytics, financial reports, communications, requests and more."
+              className="max-w-md mx-auto"
+            />
+          </div>
+        </CardContent>
+      </Card>
     </>
   );
 }

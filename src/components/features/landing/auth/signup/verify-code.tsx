@@ -95,7 +95,7 @@ export default function VerifyOtpForm({ email, onVerify, onResend }: Props) {
 
       <div
         className={cn(
-          "w-full overflow-x-auto pb-1 flex justify-center",
+          "w-full overflow-x-auto overflow-y-visible py-3 flex justify-center",
           error && "animate-shake",
         )}
       >

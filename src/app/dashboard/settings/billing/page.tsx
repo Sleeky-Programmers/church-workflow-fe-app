@@ -120,7 +120,10 @@ export default function BillingPage() {
               )}
             >
               {plan.popular && (
-                <Badge className="absolute -top-3 left-1/2 -translate-x-1/2">
+                <Badge
+                  shape="pill"
+                  className="absolute -top-3 left-1/2 -translate-x-1/2"
+                >
                   MOST POPULAR
                 </Badge>
               )}

@@ -19,16 +19,18 @@ export function SignupPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { isAdmin, inviteData, isLoading, error } = useAdminInvite();
+
   const [currentStep, setCurrentStep] = useState<SignUpStep>(SignUpStep.SIGNUP);
   const [email, setEmail] = useState("");
   const [signupData, setSignupData] = useState<any>(null);
-  const preFilledSignupEmail = searchParams?.get("email") || "";
 
+  const preFilledSignupEmail = searchParams?.get("email") || "";
   const { toast } = useToast();
 
   useEffect(() => {
-    if (typeof window === "undefined") return;
-
+    if (typeof window === "undefined") {
+      return;
+    }
     const pendingEmail = sessionStorage.getItem("pendingVerificationEmail");
     const paramEmail = searchParams?.get("email") || "";
     const shouldVerify =
@@ -38,7 +40,9 @@ export function SignupPageContent() {
     let storedSignup: any = null;
     try {
       const stored = sessionStorage.getItem("signupData");
-      if (stored) storedSignup = JSON.parse(stored);
+      if (stored) {
+        storedSignup = JSON.parse(stored);
+      }
     } catch {
       storedSignup = null;
     }
@@ -93,23 +97,27 @@ export function SignupPageContent() {
 
   const handleSignupSuccess = (submittedEmail: string, data?: any) => {
     setEmail(submittedEmail);
+
     if (data) {
       setSignupData(data);
-      if (typeof window !== "undefined") {
-        sessionStorage.setItem("signupData", JSON.stringify(data));
-      }
+      sessionStorage.setItem("signupData", JSON.stringify(data));
     }
 
+    // IMPORTANT: DO NOT bypass onboarding for super admin
     if (isAdmin) {
       router.push(RouteConfig.dashboard.home);
-    } else {
-      setCurrentStep(SignUpStep.VERIFY_OTP);
+      return;
     }
+
+    setCurrentStep(SignUpStep.VERIFY_OTP);
   };
 
   const handleOtpVerified = async (otp: string) => {
     try {
-      const response = await verifyOtp({ email, otp: Number(otp) });
+      const response = await verifyOtp({
+        email,
+        otp: Number(otp),
+      });
 
       if (response.accessToken) {
         initializeAuthSession({
@@ -123,10 +131,9 @@ export function SignupPageContent() {
         });
       }
 
-      if (signupData && typeof window !== "undefined") {
-        sessionStorage.setItem("signupData", JSON.stringify(signupData));
-      }
+      sessionStorage.setItem("signupData", JSON.stringify(signupData));
 
+      // SUPER ADMIN ALWAYS GOES TO ONBOARDING
       router.push(RouteConfig.onboarding);
       return true;
     } catch (error: any) {
@@ -163,6 +170,7 @@ export function SignupPageContent() {
             preFilledEmail={preFilledSignupEmail}
           />
         )}
+
         {currentStep === SignUpStep.SIGNUP && isAdmin && inviteData && (
           <AdminSignupForm
             onSubmit={handleSignupSuccess}
@@ -174,6 +182,7 @@ export function SignupPageContent() {
             invitedRole={inviteData.role}
           />
         )}
+
         {currentStep === SignUpStep.VERIFY_OTP && (
           <VerifyOtpForm
             email={email}
