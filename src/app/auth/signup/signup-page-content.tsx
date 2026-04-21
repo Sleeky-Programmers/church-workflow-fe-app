@@ -103,7 +103,6 @@ export function SignupPageContent() {
       sessionStorage.setItem("signupData", JSON.stringify(data));
     }
 
-    // IMPORTANT: DO NOT bypass onboarding for super admin
     if (isAdmin) {
       router.push(RouteConfig.dashboard.home);
       return;
@@ -133,7 +132,6 @@ export function SignupPageContent() {
 
       sessionStorage.setItem("signupData", JSON.stringify(signupData));
 
-      // SUPER ADMIN ALWAYS GOES TO ONBOARDING
       router.push(RouteConfig.onboarding);
       return true;
     } catch (error: any) {

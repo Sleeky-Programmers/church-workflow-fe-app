@@ -38,7 +38,7 @@ const FilterDropdown = ({
     `flex-1 text-xs px-2.5 py-1.5 rounded-md border transition
      ${
        active
-         ? "bg-blue-50 border-blue-600 text-blue-700"
+         ? "bg-blue-50 border-blue-600 text-gray-700"
          : "bg-white border-gray-300 text-gray-700 hover:bg-gray-100"
      }`;
 

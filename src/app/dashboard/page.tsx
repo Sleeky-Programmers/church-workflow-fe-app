@@ -19,8 +19,7 @@ import {
 } from "@/lib/utils";
 import Link from "next/link";
 import { TrendChart } from "@/components/features/dashboard/trend-chart";
-import { IncomeVsExpenses } from "@/components/features/dashboard/income-expense";
-import { IncomeBreakdown } from "@/components/features/dashboard/income-breakdown";
+
 import {
   fetchAttendanceStats,
   fetchTotalMembers,
@@ -236,11 +235,8 @@ export default function Dashboard() {
         </Card>
       )}
 
-      {/* Main Grid: Left (2/3) + Right sidebar (1/3) */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 mb-6">
-        {/* Left Column */}
         <div className="lg:col-span-2 space-y-3">
-          {/* Stat Cards Row — only Total Members & Attendance, matching the UI screenshot */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <StatCard
               title="Total Members"
@@ -367,7 +363,6 @@ export default function Dashboard() {
               xmlns="http://www.w3.org/2000/svg"
               className="w-full h-full"
             >
-              {/* Orbit ring */}
               <ellipse
                 cx="80"
                 cy="100"
@@ -377,7 +372,7 @@ export default function Dashboard() {
                 strokeWidth="2"
                 fill="none"
               />
-              {/* Rocket body */}
+
               <rect
                 x="68"
                 y="30"
@@ -386,15 +381,15 @@ export default function Dashboard() {
                 rx="12"
                 fill="#1D4ED8"
               />
-              {/* Rocket nose */}
+
               <polygon points="80,10 68,42 92,42" fill="#2563EB" />
-              {/* Rocket window */}
+
               <circle cx="80" cy="55" r="7" fill="white" opacity="0.9" />
-              {/* Left fin */}
+
               <polygon points="68,75 55,95 68,90" fill="#3B82F6" />
-              {/* Right fin */}
+
               <polygon points="92,75 105,95 92,90" fill="#3B82F6" />
-              {/* Flame */}
+
               <ellipse
                 cx="80"
                 cy="97"
@@ -411,7 +406,7 @@ export default function Dashboard() {
                 fill="#F97316"
                 opacity="0.8"
               />
-              {/* Person */}
+
               <circle cx="115" cy="88" r="8" fill="#FBBF24" />
               <rect
                 x="109"
@@ -439,7 +434,7 @@ export default function Dashboard() {
                 strokeWidth="3"
                 strokeLinecap="round"
               />
-              {/* Dots / stars */}
+
               <circle cx="30" cy="40" r="3" fill="#BFDBFE" />
               <circle cx="140" cy="60" r="3" fill="#FDE68A" />
               <circle cx="20" cy="90" r="2" fill="#C7D2FE" />
