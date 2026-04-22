@@ -16,7 +16,7 @@ import {
   CreateWeeklyServicePayload,
   GoogleAuthResponse,
 } from "@/types/payload";
-import { MOCK_ADMIN, MOCK_MEMBERS_FULL, MOCK_SERVICES } from "../data";
+import { MOCK_ADMIN } from "../data";
 import {
   ActivityLogApiResponse,
   Member,

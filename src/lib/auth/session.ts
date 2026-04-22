@@ -46,6 +46,8 @@ export type OnboardingState = {
   updatedAt: string;
 };
 
+export type AuthType = "SUPER_ADMIN" | "INVITED_ADMIN";
+
 const DEFAULT_ONBOARDING_STATE: OnboardingState = {
   churchIdentityCompleted: false,
   weeklyServicesCompleted: false,
@@ -134,6 +136,7 @@ export function initializeAuthSession(args: {
   refreshToken?: string;
   emailHint?: string;
   user?: SessionUser;
+  authType?: AuthType;
 }): UserProfile {
   if (!isClient()) {
     return { userKey: "unknown-user" };
@@ -171,6 +174,7 @@ export function initializeAuthSession(args: {
     window.localStorage.setItem(REFRESH_TOKEN_KEY, args.refreshToken);
   }
   window.localStorage.setItem(CURRENT_USER_KEY, resolvedUserKey);
+  window.localStorage.setItem("auth:type", args.authType || "SUPER_ADMIN");
   window.localStorage.setItem(
     profileStorageKey(resolvedUserKey),
     JSON.stringify(profile),

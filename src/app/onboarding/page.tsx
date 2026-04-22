@@ -1,4 +1,5 @@
 "use client";
+
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { OnboardingLayout } from "@/components/features/landing/layout/onboarding-layout";
@@ -22,20 +23,37 @@ export default function OnboardingPage() {
 
       try {
         const church = await getMyChurch();
+
         if (church) {
           router.replace(RouteConfig.dashboard.home);
           return;
         }
+
         setReady(true);
-      } catch {
-        router.replace(RouteConfig.auth.signIn);
+      } catch (error: any) {
+        const status = error?.response?.status;
+
+        if (status === 401) {
+          router.replace(RouteConfig.auth.signIn);
+          return;
+        }
+
+        setReady(true);
       }
     };
 
     checkOnboardingAccess();
   }, [router]);
 
-  if (!ready) return null;
+  if (!ready) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <OnboardingLayout>
+          <div className="text-center">Loading onboarding...</div>
+        </OnboardingLayout>
+      </div>
+    );
+  }
 
   return (
     <OnboardingLayout>

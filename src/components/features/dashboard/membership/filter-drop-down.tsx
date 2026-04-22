@@ -13,10 +13,11 @@ import {
   Gender,
   FilterSection,
 } from "@/lib/enums";
+
 import { Span, Text } from "@/components/ui/typography/Text";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search } from "lucide-react";
+import { Search, ChevronDown, ChevronUp } from "lucide-react";
 import { formatLabel } from "@/utils/helpers";
 import { FilterProps } from "@/lib/interface";
 
@@ -29,17 +30,16 @@ const FilterDropdown = ({
   const [openSection, setOpenSection] = useState("gender");
   const [open, setOpen] = useState(false);
 
-  const toggleSection = (section: string) => {
+  const toggleSection = (section: FilterSection) => {
     setOpenSection((prev) => (prev === section ? "" : section));
   };
 
   const pillClass = (active: boolean) =>
-    `px-2 py-1.5 rounded-md text-xs border transition
-     bg-transparent hover:bg-transparent active:bg-transparent
+    `flex-1 text-xs px-2.5 py-1.5 rounded-md border transition
      ${
        active
-         ? "border-blue-600 text-blue-600"
-         : "border-gray-300 text-gray-700"
+         ? "bg-blue-50 border-blue-600 text-gray-700"
+         : "bg-white border-gray-300 text-gray-700 hover:bg-gray-100"
      }`;
 
   return (
@@ -49,8 +49,7 @@ const FilterDropdown = ({
           variant="filter"
           className="border px-4 py-2 rounded-lg bg-white flex items-center gap-2"
         >
-          Filter
-          <Span>▾</Span>
+          Filter <Span>▾</Span>
         </Button>
       </DropdownMenuTrigger>
 
@@ -58,7 +57,7 @@ const FilterDropdown = ({
         align="end"
         className="w-64 bg-gray-50 rounded-2xl shadow-xl border p-3"
       >
-        <div className="flex justify-between mb-4">
+        <div className="flex justify-between items-center mb-2.5">
           <Text>Member Filter</Text>
           <Button
             variant="ghost"
@@ -69,30 +68,35 @@ const FilterDropdown = ({
           </Button>
         </div>
 
-        <div className="relative w-full mb-3">
-          <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400 pointer-events-none" />
+        <div className="relative mb-3">
+          <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400" />
           <Input
             placeholder="Search by name..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-8 h-8 text-xs"
+            className="pl-8 h-8 text-xs"
           />
         </div>
 
-        <div className="py-2">
+        <div className="mb-2 border-t">
           <Button
             variant="filterHeader"
-            onClick={() => toggleSection("gender")}
-            className="w-full flex justify-between"
+            onClick={() => toggleSection(FilterSection.GENDER)}
+            className="w-full flex justify-between items-center"
           >
             Gender
-            <Span>{openSection === "gender" ? "▴" : "▾"}</Span>
+            {openSection === FilterSection.GENDER ? (
+              <ChevronUp className="h-5 w-5 text-gray-500" />
+            ) : (
+              <ChevronDown className="h-5 w-5 text-gray-500" />
+            )}
           </Button>
 
           {openSection === FilterSection.GENDER && (
-            <div className="flex gap-2 mt-3">
+            <div className="flex gap-1.5 mt-2">
               {Object.values(Gender).map((gender) => (
                 <Button
+                  variant="filter"
                   key={gender}
                   onClick={() =>
                     setFilters({
@@ -109,21 +113,26 @@ const FilterDropdown = ({
           )}
         </div>
 
-        <div className="py-3 border-t">
+        <div className="py-2 border-t">
           <Button
             variant="filterHeader"
-            onClick={() => toggleSection("marital")}
-            className="w-full flex justify-between"
+            onClick={() => toggleSection(FilterSection.MARITAL)}
+            className="w-full flex justify-between items-center"
           >
             Marital Status
-            <Span>{openSection === "marital" ? "▴" : "▾"}</Span>
+            {openSection === FilterSection.MARITAL ? (
+              <ChevronUp className="h-5 w-5 text-gray-500" />
+            ) : (
+              <ChevronDown className="h-5 w-5 text-gray-500" />
+            )}
           </Button>
 
           {openSection === FilterSection.MARITAL && (
-            <div className="grid grid-cols-2 gap-2 mt-3">
+            <div className="grid grid-cols-2 gap-1.5 mt-2">
               {Object.values(MaritalStatus).map((status) => (
                 <Button
                   key={status}
+                  variant="filter"
                   onClick={() =>
                     setFilters({
                       ...filters,
@@ -140,20 +149,25 @@ const FilterDropdown = ({
           )}
         </div>
 
-        <div className="py-3 border-t">
+        <div className="py-2 border-t">
           <Button
             variant="filterHeader"
-            onClick={() => toggleSection("membership")}
-            className="w-full flex justify-between"
+            onClick={() => toggleSection(FilterSection.MEMBERSHIP)}
+            className="w-full flex justify-between items-center"
           >
             Membership Status
-            <Span>{openSection === "membership" ? "▴" : "▾"}</Span>
+            {openSection === FilterSection.MEMBERSHIP ? (
+              <ChevronUp className="h-5 w-5 text-gray-500" />
+            ) : (
+              <ChevronDown className="h-5 w-5 text-gray-500" />
+            )}
           </Button>
 
           {openSection === FilterSection.MEMBERSHIP && (
-            <div className="grid grid-cols-2 gap-2 mt-3">
+            <div className="grid grid-cols-2 gap-1.5 mt-2">
               {Object.values(MembershipStatus).map((status) => (
                 <Button
+                  variant="filter"
                   key={status}
                   onClick={() =>
                     setFilters({
@@ -171,7 +185,7 @@ const FilterDropdown = ({
           )}
         </div>
 
-        <Button className="w-full mt-4 py-2 text-sm">Save</Button>
+        <Button className="w-full mt-3 h-9 text-sm font-medium">Save</Button>
       </DropdownMenuContent>
     </DropdownMenu>
   );
