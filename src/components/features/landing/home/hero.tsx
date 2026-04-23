@@ -1,16 +1,25 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import dynamic from "next/dynamic";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Text } from "@/components/ui/typography/Text";
 import Heading from "@/components/ui/typography/Heading";
 import { FloatingBadge } from "@/components/ui/landing-page/FloatingBadge";
-import {
-  IconShieldCheckFill,
-  IconFolderCheckFill,
-  IconSettingsFill,
-} from "obra-icons-react";
+
+const IconFolderCheckFill = dynamic(
+  () => import("obra-icons-react").then((mod) => mod.IconFolderCheckFill),
+  { ssr: false },
+);
+const IconSettingsFill = dynamic(
+  () => import("obra-icons-react").then((mod) => mod.IconSettingsFill),
+  { ssr: false },
+);
+const IconShieldCheckFill = dynamic(
+  () => import("obra-icons-react").then((mod) => mod.IconShieldCheckFill),
+  { ssr: false },
+);
 
 export default function HeroSection() {
   const [mounted, setMounted] = useState(false);
@@ -28,8 +37,8 @@ export default function HeroSection() {
           }`}
         >
           <Heading
-            level={1}
-            className="text-4xl md:text-5xl font-extrabold leading-tight text-gray-900"
+            level={2}
+            className="text-4xl md:text-5xl font-black text-black leading-tight text-gray-900"
           >
             <span className="relative inline-block text-blue-600">
               Simplify
@@ -54,7 +63,10 @@ export default function HeroSection() {
               aria-hidden="true"
               className="absolute -top-3 -right-6 select-none pointer-events-none"
             />
-            <Text variant="muted" className="text-base leading-relaxed">
+            <Text
+              variant="muted"
+              className="text-base font-medium leading-relaxed"
+            >
               All-in-one software that helps churches manage
               <br />
               tasks, records, and workflows with ease.

@@ -1,5 +1,7 @@
-import { useEffect, useState } from 'react';
-import { ReactNode } from 'react';
+"use client";
+
+import { useEffect, useState } from "react";
+import { ReactNode } from "react";
 
 type StickyHeaderProps = {
   children: ReactNode;
@@ -11,15 +13,18 @@ export function StickyHeader({ children, className }: StickyHeaderProps) {
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
-    window.addEventListener('scroll', onScroll);
-    return () => window.removeEventListener('scroll', onScroll);
+    window.addEventListener("scroll", onScroll);
+    return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
   return (
     <header
-      className={`inset-x-0 top-0 z-50 transition-all duration-300 ${
-        scrolled ? 'bg-white/80 shadow-sm backdrop-blur' : 'bg-gray-50'
+      className={`fixed inset-x-0 top-0 z-50 transition-all duration-300 ${
+        scrolled ? "shadow-sm backdrop-blur-md" : "bg-transparent"
       } ${className || ""}`}
+      style={
+        scrolled ? { backgroundColor: "rgba(243, 247, 251, 0.85)" } : undefined
+      }
     >
       {children}
     </header>

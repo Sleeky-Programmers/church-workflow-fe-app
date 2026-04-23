@@ -1,0 +1,75 @@
+"use client";
+
+import { Text } from "@/components/ui/typography/Text";
+import Heading from "@/components/ui/typography/Heading";
+import { ChallengeCard } from "@/components/ui/landing-page/ChallengeCard";
+
+const challenges = [
+  {
+    image: "/landing-page/69c8bde9f582d633a2546f4c077c73a84c064ba8.png",
+    title: "Scattered Records",
+    description:
+      "Information spread across books, spreadsheets, and different tools.",
+  },
+  {
+    image: "/landing-page/5f8c0a008191a45888ee7f67f299732d717392ea.png",
+    title: "Sensitive Data Risks",
+    description:
+      "Approvals and records handled without proper structure or security.",
+  },
+  {
+    image: "/landing-page/e122a66e1f91674101d2804aca9eaa258387f350.png",
+    title: "Delays & Confusion",
+    description:
+      "Tasks, requests, and notifications often get missed or delayed.",
+  },
+];
+
+export default function ChallengesSection() {
+  return (
+    <section className="relative bg-white py-24 px-6 overflow-hidden">
+      {/* Decorative Stars */}
+      <img
+        src="/assets/icons/star.svg"
+        alt=""
+        className="absolute top-12 right-[10%] w-8 h-8 opacity-80"
+      />
+      <img
+        src="/assets/icons/star.svg"
+        alt=""
+        className="absolute bottom-16 left-[8%] w-7 h-7 opacity-80"
+      />
+
+      {/* Header Section */}
+      <div className="max-w-4xl mx-auto text-center mb-20">
+        <Heading
+          level={2}
+          className="text-4xl md:text-5xl font-black text-black inline-flex flex-wrap justify-center gap-x-4 items-center"
+        >
+          <span className="relative inline-block text-[#0066cc]">
+            The Challenges
+            {/* The orange wave underline */}
+            <img
+              src="/assets/icons/wave.svg"
+              alt=""
+              className="absolute -bottom-2 left-0 w-full h-auto"
+            />
+          </span>
+          <span className="text-black">Churches Face</span>
+        </Heading>
+
+        <Text className="mt-6 text-gray-500 text-base font-medium max-w-xl mx-auto leading-tight">
+          These challenges slow down church operations and increase the workload
+          <br className="hidden md:block" /> on leaders and administrators.
+        </Text>
+      </div>
+
+      {/* Grid Layout */}
+      <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-10">
+        {challenges.map((challenge) => (
+          <ChallengeCard key={challenge.title} {...challenge} />
+        ))}
+      </div>
+    </section>
+  );
+}
