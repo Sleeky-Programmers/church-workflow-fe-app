@@ -9,7 +9,7 @@ const steps = [
     step: "STEP ONE",
     title: (
       <>
-        Set Up <span className="text-blue-600">Your Church</span>
+        Set Up <span className="text-[#0C5FB3]">Your Church</span>
       </>
     ),
     description:
@@ -21,9 +21,9 @@ const steps = [
     step: "STEP TWO",
     title: (
       <>
-        Add <span className="text-blue-600">Members &</span>
+        Add <span className="text-[#0C5FB3]">Members &</span>
         <br />
-        <span className="text-blue-600">Departments</span>
+        <span className="text-[#0C5FB3]">Departments</span>
       </>
     ),
     description:
@@ -35,7 +35,7 @@ const steps = [
     step: "STEP THREE",
     title: (
       <>
-        Manage <span className="text-blue-600">&amp; Grow</span>
+        Manage <span className="text-[#0C5FB3]">&amp; Grow</span>
       </>
     ),
     description:
@@ -62,13 +62,13 @@ export default function HowItWorksSection() {
           level={2}
           className="text-3xl md:text-4xl font-extrabold text-gray-900"
         >
-          <span className="relative inline-block text-blue-600">
+          <span className="relative inline-block text-[#0C5FB3]">
             How Church Workflow Works
             <img
               src="/assets/icons/wave.svg"
               alt=""
               aria-hidden="true"
-              className="absolute -bottom-1 left-0 w-full h-auto"
+              className="absolute -bottom-5 left-0 w-full h-auto"
             />
           </span>
         </Heading>
@@ -85,14 +85,14 @@ export default function HowItWorksSection() {
             <div className="flex-1 flex flex-col gap-4">
               <Text
                 variant="muted"
-                className="text-xs font-semibold tracking-widest uppercase"
+                className="text-xs font-bold tracking-widest uppercase text-[#FF5F00]"
               >
                 {step.step}
               </Text>
 
               <Heading
                 level={2}
-                className="text-3xl md:text-4xl font-extrabold text-gray-900 leading-tight"
+                className="text-[48px] font-black leading-tight text-gray-900"
               >
                 {step.title}
               </Heading>

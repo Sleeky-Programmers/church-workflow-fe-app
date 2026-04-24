@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
 import { Text } from "@/components/ui/typography/Text";
 import Heading from "@/components/ui/typography/Heading";
 import { Check } from "lucide-react";
@@ -146,9 +145,9 @@ export default function PricingSection() {
         <div className="max-w-3xl mx-auto text-center mb-10">
           <Heading
             level={2}
-            className="text-3xl md:text-4xl font-extrabold text-gray-900"
+            className="text-4xl md:text-5xl font-black text-gray-900"
           >
-            <span className="relative inline-block text-blue-600">
+            <span className="relative inline-block text-[#0C5FB3]">
               Flexible Plans
               <img
                 src="/assets/icons/wave.svg"
@@ -160,18 +159,18 @@ export default function PricingSection() {
             for Every Church
           </Heading>
 
-          <Text variant="muted" className="mt-4 text-sm max-w-md mx-auto">
+          <Text variant="muted" className="mt-4 max-w-md mx-auto">
             Choose a plan that fits your church size and administrative needs.
           </Text>
         </div>
 
         <div className="flex items-center justify-center gap-3 mb-12">
-          <div className="flex items-center bg-white rounded-full p-1 shadow-sm border border-gray-200">
+          <div className="flex items-center bg-gray-200 rounded-full p-1 shadow-sm border border-gray-200">
             <button
               onClick={() => setBilling("monthly")}
               className={`px-5 py-1.5 rounded-full text-sm font-medium transition-all ${
                 billing === "monthly"
-                  ? "bg-blue-600 text-white shadow"
+                  ? "bg-[#0C5FB3] text-[#ffff] shadow"
                   : "text-gray-500 hover:text-gray-700"
               }`}
             >
@@ -181,7 +180,7 @@ export default function PricingSection() {
               onClick={() => setBilling("yearly")}
               className={`px-5 py-1.5 rounded-full text-sm font-medium transition-all ${
                 billing === "yearly"
-                  ? "bg-blue-600 text-white shadow"
+                  ? "bg-[#0C5FB3] text-[#ffff] shadow"
                   : "text-gray-500 hover:text-gray-700"
               }`}
             >
@@ -197,24 +196,24 @@ export default function PricingSection() {
           {plans[billing].map((plan) => (
             <div
               key={plan.name}
-              className={`relative flex flex-col h-full rounded-2xl bg-white px-5 py-6 gap-5 ${
+              className={`relative flex flex-col h-full rounded-2xl bg-[#ffffff] px-5 py-6 gap-5 ${
                 plan.popular
-                  ? "border-2 border-blue-600 shadow-xl"
+                  ? "border-2 border-[#0C5FB3] shadow-xl"
                   : "border border-gray-200 shadow-sm"
               }`}
             >
               {plan.popular && (
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                  <span className="bg-blue-600 text-white text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full">
+                  <span className="bg-[#0C5FB3] text-[#ffff] text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full">
                     Most Popular
                   </span>
                 </div>
               )}
 
               <div className="flex flex-col gap-1">
-                <p className="text-sm font-semibold text-gray-800">
+                <Text variant="label" className="text-gray-800">
                   {plan.name}
-                </p>
+                </Text>
                 <div className="flex items-baseline gap-1">
                   <span className="text-2xl font-black text-gray-900">
                     {plan.price}
@@ -228,28 +227,27 @@ export default function PricingSection() {
                   <div key={feature} className="flex items-start gap-2">
                     <Check
                       size={14}
-                      className="text-blue-600 mt-0.5 shrink-0"
+                      className="text-green-600 mt-0.5 shrink-0"
                     />
-                    <p
+                    <Text
+                      variant={
+                        plan.boldFeatures.includes(feature) ? "label" : "muted"
+                      }
                       className={`text-xs leading-snug ${
                         plan.boldFeatures.includes(feature)
-                          ? "font-bold text-gray-900"
-                          : "text-gray-500"
+                          ? "text-gray-900"
+                          : ""
                       }`}
                     >
                       {feature}
-                    </p>
+                    </Text>
                   </div>
                 ))}
               </div>
 
-              <Button
-                variant={plan.popular ? "default" : "outline"}
-                size="sm"
-                className="w-full rounded-lg mt-auto"
-              >
+              <button className="w-full rounded-lg mt-auto py-2 px-4 text-sm font-semibold text-[#0C5FB3] bg-[#0C5FB3]/10 cursor-pointer">
                 Get Started
-              </Button>
+              </button>
             </div>
           ))}
         </div>

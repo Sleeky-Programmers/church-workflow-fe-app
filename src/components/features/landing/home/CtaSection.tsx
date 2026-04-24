@@ -59,13 +59,13 @@ export default function CtaSection() {
           >
             Ready to Simplify Your
             <br />
-            <span className="relative inline-block text-blue-600">
+            <span className="relative inline-block text-[#0C5FB3]">
               Church Operations?
               <img
                 src="/assets/icons/wave.svg"
                 alt=""
                 aria-hidden="true"
-                className="absolute -bottom-1 left-0 w-full h-auto"
+                className="absolute -bottom-4 left-0 w-full h-auto"
               />
             </span>
           </Heading>
@@ -82,7 +82,7 @@ export default function CtaSection() {
             <Button
               variant="outline"
               size="lg"
-              className="rounded-[8px] px-7 border-blue-600 text-blue-600 hover:bg-white hover:text-blue-600"
+              className="rounded-[8px] px-7 border-[#0C5FB3] text-[#0C5FB3] hover:bg-white hover:text-[#0C5FB3]"
             >
               Start Free Plan
             </Button>

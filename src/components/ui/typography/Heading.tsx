@@ -33,7 +33,7 @@ const mobileSizeClasses: Record<HeadingLevel, string> = {
 
 const variantStyles: Record<HeadingVariant, string> = {
   default: "text-inherit",
-  primary: "text-blue-600",
+  primary: "text-[#0C5FB3]",
   muted: "text-gray-500",
 };
 

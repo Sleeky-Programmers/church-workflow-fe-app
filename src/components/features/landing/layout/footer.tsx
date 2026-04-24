@@ -28,7 +28,7 @@ export default function Footer() {
         src="/landing-page/darkblue.png"
         alt=""
         aria-hidden="true"
-        className="absolute inset-0 w-full h-full object-fill object-top pointer-events-none select-none"
+        className="absolute inset-0 w-full h-full object-cover object-top pointer-events-none select-none"
       />
 
       <div className="relative z-10 max-w-6xl mx-auto px-6 pt-16 pb-8">

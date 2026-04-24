@@ -1,7 +1,6 @@
 "use client";
 
 import { Text } from "@/components/ui/typography/Text";
-import Heading from "@/components/ui/typography/Heading";
 import { ArrowRight } from "lucide-react";
 
 const benefits = [
@@ -10,36 +9,41 @@ const benefits = [
     title: "Save Time & Reduce Manual Work",
     description:
       "Church Workflow automates repetitive administrative processes such as member tracking, attendance logging, and task delegation. By centralizing operations, church leaders and administrators spend less time on paperwork and more time on ministry impact.",
+    firstItem: true,
   },
   {
     number: "02",
     title: "Improve Coordination Across Departments",
     description:
       "Keep pastors, workers, media teams, finance units, and department heads aligned within one unified system. Clear task assignments, reminders, and structured communication eliminate confusion and improve teamwork.",
+    firstItem: false,
   },
   {
     number: "03",
     title: "Enhance Record Accuracy & Transparency",
     description:
       "Maintain up-to-date member records, financial entries, attendance logs, and departmental data. Structured data improves reporting accuracy and ensures accountability across the organization.",
+    firstItem: false,
   },
   {
     number: "04",
     title: "Make Data-Driven Decisions",
     description:
       "Access real-time insights through dashboards and reports. Church leaders can evaluate performance, monitor growth trends, and make informed strategic decisions confidently.",
+    firstItem: false,
   },
   {
     number: "05",
     title: "Strengthen Data Security & Role Control",
     description:
       "Sensitive church information is protected with role-based access controls and structured permissions. Only authorized users can access specific data, reducing privacy risks.",
+    firstItem: false,
   },
 ];
 
 export default function FocusMinistrySection() {
   return (
-    <section className="relative w-full text-white">
+    <section className="relative w-full">
       <img
         src="/landing-page/darkblue.png"
         alt=""
@@ -66,7 +70,7 @@ export default function FocusMinistrySection() {
                 src="/assets/icons/wave.svg"
                 alt=""
                 aria-hidden="true"
-                className="absolute -bottom-4 left-0 w-full h-auto"
+                className="absolute -bottom-6 left-0 w-full h-auto"
               />
             </span>
             <br />
@@ -74,7 +78,7 @@ export default function FocusMinistrySection() {
           </h2>
         </div>
 
-        <div className="max-w-3xl mx-auto flex flex-col divide-y divide-white/20">
+        <div className="max-w-3xl mx-auto flex flex-col divide-y divide-[#ffff]/20">
           {benefits.map((benefit) => (
             <div
               key={benefit.number}
@@ -90,14 +94,20 @@ export default function FocusMinistrySection() {
                 </p>
                 <Text
                   variant="muted"
-                  className="text-white/70 text-sm leading-relaxed"
+                  className="text-[#ffff]/70 text-sm leading-relaxed"
                 >
                   {benefit.description}
                 </Text>
               </div>
 
-              <div className="shrink-0 w-9 h-9 rounded-full border border-white/30 flex items-center justify-center text-white group-hover:bg-white/10 transition-colors mt-0.5">
-                <ArrowRight size={16} />
+              <div
+                className={`shrink-0 w-10 h-10 rounded-full flex items-center justify-center mt-0.5 transition-all ${
+                  benefit.firstItem
+                    ? "bg-[#ffffff] text-[#0C5FB3] border border-[#ffffff]"
+                    : "bg-[#ffffff]/20 backdrop-blur-sm border border-[#0C5FB3]/30 text-[#ffff]"
+                }`}
+              >
+                <ArrowRight size={18} />
               </div>
             </div>
           ))}

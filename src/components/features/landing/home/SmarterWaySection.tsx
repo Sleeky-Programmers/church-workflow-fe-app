@@ -44,20 +44,20 @@ export default function SmarterWaySection() {
             className="text-4xl font-black text-black inline-flex flex-wrap justify-center gap-x-3"
           >
             <span>A Smarter Way to</span>
-            <span className="relative inline-block text-blue-600">
+            <span className="relative inline-block text-[#0C5FB3]">
               Manage Your Church
               <img
                 src="/assets/icons/wave.svg"
                 alt=""
                 aria-hidden="true"
-                className="absolute -bottom-1 left-0 w-full h-auto"
+                className="absolute -bottom-2 left-0 w-full h-auto"
               />
             </span>
           </Heading>
 
           <Text
             variant="muted"
-            className="mt-5 text-sm text-center max-w-lg mx-auto leading-relaxed"
+            className="mt-5 text-center max-w-lg mx-auto leading-relaxed"
           >
             Church Workflow unifies administration, automates tasks, and
             simplifies record-keeping — helping church leaders focus on ministry

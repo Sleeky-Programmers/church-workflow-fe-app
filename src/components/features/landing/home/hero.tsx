@@ -29,18 +29,18 @@ export default function HeroSection() {
   }, []);
 
   return (
-    <section className="relative min-h-screen flex items-stretch overflow-hidden">
-      <div className="relative flex items-center w-full md:w-1/2 bg-white px-8 md:px-16 py-24 md:py-0">
+    <section className="relative min-h-screen flex flex-col md:flex-row items-stretch overflow-hidden">
+      <div className="relative flex items-center justify-center w-full md:w-1/2 bg-white px-8 md:px-16 py-24 md:py-0">
         <div
-          className={`max-w-lg space-y-6 transition-all duration-700 ${
+          className={`w-full max-w-lg space-y-6 transition-all duration-700 ${
             mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
           }`}
         >
           <Heading
-            level={2}
-            className="text-4xl md:text-5xl font-black text-black leading-tight text-gray-900"
+            level={1}
+            className="text-4xl md:text-5xl font-black leading-tight text-gray-900"
           >
-            <span className="relative inline-block text-blue-600">
+            <span className="relative inline-block text-[#0C5FB3]">
               Simplify
               <img
                 src="/assets/icons/wave.svg"
@@ -63,24 +63,21 @@ export default function HeroSection() {
               aria-hidden="true"
               className="absolute -top-3 -right-6 select-none pointer-events-none"
             />
-            <Text
-              variant="muted"
-              className="text-base font-medium leading-relaxed"
-            >
+            <Text variant="muted" className="font-medium leading-relaxed">
               All-in-one software that helps churches manage
               <br />
               tasks, records, and workflows with ease.
             </Text>
           </div>
 
-          <div className="flex flex-wrap gap-3 pt-2 mb-2">
+          <div className="flex flex-wrap gap-3 pt-2">
             <Button variant="default" size="lg" className="rounded-[8px] px-7">
               Request a Demo
             </Button>
             <Button
               variant="outline"
               size="lg"
-              className="rounded-[8px] px-7 border-blue-600 text-blue-600 hover:bg-gray-50 hover:text-blue-600/90"
+              className="rounded-[8px] px-7 border-[#0C5FB3] text-[#0C5FB3] hover:bg-gray-50 hover:text-[#0C5FB3]"
             >
               See How It Works
             </Button>
@@ -98,15 +95,15 @@ export default function HeroSection() {
       </div>
 
       <div
-        className="relative hidden md:flex items-center justify-center w-1/2 px-10 py-20"
+        className="relative flex items-center justify-center w-full md:w-1/2 px-8 md:px-10 py-20"
         style={{ backgroundColor: "#F3F7FB" }}
       >
-        <div className="absolute right-5 top-1/2 -translate-y-1/2 flex flex-col gap-2">
+        <div className="absolute right-5 top-1/2 -translate-y-1/2 hidden md:flex flex-col gap-2">
           {[0, 1, 2, 3].map((i) => (
             <div
               key={i}
               className={`w-2 h-2 rounded-full transition-colors ${
-                i === 0 ? "bg-blue-600" : "bg-gray-300"
+                i === 0 ? "bg-[#0C5FB3]" : "bg-gray-300"
               }`}
             />
           ))}
@@ -138,7 +135,7 @@ export default function HeroSection() {
             />
           </div>
 
-          <div className="relative w-[460px]">
+          <div className="relative w-full max-w-[460px] mx-auto">
             <Image
               src="/landing-page/f7231d12c7971edd138487e47e3a828f4441f808(1).png"
               alt="Church Workflow dashboard on Mac Studio"
