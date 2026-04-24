@@ -1,29 +1,105 @@
-'use client'
-import { Span } from '@/components/ui/typography/Text';
+import Link from "next/link";
+import { Text } from "@/components/ui/typography/Text";
+
+const productLinks = [
+  { label: "Features", href: "#features" },
+  { label: "How It Works", href: "#how-it-works" },
+  { label: "Pricing", href: "#pricing" },
+  { label: "Request a Demo", href: "#demo" },
+];
+
+const resourceLinks = [
+  { label: "Help Center", href: "#help" },
+  { label: "Documentation", href: "#docs" },
+  { label: "Privacy Policy", href: "#privacy" },
+  { label: "Terms of Service", href: "#terms" },
+];
+
+const contactLinks = [
+  { label: "Contact Us", href: "#contact" },
+  { label: "Support", href: "#support" },
+  { label: "Login", href: "#login" },
+];
 
 export default function Footer() {
-  const partners = [
-    'ProfitWell',
-    'Appcues',
-    'ShipBob',
-    'Bench',
-    'Subbly',
-    'Demio',
-  ]
   return (
-    <footer className="w-full"> 
-      <div className="max-w-7xl mx-auto px-6 py-12">
-        <div className="grid grid-cols-2 md:grid-cols-6 gap-8 place-items-center">
-          {partners.map((partner) => (
-            <Span
-              key={partner}
-              variant="partner" 
-            >
-              {partner}
-            </Span>
-          ))}
+    <footer className="relative w-full overflow-hidden">
+      <img
+        src="/landing-page/darkblue.png"
+        alt=""
+        aria-hidden="true"
+        className="absolute inset-0 w-full h-full object-cover object-top pointer-events-none select-none"
+      />
+
+      <div className="relative z-10 max-w-6xl mx-auto px-6 pt-16 pb-8">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
+          <div className="flex flex-col gap-4">
+            <div className="flex items-center gap-3">
+              <img
+                src="/assets/logo/horizontal/white.png"
+                alt="Church Workflow logo"
+                width={148}
+                height={148}
+              />
+            </div>
+            <p className="text-[#ffff]/70 text-sm leading-relaxed max-w-xs">
+              Simplifying church administration and empowering ministry through
+              structured, secure, and centralized management.
+            </p>
+          </div>
+
+          <div className="flex flex-col gap-4">
+            <p className="text-[#ffff] font-bold text-sm">Product</p>
+            <div className="flex flex-col gap-3">
+              {productLinks.map((link) => (
+                <Link
+                  key={link.label}
+                  href={link.href}
+                  className="text-[#ffff]/70 text-sm hover:text-[#ffff] transition-colors"
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-4">
+            <p className="text-[#ffff] font-bold text-sm">Resources</p>
+            <div className="flex flex-col gap-3">
+              {resourceLinks.map((link) => (
+                <Link
+                  key={link.label}
+                  href={link.href}
+                  className="text-[#ffff]/70 text-sm hover:text-[#ffff] transition-colors"
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-4">
+            <p className="text-[#ffff] font-bold text-sm">Contact</p>
+            <div className="flex flex-col gap-3">
+              {contactLinks.map((link) => (
+                <Link
+                  key={link.label}
+                  href={link.href}
+                  className="text-[#ffff]/70 text-sm hover:text-[#ffff] transition-colors"
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div className="border-t border-white/20 pt-6 flex items-center justify-center">
+          <p className="text-[#ffff]/60 text-xs">
+            © 2026 Church Workflow. All rights reserved.
+          </p>
         </div>
       </div>
     </footer>
-  )
+  );
 }
