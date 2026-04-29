@@ -1,19 +1,7 @@
 "use client";
-import { ArrowUpRight, CalendarDays, ChevronDown, User } from "lucide-react";
+import { CalendarDays, User } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import {
-  Bar,
-  BarChart,
-  Cell,
-  Legend,
-  Pie,
-  PieChart,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from "recharts";
 
 import DashboardMobile from "@/components/features/dashboard/dashboard-mobile";
 import {
@@ -57,6 +45,18 @@ const EVENT_CATEGORY_BY_TYPE: Partial<Record<EventType, EventCategory>> = {
   [EventType.OTHER]: EventCategory.SPECIAL,
 };
 
+const formatNaira = (amount: string | number): string => {
+  const numAmount =
+    typeof amount === "string" ? parseInt(amount.replace(/,/g, "")) : amount;
+  return `₦${numAmount.toLocaleString()}`;
+};
+
+const formatGrowth = (growth: string | number): string => {
+  const numGrowth = typeof growth === "string" ? parseFloat(growth) : growth;
+  const sign = numGrowth > 0 ? "+" : "";
+  return `${sign}${numGrowth.toFixed(1)}%`;
+};
+
 export default function Dashboard() {
   const [displayName, setDisplayName] = useState("Super Admin");
   const [churchName, setChurchName] = useState<string | null>(null);
@@ -89,6 +89,8 @@ export default function Dashboard() {
   const [totalMembers, setTotalMembers] = useState("0");
   const [totalMembersGrowth, setTotalMembersGrowth] = useState("0%");
   const [serviceAttendance, setServiceAttendance] = useState("0");
+  const [income, setIncome] = useState(0);
+  const [incomeGrowth, setIncomeGrowth] = useState(0);
   const [serviceAttendanceGrowth, setServiceAttendanceGrowth] = useState("0%");
   const [attendanceTrendData, setAttendanceTrendData] = useState<any[]>([]);
   const [incomeTrendData, setIncomeTrendData] = useState<any[]>([]);
@@ -258,8 +260,8 @@ export default function Dashboard() {
             />
 
             <TotalIncomeCard
-              amount="$ 2,318"
-              growth="+15%"
+              amount={formatNaira(income)}
+              growth={formatGrowth(incomeGrowth)}
               monthFilter={incomeMonth}
               onToggleMonth={() =>
                 setIncomeMonth((prev) =>
