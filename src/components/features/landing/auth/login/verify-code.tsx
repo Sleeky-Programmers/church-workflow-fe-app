@@ -154,47 +154,6 @@ export default function VerifyCodeForm({
                     </InputOTP>
                   </div>
                 </FormControl>
-                {/* <FormControl>
-									<div className="w-full overflow-x-auto pb-1">
-										<InputOTP
-											maxLength={6}
-											value={field.value}
-											onChange={field.onChange}
-											inputMode="numeric"
-											autoComplete="one-time-code"
-											containerClassName="justify-center min-w-max mx-auto">
-											<InputOTPGroup className="space-x-2">
-												<InputOTPSlot
-													index={0}
-													className="h-12 w-10 text-lg sm:h-14 sm:w-12 sm:text-xl"
-												/>
-												<InputOTPSlot
-													index={1}
-													className="h-12 w-10 text-lg sm:h-14 sm:w-12 sm:text-xl"
-												/>
-												<InputOTPSlot
-													index={2}
-													className="h-12 w-10 text-lg sm:h-14 sm:w-12 sm:text-xl"
-												/>
-											</InputOTPGroup>
-											<InputOTPSeparator className="[&>svg]:h-4 [&>svg]:w-4 text-muted-foreground" />
-											<InputOTPGroup className="space-x-2">
-												<InputOTPSlot
-													index={3}
-													className="h-12 w-10 text-lg sm:h-14 sm:w-12 sm:text-xl"
-												/>
-												<InputOTPSlot
-													index={4}
-													className="h-12 w-10 text-lg sm:h-14 sm:w-12 sm:text-xl"
-												/>
-												<InputOTPSlot
-													index={5}
-													className="h-12 w-10 text-lg sm:h-14 sm:w-12 sm:text-xl"
-												/>
-											</InputOTPGroup>
-										</InputOTP>
-									</div>
-								</FormControl> */}
                 <FormMessage />
               </FormItem>
             )}
