@@ -25,14 +25,6 @@ export async function fetchAdmins({
     pagination: any;
   }>(`/admin?${params}`);
 
-  console.log({
-    response: response,
-    data: response.data.map((admin) => ({
-      id: admin.id || admin._id,
-      fullName: admin.fullName || `${admin.firstName} ${admin.lastName}`,
-    })),
-  });
-
   return {
     data: response.data.map((admin) => ({
       id: admin.id || admin._id,

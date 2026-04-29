@@ -86,6 +86,12 @@ export default function MembershipPage() {
     loadMembers(page, debouncedSearch, backendFilter);
   }, [page, debouncedSearch, backendFilter, loadMembers]);
 
+  useEffect(() => {
+    if (selectedMemberIds.length > 0) {
+      setSearchQuery("");
+    }
+  }, [selectedMemberIds]);
+
   const handleAddMember = async () => {
     await loadMembers(1, debouncedSearch, backendFilter);
     setPage(1);
