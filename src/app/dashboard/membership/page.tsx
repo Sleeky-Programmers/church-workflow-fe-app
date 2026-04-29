@@ -1,27 +1,32 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Search, Plus, MoreVertical } from "lucide-react";
-import Heading from "@/components/ui/typography/Heading";
+import { MoreVertical, Plus, Search } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useState } from "react";
+
+import { AddMemberModal } from "@/components/features/dashboard/membership/add-member-modal";
+import { CsvUploadModal } from "@/components/features/dashboard/membership/csv-upload-modal";
+import { DeleteMembersModal } from "@/components/features/dashboard/membership/delete-member-modal";
+import FilterDropdown from "@/components/features/dashboard/membership/filter-drop-down";
 import { MembersTable } from "@/components/features/dashboard/membership/members-table";
+import { AddMemberFormatModal } from "@/components/features/dashboard/membership/select-modal";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Loader } from "@/components/ui/loader";
+import { SidebarTrigger } from "@/components/ui/sidebar";
+import Heading from "@/components/ui/typography/Heading";
+import { useDebounce } from "@/hooks/use-debounce";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { useToast } from "@/hooks/use-toast";
+import {
+  Gender,
+  MaritalStatus,
+  MemberFormType,
+  MembershipStatus,
+} from "@/lib/enums";
+import { mapFiltersToBackend } from "@/mappers/filter.mapper";
 import { fetchMembers } from "@/services/memberService";
 import { MemberProfile } from "@/types";
-import { SidebarTrigger } from "@/components/ui/sidebar";
-import { AddMemberModal } from "@/components/features/dashboard/membership/add-member-modal";
-import { AddMemberFormatModal } from "@/components/features/dashboard/membership/select-modal";
-import { DeleteMembersModal } from "@/components/features/dashboard/membership/delete-member-modal";
-import { useToast } from "@/hooks/use-toast";
-import { useDebounce } from "@/hooks/use-debounce";
-import { MemberFormType } from "@/lib/enums";
-import { CsvUploadModal } from "@/components/features/dashboard/membership/csv-upload-modal";
-import FilterDropdown from "@/components/features/dashboard/membership/filter-drop-down";
-import { MaritalStatus, Gender, MembershipStatus } from "@/lib/enums";
-import { mapFiltersToBackend } from "@/mappers/filter.mapper";
-import { useIsMobile } from "@/hooks/use-mobile";
-import { useRouter } from "next/navigation";
-import { Loader } from "@/components/ui/loader";
 
 export default function MembershipPage() {
   const { toast } = useToast();
