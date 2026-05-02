@@ -1,5 +1,10 @@
 "use client";
 
+import Image from "next/image";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useState } from "react";
+
 import {
   Sidebar,
   SidebarContent,
@@ -13,15 +18,12 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
-import Link from "next/link";
-import Image from "next/image";
-import { usePathname } from "next/navigation";
 import { SidebarData } from "@/lib/data";
-import { Span, Text } from "../ui/typography/Text";
-import { useFavoritesStore } from "@/stores/useFavoritesStore";
-import { useState } from "react";
-import { cn } from "@/lib/utils";
 import { ActiveTab } from "@/lib/enums";
+import { cn } from "@/lib/utils";
+import { useFavoritesStore } from "@/stores/useFavoritesStore";
+
+import { Span, Text } from "../ui/typography/Text";
 
 export function AppSidebar() {
   const pathname = usePathname();
@@ -44,7 +46,7 @@ export function AppSidebar() {
     }
   };
 
-  const comingSoonTitles = ["Communications", "Requisitions", "Finance"];
+  const comingSoonTitles = ["Communication", "Requests", "Finance"];
 
   const mainPages = SidebarData.pages.filter(
     (p) => !comingSoonTitles.includes(p.title),

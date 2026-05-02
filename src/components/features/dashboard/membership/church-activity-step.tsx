@@ -1,10 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { AddMemberStep3Data } from "@/types";
-import { MembershipStatus } from "@/lib/enums";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -12,9 +12,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
-import { Text, Span } from "@/components/ui/typography/Text";
 import Heading from "@/components/ui/typography/Heading";
+import { Span, Text } from "@/components/ui/typography/Text";
+import { MembershipStatus } from "@/lib/enums";
+import { AddMemberStep3Data } from "@/types";
 
 type ChurchActivityStepProps = {
   onNext: (data: AddMemberStep3Data) => void;
@@ -38,9 +39,6 @@ export function ChurchActivityStep({
 
     if (!formData.membershipStatus) {
       newErrors.membershipStatus = "Membership status is required";
-    }
-    if (formData.baptized === undefined) {
-      newErrors.baptized = "Baptism status is required";
     }
 
     setErrors(newErrors);
@@ -130,9 +128,7 @@ export function ChurchActivityStep({
         </div>
 
         <div>
-          <Label className="mb-2">
-            Are you baptized? <Span variant="error">*</Span>
-          </Label>
+          <Label className="mb-2">Are you baptized? (Optional)</Label>
           <Select
             value={
               formData.baptized !== undefined ? String(formData.baptized) : ""
@@ -141,9 +137,7 @@ export function ChurchActivityStep({
               setFormData({ ...formData, baptized: value === "true" })
             }
           >
-            <SelectTrigger
-              className={errors.baptized ? "border-destructive-600" : ""}
-            >
+            <SelectTrigger>
               <SelectValue placeholder="Select" />
             </SelectTrigger>
             <SelectContent>
@@ -151,11 +145,6 @@ export function ChurchActivityStep({
               <SelectItem value="false">No</SelectItem>
             </SelectContent>
           </Select>
-          {errors.baptized && (
-            <Text variant="error" className="mt-1">
-              {errors.baptized}
-            </Text>
-          )}
         </div>
 
         <div>

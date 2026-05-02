@@ -1,23 +1,8 @@
 import {
-  ActivityRow,
-  DepartmentRow,
-  MemberAttendanceRecord,
-  MemberProfile,
-  RegularService,
-  Role,
-} from "@/types";
-import {
-  EventCategory,
-  Gender,
-  MaritalStatus,
-  MembershipStatus,
-  MemberTitle,
-  RequisitionStatus,
-} from "./enums";
-import {
   Activity,
   Calendar1,
   CalendarCheck2,
+  CalendarPlus,
   ChartPie,
   CheckCircle,
   DollarSign,
@@ -26,14 +11,31 @@ import {
   Inbox,
   Layers,
   LogOut,
-  MessagesSquare,
-  NotepadTextDashed,
   Settings,
   Tag,
   UserPlus,
   Users,
   Wallet,
 } from "lucide-react";
+
+import { CustomMessagesIcon } from "@/components/ui/custom-message-svg";
+import {
+  ActivityRow,
+  DepartmentRow,
+  MemberAttendanceRecord,
+  MemberProfile,
+  RegularService,
+  Role,
+} from "@/types";
+
+import {
+  EventCategory,
+  Gender,
+  MaritalStatus,
+  MembershipStatus,
+  MemberTitle,
+  RequisitionStatus,
+} from "./enums";
 
 export const DEFAULT_ORDER = [
   "Opening Prayer",
@@ -296,14 +298,14 @@ export const SidebarData = {
       icon: Calendar1,
     },
     {
-      title: "Communications",
-      url: "/dashboard/communications",
-      icon: MessagesSquare,
+      title: "Communication",
+      url: "/dashboard/communication",
+      icon: CustomMessagesIcon,
     },
     {
-      title: "Requisitions",
-      url: "/dashboard/requisitions",
-      icon: NotepadTextDashed,
+      title: "Requests",
+      url: "/dashboard/requests",
+      icon: CalendarPlus,
     },
     {
       title: "Finance",

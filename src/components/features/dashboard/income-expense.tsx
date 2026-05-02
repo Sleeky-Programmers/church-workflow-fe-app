@@ -1,11 +1,12 @@
 "use client";
 
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip } from "recharts";
 import Link from "next/link";
+import { Bar, BarChart, CartesianGrid, Tooltip, XAxis, YAxis } from "recharts";
+
 import { Card, CardContent } from "@/components/ui/card";
+import { ChartContainer, ChartTooltipContent } from "@/components/ui/chart";
 import Heading from "@/components/ui/typography/Heading";
 import { Span, Text } from "@/components/ui/typography/Text";
-import { ChartContainer, ChartTooltipContent } from "@/components/ui/chart";
 
 function getDateRange(data: { month: string }[]) {
   if (!data.length) return "";

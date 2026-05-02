@@ -1,22 +1,24 @@
 "use client";
 
+import { CrossIcon, Phone, User } from "lucide-react";
 import { useState } from "react";
+
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
 } from "@/components/ui/dialog";
-import { User, Phone, CrossIcon } from "lucide-react";
-import { AddMemberStep2Data, MemberProfile, NewMemberData } from "@/types";
-import { ProfileDetailsStep } from "./profile-details-step";
-import { ContactDetailsStep } from "./contact-details-step";
-import { ChurchActivityStep } from "./church-activity-step";
-import { ReviewMemberStep } from "./review-member-step";
-import { useToast } from "@/hooks/use-toast";
 import { Text } from "@/components/ui/typography/Text";
-import { Button } from "@/components/ui/button";
-import { createMember } from "@/services/memberService";
+import { useToast } from "@/hooks/use-toast";
 import { MembershipStatus } from "@/lib/enums";
+import { createMember } from "@/services/memberService";
+import { AddMemberStep2Data, MemberProfile, NewMemberData } from "@/types";
+
+import { ChurchActivityStep } from "./church-activity-step";
+import { ContactDetailsStep } from "./contact-details-step";
+import { ProfileDetailsStep } from "./profile-details-step";
+import { ReviewMemberStep } from "./review-member-step";
 
 type AddMemberModalProps = {
   open: boolean;
@@ -69,13 +71,7 @@ function MembershipStepIndicator({ step }: { step: 1 | 2 | 3 }) {
                   }`}
                 >
                   <Icon
-                    className={`h-4 w-4 sm:h-7 sm:w-7 ${
-                      isActive
-                        ? "text-white"
-                        : isCompleted
-                          ? "text-primary-600"
-                          : "text-gray-400"
-                    }`}
+                    className={`h-4 w-4 sm:h-7 sm:w-7 ${isActive ? "text-white" : isCompleted ? "text-primary-600" : "text-gray-400"}`}
                   />
                 </div>
 
@@ -129,8 +125,7 @@ export function AddMemberModal({
       !data.fullName ||
       !data.gender ||
       !data.maritalStatus ||
-      !data.membershipStatus ||
-      data.baptized === undefined
+      !data.membershipStatus
     ) {
       throw new Error("Member form is incomplete.");
     }

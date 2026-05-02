@@ -1,14 +1,29 @@
 "use client";
-import { useEffect, useState } from "react";
 import { CalendarDays, User } from "lucide-react";
-import { Span, Text } from "@/components/ui/typography/Text";
-import { StatCard } from "@/components/features/dashboard/StatCard";
-import { Card, CardContent } from "@/components/ui/card";
+import Link from "next/link";
+import { useEffect, useState } from "react";
+
+import DashboardMobile from "@/components/features/dashboard/dashboard-mobile";
+import {
+  StatCard,
+  TotalIncomeCard,
+} from "@/components/features/dashboard/StatCard";
+import { TrendChart } from "@/components/features/dashboard/trend-chart";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import Heading from "@/components/ui/typography/Heading";
-import { DashboardData } from "@/lib/data";
+import { Span, Text } from "@/components/ui/typography/Text";
 import { EVENT_CATEGORY_CONFIG } from "@/config/event-category";
+import { useIsMobile } from "@/hooks/use-mobile";
+import {
+  fetchAttendanceStats,
+  fetchTotalMembers,
+  getMyChurch,
+} from "@/lib/api";
+import { getCurrentUserProfile } from "@/lib/auth/session";
+import { DashboardData } from "@/lib/data";
+import { EventCategory, EventType } from "@/lib/enums";
 import {
   cn,
   formatEventDate,
@@ -17,30 +32,29 @@ import {
   isInFuture,
   sortBirthdaysByNearest,
 } from "@/lib/utils";
-import Link from "next/link";
-import { TrendChart } from "@/components/features/dashboard/trend-chart";
-
-import {
-  fetchAttendanceStats,
-  fetchTotalMembers,
-  getMyChurch,
-} from "@/lib/api";
 import { fetchMembers as fetchMemberProfiles } from "@/services/memberService";
-import type { ChurchResponse } from "@/types/payload";
-import { getCurrentUserProfile } from "@/lib/auth/session";
-import { EventCategory, EventType } from "@/lib/enums";
 import { ChurchEvent } from "@/types";
-import { useIsMobile } from "@/hooks/use-mobile";
-import DashboardMobile from "@/components/features/dashboard/dashboard-mobile";
 
+import type { ChurchResponse } from "@/types/payload";
 const EVENT_STORAGE_KEY = "dashboard:events";
-
 const EVENT_CATEGORY_BY_TYPE: Partial<Record<EventType, EventCategory>> = {
   [EventType.WORSHIP_SERVICE]: EventCategory.GENERAL,
   [EventType.BIRTHDAY]: EventCategory.GENERAL,
   [EventType.MEETING]: EventCategory.LEADERSHIP,
   [EventType.WEDDING_ANNIVERSARY]: EventCategory.SPECIAL,
   [EventType.OTHER]: EventCategory.SPECIAL,
+};
+
+const formatNaira = (amount: string | number): string => {
+  const numAmount =
+    typeof amount === "string" ? parseInt(amount.replace(/,/g, "")) : amount;
+  return `₦${numAmount.toLocaleString()}`;
+};
+
+const formatGrowth = (growth: string | number): string => {
+  const numGrowth = typeof growth === "string" ? parseFloat(growth) : growth;
+  const sign = numGrowth > 0 ? "+" : "";
+  return `${sign}${numGrowth.toFixed(1)}%`;
 };
 
 export default function Dashboard() {
@@ -75,6 +89,8 @@ export default function Dashboard() {
   const [totalMembers, setTotalMembers] = useState("0");
   const [totalMembersGrowth, setTotalMembersGrowth] = useState("0%");
   const [serviceAttendance, setServiceAttendance] = useState("0");
+  const [income, setIncome] = useState(0);
+  const [incomeGrowth, setIncomeGrowth] = useState(0);
   const [serviceAttendanceGrowth, setServiceAttendanceGrowth] = useState("0%");
   const [attendanceTrendData, setAttendanceTrendData] = useState<any[]>([]);
   const [incomeTrendData, setIncomeTrendData] = useState<any[]>([]);
@@ -83,6 +99,9 @@ export default function Dashboard() {
   >([]);
   const [upcomingEvents, setUpcomingEvents] = useState(
     DashboardData.upcomingEvents,
+  );
+  const [incomeMonth, setIncomeMonth] = useState<"This Month" | "Last Month">(
+    "This Month",
   );
 
   useEffect(() => {
@@ -124,48 +143,34 @@ export default function Dashboard() {
 
   useEffect(() => {
     let isMounted = true;
-
     async function loadBirthdays() {
       try {
         const members: any[] = [];
         let currentPage = 1;
         const MAX_PAGES = 3;
-
         while (currentPage <= MAX_PAGES) {
           const response = await fetchMemberProfiles(currentPage, 100);
-
           members.push(...(response.data || []));
-
           if (!response.pagination?.hasNextPage) break;
-
           currentPage += 1;
         }
-
         if (!isMounted) return;
-
         const mappedBirthdays = members
           .filter((m) => m?.birthday && !isNaN(new Date(m.birthday).getTime()))
-          .map((m) => ({
-            name: m.fullName,
-            date: m.birthday,
-          }))
+          .map((m) => ({ name: m.fullName, date: m.birthday }))
           .filter((m) => {
             const next = getNextBirthdayDate(m.date);
             const today = new Date();
             const future = new Date();
             future.setMonth(today.getMonth() + 3);
-
             return next >= today && next <= future;
           });
-
         setUpcomingBirthdays(sortBirthdaysByNearest(mappedBirthdays));
       } catch {
         if (isMounted) setUpcomingBirthdays([]);
       }
     }
-
     loadBirthdays();
-
     return () => {
       isMounted = false;
     };
@@ -175,14 +180,12 @@ export default function Dashboard() {
     try {
       const stored = localStorage.getItem(EVENT_STORAGE_KEY);
       if (!stored) return;
-
       const parsed = JSON.parse(stored) as ChurchEvent[];
       const normalized = parsed.map((event) => ({
         title: event.title,
         date: event.date,
         category: EVENT_CATEGORY_BY_TYPE[event.type] || EventCategory.GENERAL,
       }));
-
       if (normalized.length) setUpcomingEvents(normalized);
     } catch {
       setUpcomingEvents(DashboardData.upcomingEvents);
@@ -208,11 +211,13 @@ export default function Dashboard() {
 
   return (
     <>
+      {/* ── Header ── */}
       <div className="flex md:items-center justify-between md:flex-row flex-col items-start gap-1 mb-5 sm:mb-6">
         <Heading level={1} text={`Hello, ${displayName}`} />
         <Text text={churchName ? `Overview - ${churchName}` : "Overview"} />
       </div>
 
+      {/* ── Church identity banner ── */}
       {churchIdentity && (
         <Card className="mb-6 rounded-3xl">
           <CardContent className="py-4">
@@ -235,40 +240,55 @@ export default function Dashboard() {
         </Card>
       )}
 
+      {/* ── Top row: stat cards + attendance trend + upcoming events ── */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 mb-6">
+        {/* Left: stat cards + trend chart */}
         <div className="lg:col-span-2 space-y-3">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {/* ── 3 stat cards ── */}
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
             <StatCard
               title="Total Members"
               count={totalMembers}
               growth={totalMembersGrowth}
             />
+
             <StatCard
-              title="Attendance"
+              title="Service Attendance"
               count={serviceAttendance}
               growth={serviceAttendanceGrowth}
-              growthText="Last Event"
+              growthLabel="Last Event"
+            />
+
+            <TotalIncomeCard
+              amount={formatNaira(income)}
+              growth={formatGrowth(incomeGrowth)}
+              monthFilter={incomeMonth}
+              onToggleMonth={() =>
+                setIncomeMonth((prev) =>
+                  prev === "This Month" ? "Last Month" : "This Month",
+                )
+              }
+              className="col-span-2 md:col-span-1"
             />
           </div>
 
+          {/* ── Attendance Trend chart ── */}
           <TrendChart
             attendanceData={attendanceTrendData}
             incomeData={incomeTrendData}
           />
         </div>
 
+        {/* ── Right: Upcoming Events ── */}
         <div className="lg:col-span-1">
           <Card className="rounded-3xl h-full">
             <CardContent className="w-full">
               <div className="flex items-center justify-between py-3">
-                <Heading
-                  level={3}
-                  text="Upcoming Events Preview"
-                  variant="primary"
-                />
+                <Heading level={3} text="Upcoming Events" variant="primary" />
                 <CalendarDays className="w-5 h-5 text-primary-600" />
               </div>
 
+              {/* Services */}
               <Text text="Services" variant="blue" />
               <div className="mt-3 space-y-3">
                 {upcomingEvents
@@ -282,7 +302,6 @@ export default function Dashboard() {
                       EVENT_CATEGORY_CONFIG[event.category];
                     const displayDate = formatEventDate(event.date);
                     if (!displayDate) return null;
-
                     return (
                       <div
                         key={i}
@@ -315,6 +334,7 @@ export default function Dashboard() {
 
               <div className="border-t my-4" />
 
+              {/* Birthdays */}
               <Text text="Birthdays" variant="blue" />
               <div className="mt-3 space-y-2">
                 {upcomingBirthdays.length === 0 ? (
@@ -353,105 +373,6 @@ export default function Dashboard() {
           </Card>
         </div>
       </div>
-
-      <Card className="rounded-3xl">
-        <CardContent className="py-12 flex flex-col items-center justify-center text-center gap-4">
-          <div className="w-40 h-40 flex items-center justify-center">
-            <svg
-              viewBox="0 0 160 160"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-              className="w-full h-full"
-            >
-              <ellipse
-                cx="80"
-                cy="100"
-                rx="50"
-                ry="14"
-                stroke="#E0E7FF"
-                strokeWidth="2"
-                fill="none"
-              />
-
-              <rect
-                x="68"
-                y="30"
-                width="24"
-                height="60"
-                rx="12"
-                fill="#1D4ED8"
-              />
-
-              <polygon points="80,10 68,42 92,42" fill="#2563EB" />
-
-              <circle cx="80" cy="55" r="7" fill="white" opacity="0.9" />
-
-              <polygon points="68,75 55,95 68,90" fill="#3B82F6" />
-
-              <polygon points="92,75 105,95 92,90" fill="#3B82F6" />
-
-              <ellipse
-                cx="80"
-                cy="97"
-                rx="8"
-                ry="12"
-                fill="#FCD34D"
-                opacity="0.9"
-              />
-              <ellipse
-                cx="80"
-                cy="100"
-                rx="5"
-                ry="8"
-                fill="#F97316"
-                opacity="0.8"
-              />
-
-              <circle cx="115" cy="88" r="8" fill="#FBBF24" />
-              <rect
-                x="109"
-                y="96"
-                width="12"
-                height="16"
-                rx="4"
-                fill="#2563EB"
-              />
-              <line
-                x1="109"
-                y1="100"
-                x2="100"
-                y2="108"
-                stroke="#2563EB"
-                strokeWidth="3"
-                strokeLinecap="round"
-              />
-              <line
-                x1="121"
-                y1="100"
-                x2="128"
-                y2="106"
-                stroke="#2563EB"
-                strokeWidth="3"
-                strokeLinecap="round"
-              />
-
-              <circle cx="30" cy="40" r="3" fill="#BFDBFE" />
-              <circle cx="140" cy="60" r="3" fill="#FDE68A" />
-              <circle cx="20" cy="90" r="2" fill="#C7D2FE" />
-              <circle cx="148" cy="110" r="2" fill="#C7D2FE" />
-            </svg>
-          </div>
-
-          <div className="space-y-2">
-            <Heading level={2} text="More Features Coming Soon!" />
-            <Text
-              variant="muted"
-              text="We're working hard to bring you attendance analytics, financial reports, communications, requests and more."
-              className="max-w-md mx-auto"
-            />
-          </div>
-        </CardContent>
-      </Card>
     </>
   );
 }

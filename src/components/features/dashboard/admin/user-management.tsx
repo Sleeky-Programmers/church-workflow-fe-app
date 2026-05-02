@@ -1,26 +1,27 @@
 "use client";
-import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import {
-  fetchAdminInvites,
-  createAdminInvite,
-  updateAdminStatus,
-  removeAdminUser,
-  fetchRoles,
-  deleteAdminInvite,
-  changeAdminRole,
-  resendAdminInvite,
-} from "@/lib/api/admin-settings";
-import { User, UserAction } from "@/types/user";
-import { UserTable } from "@/components/features/dashboard/admin/users-table";
+import { useEffect, useState } from "react";
+
 import { InviteUserDialog } from "@/components/features/dashboard/admin/invite-user";
-import { RemoveUserDialog } from "@/components/features/dashboard/admin/mini-components/remove-user-dialog";
 import { ChangeRoleDialog } from "@/components/features/dashboard/admin/mini-components/change-role-dialog";
-import { useToast } from "@/hooks/use-toast";
+import { RemoveUserDialog } from "@/components/features/dashboard/admin/mini-components/remove-user-dialog";
+import { UserTable } from "@/components/features/dashboard/admin/users-table";
+import { Button } from "@/components/ui/button";
+import { Loader } from "@/components/ui/loader";
 import Heading from "@/components/ui/typography/Heading";
 import { Text } from "@/components/ui/typography/Text";
-import { Loader } from "@/components/ui/loader";
+import { useToast } from "@/hooks/use-toast";
+import {
+  changeAdminRole,
+  createAdminInvite,
+  deleteAdminInvite,
+  fetchAdminInvites,
+  fetchRoles,
+  removeAdminUser,
+  resendAdminInvite,
+  updateAdminStatus,
+} from "@/lib/api/admin-settings";
 import { AdminOption } from "@/lib/enums";
+import { User, UserAction } from "@/types/user";
 
 export function UserManagementPage() {
   const [users, setUsers] = useState<User[]>([]);
@@ -229,6 +230,15 @@ export function UserManagementPage() {
     }
   };
 
+  const refetchRoles = async () => {
+    try {
+      const rolesData = await fetchRoles();
+      setRoles(rolesData);
+    } catch (error) {
+      console.error("Failed to refetch roles:", error);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-16 gap-2">
@@ -255,6 +265,7 @@ export function UserManagementPage() {
         onSubmit={handleInviteUser}
         isLoading={isActionLoading}
         roles={roles}
+        onRoleCreated={refetchRoles}
       />
 
       <RemoveUserDialog
