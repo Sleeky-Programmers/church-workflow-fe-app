@@ -43,59 +43,6 @@ export const MODULE_PERMISSIONS: ModulePermission[] = [
     ],
   },
   {
-    module: "Finance Module (Giving Records)",
-    level: "no_access",
-    options: [
-      {
-        label: "No Access",
-        value: "no_access",
-        description: "",
-      },
-      {
-        label: "View",
-        value: "view",
-        description: "View finance dashboard & reports",
-      },
-      {
-        label: "Manage",
-        value: "manage",
-        description: "Add giving records",
-      },
-      {
-        label: "Full Access",
-        value: "full_access",
-        description: "Add giving records, approvals & exports",
-      },
-    ],
-  },
-  {
-    module: "Finance Module (Giving & Expenses Record)",
-    level: "no_access",
-    options: [
-      {
-        label: "No Access",
-        value: "no_access",
-        description: "",
-      },
-      {
-        label: "View",
-        value: "view",
-        description: "View finance dashboard & reports",
-      },
-      {
-        label: "Manage",
-        value: "manage",
-        description: "Add giving & view expenses records",
-      },
-      {
-        label: "Full Access",
-        value: "full_access",
-        description:
-          "Add giving records, expenses records, approvals & exports",
-      },
-    ],
-  },
-  {
     module: "Requests Module",
     level: "no_access",
     options: [
