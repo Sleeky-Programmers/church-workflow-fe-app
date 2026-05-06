@@ -28,6 +28,7 @@ import {
   Role,
 } from "@/types";
 
+import CalendarPlusSvg from "../../public/calendarPlus.svg";
 import {
   EventCategory,
   Gender,
@@ -305,7 +306,7 @@ export const SidebarData = {
     {
       title: "Requests",
       url: "/dashboard/requests",
-      icon: CalendarPlus,
+      icon: CalendarPlusSvg,
     },
     {
       title: "Finance",

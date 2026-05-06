@@ -2,19 +2,19 @@
 
 import { useState } from "react";
 import {
-  LineChart,
+  CartesianGrid,
   Line,
+  LineChart,
+  Tooltip,
   XAxis,
   YAxis,
-  CartesianGrid,
-  Tooltip,
 } from "recharts";
 
-import { Card, CardContent } from "@/components/ui/card";
-import { Span, Text } from "@/components/ui/typography/Text";
-import { ChartContainer, ChartTooltipContent } from "@/components/ui/chart";
-import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { ChartContainer, ChartTooltipContent } from "@/components/ui/chart";
+import { Span, Text } from "@/components/ui/typography/Text";
+import { cn } from "@/lib/utils";
 
 type TrendType = "attendance" | "income";
 
@@ -31,7 +31,7 @@ export function TrendChart({ attendanceData, incomeData }: TrendChartProps) {
   const hasData = data.length > 0;
 
   return (
-    <Card className="rounded-3xl p-3">
+    <Card className="rounded-3xl py-4 px-1 border-0">
       <CardContent>
         <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-sm">
           <Button
@@ -47,12 +47,18 @@ export function TrendChart({ attendanceData, incomeData }: TrendChartProps) {
 
           <Span text="|" className="text-muted-foreground hidden sm:inline" />
           <div className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-blue-600 inline-block" />
-            <Text text="Regular Services" className="text-sm text-gray-600" />
+            <span className="w-2.5 h-2.5 rounded-full bg-primary-400 inline-block" />
+            <Text
+              text="Regular Services"
+              className="text-sm text-gray-600 font-semibold"
+            />
           </div>
           <div className="flex items-center gap-1.5">
             <span className="w-2.5 h-2.5 rounded-full bg-blue-300 inline-block" />
-            <Text text="Special Services" className="text-sm text-gray-600" />
+            <Text
+              text="Special Services"
+              className="text-sm text-gray-600 font-semibold"
+            />
           </div>
         </div>
 

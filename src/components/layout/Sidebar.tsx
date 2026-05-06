@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { ComponentType, useState } from "react";
 
 import {
   Sidebar,
@@ -24,6 +24,34 @@ import { cn } from "@/lib/utils";
 import { useFavoritesStore } from "@/stores/useFavoritesStore";
 
 import { Span, Text } from "../ui/typography/Text";
+
+export const normalizeIcon = (
+  icon: any,
+): ComponentType<{ className?: string }> => {
+  // If it's already a valid component, return it
+  if (
+    typeof icon === "function" ||
+    (typeof icon === "object" && icon?.render)
+  ) {
+    return icon;
+  }
+
+  // If it's an object with src (like from require/import)
+  if (icon?.src || typeof icon === "object") {
+    return ({ className }) => (
+      <Image
+        src={icon.src || icon}
+        alt="icon"
+        width={16}
+        height={16}
+        className={className}
+      />
+    );
+  }
+
+  // Fallback component
+  return () => <span className="w-4 h-4" />;
+};
 
 export function AppSidebar() {
   const pathname = usePathname();
@@ -182,7 +210,7 @@ export function AppSidebar() {
           <SidebarGroupContent>
             <SidebarMenu>
               {comingSoonPages.map((page) => {
-                const Icon = page.icon;
+                const Icon = normalizeIcon(page.icon);
 
                 return (
                   <SidebarMenuItem key={page.title}>
