@@ -217,29 +217,6 @@ export default function Dashboard() {
         <Text text={churchName ? `Overview - ${churchName}` : "Overview"} />
       </div>
 
-      {/* ── Church identity banner ── */}
-      {churchIdentity && (
-        <Card className="mb-6 rounded-3xl">
-          <CardContent className="py-4">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-              <Text
-                text={`Church: ${churchIdentity.name}`}
-                variant="blue"
-                className="break-words"
-              />
-              <Text
-                text={`Location: ${churchIdentity.address}, ${churchIdentity.country}`}
-                className="break-words"
-              />
-              <Text
-                text={`Currency/Timezone: ${churchIdentity.defaultCurrency} - ${churchIdentity.timeZone}`}
-                className="break-words"
-              />
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
       {/* ── Top row: stat cards + attendance trend + upcoming events ── */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 mb-6">
         {/* Left: stat cards + trend chart */}
