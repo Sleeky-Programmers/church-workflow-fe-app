@@ -217,7 +217,6 @@ export default function AddSmallTeamDialog({
             return (
               <Button
                 key={pageNum}
-                // variant="pageNumber"
                 onClick={() => handlePageChange(pageNum)}
                 className={cn(
                   "px-2 py-0.5 text-xs",
@@ -297,7 +296,6 @@ export default function AddSmallTeamDialog({
           )}
         >
           <div className="flex items-start gap-4">
-            {/* LEFT MODAL */}
             <div className="rounded-xl w-full sm:w-[510px] h-full flex flex-col overflow-hidden bg-white">
               <div className="flex justify-between items-center border-b px-6 py-4">
                 <Heading level={2}>Add a Small Team</Heading>
@@ -449,7 +447,6 @@ export default function AddSmallTeamDialog({
               </div>
             </div>
 
-            {/* RIGHT PANEL — desktop only */}
             {!isMobile && showSelectedPanel && (
               <div className="hidden sm:flex w-[340px] max-h-[80vh] h-[80vh]">
                 <PanelContent />
@@ -459,7 +456,6 @@ export default function AddSmallTeamDialog({
         </DialogContent>
       </Dialog>
 
-      {/* RIGHT PANEL — mobile sheet */}
       {isMobile && showSelectedPanel && (
         <Dialog open={showSelectedPanel} onOpenChange={setShowSelectedPanel}>
           <DialogContent
