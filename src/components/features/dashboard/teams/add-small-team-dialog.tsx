@@ -1,7 +1,14 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Plus, RefreshCw, ExternalLink, X, ChevronRight } from "lucide-react";
+import {
+  Plus,
+  RefreshCw,
+  ExternalLink,
+  X,
+  ChevronRight,
+  Search,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -25,12 +32,14 @@ import {
   MemberMultiSelect,
   MemberSingleSelect,
 } from "@/components/features/dashboard/departments/member-selectors";
-import { InviteUserDialog } from "@/components/features/dashboard/admin/invite-user";
-import { InviteFormData, PendingInvite } from "@/types/user";
+import { fetchAdmins } from "@/services/userServices";
+import { fetchMembers } from "@/services/memberService";
 import { Span, Text } from "@/components/ui/typography/Text";
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useIsMobile } from "@/hooks/use-mobile";
+
+const PANEL_PAGE_SIZE = 8;
 
 interface Props {
   members: MemberProfile[];
@@ -62,21 +71,22 @@ export default function AddSmallTeamDialog({
   const [memberIds, setMemberIds] = useState<string[]>([]);
   const [status, setStatus] = useState("active");
   const [description, setDescription] = useState("");
-  const [inviteOpen, setInviteOpen] = useState(false);
-  const [pendingInvites, setPendingInvites] = useState<PendingInvite[]>([]);
-  const [isInviteLoading, setIsInviteLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [showSelectedPanel, setShowSelectedPanel] = useState(false);
   const [panelQuery, setPanelQuery] = useState("");
-  const inviteDialogTitle = "Invite New Leader";
+  const [panelPage, setPanelPage] = useState(1);
 
   const selectedMembers = useMemo(() => {
-    if (!memberIds.length) return [];
+    if (!memberIds.length) {
+      return [];
+    }
     return members.filter((member) => memberIds.includes(member.id));
   }, [memberIds, members]);
 
-  const panelMembers = useMemo(() => {
-    if (!panelQuery.trim()) return selectedMembers;
+  const filteredPanelMembers = useMemo(() => {
+    if (!panelQuery.trim()) {
+      return selectedMembers;
+    }
     const query = panelQuery.toLowerCase();
     return selectedMembers.filter(
       (member) =>
@@ -85,22 +95,25 @@ export default function AddSmallTeamDialog({
     );
   }, [panelQuery, selectedMembers]);
 
-  function handleInviteSubmit(formData: InviteFormData) {
-    setIsInviteLoading(true);
-    setTimeout(() => {
-      const newInvite: PendingInvite = {
-        id: crypto.randomUUID(),
-        name:
-          [formData.title, formData.firstName, formData.lastName]
-            .filter(Boolean)
-            .join(" ") || formData.email,
-        email: formData.email,
-        role: formData.role,
-        status: "pending",
-      };
-      setPendingInvites((prev) => [...prev, newInvite]);
-      setIsInviteLoading(false);
-    }, 600);
+  const totalPanelPages = Math.max(
+    1,
+    Math.ceil(filteredPanelMembers.length / PANEL_PAGE_SIZE),
+  );
+
+  const safePage = Math.min(panelPage, totalPanelPages);
+
+  const pagedPanelMembers = useMemo(() => {
+    const start = (safePage - 1) * PANEL_PAGE_SIZE;
+    return filteredPanelMembers.slice(start, start + PANEL_PAGE_SIZE);
+  }, [filteredPanelMembers, safePage]);
+
+  function handlePageChange(p: number) {
+    setPanelPage(Math.max(1, Math.min(p, totalPanelPages)));
+  }
+
+  function handlePanelQueryChange(q: string) {
+    setPanelQuery(q);
+    setPanelPage(1);
   }
 
   async function handleSave() {
@@ -122,6 +135,7 @@ export default function AddSmallTeamDialog({
       setDescription("");
       setShowSelectedPanel(false);
       setPanelQuery("");
+      setPanelPage(1);
       setIsOpen(false);
     } finally {
       setIsSaving(false);
@@ -139,6 +153,128 @@ export default function AddSmallTeamDialog({
   const isOpen = controlledOpen ?? open;
   const setIsOpen = onOpenChange ?? setOpen;
 
+  const SelectedMembersList = () => (
+    <>
+      {pagedPanelMembers.length === 0 ? (
+        <div className="px-4 py-6 text-center">
+          <Text variant="muted">No members found.</Text>
+        </div>
+      ) : (
+        pagedPanelMembers.map((member) => (
+          <div
+            key={member.id}
+            className="flex items-center justify-between gap-3 px-4 py-2.5"
+          >
+            <div className="flex items-center gap-3 min-w-0">
+              <Avatar className="h-8 w-8 shrink-0">
+                <AvatarFallback className="bg-gray-200 text-gray-700 text-xs">
+                  {member.initials}
+                </AvatarFallback>
+              </Avatar>
+              <div className="min-w-0">
+                <Text variant="default" className="truncate">
+                  {member.fullName}
+                </Text>
+                <Text variant="muted" className="truncate text-xs">
+                  {member.email}
+                </Text>
+              </div>
+            </div>
+            <Button
+              variant="rowRemove"
+              onClick={() => removeSelectedMember(member.id)}
+              aria-label={`Remove ${member.fullName}`}
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+        ))
+      )}
+    </>
+  );
+
+  const PaginationFooter = () => {
+    if (totalPanelPages <= 1) {
+      return null;
+    }
+
+    return (
+      <div className="flex items-center justify-between border-t px-4 py-3">
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-7 px-2 text-xs"
+          disabled={safePage <= 1}
+          onClick={() => handlePageChange(safePage - 1)}
+        >
+          {"< Previous"}
+        </Button>
+
+        <div className="flex items-center gap-1.5 text-xs">
+          {Array.from({ length: totalPanelPages }).map((_, i) => {
+            const pageNum = i + 1;
+            const isActive = pageNum === safePage;
+            return (
+              <Button
+                key={pageNum}
+                onClick={() => handlePageChange(pageNum)}
+                className={cn(
+                  "px-2 py-0.5 text-xs",
+                  isActive
+                    ? "bg-gray-200 text-gray-800 font-medium"
+                    : "text-gray-500 hover:text-gray-700",
+                )}
+              >
+                {pageNum}
+              </Button>
+            );
+          })}
+        </div>
+
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-7 px-2 text-xs"
+          disabled={safePage >= totalPanelPages}
+          onClick={() => handlePageChange(safePage + 1)}
+        >
+          {"Next >"}
+        </Button>
+      </div>
+    );
+  };
+
+  const PanelContent = () => (
+    <div className="rounded-xl shadow-lg flex flex-col overflow-hidden bg-white w-full h-full">
+      <div className="flex items-center justify-between border-b px-4 py-3">
+        <Heading level={3}>Selected Members</Heading>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => setShowSelectedPanel(false)}
+        >
+          <X className="h-4 w-4" />
+        </Button>
+      </div>
+
+      <div className="relative p-4 border-b">
+        <Search className="absolute left-7 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
+        <Input
+          placeholder="Select or search"
+          value={panelQuery}
+          onChange={(e) => handlePanelQueryChange(e.target.value)}
+          className="pl-8"
+        />
+      </div>
+
+      <div className="flex-1 overflow-y-auto py-1">
+        <SelectedMembersList />
+      </div>
+
+      <PaginationFooter />
+    </div>
+  );
+
   return (
     <>
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -155,12 +291,12 @@ export default function AddSmallTeamDialog({
           showClose={false}
           mobileSheet={isMobile}
           className={cn(
-            "!p-0 !bg-transparent !shadow-none !border-none",
+            "!p-0 !bg-white !shadow-lg !border !border-gray-200",
             isMobile && "!rounded-t-2xl",
           )}
         >
           <div className="flex items-start gap-4">
-            <div className="rounded-xl shadow-lg w-full sm:w-[460px] h-full flex flex-col overflow-hidden bg-gray-50">
+            <div className="rounded-xl w-full sm:w-[510px] h-full flex flex-col overflow-hidden bg-white">
               <div className="flex justify-between items-center border-b px-6 py-4">
                 <Heading level={2}>Add a Small Team</Heading>
 
@@ -191,7 +327,7 @@ export default function AddSmallTeamDialog({
                   <div className="flex items-center gap-2">
                     <div className="flex-1">
                       <MemberSingleSelect
-                        options={members}
+                        fetchOptions={fetchAdmins}
                         value={leaderId}
                         onChange={setLeaderId}
                         placeholder="Select or search"
@@ -209,10 +345,8 @@ export default function AddSmallTeamDialog({
                   </div>
                   <a
                     href="/dashboard/members/invite"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      setInviteOpen(true);
-                    }}
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className="mt-0.5 inline-flex items-center gap-1 text-xs text-primary hover:underline"
                   >
                     Add New Team Lead
@@ -238,19 +372,19 @@ export default function AddSmallTeamDialog({
                       <div className="flex flex-wrap gap-2">
                         {memberIds.slice(0, 3).map((id) => {
                           const member = members.find((m) => m.id === id);
-                          if (!member) return null;
+                          if (!member) {
+                            return null;
+                          }
 
                           return (
                             <Span
                               key={id}
                               variant="chip"
-                              className="inline-flex items-center gap-1 "
+                              className="flex items-center gap-1"
                             >
                               {member.fullName.split(" ")[0]}
                               <Button
-                                type="button"
-                                size="icon"
-                                variant="ghost"
+                                variant="chipRemove"
                                 onClick={() => removeSelectedMember(id)}
                                 aria-label={`Remove ${member.fullName}`}
                               >
@@ -270,9 +404,9 @@ export default function AddSmallTeamDialog({
                   <Label>Add Members</Label>
 
                   <MemberMultiSelect
-                    options={members}
+                    fetchOptions={fetchMembers}
                     value={memberIds}
-                    onChange={setMemberIds}
+                    onChange={(ids) => setMemberIds(ids)}
                     placeholder="Select or search"
                   />
                 </div>
@@ -314,77 +448,8 @@ export default function AddSmallTeamDialog({
             </div>
 
             {!isMobile && showSelectedPanel && (
-              <div className="hidden sm:flex rounded-xl shadow-lg w-[340px] h-[80vh] flex-col overflow-hidden bg-gray-50">
-                <div className="flex items-center justify-between border-b px-4 py-3">
-                  <Heading level={3}>Selected Members</Heading>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => setShowSelectedPanel(false)}
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
-                </div>
-
-                <div className="p-4 border-b">
-                  <Input
-                    placeholder="Select or search"
-                    value={panelQuery}
-                    onChange={(e) => setPanelQuery(e.target.value)}
-                  />
-                </div>
-
-                <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3">
-                  {panelMembers.length === 0 ? (
-                    <Text variant="muted">No members selected.</Text>
-                  ) : (
-                    panelMembers.map((member) => (
-                      <div
-                        key={member.id}
-                        className="flex items-center justify-between gap-3 rounded-lg border border-gray-200 bg-white px-3 py-2"
-                      >
-                        <div className="flex items-center gap-3 min-w-0">
-                          <Avatar className="h-8 w-8">
-                            <AvatarFallback className="bg-gray-200 text-gray-700 text-xs">
-                              {member.initials}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div className="min-w-0">
-                            <Text variant="default" className="truncate">
-                              {member.fullName}
-                            </Text>
-                            <Text variant="muted" className="truncate">
-                              {member.email}
-                            </Text>
-                          </div>
-                        </div>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => removeSelectedMember(member.id)}
-                          className="text-destructive-600 hover:text-destructive-700"
-                        >
-                          <X className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    ))
-                  )}
-                </div>
-                <div className="flex items-center justify-between border-t px-4 py-3 text-xs text-gray-600">
-                  <Button variant="ghost" size="sm" className="h-7 px-2">
-                    Previous
-                  </Button>
-                  <div className="flex items-center gap-2">
-                    <Span className="px-2 py-1 rounded bg-gray-200 text-gray-800">
-                      1
-                    </Span>
-                    <Span>2</Span>
-                    <Span>Next</Span>
-                  </div>
-                  <Button variant="ghost" size="sm" className="h-7 px-2">
-                    Next
-                  </Button>
-                </div>
+              <div className="hidden sm:flex w-[340px] max-h-[80vh] h-[80vh]">
+                <PanelContent />
               </div>
             )}
           </div>
@@ -396,93 +461,12 @@ export default function AddSmallTeamDialog({
           <DialogContent
             showClose={false}
             mobileSheet
-            className="w-full max-w-[520px] p-0 overflow-hidden max-sm:max-h-[88vh] h-[80vh]"
+            className="w-full max-w-[520px] p-0 overflow-hidden max-sm:max-h-[88vh] h-[80vh] !bg-transparent !shadow-none !border-none"
           >
-            <div className="rounded-xl shadow-lg w-full h-full flex flex-col overflow-hidden bg-gray-50">
-              <div className="flex items-center justify-between border-b px-4 py-3">
-                <Heading level={3}>Selected Members</Heading>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setShowSelectedPanel(false)}
-                >
-                  <X className="h-4 w-4" />
-                </Button>
-              </div>
-
-              <div className="p-4 border-b">
-                <Input
-                  placeholder="Select or search"
-                  value={panelQuery}
-                  onChange={(e) => setPanelQuery(e.target.value)}
-                />
-              </div>
-
-              <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3">
-                {panelMembers.length === 0 ? (
-                  <Text variant="muted">No members selected.</Text>
-                ) : (
-                  panelMembers.map((member) => (
-                    <div
-                      key={member.id}
-                      className="flex items-center justify-between gap-3 rounded-lg border border-gray-200 bg-white px-3 py-2"
-                    >
-                      <div className="flex items-center gap-3 min-w-0">
-                        <Avatar className="h-8 w-8">
-                          <AvatarFallback className="bg-gray-200 text-gray-700 text-xs">
-                            {member.initials}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div className="min-w-0">
-                          <Text variant="default" className="truncate">
-                            {member.fullName}
-                          </Text>
-                          <Text variant="muted" className="truncate">
-                            {member.email}
-                          </Text>
-                        </div>
-                      </div>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => removeSelectedMember(member.id)}
-                        className="text-destructive-600 hover:text-destructive-700"
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  ))
-                )}
-              </div>
-
-              <div className="flex items-center justify-between border-t px-4 py-3 text-xs text-gray-600">
-                <Button variant="ghost" size="sm" className="h-7 px-2">
-                  Previous
-                </Button>
-                <div className="flex items-center gap-2">
-                  <span className="px-2 py-1 rounded bg-gray-200 text-gray-800">
-                    1
-                  </span>
-                  <span>2</span>
-                  <span>Next</span>
-                </div>
-                <Button variant="ghost" size="sm" className="h-7 px-2">
-                  Next
-                </Button>
-              </div>
-            </div>
+            <PanelContent />
           </DialogContent>
         </Dialog>
       )}
-
-      <InviteUserDialog
-        open={inviteOpen}
-        onOpenChange={setInviteOpen}
-        onSubmit={handleInviteSubmit}
-        pendingInvites={pendingInvites}
-        isLoading={isInviteLoading}
-        title={inviteDialogTitle}
-      />
     </>
   );
 }
