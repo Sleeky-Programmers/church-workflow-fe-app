@@ -1,25 +1,24 @@
 "use client";
 
+import { ChevronDown, ChevronUp, Search } from "lucide-react";
 import { useState } from "react";
+
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
-  DropdownMenuTrigger,
   DropdownMenuContent,
+  DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-
+import { Input } from "@/components/ui/input";
+import { Span, Text } from "@/components/ui/typography/Text";
 import {
+  FilterSection,
+  Gender,
   MaritalStatus,
   MembershipStatus,
-  Gender,
-  FilterSection,
 } from "@/lib/enums";
-
-import { Span, Text } from "@/components/ui/typography/Text";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Search, ChevronDown, ChevronUp } from "lucide-react";
-import { formatLabel } from "@/utils/helpers";
 import { FilterProps } from "@/lib/interface";
+import { formatLabel } from "@/utils/helpers";
 
 const FilterDropdown = ({
   filters,
@@ -36,11 +35,7 @@ const FilterDropdown = ({
 
   const pillClass = (active: boolean) =>
     `flex-1 text-xs px-2.5 py-1.5 rounded-md border transition
-     ${
-       active
-         ? "bg-blue-50 border-blue-600 text-gray-700"
-         : "bg-white border-gray-300 text-gray-700 hover:bg-gray-100"
-     }`;
+     ${active ? "bg-blue-50 border-blue-600 text-gray-700" : "bg-white border-gray-300 text-gray-700 hover:bg-gray-100"}`;
 
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>
@@ -185,7 +180,12 @@ const FilterDropdown = ({
           )}
         </div>
 
-        <Button className="w-full mt-3 h-9 text-sm font-medium">Save</Button>
+        <Button
+          onClick={() => setOpen(false)}
+          className="w-full mt-3 h-9 text-sm font-medium"
+        >
+          Save
+        </Button>
       </DropdownMenuContent>
     </DropdownMenu>
   );

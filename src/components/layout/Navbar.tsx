@@ -1,13 +1,14 @@
 "use client";
 
-import { Bell, Search, Star, User } from "lucide-react";
+import { Bell, Search, Star, User, X } from "lucide-react";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
-import React, { useEffect, useMemo, useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import React, { useEffect, useMemo } from "react";
 
 import { RouteConfig } from "@/config/routes";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useFavoritesStore } from "@/stores/useFavoritesStore";
+import { useSearchStore } from "@/stores/useSearchStore";
 import { useUserStore } from "@/stores/useUserStore";
 
 import { Avatar, AvatarFallback } from "../ui/avatar";
@@ -28,8 +29,17 @@ export function Navbar() {
   const pathname = usePathname() || RouteConfig.dashboard.home;
   const router = useRouter();
   const isMobile = useIsMobile();
+  const searchParams = useSearchParams();
 
-  const [search, setSearch] = useState("");
+  // Use Zustand store instead of local state
+  const {
+    searchQuery,
+    setSearchQuery,
+    clearSearch,
+    updateURLSearch,
+    syncFromURL,
+  } = useSearchStore();
+
   const { toggleFavorite, isFavorite } = useFavoritesStore();
   const { user, getUserFullName, fetchUserData } = useUserStore();
   const starred = isFavorite(pathname);
@@ -38,6 +48,11 @@ export function Navbar() {
   useEffect(() => {
     fetchUserData();
   }, [fetchUserData]);
+
+  // Sync URL changes with store
+  useEffect(() => {
+    syncFromURL(searchParams);
+  }, [searchParams, syncFromURL]);
 
   const pageLabel = useMemo(() => {
     const path = pathname.replace(/\/+$/, "");
@@ -51,11 +66,17 @@ export function Navbar() {
   }, [pathname]);
 
   const handleSearch = () => {
-    if (!search.trim()) return;
-    router.push(
-      `${RouteConfig.dashboard.search}?q=${encodeURIComponent(search)}`,
-    );
-    setSearch("");
+    if (!searchQuery.trim()) return;
+    updateURLSearch(pathname, router);
+  };
+
+  const handleClearSearch = () => {
+    clearSearch();
+    updateURLSearch(pathname, router);
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
   };
 
   const displayName = getUserFullName();
@@ -107,15 +128,25 @@ export function Navbar() {
           <Search className="w-4 h-4" />
         </Button>
 
-        <div className="hidden sm:block">
+        <div className="hidden sm:block relative">
           <Input
             leftIcon={<Search className="w-4 h-4" />}
             placeholder="Search"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            value={searchQuery}
+            onChange={handleChange}
             onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-            className="w-48 md:w-64"
+            className="w-48 md:w-64 pr-8"
           />
+          {searchQuery && (
+            <Button
+              size="icon"
+              variant="ghost"
+              className="absolute right-0 top-0 h-full px-3"
+              onClick={handleClearSearch}
+            >
+              <X className="w-4 h-4" />
+            </Button>
+          )}
         </div>
 
         <Link href={RouteConfig.dashboard.notifications}>

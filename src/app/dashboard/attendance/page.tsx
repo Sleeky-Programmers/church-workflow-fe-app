@@ -1,28 +1,31 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
-import { Input } from "@/components/ui/input";
+import { format } from "date-fns";
 import { Search } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
-import { RegularService, SpecialServiceEvent } from "@/types";
+import { useEffect, useMemo, useState } from "react";
+
 import { AttendanceEmptyState } from "@/components/features/dashboard/attendance/attendance-empty-state";
-import { ServiceTypeModal } from "@/components/features/dashboard/attendance/service-type";
+import { AttendanceModal } from "@/components/features/dashboard/attendance/attendance-modal";
+import { CalendarGrid } from "@/components/features/dashboard/attendance/calendar-grid";
 import { CreateRegularServiceModal } from "@/components/features/dashboard/attendance/create-regular-service";
 import { CreateSpecialServiceModal } from "@/components/features/dashboard/attendance/create-special-service";
-import { AttendanceModal } from "@/components/features/dashboard/attendance/attendance-modal";
+import {
+  GivingRecordModal,
+  GivingValues,
+} from "@/components/features/dashboard/attendance/giving-record-modal";
 import { MobileAttendanceView } from "@/components/features/dashboard/attendance/mobile-view";
-import { CalendarGrid } from "@/components/features/dashboard/attendance/calendar-grid";
-import { GivingRecordModal } from "@/components/features/dashboard/attendance/giving-record-modal";
 import { ServiceDetailModal } from "@/components/features/dashboard/attendance/service-detail-modal";
-import { GivingValues } from "@/components/features/dashboard/attendance/giving-record-modal";
+import { ServiceTypeModal } from "@/components/features/dashboard/attendance/service-type";
+import { Input } from "@/components/ui/input";
 import Heading from "@/components/ui/typography/Heading";
 import { Text } from "@/components/ui/typography/Text";
+import { useToast } from "@/hooks/use-toast";
+import { fetchServices } from "@/lib/api";
+import { getCurrentUserProfile } from "@/lib/auth/session";
 import { DEFAULT_ORDER } from "@/lib/data";
 import { ServiceFrequency, ServiceType } from "@/lib/enums";
-import { fetchServices } from "@/lib/api";
-import { format } from "date-fns";
+import { RegularService, SpecialServiceEvent } from "@/types";
 
-import { getCurrentUserProfile } from "@/lib/auth/session";
 function useIsMobile() {
   const [isMobile, setIsMobile] = useState(false);
 
@@ -180,6 +183,22 @@ export default function AttendancePage() {
   };
 
   const handleAddAttendance = (service: RegularService, date: string) => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const selectedDate = new Date(date);
+    selectedDate.setHours(0, 0, 0, 0);
+
+    if (selectedDate > today) {
+      toast({
+        title: "Cannot Mark Attendance",
+        description: `You cannot mark attendance for future dates (${format(selectedDate, "MMMM d, yyyy")}). Attendance can only be recorded for past or current dates.`,
+        variant: "destructive",
+        duration: 5000, // Show for 5 seconds
+      });
+      console.log("testing");
+      return;
+    }
+
     setServiceContext(service, date);
     setIsAttendanceModalOpen(true);
   };

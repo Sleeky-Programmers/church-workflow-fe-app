@@ -1,8 +1,8 @@
 "use client";
 
-import { MoreVertical, Plus, Search } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { MoreVertical, Plus, Search, X } from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { AddMemberModal } from "@/components/features/dashboard/membership/add-member-modal";
 import { CsvUploadModal } from "@/components/features/dashboard/membership/csv-upload-modal";
@@ -26,12 +26,23 @@ import {
 } from "@/lib/enums";
 import { mapFiltersToBackend } from "@/mappers/filter.mapper";
 import { fetchMembers } from "@/services/memberService";
+import { useSearchStore } from "@/stores/useSearchStore";
 import { MemberProfile } from "@/types";
 
 export default function MembershipPage() {
   const { toast } = useToast();
   const router = useRouter();
   const isMobile = useIsMobile();
+  const searchParams = useSearchParams();
+
+  // Use Zustand store for search state
+  const {
+    searchQuery,
+    setSearchQuery,
+    clearSearch,
+    syncFromURL,
+    updateURLSearch,
+  } = useSearchStore();
 
   const [filters, setFilters] = useState({
     gender: null as Gender | null,
@@ -40,7 +51,6 @@ export default function MembershipPage() {
   });
 
   const [members, setMembers] = useState<MemberProfile[]>([]);
-  const [searchQuery, setSearchQuery] = useState("");
   const [selectedMemberIds, setSelectedMemberIds] = useState<string[]>([]);
 
   const [isFormatModalOpen, setIsFormatModalOpen] = useState(false);
@@ -60,6 +70,9 @@ export default function MembershipPage() {
   const debouncedSearch = useDebounce(searchQuery, 500);
   const backendFilter = mapFiltersToBackend(filters);
 
+  // Ref to track if we're clearing search due to selection
+  const isClearingSearchFromSelection = useRef(false);
+
   const loadMembers = useCallback(
     async (pageOverride: number, search: string, filter: string) => {
       try {
@@ -76,21 +89,68 @@ export default function MembershipPage() {
     [toast],
   );
 
+  // Sync URL params with Zustand store on mount and URL changes
+  useEffect(() => {
+    syncFromURL(searchParams);
+  }, [searchParams, syncFromURL]);
+
+  // Update URL when debounced search changes
+  useEffect(() => {
+    if (
+      debouncedSearch === searchQuery &&
+      !isClearingSearchFromSelection.current
+    ) {
+      updateURLSearch(window.location.pathname, router);
+    }
+  }, [debouncedSearch, searchQuery, updateURLSearch, router]);
+
+  // Clear search when members are selected (but don't clear selection)
+  useEffect(() => {
+    if (selectedMemberIds.length > 0 && searchQuery) {
+      isClearingSearchFromSelection.current = true;
+      clearSearch();
+      updateURLSearch(window.location.pathname, router);
+
+      // Reset the flag after a short delay
+      setTimeout(() => {
+        isClearingSearchFromSelection.current = false;
+      }, 100);
+    }
+  }, [
+    selectedMemberIds.length,
+    searchQuery,
+    clearSearch,
+    updateURLSearch,
+    router,
+  ]);
+
+  // Load members when search or filters change (reset to page 1)
   useEffect(() => {
     const newPage = 1;
     setPage(newPage);
     loadMembers(newPage, debouncedSearch, backendFilter);
   }, [debouncedSearch, backendFilter, loadMembers]);
 
+  // Load members when page changes
   useEffect(() => {
     loadMembers(page, debouncedSearch, backendFilter);
   }, [page, debouncedSearch, backendFilter, loadMembers]);
 
-  useEffect(() => {
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newValue = e.target.value;
+    setSearchQuery(newValue);
+    // Clear selection when user starts typing a new search
     if (selectedMemberIds.length > 0) {
-      setSearchQuery("");
+      setSelectedMemberIds([]);
     }
-  }, [selectedMemberIds]);
+  };
+
+  const handleClearSearch = () => {
+    clearSearch();
+    updateURLSearch(window.location.pathname, router);
+    // Keep selection when clearing search manually? Or clear it?
+    // Let's keep selection for better UX
+  };
 
   const handleAddMember = async () => {
     await loadMembers(1, debouncedSearch, backendFilter);
@@ -142,9 +202,17 @@ export default function MembershipPage() {
               <Input
                 placeholder="Search members..."
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
+                onChange={handleSearchChange}
+                className="pl-10 pr-8"
               />
+              {searchQuery && (
+                <button
+                  onClick={handleClearSearch}
+                  className="absolute right-3 top-1/2 -translate-y-1/2"
+                >
+                  <X className="h-4 w-4 text-gray-400 hover:text-gray-600" />
+                </button>
+              )}
             </div>
 
             <FilterDropdown
@@ -180,7 +248,7 @@ export default function MembershipPage() {
         </div>
       </div>
 
-      <div className="py-4 sm:py-6 px-3 sm:px-4">
+      <div className="py-4 sm:py-6 px-3 sm:px-4 relative">
         {isLoading && (
           <div className="absolute inset-0 flex items-center justify-center bg-white/60 z-10">
             <Loader className="h-6 w-6" />
@@ -220,6 +288,7 @@ export default function MembershipPage() {
         onOpenChange={setIsAddModalOpen}
         onMemberAdded={handleAddMember}
       />
+
       <CsvUploadModal
         open={isCsvModalOpen}
         onClose={() => setIsCsvModalOpen(false)}
