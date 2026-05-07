@@ -1,24 +1,24 @@
+import { LucideIcon } from "lucide-react";
+
 import {
+  BillingCycle,
+  ChurchSubscriptionStatus,
   EventCalendarView,
+  EventCategory,
   EventRecurrence,
   EventReminderType,
   EventType,
+  Gender,
+  MaritalStatus,
+  MembershipStatus,
+  MemberTitle,
   NotificationType,
+  PaymentProvider,
+  PlanType,
+  SubscriptionStatus,
   UserRole,
   UserStatus,
-  MemberTitle,
-  MaritalStatus,
-  Gender,
-  MembershipStatus,
-  EventCategory,
-  PlanType,
-  ChurchSubscriptionStatus,
-  PaymentProvider,
-  BillingCycle,
-  SubscriptionStatus,
 } from "@/lib/enums";
-
-import { LucideIcon } from "lucide-react";
 
 export type ActivityRow = {
   _id: string;
@@ -347,6 +347,7 @@ export type UploadFile = {
   status: "uploading" | "paused" | "success" | "error";
   error?: string;
   controller?: AbortController;
+  errorDetails?: string;
 };
 
 export type FileInputProps = {
