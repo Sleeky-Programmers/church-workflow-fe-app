@@ -28,12 +28,8 @@ const buttonVariants = cva(
           "bg-transparent border border-gray-300 text-gray-700 hover:bg-transparent active:bg-transparent focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1",
         filterHeader:
           "bg-transparent hover:bg-transparent text-sm px-0 py-1 justify-between w-full focus-visible:ring-0 focus:outline-none",
-        // Used for the × button inside chip/tag badges (e.g. "Taylor Elizabeth ×")
-        // Renders inline, no padding, inherits text color, turns red on hover
         chipRemove:
           "p-0 h-auto w-auto rounded-none bg-transparent text-current hover:text-red-500 focus-visible:ring-0",
-        // Used for the × remove button on member rows in the Selected Members panel
-        // Has slight padding for hit area, muted red that deepens on hover
         rowRemove:
           "p-1 h-auto w-auto rounded bg-transparent text-red-400 hover:text-red-600 focus-visible:ring-0",
       },
