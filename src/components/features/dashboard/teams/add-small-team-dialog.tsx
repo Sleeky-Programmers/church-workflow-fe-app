@@ -77,12 +77,16 @@ export default function AddSmallTeamDialog({
   const [panelPage, setPanelPage] = useState(1);
 
   const selectedMembers = useMemo(() => {
-    if (!memberIds.length) return [];
+    if (!memberIds.length) {
+      return [];
+    }
     return members.filter((member) => memberIds.includes(member.id));
   }, [memberIds, members]);
 
   const filteredPanelMembers = useMemo(() => {
-    if (!panelQuery.trim()) return selectedMembers;
+    if (!panelQuery.trim()) {
+      return selectedMembers;
+    }
     const query = panelQuery.toLowerCase();
     return selectedMembers.filter(
       (member) =>
@@ -176,14 +180,13 @@ export default function AddSmallTeamDialog({
                 </Text>
               </div>
             </div>
-            <button
-              type="button"
+            <Button
+              variant="rowRemove"
               onClick={() => removeSelectedMember(member.id)}
               aria-label={`Remove ${member.fullName}`}
-              className="text-red-400 hover:text-red-600 p-1 shrink-0"
             >
               <X className="h-4 w-4" />
-            </button>
+            </Button>
           </div>
         ))
       )}
@@ -191,7 +194,9 @@ export default function AddSmallTeamDialog({
   );
 
   const PaginationFooter = () => {
-    if (totalPanelPages <= 1) return null;
+    if (totalPanelPages <= 1) {
+      return null;
+    }
 
     return (
       <div className="flex items-center justify-between border-t px-4 py-3">
@@ -210,19 +215,19 @@ export default function AddSmallTeamDialog({
             const pageNum = i + 1;
             const isActive = pageNum === safePage;
             return (
-              <button
+              <Button
                 key={pageNum}
-                type="button"
+                // variant="pageNumber"
                 onClick={() => handlePageChange(pageNum)}
                 className={cn(
-                  "px-2 py-0.5 rounded text-xs transition-colors",
+                  "px-2 py-0.5 text-xs",
                   isActive
                     ? "bg-gray-200 text-gray-800 font-medium"
                     : "text-gray-500 hover:text-gray-700",
                 )}
               >
                 {pageNum}
-              </button>
+              </Button>
             );
           })}
         </div>
@@ -292,6 +297,7 @@ export default function AddSmallTeamDialog({
           )}
         >
           <div className="flex items-start gap-4">
+            {/* LEFT MODAL */}
             <div className="rounded-xl w-full sm:w-[510px] h-full flex flex-col overflow-hidden bg-white">
               <div className="flex justify-between items-center border-b px-6 py-4">
                 <Heading level={2}>Add a Small Team</Heading>
@@ -368,7 +374,9 @@ export default function AddSmallTeamDialog({
                       <div className="flex flex-wrap gap-2">
                         {memberIds.slice(0, 3).map((id) => {
                           const member = members.find((m) => m.id === id);
-                          if (!member) return null;
+                          if (!member) {
+                            return null;
+                          }
 
                           return (
                             <Span
@@ -377,14 +385,13 @@ export default function AddSmallTeamDialog({
                               className="flex items-center gap-1"
                             >
                               {member.fullName.split(" ")[0]}
-                              <button
-                                type="button"
+                              <Button
+                                variant="chipRemove"
                                 onClick={() => removeSelectedMember(id)}
                                 aria-label={`Remove ${member.fullName}`}
-                                className="ml-0.5 hover:text-red-500"
                               >
                                 <X className="h-3 w-3" />
-                              </button>
+                              </Button>
                             </Span>
                           );
                         })}
@@ -442,6 +449,7 @@ export default function AddSmallTeamDialog({
               </div>
             </div>
 
+            {/* RIGHT PANEL — desktop only */}
             {!isMobile && showSelectedPanel && (
               <div className="hidden sm:flex w-[340px] max-h-[80vh] h-[80vh]">
                 <PanelContent />
@@ -451,6 +459,7 @@ export default function AddSmallTeamDialog({
         </DialogContent>
       </Dialog>
 
+      {/* RIGHT PANEL — mobile sheet */}
       {isMobile && showSelectedPanel && (
         <Dialog open={showSelectedPanel} onOpenChange={setShowSelectedPanel}>
           <DialogContent
