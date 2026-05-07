@@ -1,7 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { format } from "date-fns";
+import { Calendar, Clock, MapPin, User, X } from "lucide-react";
+import { useEffect, useState } from "react";
+
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -9,22 +12,21 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Calendar, Clock, MapPin, User, X } from "lucide-react";
-import { AttendanceRecord, RegularService } from "@/types";
+import { Span } from "@/components/ui/typography/Text";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { useToast } from "@/hooks/use-toast";
 import { useAttendanceModal } from "@/hooks/useAttendanceModal";
 import {
   fetchMembers,
   getAttendanceRecord,
-  saveAttendance,
   saveAbsentAttendance,
+  saveAttendance,
 } from "@/lib/api";
-import { SelectMembersView } from "./select-member-view";
-import { AttendanceStatsView } from "./attendance-stats";
-import { Span } from "@/components/ui/typography/Text";
-import { useToast } from "@/hooks/use-toast";
-import { useIsMobile } from "@/hooks/use-mobile";
 import { getCurrentUserProfile } from "@/lib/auth/session";
+import { AttendanceRecord, RegularService } from "@/types";
+
+import { AttendanceStatsView } from "./attendance-stats";
+import { SelectMembersView } from "./select-member-view";
 
 type AttendanceModalProps = {
   isOpen: boolean;
@@ -97,8 +99,27 @@ export function AttendanceModal({
     setAttendanceStats(null);
   }, [isOpen]);
 
+  const isFutureDate = (dateString: string): boolean => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const selectedDate = new Date(dateString);
+    selectedDate.setHours(0, 0, 0, 0);
+    return selectedDate > today;
+  };
+
   useEffect(() => {
     if (!isOpen || !service || !date) return;
+
+    if (isFutureDate(date)) {
+      toast({
+        title: "Cannot Mark Attendance",
+        description:
+          "You cannot mark attendance for future dates. Please select a past or current date.",
+        variant: "destructive",
+      });
+      handleClose();
+      return;
+    }
 
     let isActive = true;
 
@@ -390,7 +411,11 @@ export function AttendanceModal({
       />
 
       <div className="px-6 py-4 mt-auto">
-        {hasExistingAttendance && !isEditMode ? (
+        {isFutureDate(date) ? (
+          <Button disabled className="w-full opacity-50 cursor-not-allowed">
+            Cannot Edit Future Dates
+          </Button>
+        ) : hasExistingAttendance && !isEditMode ? (
           <Button onClick={() => setIsEditMode(true)} className="w-full">
             Edit
           </Button>
