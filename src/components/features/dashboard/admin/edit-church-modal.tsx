@@ -2,19 +2,20 @@
 
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
+
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
-  DialogHeader,
   DialogFooter,
+  DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { useToast } from "@/hooks/use-toast";
 import { updateChurch } from "@/services/churchService";
-import { useIsMobile } from "@/hooks/use-mobile";
 
 type FormValues = {
   name: string;
@@ -79,7 +80,7 @@ export function EditChurchModal({
           <DialogTitle>Edit Church</DialogTitle>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="px-6 space-y-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="px-6 pb-5 space-y-4">
           <div>
             <Label>Church Name</Label>
             <Input
@@ -113,12 +114,13 @@ export function EditChurchModal({
             <Button
               type="button"
               variant="destructive"
+              size={"sm"}
               onClick={() => onOpenChange(false)}
             >
               Cancel
             </Button>
 
-            <Button type="submit" disabled={isSubmitting}>
+            <Button type="submit" size={"sm"} disabled={isSubmitting}>
               {isSubmitting ? "Saving..." : "Save"}
             </Button>
           </DialogFooter>

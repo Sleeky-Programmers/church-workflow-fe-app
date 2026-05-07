@@ -220,7 +220,6 @@ export default function MembershipPage() {
         onOpenChange={setIsAddModalOpen}
         onMemberAdded={handleAddMember}
       />
-
       <CsvUploadModal
         open={isCsvModalOpen}
         onClose={() => setIsCsvModalOpen(false)}
@@ -230,7 +229,7 @@ export default function MembershipPage() {
           setPagination(response.pagination);
           setPage(1);
         }}
-        onOpenChange={setIsFormatModalOpen}
+        onOpenChange={setIsCsvModalOpen}
       />
 
       <DeleteMembersModal

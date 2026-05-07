@@ -2,20 +2,22 @@
 
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
+
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
-  DialogHeader,
   DialogFooter,
+  DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Text } from "@/components/ui/typography/Text";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { useToast } from "@/hooks/use-toast";
 import { updateProfile } from "@/services/userServices";
-import { useIsMobile } from "@/hooks/use-mobile";
-import { Text } from "@/components/ui/typography/Text";
+
 type FormValues = {
   firstName: string;
   lastName: string;
@@ -74,7 +76,7 @@ export function EditPersonalInfoModal({
           <DialogTitle>Update Personal Information</DialogTitle>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="px-6 space-y-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="px-6 pb-5 space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
               <Label>First Name</Label>
@@ -130,7 +132,7 @@ export function EditPersonalInfoModal({
               Cancel
             </Button>
 
-            <Button type="submit" disabled={isSubmitting}>
+            <Button type="submit" size={"sm"} disabled={isSubmitting}>
               {isSubmitting ? "Saving..." : "Save"}
             </Button>
           </DialogFooter>

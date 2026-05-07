@@ -1,7 +1,16 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
 import { Bell, Search, Star, User } from "lucide-react";
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
+import React, { useEffect, useMemo, useState } from "react";
+
+import { RouteConfig } from "@/config/routes";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { useFavoritesStore } from "@/stores/useFavoritesStore";
+import { useUserStore } from "@/stores/useUserStore";
+
+import { Avatar, AvatarFallback } from "../ui/avatar";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -10,18 +19,10 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "../ui/breadcrumb";
-import { usePathname, useRouter } from "next/navigation";
+import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { SidebarTrigger } from "../ui/sidebar";
-import { Button } from "../ui/button";
-import { Avatar, AvatarFallback } from "../ui/avatar";
-import Link from "next/link";
 import { Text } from "../ui/typography/Text";
-import { RouteConfig } from "@/config/routes";
-import { useFavoritesStore } from "@/stores/useFavoritesStore";
-import { useAuthStore } from "@/stores/useAuthStore";
-import { getCurrentUserProfile } from "@/lib/auth/session";
-import { useIsMobile } from "@/hooks/use-mobile";
 
 export function Navbar() {
   const pathname = usePathname() || RouteConfig.dashboard.home;
@@ -29,21 +30,14 @@ export function Navbar() {
   const isMobile = useIsMobile();
 
   const [search, setSearch] = useState("");
-  const [fallbackName, setFallbackName] = useState("John Doe");
   const { toggleFavorite, isFavorite } = useFavoritesStore();
-  const { user } = useAuthStore();
+  const { user, getUserFullName, fetchUserData } = useUserStore();
   const starred = isFavorite(pathname);
 
+  // Fetch user data if not already loaded
   useEffect(() => {
-    const profile = getCurrentUserProfile();
-    if (profile?.firstName) {
-      setFallbackName(profile.firstName);
-      return;
-    }
-    if (profile?.fullName) {
-      setFallbackName(profile.fullName);
-    }
-  }, []);
+    fetchUserData();
+  }, [fetchUserData]);
 
   const pageLabel = useMemo(() => {
     const path = pathname.replace(/\/+$/, "");
@@ -64,7 +58,10 @@ export function Navbar() {
     setSearch("");
   };
 
+  const displayName = getUserFullName();
+
   if (isMobile) return null;
+
   return (
     <header className="w-full hidden md:flex flex items-center h-16 gap-2 px-3 md:px-6 border-b">
       <div className="flex items-center gap-2 min-w-0">
@@ -131,11 +128,13 @@ export function Navbar() {
           <Button variant="ghost" className="flex items-center gap-2 p-0">
             <Avatar>
               <AvatarFallback>
-                <User className="w-4 h-4" />
+                {displayName.charAt(0).toUpperCase() || (
+                  <User className="w-4 h-4" />
+                )}
               </AvatarFallback>
             </Avatar>
             <Text variant="default" className="hidden sm:block">
-              {user?.name || fallbackName}
+              {displayName}
             </Text>
           </Button>
         </Link>

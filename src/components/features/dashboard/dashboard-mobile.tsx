@@ -114,25 +114,42 @@ export default function DashboardMobile({
               <CalendarDays className="w-5 h-5 text-primary-600" />
             </div>
 
-            <div className="space-y-3">
-              <p className="text-[12.5px] font-bold text-primary-400 mb-1">
-                Services
-              </p>
+            <div className="space-y-4">
               {sortedUpcomingEvents.length === 0 ? (
                 <Text text="No upcoming services" variant="muted" />
               ) : (
                 sortedUpcomingEvents.map((event, i) => {
                   const config = EVENT_CATEGORY_CONFIG[event.category];
                   const date = formatEventDate(event.date);
+                  const iconColors = [
+                    "bg-blue-500",
+                    "bg-orange-500",
+                    "bg-blue-500",
+                    "bg-orange-500",
+                  ];
+
                   return (
-                    <div key={i} className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <span
-                          className={`w-2 h-2 rounded-full ${config.dotClass}`}
-                        />
-                        <Text text={event.title} />
+                    <div key={i} className="flex items-center gap-3">
+                      {/* Colored icon box */}
+                      <div
+                        className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${iconColors[i % iconColors.length]}`}
+                      >
+                        <CalendarDays className="w-5 h-5 text-white-600" />
                       </div>
-                      <Span text={date || ""} />
+
+                      {/* Title + Location */}
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-semibold text-gray-900 leading-tight">
+                          {event.title}
+                        </p>
+                      </div>
+
+                      {/* Date */}
+                      <div className="text-right shrink-0">
+                        <span className="text-xs text-gray-400 font-medium whitespace-nowrap">
+                          {date}
+                        </span>
+                      </div>
                     </div>
                   );
                 })
