@@ -163,17 +163,17 @@ export default function Dashboard() {
   // ── Attendance ──
   useEffect(() => {
     fetchAttendanceStats()
-      .then(
-        ({ totalAttendance, attendanceGrowth, monthlyAttendanceTrends }) => {
-          setServiceAttendance(totalAttendance.toLocaleString());
-          setServiceAttendanceGrowth(attendanceGrowth || "0%");
-          const trends = monthlyAttendanceTrends || [];
-          setAttendanceTrendData(trends);
-          setIncomeTrendData(
-            trends.map((t) => ({ month: t.month, thisMonth: 0, lastMonth: 0 })),
-          );
-        },
-      )
+      .then((res) => {
+        const { totalAttendance, attendanceGrowth, monthlyAttendanceTrends } =
+          res;
+        setServiceAttendance(totalAttendance.toLocaleString());
+        setServiceAttendanceGrowth(attendanceGrowth || "0%");
+        const trends = monthlyAttendanceTrends || [];
+        setAttendanceTrendData(trends);
+        setIncomeTrendData(
+          trends.map((t) => ({ month: t.month, thisMonth: 0, lastMonth: 0 })),
+        );
+      })
       .catch(() => {});
   }, []);
 

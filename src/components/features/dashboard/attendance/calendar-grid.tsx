@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
 import {
   addDays,
   addMonths,
@@ -11,20 +10,10 @@ import {
   startOfWeek,
   subMonths,
 } from "date-fns";
-import { ChevronLeft, ChevronRight, Filter, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, X } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+
 import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 import {
   Dialog,
   DialogContent,
@@ -32,11 +21,19 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { generateCalendarDays, mapServicesToCalendar } from "@/lib/utils";
-import { RegularService } from "@/types";
-import { CalendarDayCell } from "./calendar-day-cell";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Span, Text } from "@/components/ui/typography/Text";
-import { SpecialServiceEvent } from "@/types";
+import { generateCalendarDays, mapServicesToCalendar } from "@/lib/utils";
+import { RegularService, SpecialServiceEvent } from "@/types";
+
+import { CalendarFilterDropdown } from "../calendar-filter-dropdown"; // Import your new component
+import { CalendarDayCell } from "./calendar-day-cell";
 
 type CalendarGridProps = {
   services: RegularService[];
@@ -439,87 +436,18 @@ export function CalendarGrid({
               </SelectContent>
             </Select>
 
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button variant="ghost" className="h-8 gap-1">
-                  <Filter className="h-4 w-4" />
-                  Filter
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent align="end" className="w-72 space-y-4">
-                <div className="flex items-center justify-between">
-                  <Text>Filters</Text>
-                  <Button
-                    variant="link"
-                    className="h-auto p-0 text-destructive"
-                    onClick={handleClearFilters}
-                  >
-                    Clear all
-                  </Button>
-                </div>
-
-                <div className="space-y-2">
-                  <Text className="font-medium">By View</Text>
-                  <div className="flex items-center gap-2">
-                    {(["week", "month", "year"] as CalendarView[]).map(
-                      (view) => (
-                        <Button
-                          key={view}
-                          size="sm"
-                          variant={viewMode === view ? "default" : "outline"}
-                          onClick={() => setViewMode(view)}
-                          className="h-7 capitalize"
-                        >
-                          {view}
-                        </Button>
-                      ),
-                    )}
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Text className="font-medium">By Date</Text>
-                  <input
-                    type="date"
-                    value={filterDate}
-                    onChange={(e) => setFilterDate(e.target.value)}
-                    className="w-full h-9 rounded-md border border-input px-3 text-sm bg-background"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Text className="font-medium">By Service</Text>
-                  <Select
-                    value={filterServiceId}
-                    onValueChange={setFilterServiceId}
-                  >
-                    <SelectTrigger className="h-9">
-                      <SelectValue placeholder="All services" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All services</SelectItem>
-                      {services.map((service, index) => {
-                        const safeValue =
-                          service.id || `service-option-${index}`;
-                        return (
-                          <SelectItem
-                            key={`${safeValue}-${index}`}
-                            value={safeValue}
-                          >
-                            {service.serviceName}
-                          </SelectItem>
-                        );
-                      })}
-                      {specialServices.map((service) => (
-                        <SelectItem key={service.id} value={service.id}>
-                          {service.serviceName} (Special)
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </PopoverContent>
-            </Popover>
+            {/* Replace the Popover with your new CalendarFilterDropdown */}
+            <CalendarFilterDropdown
+              viewMode={viewMode}
+              setViewMode={setViewMode}
+              filterDate={filterDate}
+              setFilterDate={setFilterDate}
+              filterServiceId={filterServiceId}
+              setFilterServiceId={setFilterServiceId}
+              services={services}
+              specialServices={specialServices}
+              onClearFilters={handleClearFilters}
+            />
 
             <Button onClick={onAddService} className="h-8">
               Add service

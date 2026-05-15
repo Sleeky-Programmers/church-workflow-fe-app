@@ -7,7 +7,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { AddMemberModal } from "@/components/features/dashboard/membership/add-member-modal";
 import { CsvUploadModal } from "@/components/features/dashboard/membership/csv-upload-modal";
 import { DeleteMembersModal } from "@/components/features/dashboard/membership/delete-member-modal";
-import FilterDropdown from "@/components/features/dashboard/membership/filter-drop-down";
+import { MemberFilterDropdown } from "@/components/features/dashboard/membership/member-filter-dropdown";
 import { MembersTable } from "@/components/features/dashboard/membership/members-table";
 import { AddMemberFormatModal } from "@/components/features/dashboard/membership/select-modal";
 import { Button } from "@/components/ui/button";
@@ -215,7 +215,7 @@ export default function MembershipPage() {
               )}
             </div>
 
-            <FilterDropdown
+            <MemberFilterDropdown
               filters={filters}
               setFilters={setFilters}
               searchQuery={searchQuery}
