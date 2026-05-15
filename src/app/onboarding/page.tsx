@@ -1,12 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+
 import { OnboardingLayout } from "@/components/features/landing/layout/onboarding-layout";
 import ChurchOnboarding from "@/components/features/onboarding";
+import { Text } from "@/components/ui/typography/Text";
 import { RouteConfig } from "@/config/routes";
-import { getAccessToken } from "@/lib/auth/session";
 import { getMyChurch } from "@/lib/api";
+import { getAccessToken } from "@/lib/auth/session";
 
 export default function OnboardingPage() {
   const router = useRouter();
@@ -49,7 +51,15 @@ export default function OnboardingPage() {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <OnboardingLayout>
-          <div className="text-center">Loading onboarding...</div>
+          <div className="flex items-center justify-center min-h-[320px]">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600 mx-auto" />
+              <Text variant="default" className="mt-3">
+                Loading onboarding...
+              </Text>
+            </div>
+          </div>
+          {/* <div className="text-center">Loading onboarding...</div> */}
         </OnboardingLayout>
       </div>
     );

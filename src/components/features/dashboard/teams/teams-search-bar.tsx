@@ -1,10 +1,13 @@
 "use client";
 
-import { Input } from "@/components/ui/input";
+import { Search } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
-import { Search, ChevronDown } from "lucide-react";
-import AddSmallTeamDialog from "./add-small-team-dialog";
+import { Input } from "@/components/ui/input";
 import { MemberProfile } from "@/types";
+
+import AddSmallTeamDialog from "./add-small-team-dialog";
+import { TeamsFilterDropdown, TeamStatusFilter } from "./teams-filter-dropdown";
 
 interface Props {
   query: string;
@@ -17,6 +20,14 @@ interface Props {
     status: string;
     description: string;
   }) => Promise<void>;
+  // Filter props
+  statusFilter: TeamStatusFilter;
+  setStatusFilter: (status: TeamStatusFilter) => void;
+  selectedMemberId: string;
+  setSelectedMemberId: (memberId: string) => void;
+  minMembers: number;
+  setMinMembers: (min: number) => void;
+  onClearFilters: () => void;
 }
 
 export default function TeamsSearchBar({
@@ -24,6 +35,13 @@ export default function TeamsSearchBar({
   onQueryChange,
   members,
   onSave,
+  statusFilter,
+  setStatusFilter,
+  selectedMemberId,
+  setSelectedMemberId,
+  minMembers,
+  setMinMembers,
+  onClearFilters,
 }: Props) {
   return (
     <div className="flex items-center justify-between">
@@ -37,10 +55,18 @@ export default function TeamsSearchBar({
         />
       </div>
       <div className="flex items-center gap-3">
-        <Button variant="ghost" className="hidden sm:flex items-center gap-2">
-          Filter
-          <ChevronDown className="w-4 h-4" />
-        </Button>
+        <TeamsFilterDropdown
+          searchQuery={query}
+          setSearchQuery={onQueryChange}
+          statusFilter={statusFilter}
+          setStatusFilter={setStatusFilter}
+          selectedMemberId={selectedMemberId}
+          setSelectedMemberId={setSelectedMemberId}
+          members={members}
+          minMembers={minMembers}
+          setMinMembers={setMinMembers}
+          onClearFilters={onClearFilters}
+        />
         <AddSmallTeamDialog members={members} onSave={onSave} />
       </div>
     </div>
