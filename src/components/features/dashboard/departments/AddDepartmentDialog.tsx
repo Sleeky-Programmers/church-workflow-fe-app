@@ -1,24 +1,21 @@
 "use client";
 
+import { ExternalLink, Plus, RefreshCw, X } from "lucide-react";
 import { useState } from "react";
-import { Plus, RefreshCw, ExternalLink, X } from "lucide-react";
+
+import {
+  MemberMultiSelect,
+  MemberSingleSelect,
+} from "@/components/features/dashboard/departments/member-selectors";
 import { Button } from "@/components/ui/button";
-import { fetchMembers } from "@/services/memberService";
-import { fetchAdmins } from "@/services/userServices";
-import { useToast } from "@/hooks/use-toast";
-import { useIsMobile } from "@/hooks/use-mobile";
-import { createDepartment } from "@/services/departmentService";
 import {
   Dialog,
-  DialogTrigger,
-  DialogContent,
   DialogClose,
+  DialogContent,
+  DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { MemberProfile } from "@/types";
-import { Textarea } from "@/components/ui/textarea";
-import Heading from "@/components/ui/typography/Heading";
 import {
   Select,
   SelectContent,
@@ -26,13 +23,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  MemberMultiSelect,
-  MemberSingleSelect,
-} from "@/components/features/dashboard/departments/member-selectors";
-import { InviteUserDialog } from "../admin/invite-user";
-import { InviteFormData, PendingInvite } from "@/types/user";
+import { Textarea } from "@/components/ui/textarea";
+import Heading from "@/components/ui/typography/Heading";
 import { Span } from "@/components/ui/typography/Text";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { useToast } from "@/hooks/use-toast";
+import { createDepartment } from "@/services/departmentService";
+import { fetchMembers } from "@/services/memberService";
+import { fetchAdmins } from "@/services/userServices";
+import { MemberProfile } from "@/types";
+import { InviteFormData, PendingInvite } from "@/types/user";
+
+import { InviteUserDialog } from "../admin/invite-user";
 
 interface Props {
   onSave?: (payload: {
@@ -92,6 +94,16 @@ export default function AddDepartmentDialog({ onSave }: Props) {
         hod: hodId,
         memberIds,
       });
+
+      if (onSave) {
+        await onSave({
+          name: departmentName,
+          hodId,
+          memberIds,
+          status,
+          description,
+        });
+      }
 
       toast({
         title: "Success",

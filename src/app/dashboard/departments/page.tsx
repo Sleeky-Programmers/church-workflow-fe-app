@@ -1,18 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { ChevronDown, MoreVertical, Search } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { Search, ChevronDown, MoreVertical } from "lucide-react";
+import { useEffect, useState } from "react";
 
+import AddDepartmentDialog from "@/components/features/dashboard/departments/AddDepartmentDialog";
+import { getDepartmentColumns } from "@/components/features/dashboard/departments/department-columns";
 import Table from "@/components/features/dashboard/Table";
-import Heading from "@/components/ui/typography/Heading";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { useToast } from "@/hooks/use-toast";
-import { useIsMobile } from "@/hooks/use-mobile";
-import { Loader } from "@/components/ui/loader";
-
-import { mapDepartmentToRow } from "@/mappers/department.mapper";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -23,19 +17,22 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-
-import AddDepartmentDialog from "@/components/features/dashboard/departments/AddDepartmentDialog";
-import { DepartmentRow } from "@/types";
-
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Loader } from "@/components/ui/loader";
+import { SidebarTrigger } from "@/components/ui/sidebar";
+import Heading from "@/components/ui/typography/Heading";
+import { RouteConfig } from "@/config/routes";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { useToast } from "@/hooks/use-toast";
+import { mapDepartmentToRow } from "@/mappers/department.mapper";
 import {
-  fetchDepartments,
   deleteDepartment,
   exportDepartments,
+  fetchDepartments,
 } from "@/services/departmentService";
+import { DepartmentRow } from "@/types";
 
-import { getDepartmentColumns } from "@/components/features/dashboard/departments/department-columns";
-import { RouteConfig } from "@/config/routes";
-import { SidebarTrigger } from "@/components/ui/sidebar";
 export default function DepartmentPage() {
   const router = useRouter();
   const isMobile = useIsMobile();

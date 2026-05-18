@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { ComponentType, useState } from "react";
 
 import {
@@ -18,6 +18,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { logout } from "@/lib/auth/session";
 import { SidebarData } from "@/lib/data";
 import { ActiveTab } from "@/lib/enums";
 import { cn } from "@/lib/utils";
@@ -55,6 +56,7 @@ export const normalizeIcon = (
 
 export function AppSidebar() {
   const pathname = usePathname();
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState<ActiveTab>(ActiveTab.FAVOURITES);
   const { favorites } = useFavoritesStore();
   const { isMobile, setOpenMobile } = useSidebar();
@@ -69,6 +71,19 @@ export function AppSidebar() {
   };
 
   const handleNavigate = () => {
+    if (isMobile) {
+      setOpenMobile(false);
+    }
+  };
+
+  const handleLogout = async () => {
+    // Clear localStorage session
+    await logout();
+
+    // Navigate to login page
+    router.push("/auth/login");
+
+    // Close mobile sidebar if open
     if (isMobile) {
       setOpenMobile(false);
     }
@@ -225,7 +240,7 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        <SidebarFooter className="mt-auto">
+        {/* <SidebarFooter className="mt-auto">
           <SidebarMenu>
             {SidebarData.footer.map((page) => (
               <SidebarMenuItem key={page.title}>
@@ -235,6 +250,32 @@ export function AppSidebar() {
                     <Text>{page.title}</Text>
                   </Link>
                 </SidebarMenuButton>
+              </SidebarMenuItem>
+            ))}
+          </SidebarMenu>
+        </SidebarFooter> */}
+        <SidebarFooter className="mt-auto">
+          <SidebarMenu>
+            {SidebarData.footer.map((page) => (
+              <SidebarMenuItem key={page.title}>
+                {page.title === "Logout" ? (
+                  <SidebarMenuButton asChild isActive={false}>
+                    <button
+                      onClick={handleLogout}
+                      className="flex items-center gap-2 w-full"
+                    >
+                      <page.icon />
+                      <Text>{page.title}</Text>
+                    </button>
+                  </SidebarMenuButton>
+                ) : (
+                  <SidebarMenuButton asChild isActive={isActive(page.url)}>
+                    <Link href={page.url} onClick={handleNavigate}>
+                      <page.icon />
+                      <Text>{page.title}</Text>
+                    </Link>
+                  </SidebarMenuButton>
+                )}
               </SidebarMenuItem>
             ))}
           </SidebarMenu>
