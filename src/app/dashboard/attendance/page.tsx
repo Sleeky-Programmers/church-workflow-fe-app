@@ -71,25 +71,33 @@ export default function AttendancePage() {
     [],
   );
 
-  useEffect(() => {
-    const loadServices = async () => {
-      setIsLoading(true);
-      try {
-        const data = await fetchServices(format(new Date(), "yyyy-MM"));
-        setServices(data);
-      } catch (error: any) {
-        toast({
-          title: "Error",
-          description: error.message || "Failed to load services",
-          variant: "destructive",
-        });
-      } finally {
-        setIsLoading(false);
-      }
-    };
+  const loadServices = async () => {
+    setIsLoading(true);
+    try {
+      const data = await fetchServices(format(new Date(), "yyyy-MM"));
+      setServices(data);
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to load services",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
+  useEffect(() => {
     loadServices();
-  }, [toast]);
+  }, []);
+
+  const handleCreateServices = async (newServices: RegularService[]) => {
+    await loadServices();
+    toast({
+      title: "Success",
+      description: "Service created successfully",
+    });
+  };
 
   const setServiceContext = (service: RegularService, date: string) => {
     setSelectedService(service);
@@ -166,16 +174,12 @@ export default function AttendancePage() {
     }
   };
 
-  const handleCreateServices = (newServices: RegularService[]) => {
-    setServices((prev) => [...prev, ...newServices]);
-  };
-
   const handleAddService = () => {
     setIsTypeModalOpen(true);
   };
 
-  const handleCreateSpecialService = (service: SpecialServiceEvent) => {
-    setSpecialServices((prev) => [...prev, service]);
+  const handleCreateSpecialService = async (service: SpecialServiceEvent) => {
+    await loadServices();
     toast({
       title: "Success",
       description: "Special service created successfully",

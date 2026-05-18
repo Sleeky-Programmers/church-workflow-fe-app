@@ -423,7 +423,7 @@ export default function Dashboard() {
             className="w-full mt-5 rounded-xl bg-primary-400 hover:bg-primary-600
                         !text-white font-bold text-[13.5px] h-10 shrink-0"
           >
-            <Link href="/dashboard/membership">View more</Link>
+            <Link href="/dashboard/events">View more</Link>
           </Button>
         </aside>
       </div>

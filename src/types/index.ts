@@ -311,6 +311,32 @@ export type ChurchEvent = {
   colorClass: string;
 };
 
+export interface ChurchService {
+  id: string;
+  churchId: string;
+  serviceName: string;
+  type: string; // "REGULAR" | "SPECIAL" etc.
+  day: string; // "SUNDAY", "MONDAY", etc.
+  startTime: string;
+  endTime: string;
+  location: string;
+  specialDays: string[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ChurchServicesResponse {
+  data: ChurchService[];
+  pagination: {
+    page: number;
+    limit: number;
+    itemCount: number;
+    totalPages: number;
+    hasPreviousPage: boolean;
+    hasNextPage: boolean;
+  };
+}
+
 export type EventFormData = Omit<ChurchEvent, "id" | "colorClass">;
 
 export type EventTypeOption = {
