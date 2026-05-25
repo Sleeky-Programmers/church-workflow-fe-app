@@ -264,7 +264,6 @@ export function UserManagementPage() {
         onOpenChange={setIsInviteDialogOpen}
         onSubmit={handleInviteUser}
         isLoading={isActionLoading}
-        roles={roles}
         onRoleCreated={refetchRoles}
       />
 
