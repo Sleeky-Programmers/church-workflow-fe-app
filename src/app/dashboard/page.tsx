@@ -1,6 +1,6 @@
 "use client";
 
-import { CalendarDays, User } from "lucide-react";
+import { CalendarDays, Loader, User } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -13,6 +13,7 @@ import {
 import { TrendChart } from "@/components/features/dashboard/trend-chart";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { Text } from "@/components/ui/typography/Text";
 import { EVENT_CATEGORY_CONFIG } from "@/config/event-category";
 import { useIsMobile } from "@/hooks/use-mobile";
 import {
@@ -32,10 +33,10 @@ import {
   sortBirthdaysByNearest,
 } from "@/lib/utils";
 import { fetchMembers as fetchMemberProfiles } from "@/services/memberService";
+import { useUserStore } from "@/stores/useUserStore";
 import { ChurchEvent } from "@/types";
 
 import type { ChurchResponse } from "@/types/payload";
-
 // ─────────────────────────────────────────────────────────────────────────────
 // Constants
 // ─────────────────────────────────────────────────────────────────────────────
@@ -76,6 +77,8 @@ const DOT_COLORS: Record<string, string> = {
 // ─────────────────────────────────────────────────────────────────────────────
 
 export default function Dashboard() {
+  const { user, church, isLoading, error, fetchUserData } = useUserStore();
+
   const [displayName, setDisplayName] = useState("Super Admin");
   const isMobile = useIsMobile();
 
@@ -97,58 +100,50 @@ export default function Dashboard() {
     "This Month",
   );
 
-  // Single church state
-  const [church, setChurch] = useState<{
-    _id: string;
-    name: string;
-    alias: string;
-    address: string;
-    country: string;
-    state: string;
-    defaultCurrency: string;
-    logoUrl: null | string;
-  }>({
-    _id: "",
-    name: "Your Church",
-    alias: "",
-    address: "",
-    country: "",
-    state: "",
-    defaultCurrency: "NGN",
-    logoUrl: null,
-  });
-
   // ── Profile ──
   useEffect(() => {
-    const profile = getCurrentUserProfile();
-    if (profile?.firstName) setDisplayName(profile.firstName);
-    else if (profile?.fullName) setDisplayName(profile.fullName);
-  }, []);
-
-  // ── Church ──
-  useEffect(() => {
-    async function loadChurch() {
-      try {
-        const churchData = await getMyChurch();
-        console.log({ church: churchData });
-        if (churchData) {
-          setChurch({
-            _id: churchData._id || "",
-            name: churchData.name || "Your Church",
-            alias: churchData.alias || "",
-            address: churchData.address || "",
-            country: churchData.country || "",
-            state: churchData.state || "",
-            defaultCurrency: churchData.defaultCurrency || "NGN",
-            logoUrl: churchData.logoUrl || null,
-          });
-        }
-      } catch {
-        /* silent - keep default church state */
-      }
+    if (user?.firstName) {
+      setDisplayName(user.firstName);
     }
-    loadChurch();
-  }, []);
+  }, [user?.firstName]);
+
+  // Fetch user data on mount
+  useEffect(() => {
+    fetchUserData();
+  }, [fetchUserData]);
+
+  // Handle error state
+  if (error) {
+    return (
+      <div className="flex items-center justify-center py-16 gap-2 flex-col">
+        <div className="text-red-500 text-center">
+          <Text variant="error" className="mb-2">
+            Error loading profile
+          </Text>
+          <Text variant="default" className="text-sm text-gray-600">
+            {error}
+          </Text>
+          <Button
+            onClick={() => fetchUserData(true)}
+            className="mt-4"
+            variant="outline"
+          >
+            Retry
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-16 gap-2">
+        <Loader className="animate-spin h-5 w-5" />
+        <Text>Loading profile...</Text>
+      </div>
+    );
+  }
 
   // ── Members ──
   useEffect(() => {
@@ -234,7 +229,7 @@ export default function Dashboard() {
     return (
       <DashboardMobile
         displayName={displayName}
-        churchName={church.name}
+        churchName={church?.name || "Your Church"}
         totalMembers={totalMembers}
         totalMembersGrowth={totalMembersGrowth}
         serviceAttendance={serviceAttendance}
@@ -252,10 +247,10 @@ export default function Dashboard() {
     .filter((e) => isInFuture(e.date))
     .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
-  // Only compute initials as fallback when alias is not available
-  const churchInitials = church.alias
+  // Safely handle null church values with fallbacks
+  const churchInitials = church?.alias
     ? church.alias.substring(0, 2).toUpperCase()
-    : church.name && church.name !== "Your Church"
+    : church?.name && church.name !== "Your Church"
       ? church.name
           .split(" ")
           .slice(0, 2)
@@ -265,19 +260,19 @@ export default function Dashboard() {
       : "CW";
 
   // Get location string from address, state, country
-  const churchLocation = [church.address].filter(Boolean).join(", ");
+  const churchLocation = church?.address ? church.address : "N/A";
 
   return (
     <div className="flex flex-col gap-5 pb-8">
       <div className="flex items-center justify-between">
         <h1 className="text-[22px] font-bold text-gray-900 tracking-tight">
-          Hello, {displayName}
+          Hello, {user?.firstName || "User"}
         </h1>
 
         <div className="flex items-center gap-3">
           <div className="text-right leading-tight">
             <p className="text-[13.5px] font-bold text-gray-900">
-              {church.name}
+              {church?.name || "Your Church"}
             </p>
             {churchLocation && churchLocation !== "N/A" && (
               <p className="text-[12px] text-gray-400 mt-0.5">
@@ -286,17 +281,17 @@ export default function Dashboard() {
             )}
           </div>
 
-          {church.logoUrl ? (
+          {church?.logoUrl ? (
             <div className="w-10 h-10 rounded-full bg-primary-400 flex items-center justify-center ring-2 ring-blue-100 shrink-0 overflow-hidden">
               <img
                 src={church.logoUrl}
-                alt={church.name}
+                alt={church.name || "Church"}
                 className="w-full h-full object-cover"
               />
             </div>
           ) : (
             <div className="w-10 h-10 rounded-full bg-primary-400 flex items-center justify-center tracking-wide text-white-600 text-[11px] font-extrabold ring-2 ring-blue-100 shrink-0">
-              {church.alias || churchInitials}
+              {church?.alias || churchInitials}
             </div>
           )}
         </div>
