@@ -88,11 +88,11 @@ export const ReusableFilterDropdown = ({
         <Button
           variant="filter"
           className={cn(
-            "border px-4 py-2 rounded-lg bg-white flex items-center gap-2",
+            "px-4 py-2 rounded-lg bg-white flex items-center gap-2",
             className,
           )}
         >
-          {triggerButtonText} <Span>▾</Span>
+          {triggerButtonText} <ChevronDown className="h-4 w-4" />
         </Button>
       </DropdownMenuTrigger>
 
