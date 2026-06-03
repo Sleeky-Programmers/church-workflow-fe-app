@@ -13,6 +13,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { useToast } from "@/hooks/use-toast";
 import { EventRecurrence, EventReminderType, EventType } from "@/lib/enums";
 import {
+  deleteChurchService,
   getAllChurchServices,
   getChurchServiceById,
 } from "@/services/churchService";
@@ -87,20 +88,15 @@ export default function EventsPage() {
   const fetchChurchServices = async (page = 1, limit = 20) => {
     try {
       setLoading(true);
-      const response = await getAllChurchServices({
-        page,
-        limit,
-      });
-
+      const response = await getAllChurchServices({ page, limit });
       const result = response as any;
-
-      // Transform the data
       const transformedServices = (result.data || []).map(
         transformChurchService,
       );
       setChurchServices(transformedServices);
+      console.log({ result });
+      console.log({ transformedServices });
 
-      // Store pagination info if needed
       if (result.pagination) {
         setPagination(result.pagination);
       }
@@ -192,11 +188,44 @@ export default function EventsPage() {
     setIsDetailModalOpen(true);
   };
 
-  const handleDeleteEvent = (eventId: string) => {
-    setEvents((prev) => prev.filter((event) => event.id !== eventId));
+  const handleDeleteEvent = async (eventId: string) => {
+    // Check if this is a church service (has MongoDB _id format) or custom event (has "event-" prefix)
+    const isChurchService =
+      !eventId.startsWith("event-") && eventId.length > 12;
+
+    if (isChurchService) {
+      try {
+        // Call backend to delete church service
+        await deleteChurchService(eventId);
+
+        // Refetch church services to update the list
+        await fetchChurchServices(pagination.page, pagination.limit);
+
+        toast({
+          title: "Success",
+          description: "Church service deleted successfully",
+        });
+      } catch (error) {
+        console.error("Failed to delete church service:", error);
+        toast({
+          title: "Error",
+          description: "Failed to delete church service",
+          variant: "destructive",
+        });
+        return;
+      }
+    } else {
+      // Delete custom event from localStorage
+      setEvents((prev) => prev.filter((event) => event.id !== eventId));
+      toast({
+        title: "Deleted",
+        description: "Event deleted successfully",
+      });
+    }
+
+    // Close modal and clear selected event
     setIsDetailModalOpen(false);
     setSelectedEvent(null);
-    toast({ title: "Deleted", description: "Event deleted successfully" });
   };
 
   const handleEditEvent = (event: ChurchEvent) => {

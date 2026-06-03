@@ -1,8 +1,10 @@
 "use client";
 
-import { MoreVertical, Plus, Search, X } from "lucide-react";
+import { CircleAlert, MoreVertical, Plus, Search, X } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
+import router from "next/router";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { MdCheckCircle, MdError, MdInfo, MdWarning } from "react-icons/md";
 
 import { AddMemberModal } from "@/components/features/dashboard/membership/add-member-modal";
 import { CsvUploadModal } from "@/components/features/dashboard/membership/csv-upload-modal";
@@ -28,6 +30,34 @@ import { mapFiltersToBackend } from "@/mappers/filter.mapper";
 import { fetchMembers } from "@/services/memberService";
 import { useSearchStore } from "@/stores/useSearchStore";
 import { MemberProfile } from "@/types";
+
+function ActionRequiredBanner() {
+  const [isVisible, setIsVisible] = useState(true);
+
+  if (!isVisible) return null;
+
+  return (
+    <div className="mx-4 sm:mx-6 mt-3 mb-1 flex items-center gap-3 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3">
+      <MdError className="text-primary-500" size={25} />
+
+      <p className="flex-1 text-sm text-gray-700">
+        <span className="font-semibold">Action Required:</span> Your 7-day grace
+        period to manage over-limit members ends on April 5th, 2026. Upgrade to
+        prevent dashboard restrictions.
+      </p>
+      <Button onClick={() => router.push("/dashboard/settings/billing")}>
+        Upgrade Now
+      </Button>
+      <button
+        onClick={() => setIsVisible(false)}
+        className="shrink-0 text-gray-400 hover:text-gray-600"
+        aria-label="Dismiss"
+      >
+        <X className="h-4 w-4" />
+      </button>
+    </div>
+  );
+}
 
 export default function MembershipPage() {
   const { toast } = useToast();
@@ -183,6 +213,8 @@ export default function MembershipPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <ActionRequiredBanner />
+
       <div className="bg-white">
         <div className="px-4 sm:px-6 py-4 flex items-center justify-between gap-2">
           <div className="flex items-center gap-2 h-8">

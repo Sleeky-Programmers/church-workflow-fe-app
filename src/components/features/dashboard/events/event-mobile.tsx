@@ -10,7 +10,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import Heading from "@/components/ui/typography/Heading";
 import { EventRecurrence, EventReminderType, EventType } from "@/lib/enums";
-import { formatEventDate } from "@/lib/utils";
+import { formatDateSafely, formatEventDate } from "@/lib/utils";
 import { ChurchEvent, ChurchService } from "@/types";
 
 type Props = {
@@ -92,7 +92,7 @@ export default function EventsMobile({
           <div className="space-y-3">
             {allEvents.map((event) => {
               const meta = getEventTypeMeta(event.type);
-              const date = formatEventDate(event.date);
+              const date = formatDateSafely(event.date);
 
               // Check if this is a church service (by ID format or property)
               const isChurchService =

@@ -1,30 +1,35 @@
-import { UserStatus } from "@/types/user";
-import { clsx, type ClassValue } from "clsx";
-import { twMerge } from "tailwind-merge";
-import { USER_ACTION_ITEMS } from "./user-data";
-import { CalendarDay, RegularService } from "@/types";
+import { clsx } from "clsx";
 import {
-  startOfMonth,
-  endOfMonth,
-  startOfWeek,
-  endOfWeek,
   eachDayOfInterval,
+  endOfMonth,
+  endOfWeek,
   format,
-  isToday,
   isSameMonth,
+  isToday,
+  isValid,
+  parseISO,
+  startOfMonth,
+  startOfWeek,
 } from "date-fns";
 import {
-  FileText,
-  MessageCircle,
-  ShieldCheck,
+  Banknote,
   Cake,
   CreditCard,
+  FileText,
+  LucideIcon,
+  MessageCircle,
+  ShieldCheck,
   Users,
-  Banknote,
 } from "lucide-react";
-import { LucideIcon } from "lucide-react";
-import { NotificationType } from "./enums";
+import { twMerge } from "tailwind-merge";
 
+import { CalendarDay, RegularService } from "@/types";
+import { UserStatus } from "@/types/user";
+
+import { NotificationType } from "./enums";
+import { USER_ACTION_ITEMS } from "./user-data";
+
+import type { ClassValue } from "clsx";
 const MILLISECONDS_IN_SECOND = 1000;
 const SECONDS_IN_MINUTE = 60;
 const MINUTES_IN_HOUR = 60;
@@ -86,6 +91,33 @@ export function formatEventDate(dateStr: string) {
   });
 
   return `${monthDay} • ${weekday}`;
+}
+
+export function formatDateSafely(dateString: string): string {
+  const date = parseISO(dateString);
+  if (!isValid(date)) {
+    return dateString;
+  }
+
+  const today = new Date();
+  const tomorrow = new Date(today);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+
+  // Reset time portion for accurate date comparison
+  today.setHours(0, 0, 0, 0);
+  tomorrow.setHours(0, 0, 0, 0);
+  const targetDate = new Date(date);
+  targetDate.setHours(0, 0, 0, 0);
+
+  if (targetDate.getTime() === today.getTime()) {
+    return "Today";
+  }
+
+  if (targetDate.getTime() === tomorrow.getTime()) {
+    return "Tomorrow";
+  }
+
+  return format(date, "EEEE, MMMM do, yyyy");
 }
 
 export function getNextBirthdayDate(dateStr: string) {

@@ -47,3 +47,13 @@ export async function getChurchServiceById(id: string): Promise<any> {
     method: "GET",
   });
 }
+
+export async function deleteChurchService(id: string): Promise<any> {
+  if (!id) {
+    throw new Error("Service ID is required");
+  }
+
+  return await authenticatedFetch(`/church-services/${id}`, {
+    method: "DELETE",
+  });
+}

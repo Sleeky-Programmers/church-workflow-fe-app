@@ -46,6 +46,36 @@ interface Props {
   }) => void;
 }
 
+interface Member {
+  id: string;
+  fullName: string;
+  email?: string;
+  role?: string;
+}
+
+interface PaginationControlsProps {
+  currentPage: number;
+  totalPages: number;
+  onPageChange: (page: number) => void;
+  totalItems: number;
+  itemsPerPage: number;
+}
+
+const getVisibleMembers = <T extends Member>(
+  memberIds: string[],
+  memberMap: Record<string, T>,
+  currentPage: number,
+  itemsPerPage: number,
+): T[] => {
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const visibleIds = memberIds.slice(startIndex, endIndex);
+
+  return visibleIds
+    .map((id) => memberMap[id])
+    .filter((member) => member !== undefined);
+};
+
 export default function AddDepartmentDialog({ onSave }: Props) {
   const { toast } = useToast();
   const isMobile = useIsMobile();
@@ -60,6 +90,7 @@ export default function AddDepartmentDialog({ onSave }: Props) {
   const [inviteOpen, setInviteOpen] = useState(false);
   const [pendingInvites, setPendingInvites] = useState<PendingInvite[]>([]);
   const [isInviteLoading, setIsInviteLoading] = useState(false);
+  const [selectedMembersPage, setSelectedMembersPage] = useState(1);
 
   function handleInviteSubmit(formData: InviteFormData) {
     setIsInviteLoading(true);
@@ -199,27 +230,106 @@ export default function AddDepartmentDialog({ onSave }: Props) {
               </a>
             </div>
 
+            {/* {memberIds.length > 0 && (
+							<div className="space-y-2">
+								<Label>Selected Members</Label>
+								<div className="flex flex-wrap gap-2">
+									{memberIds.map((id) => {
+										const member = memberMap[id];
+										if (!member) return null;
+
+										return (
+											<Span
+												key={id}
+												variant="chip">
+												{member.fullName}
+												<Button
+													size="icon"
+													variant="ghost"
+													onClick={() => removeSelectedMember(id)}>
+													<X className="h-3 w-3" />
+												</Button>
+											</Span>
+										);
+									})}
+								</div>
+							</div>
+						)} */}
+
             {memberIds.length > 0 && (
               <div className="space-y-2">
-                <Label>Selected Members</Label>
-                <div className="flex flex-wrap gap-2">
-                  {memberIds.map((id) => {
-                    const member = memberMap[id];
-                    if (!member) return null;
+                <div className="flex items-center justify-between">
+                  <Label>Selected Members ({memberIds.length})</Label>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      setMemberIds([]);
+                      setMemberMap({});
+                      setSelectedMembersPage(1);
+                    }}
+                    className="text-xs h-auto py-1 px-2 text-muted-foreground hover:text-destructive"
+                  >
+                    Clear all
+                  </Button>
+                </div>
 
-                    return (
-                      <Span key={id} variant="chip">
-                        {member.fullName}
-                        <Button
-                          size="icon"
-                          variant="ghost"
-                          onClick={() => removeSelectedMember(id)}
+                <div className="rounded-lg border bg-muted/30 p-3">
+                  <div className="flex flex-col gap-2">
+                    <div className="flex flex-wrap gap-2">
+                      {getVisibleMembers(
+                        memberIds,
+                        memberMap,
+                        selectedMembersPage,
+                        6,
+                      ).map((member) => (
+                        <div
+                          key={member.id}
+                          className="group flex items-center gap-2 rounded-full bg-background border shadow-sm pl-3 pr-1 py-1 transition-all hover:shadow-md hover:border-primary/20"
                         >
-                          <X className="h-3 w-3" />
-                        </Button>
-                      </Span>
-                    );
-                  })}
+                          <div className="w-6 h-6 rounded-full bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center">
+                            <span className="text-xs font-medium text-primary">
+                              {member.fullName.charAt(0).toUpperCase()}
+                            </span>
+                          </div>
+
+                          <span className="text-sm font-medium">
+                            {member.fullName}
+                          </span>
+
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            onClick={() => {
+                              const remainingCount = memberIds.length - 1;
+                              const itemsPerPage = 6;
+                              const newTotalPages = Math.ceil(
+                                remainingCount / itemsPerPage,
+                              );
+                              removeSelectedMember(member.id);
+                              if (
+                                selectedMembersPage > newTotalPages &&
+                                newTotalPages > 0
+                              ) {
+                                setSelectedMembersPage(newTotalPages);
+                              }
+                            }}
+                            className="h-5 w-5 rounded-full hover:bg-destructive/10 hover:text-destructive transition-colors"
+                          >
+                            <X className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+
+                    <PaginationControls
+                      currentPage={selectedMembersPage}
+                      totalPages={Math.ceil(memberIds.length / 6)}
+                      onPageChange={setSelectedMembersPage}
+                      totalItems={memberIds.length}
+                      itemsPerPage={6}
+                    />
+                  </div>
                 </div>
               </div>
             )}
@@ -287,3 +397,86 @@ export default function AddDepartmentDialog({ onSave }: Props) {
     </>
   );
 }
+
+const PaginationControls = ({
+  currentPage,
+  totalPages,
+  onPageChange,
+  totalItems,
+  itemsPerPage,
+}: PaginationControlsProps) => {
+  if (totalPages <= 1) return null;
+
+  const startItem = (currentPage - 1) * itemsPerPage + 1;
+  const endItem = Math.min(currentPage * itemsPerPage, totalItems);
+
+  const getPageNumbers = () => {
+    const delta = 2;
+    const pages = [];
+
+    for (let i = 1; i <= totalPages; i++) {
+      if (
+        i === 1 ||
+        i === totalPages ||
+        (i >= currentPage - delta && i <= currentPage + delta)
+      ) {
+        pages.push(i);
+      } else if (pages[pages.length - 1] !== "ellipsis") {
+        pages.push("ellipsis");
+      }
+    }
+
+    return pages;
+  };
+
+  return (
+    <div className="flex items-center justify-between gap-2 mt-2 pt-2 border-t">
+      <div className="text-xs text-muted-foreground">
+        Showing {startItem}-{endItem} of {totalItems}
+      </div>
+
+      <div className="flex items-center gap-1">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => onPageChange(currentPage - 1)}
+          disabled={currentPage === 1}
+          className="h-7 px-2 text-xs"
+        >
+          Prev
+        </Button>
+
+        {getPageNumbers().map((page, idx) =>
+          page === "ellipsis" ? (
+            <span
+              key={`ellipsis-${idx}`}
+              className="px-1 text-xs text-muted-foreground"
+            >
+              ...
+            </span>
+          ) : (
+            <Button
+              key={page}
+              variant={currentPage === page ? "default" : "outline"}
+              size="sm"
+              onClick={() => onPageChange(Number(page))}
+              className="h-7 w-7 p-0 text-xs"
+            >
+              {page}
+            </Button>
+          ),
+        )}
+
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => onPageChange(currentPage + 1)}
+          disabled={currentPage === totalPages}
+          className="h-7 px-2 text-xs"
+        >
+          Next
+        </Button>
+      </div>
+    </div>
+  );
+};

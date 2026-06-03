@@ -20,7 +20,7 @@ import { Input } from "@/components/ui/input";
 import Heading from "@/components/ui/typography/Heading";
 import { Text } from "@/components/ui/typography/Text";
 import { useToast } from "@/hooks/use-toast";
-import { fetchServices } from "@/lib/api";
+import { fetchAllServices, fetchServices } from "@/lib/api";
 import { getCurrentUserProfile } from "@/lib/auth/session";
 import { DEFAULT_ORDER } from "@/lib/data";
 import { ServiceFrequency, ServiceType } from "@/lib/enums";
@@ -75,6 +75,8 @@ export default function AttendancePage() {
     setIsLoading(true);
     try {
       const data = await fetchServices(format(new Date(), "yyyy-MM"));
+      const data2 = await fetchAllServices(format(new Date(), "yyyy-MM"));
+      console.log({ data2 });
       setServices(data);
     } catch (error: any) {
       toast({
@@ -92,6 +94,8 @@ export default function AttendancePage() {
   }, []);
 
   const handleCreateServices = async (newServices: RegularService[]) => {
+    "/church-services";
+
     await loadServices();
     toast({
       title: "Success",
