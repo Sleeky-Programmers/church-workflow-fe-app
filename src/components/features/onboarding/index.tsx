@@ -1,23 +1,13 @@
 "use client";
-import { useState, useEffect } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
+
 import { Card } from "@/components/ui/card";
-import { ChurchIdentityStep } from "./church-identity";
-import { UploadMembersStep } from "./upload-members";
-import { WeeklyServicesStep } from "./weekly-service";
-import {
-  WeeklyServicesValues,
-  ChurchIdentityValues,
-  churchIdentitySchema,
-  UploadMembersValues,
-  uploadMembersSchema,
-} from "@/types/type";
-import { createChurch, createWeeklyService, uploadMembersCsv } from "@/lib/api";
 import { RouteConfig } from "@/config/routes";
-import { convertTo12Hour } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
+import { createChurch, createWeeklyService, uploadMembersCsv } from "@/lib/api";
 import {
   getAccessToken,
   getCurrentUserKey,
@@ -25,7 +15,19 @@ import {
   markMembersUploaded,
   markWeeklyServicesComplete,
 } from "@/lib/auth/session";
-import Image from "next/image";
+import { convertTo12Hour } from "@/lib/utils";
+import {
+  churchIdentitySchema,
+  ChurchIdentityValues,
+  uploadMembersSchema,
+  UploadMembersValues,
+  WeeklyServicesValues,
+} from "@/types/type";
+import { zodResolver } from "@hookform/resolvers/zod";
+
+import { ChurchIdentityStep } from "./church-identity";
+import { UploadMembersStep } from "./upload-members";
+import { WeeklyServicesStep } from "./weekly-service";
 
 export default function ChurchOnboarding() {
   const [step, setStep] = useState(1);
@@ -222,7 +224,7 @@ export default function ChurchOnboarding() {
 
     for (const service of uniqueServices.values()) {
       await createWeeklyService({
-        serviceName: service.serviceName,
+        title: service.serviceName,
         type: "REGULAR",
         day: service.day,
         startTime: service.startTime,
