@@ -51,17 +51,6 @@ const EVENT_CATEGORY_BY_TYPE: Partial<Record<EventType, EventCategory>> = {
   [EventType.OTHER]: EventCategory.SPECIAL,
 };
 
-const formatNaira = (amount: string | number): string => {
-  const n =
-    typeof amount === "string" ? parseInt(amount.replace(/,/g, "")) : amount;
-  return `₦${n.toLocaleString()}`;
-};
-
-const formatGrowth = (growth: string | number): string => {
-  const n = typeof growth === "string" ? parseFloat(growth) : growth;
-  return `${n > 0 ? "+" : ""}${n.toFixed(1)}%`;
-};
-
 // ─────────────────────────────────────────────────────────────────────────────
 // Dot colour map for event categories
 // ─────────────────────────────────────────────────────────────────────────────
@@ -111,39 +100,6 @@ export default function Dashboard() {
   useEffect(() => {
     fetchUserData();
   }, [fetchUserData]);
-
-  // Handle error state
-  if (error) {
-    return (
-      <div className="flex items-center justify-center py-16 gap-2 flex-col">
-        <div className="text-red-500 text-center">
-          <Text variant="error" className="mb-2">
-            Error loading profile
-          </Text>
-          <Text variant="default" className="text-sm text-gray-600">
-            {error}
-          </Text>
-          <Button
-            onClick={() => fetchUserData(true)}
-            className="mt-4"
-            variant="outline"
-          >
-            Retry
-          </Button>
-        </div>
-      </div>
-    );
-  }
-
-  // Show loading state
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center py-16 gap-2">
-        <Loader className="animate-spin h-5 w-5" />
-        <Text>Loading profile...</Text>
-      </div>
-    );
-  }
 
   // ── Members ──
   useEffect(() => {
@@ -223,6 +179,39 @@ export default function Dashboard() {
       setUpcomingEvents(DashboardData.upcomingEvents);
     }
   }, []);
+
+  // Handle error state
+  if (error) {
+    return (
+      <div className="flex items-center justify-center py-16 gap-2 flex-col">
+        <div className="text-red-500 text-center">
+          <Text variant="error" className="mb-2">
+            Error loading profile
+          </Text>
+          <Text variant="default" className="text-sm text-gray-600">
+            {error}
+          </Text>
+          <Button
+            onClick={() => fetchUserData(true)}
+            className="mt-4"
+            variant="outline"
+          >
+            Retry
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-16 gap-2">
+        <Loader className="animate-spin h-5 w-5" />
+        <Text>Loading profile...</Text>
+      </div>
+    );
+  }
 
   // ── Mobile shell ──
   if (isMobile) {

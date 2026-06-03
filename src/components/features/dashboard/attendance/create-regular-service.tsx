@@ -1,6 +1,9 @@
 "use client";
 
+import { Info, Plus, Trash2, X } from "lucide-react";
 import { useState } from "react";
+
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -8,15 +11,13 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Plus, Trash2, Info, X } from "lucide-react";
 import { Span, Text } from "@/components/ui/typography/Text";
-import { RegularService } from "@/types";
 import { useToast } from "@/hooks/use-toast";
-import { convertTo12Hour } from "@/lib/utils";
 import { createWeeklyService } from "@/lib/api";
+import { convertTo12Hour } from "@/lib/utils";
+import { RegularService } from "@/types";
 
 type CreateRegularServiceModalProps = {
   open: boolean;
@@ -126,7 +127,7 @@ export function CreateRegularServiceModal({
           if (!dayEnum) continue;
 
           const createdService: any = await createWeeklyService({
-            serviceName: service.serviceName,
+            title: service.serviceName,
             type: "REGULAR",
             day: dayEnum,
             startTime,

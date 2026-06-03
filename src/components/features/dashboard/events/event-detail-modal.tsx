@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/dialog";
 import Heading from "@/components/ui/typography/Heading";
 import { Span, Text } from "@/components/ui/typography/Text";
+import { formatDateSafely } from "@/lib/utils";
 import { ChurchEvent } from "@/types";
 
 import {
@@ -57,18 +58,9 @@ function parseTimeString(date: string, time: string): Date | null {
 function formatTimeSafely(date: string, time: string): string {
   const dateTime = parseTimeString(date, time);
   if (!dateTime || !isValid(dateTime)) {
-    return time; // Return original time string as fallback
+    return time;
   }
   return format(dateTime, "p");
-}
-
-// Helper to format date safely
-function formatDateSafely(dateString: string): string {
-  const date = parseISO(dateString);
-  if (!isValid(date)) {
-    return dateString;
-  }
-  return format(date, "EEEE, MMMM do, yyyy");
 }
 
 export function EventDetailModal({
@@ -80,6 +72,7 @@ export function EventDetailModal({
 }: EventDetailModalProps) {
   if (!event) return null;
 
+  console.log({ event: event.date });
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent showClose={false} className="max-w-lg p-0">

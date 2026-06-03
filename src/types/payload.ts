@@ -99,7 +99,7 @@ export interface CreateChurchPayload {
 }
 
 export interface CreateWeeklyServicePayload {
-  serviceName: string;
+  title: string;
   type: "REGULAR" | "SPECIAL";
   day: string;
   startTime: string;

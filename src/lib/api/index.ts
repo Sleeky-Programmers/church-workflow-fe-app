@@ -1,29 +1,29 @@
-import { InviteFormData, PendingInvite, User, UserAction } from "@/types/user";
-import { MOCK_USERS } from "../user-data";
-
-import {
-  SignupPayload,
-  AdminRegisterPayload,
-  AdminRegisterResponse,
-  AttendanceStatsResponse,
-  VerifyOtpPayload,
-  VerifyOtpResponse,
-  LoginPayload,
-  LoginResponse,
-  ResetPasswordPayload,
-  ResetPasswordResponse,
-  CreateChurchPayload,
-  CreateWeeklyServicePayload,
-  GoogleAuthResponse,
-} from "@/types/payload";
-import { MOCK_ADMIN } from "../data";
+import { getInitials } from "@/lib/utils";
 import {
   ActivityLogApiResponse,
   Member,
   NotificationApiResponse,
   RegularService,
 } from "@/types";
-import { getInitials } from "@/lib/utils";
+import {
+  AdminRegisterPayload,
+  AdminRegisterResponse,
+  AttendanceStatsResponse,
+  CreateChurchPayload,
+  CreateWeeklyServicePayload,
+  GoogleAuthResponse,
+  LoginPayload,
+  LoginResponse,
+  ResetPasswordPayload,
+  ResetPasswordResponse,
+  SignupPayload,
+  VerifyOtpPayload,
+  VerifyOtpResponse,
+} from "@/types/payload";
+import { InviteFormData, PendingInvite, User, UserAction } from "@/types/user";
+
+import { MOCK_ADMIN } from "../data";
+import { MOCK_USERS } from "../user-data";
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -522,6 +522,30 @@ export async function fetchServices(_month: string): Promise<RegularService[]> {
   const response = await authenticatedFetch<
     PaginatedResponse<ChurchServiceApi>
   >("/church-services?page=1&limit=100", { method: "GET" });
+
+  return (response.data || [])
+    .filter(
+      (service) =>
+        typeof service.type === "string" &&
+        service.type.toUpperCase() === "REGULAR",
+    )
+    .map(mapChurchServiceToRegular);
+}
+
+export async function fetchAllServices(_month: string) {
+  const response = await authenticatedFetch<
+    PaginatedResponse<ChurchServiceApi>
+  >("/church-services?page=1&limit=100", { method: "GET" });
+
+  return response.data || [];
+}
+
+export async function createSpecialServices(
+  _month: string,
+): Promise<RegularService[]> {
+  const response = await authenticatedFetch<
+    PaginatedResponse<ChurchServiceApi>
+  >("/church-services", { method: "POST" });
 
   return (response.data || [])
     .filter(
