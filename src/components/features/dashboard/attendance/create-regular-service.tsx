@@ -58,7 +58,8 @@ export function CreateRegularServiceModal({
   const [formData, setFormData] = useState<RegularService>({
     id: "",
     serviceName: "",
-    days: [],
+    type: "REGULAR",
+    day: "",
     startTime: "",
     endTime: "",
     location: "",
@@ -68,9 +69,7 @@ export function CreateRegularServiceModal({
   const handleDayToggle = (day: string) => {
     setFormData((prev) => ({
       ...prev,
-      days: prev.days.includes(day)
-        ? prev.days.filter((d) => d !== day)
-        : [...prev.days, day],
+      day,
     }));
   };
 
@@ -79,7 +78,7 @@ export function CreateRegularServiceModal({
       alert("Please enter a service name");
       return;
     }
-    if (formData.days.length === 0) {
+    if (formData.day.length === 0) {
       alert("Please select at least one day");
       return;
     }
@@ -97,7 +96,8 @@ export function CreateRegularServiceModal({
     setFormData({
       id: "",
       serviceName: "",
-      days: [],
+      type: "REGULAR",
+      day: "",
       startTime: "",
       endTime: "",
       location: "",
@@ -122,7 +122,7 @@ export function CreateRegularServiceModal({
         const startTime = convertTo12Hour(service.startTime);
         const endTime = convertTo12Hour(service.endTime || "");
 
-        for (const day of service.days) {
+        for (const day of service.day) {
           const dayEnum = SERVICE_DAY_ENUM_MAP[day];
           if (!dayEnum) continue;
 
@@ -138,7 +138,8 @@ export function CreateRegularServiceModal({
           created.push({
             id: createdService._id,
             serviceName: createdService.serviceName,
-            days: [day],
+            type: "REGULAR",
+            day,
             startTime: createdService.startTime,
             endTime: createdService.endTime,
             location: createdService.location,
@@ -158,7 +159,8 @@ export function CreateRegularServiceModal({
       setFormData({
         id: "",
         serviceName: "",
-        days: [],
+        type: "REGULAR",
+        day: "",
         startTime: "",
         endTime: "",
         location: "",
@@ -181,7 +183,8 @@ export function CreateRegularServiceModal({
     setFormData({
       id: "",
       serviceName: "",
-      days: [],
+      type: "REGULAR",
+      day: "",
       startTime: "",
       endTime: "",
       location: "",
@@ -264,7 +267,7 @@ export function CreateRegularServiceModal({
                   key={day.short}
                   type="button"
                   variant={
-                    formData.days.includes(day.full) ? "default" : "outline"
+                    formData.day.includes(day.full) ? "default" : "outline"
                   }
                   size="sm"
                   onClick={() => handleDayToggle(day.full)}
@@ -333,7 +336,7 @@ export function CreateRegularServiceModal({
                   <div className="flex-1">
                     <Text variant="default">{service.serviceName}</Text>
                     <Text variant="muted">
-                      {service.days.join(", ")} - {service.startTime}
+                      {service.day} - {service.startTime}
                       {service.endTime && ` - ${service.endTime}`}
                       {service.location && ` - ${service.location}`}
                     </Text>
