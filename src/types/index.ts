@@ -195,7 +195,7 @@ export type RegularService = {
   id: string;
   serviceName: string;
   type: "REGULAR" | "SPECIAL";
-  day?: string;
+  day: string;
   startTime: string;
   endTime?: string;
   location?: string;
