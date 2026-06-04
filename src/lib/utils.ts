@@ -264,19 +264,42 @@ export function getServicesForDate(
 ): RegularService[] {
   const dayName = format(date, "EEEE");
 
-  return services.filter((service) => service.days.includes(dayName));
+  return services.filter((service) =>
+    service.day ? service.day.includes(dayName) : "",
+  );
 }
 
 export function mapServicesToCalendar(
-  calendarDays: CalendarDay[],
+  days: Date[],
   services: RegularService[],
-): CalendarDay[] {
-  return calendarDays.map((day) => ({
-    ...day,
-    services: getServicesForDate(day.date, services),
-  }));
-}
+) {
+  return days.map((date) => {
+    const dateString = format(date, "yyyy-MM-dd");
+    const dayName = format(date, "EEEE").toUpperCase();
 
+    // Filter services for this specific date
+    const servicesForDate = services.filter((service) => {
+      if (!service.day) return false;
+
+      // Handle both string and array
+      if (typeof service.day === "string") {
+        return service.day.toUpperCase() === dayName;
+      }
+      // if (Array.isArray(service.day)) {
+      //   return service.day.some(d => d.toUpperCase() === dayName);
+      // }
+      return false;
+    });
+
+    return {
+      date,
+      dateString,
+      isCurrentMonth: date.getMonth() === days[15]?.getMonth(),
+      isToday: format(date, "yyyy-MM-dd") === format(new Date(), "yyyy-MM-dd"),
+      services: servicesForDate,
+    };
+  });
+}
 export function getAttendanceCount(
   service: RegularService,
   date: string,

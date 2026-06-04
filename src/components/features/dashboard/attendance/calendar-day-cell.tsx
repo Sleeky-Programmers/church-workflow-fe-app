@@ -1,12 +1,14 @@
 "use client";
 
 import { format } from "date-fns";
-import { CalendarDay, RegularService, SpecialServiceEvent } from "@/types";
-import { ServicePopover } from "./service-popover";
-import { ServiceItem } from "./service";
-import { Button } from "@/components/ui/button";
 import { Star } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
 import { Text } from "@/components/ui/typography/Text";
+import { CalendarDay, RegularService, SpecialServiceEvent } from "@/types";
+
+import { ServiceItem } from "./service";
+import { ServicePopover } from "./service-popover";
 
 type CalendarDayCellProps = {
   day: CalendarDay;
@@ -49,13 +51,7 @@ export function CalendarDayCell({
         <div
           className={`
             text-sm font-medium
-            ${
-              day.isToday
-                ? "flex items-center justify-center w-6 h-6 bg-primary-600 text-white rounded-full"
-                : day.isCurrentMonth
-                  ? "text-gray-500"
-                  : "text-gray-400"
-            }
+            ${day.isToday ? "flex items-center justify-center w-6 h-6 bg-primary-600 text-white rounded-full" : day.isCurrentMonth ? "text-gray-500" : "text-gray-400"}
           `}
         >
           {format(day.date, "d")}

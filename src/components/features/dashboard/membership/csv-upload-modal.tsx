@@ -154,7 +154,6 @@ export function CsvUploadModal({
 
     // Get actual headers from the first row
     const headers = Object.keys(data[0] || {});
-    console.log("CSV Headers found:", headers);
 
     // Check if required headers exist
     const requiredHeaders = ["full_name", "phone_number"];
@@ -191,9 +190,6 @@ export function CsvUploadModal({
 
       // If we encounter an empty row, stop processing further rows
       if (isEmptyRow) {
-        console.log(
-          `Empty row detected at row ${index + 2}, stopping validation`,
-        );
         hasEncounteredEmptyRow = true;
         break; // Stop processing when we hit an empty row
       }
@@ -261,19 +257,9 @@ export function CsvUploadModal({
       }
     }
 
-    if (hasEncounteredEmptyRow) {
-      console.log(
-        `Validation stopped at first empty row. ${validRowCount} valid rows processed.`,
-      );
-    }
-
     if (validRowCount === 0 && !hasEncounteredEmptyRow) {
       errors.push("No valid data rows found in the CSV file");
     }
-
-    console.log(
-      `Validation complete. Found ${errors.length} errors. Valid rows: ${validRowCount}`,
-    );
     return { isValid: errors.length === 0, errors };
   };
 
@@ -367,11 +353,6 @@ export function CsvUploadModal({
           transformHeader: (header) =>
             header.trim().toLowerCase().replace(/\s/g, "_"),
           complete: (results) => {
-            console.log("Parsed CSV results:", {
-              meta: results.meta,
-              errors: results.errors,
-              dataLength: results.data.length,
-            });
             resolve(results.data as any[]);
           },
           error: (err) => reject(err),
@@ -402,10 +383,6 @@ export function CsvUploadModal({
           ? parsed
           : parsed.slice(0, firstEmptyRowIndex);
 
-      console.log(
-        `Original rows: ${parsed.length}, Cleaned rows: ${cleanedData.length}`,
-      );
-
       if (cleanedData.length === 0) {
         throw new Error("CSV file contains no valid data rows");
       }
@@ -421,9 +398,6 @@ export function CsvUploadModal({
       // Normalize the data to match backend expectations
       const normalizedData = cleanedData.map(normalizeRow);
 
-      console.log("Normalized data:", normalizedData.length, "records");
-      console.log("Sample normalized record:", normalizedData[0]);
-
       // Convert normalized data back to CSV
       const normalizedCSV = convertToCSV(normalizedData);
 
@@ -431,10 +405,6 @@ export function CsvUploadModal({
       const normalizedFile = new File([normalizedCSV], file.name, {
         type: "text/csv",
       });
-
-      console.log(
-        "Sending normalized CSV to backend with proper camelCase headers",
-      );
 
       // Send the new CSV file to the backend
       const result = await uploadMembersCsv(normalizedFile, {
