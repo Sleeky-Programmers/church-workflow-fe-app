@@ -194,22 +194,24 @@ export type AttendanceRecord = {
 export type RegularService = {
   id: string;
   serviceName: string;
-  days: string[];
+  type: "REGULAR" | "SPECIAL";
+  day?: string;
   startTime: string;
   endTime?: string;
   location?: string;
-  frequency: "weekly";
-  attendanceRecords?: AttendanceRecord[];
+  description?: string;
+  frequency?: "weekly" | "monthly";
+  attendanceRecords?: any[];
 };
 
 export type SpecialService = {
   id: string;
   serviceName: string;
+  type: "REGULAR" | "SPECIAL";
   date: string;
   startTime: string;
   endTime?: string;
   location?: string;
-  type: string;
   attendanceRecord?: AttendanceRecord;
 };
 
@@ -363,7 +365,17 @@ export type SpecialServiceEvent = {
   endDate?: string;
   location?: string;
   description?: string;
-  recurrence: "none" | "monthly-first-sunday";
+  recurrence?:
+    | "NO_REPEAT"
+    | "WEEKLY_MONDAY"
+    | "MONTHLY_FIRST_MONDAY"
+    | "ANNUALLY";
+  eventType?:
+    | "WORSHIP_SERVICE"
+    | "BIRTHDAY"
+    | "MEETING"
+    | "WEDDING_ANNIVERSARY"
+    | "OTHERS";
   daySchedules: SpecialServiceDaySchedule[];
 };
 

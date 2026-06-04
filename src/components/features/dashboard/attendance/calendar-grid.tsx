@@ -86,14 +86,23 @@ function parseHour(value: string): number {
 }
 
 function isServiceOnDate(service: RegularService, date: Date): boolean {
-  return service.days.includes(format(date, "EEEE"));
+  const dateDayName = format(date, "EEEE").toUpperCase();
+  return service.day ? service.day.includes(dateDayName) : false;
 }
 
 function getServicesForDate(
   services: RegularService[],
   date: Date,
 ): RegularService[] {
-  return services.filter((service) => isServiceOnDate(service, date));
+  const dateDayName = format(date, "EEEE").toUpperCase(); // "SUNDAY", "MONDAY", etc.
+  return services.filter((service) => {
+    if (!service.day) return false;
+    // Handle both string and array of days
+    if (typeof service.day === "string") {
+      return service.day.toUpperCase() === dateDayName;
+    }
+    return false;
+  });
 }
 
 function isFirstSunday(date: Date): boolean {
@@ -105,10 +114,19 @@ function isSpecialServiceOnDate(
   date: Date,
 ): boolean {
   const dateString = format(date, "yyyy-MM-dd");
-  if (service.recurrence === "monthly-first-sunday") {
+
+  // Handle recurrence
+  if (service.recurrence === "MONTHLY_FIRST_MONDAY") {
     return date >= new Date(service.startDate) && isFirstSunday(date);
   }
-  return service.daySchedules.some((schedule) => schedule.date === dateString);
+
+  // Check daySchedules - need to normalize dates for comparison
+  return service.daySchedules.some((schedule) => {
+    // If schedule.date is a Date object or ISO string
+    const scheduleDate = new Date(schedule.date);
+    const scheduleDateString = format(scheduleDate, "yyyy-MM-dd");
+    return scheduleDateString === dateString;
+  });
 }
 
 function getSpecialServicesForDate(
@@ -199,7 +217,9 @@ export function CalendarGrid({
 
   const calendarDays = useMemo(() => {
     const days = generateCalendarDays(currentMonth);
-    return mapServicesToCalendar(days, filteredRegularServices);
+    // Extract just the date objects from CalendarDay array
+    const dateObjects = days.map((day) => day.date);
+    return mapServicesToCalendar(dateObjects, filteredRegularServices);
   }, [currentMonth, filteredRegularServices]);
 
   const weekDays = useMemo(() => {

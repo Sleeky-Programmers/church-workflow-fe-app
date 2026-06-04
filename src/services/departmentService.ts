@@ -51,11 +51,12 @@ export async function createDepartment(payload: CreateDepartmentPayload) {
 export async function fetchDepartments(params: DepartmentQueryParams) {
   const query = new URLSearchParams();
 
-  Object.entries(params).forEach(([key, value]) => {
-    if (value !== undefined && value !== null && value !== "") {
-      query.append(key, String(value));
-    }
-  });
+  if (params.search) {
+    query.append("search", params.search);
+  }
+
+  if (params.page) query.append("page", String(params.page));
+  if (params.limit) query.append("limit", String(params.limit));
 
   return authenticatedFetch<{
     data: DepartmentResponse[];

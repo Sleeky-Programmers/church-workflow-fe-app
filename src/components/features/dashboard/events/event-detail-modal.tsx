@@ -72,7 +72,6 @@ export function EventDetailModal({
 }: EventDetailModalProps) {
   if (!event) return null;
 
-  console.log({ event: event.date });
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent showClose={false} className="max-w-lg p-0">

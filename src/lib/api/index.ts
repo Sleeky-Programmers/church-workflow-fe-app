@@ -4,6 +4,8 @@ import {
   Member,
   NotificationApiResponse,
   RegularService,
+  SpecialServiceDaySchedule,
+  SpecialServiceEvent,
 } from "@/types";
 import {
   AdminRegisterPayload,
@@ -396,7 +398,14 @@ type ChurchServiceApi = {
   _id: string;
   serviceName: string;
   type: "REGULAR" | "SPECIAL";
+  recurrence:
+    | "WEEKLY_MONDAY"
+    | "NO_REPEAT"
+    | "MONTHLY_FIRST_MONDAY"
+    | "ANNUALLY";
   day?: string;
+  daySchedules: SpecialServiceDaySchedule[];
+  eventType: any;
   startTime: string;
   endTime?: string;
   location?: string;
@@ -509,14 +518,54 @@ function mapChurchServiceToRegular(service: ChurchServiceApi): RegularService {
   return {
     id: service._id,
     serviceName: service.serviceName,
-    days,
     startTime: service.startTime,
+    day: service.day,
+    type: service.type,
     endTime: service.endTime,
     location: service.location,
     frequency: "weekly",
     attendanceRecords: [],
   };
 }
+
+export const mapToRegularService = (
+  apiService: ChurchServiceApi,
+): RegularService => {
+  return {
+    id: apiService._id,
+    serviceName: apiService.serviceName,
+    type: apiService.type,
+    day: apiService.day,
+    startTime: apiService.startTime,
+    endTime: apiService.endTime,
+    location: apiService.location,
+    description: apiService.description,
+    frequency: apiService.recurrence === "WEEKLY_MONDAY" ? "weekly" : "monthly",
+    attendanceRecords: [],
+  };
+};
+
+// Helper function to map API response to SpecialServiceEvent
+export const mapToSpecialService = (
+  apiService: ChurchServiceApi,
+): SpecialServiceEvent => {
+  return {
+    id: apiService._id,
+    serviceName: apiService.serviceName,
+    startDate: apiService.startDate || "",
+    endDate: apiService.endDate,
+    location: apiService.location,
+    description: apiService.description,
+    recurrence: apiService.recurrence as any,
+    eventType: apiService.eventType as any,
+    daySchedules:
+      apiService.specialDays?.map((day) => ({
+        date: day.date,
+        startTime: day.startTime,
+        endTime: day.endTime ? day.endTime : "",
+      })) || [],
+  };
+};
 
 export async function fetchServices(_month: string): Promise<RegularService[]> {
   const response = await authenticatedFetch<

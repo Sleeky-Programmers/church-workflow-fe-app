@@ -94,8 +94,6 @@ export default function EventsPage() {
         transformChurchService,
       );
       setChurchServices(transformedServices);
-      console.log({ result });
-      console.log({ transformedServices });
 
       if (result.pagination) {
         setPagination(result.pagination);

@@ -1,7 +1,7 @@
 "use client";
 
 import { addDays, format } from "date-fns";
-import { CalendarDays, Clock3, X } from "lucide-react";
+import { CalendarDays, Clock3, Loader2, X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -28,11 +28,28 @@ import { SpecialServiceDaySchedule, SpecialServiceEvent } from "@/types";
 type CreateSpecialServiceModalProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onCreateService: (service: SpecialServiceEvent) => void;
+  onCreateService: (service: SpecialServiceEvent) => Promise<void>;
 };
 
 const DEFAULT_START_TIME = "";
 const DEFAULT_END_TIME = "";
+
+// Map frontend recurrence to backend enum values
+const RECURRENCE_MAP: Record<string, string> = {
+  none: "NO_REPEAT",
+  weekly: "WEEKLY_MONDAY",
+  monthly: "MONTHLY_FIRST_MONDAY",
+  yearly: "ANNUALLY",
+};
+
+// Map event types
+const EVENT_TYPE_MAP: Record<string, string> = {
+  WORSHIP_SERVICE: "WORSHIP_SERVICE",
+  BIRTHDAY: "BIRTHDAY",
+  MEETING: "MEETING",
+  WEDDING_ANNIVERSARY: "WEDDING_ANNIVERSARY",
+  OTHERS: "OTHERS",
+};
 
 function listDates(startDate: string, endDate?: string): string[] {
   if (!startDate) {
@@ -61,14 +78,16 @@ export function CreateSpecialServiceModal({
   onCreateService,
 }: CreateSpecialServiceModalProps) {
   const { toast } = useToast();
+  const [isLoading, setIsLoading] = useState(false);
   const [serviceName, setServiceName] = useState("");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [location, setLocation] = useState("");
   const [description, setDescription] = useState("");
-  const [recurrence, setRecurrence] = useState<"none" | "monthly-first-sunday">(
-    "none",
-  );
+  const [recurrence, setRecurrence] = useState<
+    "none" | "weekly" | "monthly" | "yearly"
+  >("none");
+  const [eventType, setEventType] = useState<string>("WORSHIP_SERVICE"); // Add event type state
   const [applySameTime, setApplySameTime] = useState(true);
   const [daySchedules, setDaySchedules] = useState<SpecialServiceDaySchedule[]>(
     [],
@@ -127,7 +146,17 @@ export function CreateSpecialServiceModal({
     }
   };
 
+  const convertTo12HourFormat = (time24: string) => {
+    if (!time24) return "";
+    const [hours, minutes] = time24.split(":");
+    const hour = parseInt(hours);
+    const ampm = hour >= 12 ? "PM" : "AM";
+    const hour12 = hour % 12 || 12;
+    return `${hour12}:${minutes} ${ampm}`;
+  };
+
   const handleClose = () => {
+    if (isLoading) return;
     onOpenChange(false);
     setServiceName("");
     setStartDate("");
@@ -135,11 +164,12 @@ export function CreateSpecialServiceModal({
     setLocation("");
     setDescription("");
     setRecurrence("none");
+    setEventType("WORSHIP_SERVICE");
     setApplySameTime(true);
     setDaySchedules([]);
   };
 
-  const handleCreate = () => {
+  const handleCreate = async () => {
     if (!serviceName.trim()) {
       toast({
         title: "Validation Error",
@@ -172,23 +202,37 @@ export function CreateSpecialServiceModal({
         ? crypto.randomUUID()
         : `special-${Date.now()}`;
 
-    onCreateService({
-      id,
-      serviceName: serviceName.trim(),
-      startDate,
-      endDate: endDate || startDate,
-      location: location.trim() || undefined,
-      description: description.trim() || undefined,
-      recurrence,
-      daySchedules,
-    });
+    setIsLoading(true);
 
-    toast({
-      title: "Success",
-      description: "Special service created successfully",
-    });
+    try {
+      await onCreateService({
+        id,
+        serviceName: serviceName.trim(),
+        startDate,
+        endDate: endDate || startDate,
+        location: location.trim() || undefined,
+        description: description.trim() || undefined,
+        recurrence: RECURRENCE_MAP[recurrence] as
+          | "NO_REPEAT"
+          | "WEEKLY_MONDAY"
+          | "MONTHLY_FIRST_MONDAY"
+          | "ANNUALLY",
+        daySchedules: daySchedules.map((schedule) => ({
+          date: schedule.date,
+          startTime: convertTo12HourFormat(schedule.startTime),
+          endTime: schedule.endTime
+            ? convertTo12HourFormat(schedule.endTime)
+            : "",
+        })),
+        eventType: eventType as any, // Add event type
+      });
 
-    handleClose();
+      handleClose();
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -201,7 +245,12 @@ export function CreateSpecialServiceModal({
         <DialogHeader className="px-6 py-4 border-b">
           <div className="flex items-center justify-between">
             <DialogTitle className="text-xl">Special Service</DialogTitle>
-            <Button variant="ghost" size="icon" onClick={handleClose}>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleClose}
+              disabled={isLoading}
+            >
               <X className="h-4 w-4" />
             </Button>
           </div>
@@ -216,6 +265,7 @@ export function CreateSpecialServiceModal({
               placeholder="e.g. Anointing Service"
               value={serviceName}
               onChange={(e) => setServiceName(e.target.value)}
+              disabled={isLoading}
             />
           </div>
 
@@ -231,6 +281,7 @@ export function CreateSpecialServiceModal({
                   setStartDate(e.target.value);
                   if (!endDate) setEndDate(e.target.value);
                 }}
+                disabled={isLoading}
               />
             </div>
             <div className="space-y-2">
@@ -240,8 +291,32 @@ export function CreateSpecialServiceModal({
                 value={endDate}
                 min={startDate || undefined}
                 onChange={(e) => setEndDate(e.target.value)}
+                disabled={isLoading}
               />
             </div>
+          </div>
+
+          {/* Add Event Type Select */}
+          <div className="space-y-2">
+            <Label>Event Type</Label>
+            <Select
+              value={eventType}
+              onValueChange={setEventType}
+              disabled={isLoading}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select event type" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="WORSHIP_SERVICE">Worship Service</SelectItem>
+                <SelectItem value="BIRTHDAY">Birthday</SelectItem>
+                <SelectItem value="MEETING">Meeting</SelectItem>
+                <SelectItem value="WEDDING_ANNIVERSARY">
+                  Wedding Anniversary
+                </SelectItem>
+                <SelectItem value="OTHERS">Others</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="space-y-2">
@@ -249,17 +324,18 @@ export function CreateSpecialServiceModal({
             <Select
               value={recurrence}
               onValueChange={(value) =>
-                setRecurrence(value as "none" | "monthly-first-sunday")
+                setRecurrence(value as "none" | "weekly" | "monthly" | "yearly")
               }
+              disabled={isLoading}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Select repeat rule" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="none">One-time</SelectItem>
-                <SelectItem value="monthly-first-sunday">
-                  Every first Sunday of the month
-                </SelectItem>
+                <SelectItem value="weekly">Weekly (Monday)</SelectItem>
+                <SelectItem value="monthly">Monthly (First Monday)</SelectItem>
+                <SelectItem value="yearly">Annually</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -268,6 +344,7 @@ export function CreateSpecialServiceModal({
             <Checkbox
               checked={applySameTime}
               onCheckedChange={(checked) => setApplySameTime(Boolean(checked))}
+              disabled={isLoading}
             />
             <Text>Apply the same time for others</Text>
           </div>
@@ -298,6 +375,7 @@ export function CreateSpecialServiceModal({
                             e.target.value,
                           )
                         }
+                        disabled={isLoading}
                       />
                       <Clock3 className="h-4 w-4 absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
                     </div>
@@ -315,6 +393,7 @@ export function CreateSpecialServiceModal({
                             e.target.value,
                           )
                         }
+                        disabled={isLoading}
                       />
                       <Clock3 className="h-4 w-4 absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
                     </div>
@@ -330,6 +409,7 @@ export function CreateSpecialServiceModal({
               placeholder="e.g. Main Auditorium"
               value={location}
               onChange={(e) => setLocation(e.target.value)}
+              disabled={isLoading}
             />
           </div>
 
@@ -340,11 +420,21 @@ export function CreateSpecialServiceModal({
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Add description"
               className="w-full min-h-24 rounded-md border border-input bg-background px-3 py-2 text-sm"
+              disabled={isLoading}
             />
           </div>
 
           <div className="flex justify-end">
-            <Button onClick={handleCreate}>Create event</Button>
+            <Button onClick={handleCreate} disabled={isLoading}>
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Creating...
+                </>
+              ) : (
+                "Create event"
+              )}
+            </Button>
           </div>
         </div>
       </DialogContent>
