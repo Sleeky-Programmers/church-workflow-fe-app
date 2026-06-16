@@ -5,7 +5,7 @@ const productLinks = [
   { label: "Features", href: "#features" },
   { label: "How It Works", href: "#how-it-works" },
   { label: "Pricing", href: "#pricing" },
-  { label: "Request a Demo", href: "#demo" },
+  { label: "Sign Up", href: "/auth/signup" },
 ];
 
 const resourceLinks = [
@@ -18,12 +18,12 @@ const resourceLinks = [
 const contactLinks = [
   { label: "Contact Us", href: "#contact" },
   { label: "Support", href: "#support" },
-  { label: "Login", href: "#login" },
+  { label: "Login", href: "/auth/login" },
 ];
 
 export default function Footer() {
   return (
-    <footer className="relative w-full overflow-hidden">
+    <footer id="contact" className="relative w-full overflow-hidden">
       <img
         src="/landing-page/darkblue.png"
         alt=""

@@ -43,7 +43,7 @@ const benefits = [
 
 export default function FocusMinistrySection() {
   return (
-    <section className="relative w-full">
+    <section id="features" className="relative w-full">
       <img
         src="/landing-page/darkblue.png"
         alt=""
