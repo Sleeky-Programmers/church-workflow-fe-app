@@ -46,14 +46,17 @@ export function AppSidebar() {
     }
   };
 
-  const comingSoonTitles = ["Communication", "Requests", "Finance"];
+  const hiddenTitles = ["Communication"];
+  const comingSoonTitles = ["Departments/Units", "Requests", "Finance"];
 
   const mainPages = SidebarData.pages.filter(
-    (p) => !comingSoonTitles.includes(p.title),
+    (p) =>
+      !comingSoonTitles.includes(p.title) && !hiddenTitles.includes(p.title),
   );
 
-  const comingSoonPages = SidebarData.pages.filter((p) =>
-    comingSoonTitles.includes(p.title),
+  const comingSoonPages = SidebarData.pages.filter(
+    (p) =>
+      comingSoonTitles.includes(p.title) && !hiddenTitles.includes(p.title),
   );
 
   return (
@@ -188,7 +191,9 @@ export function AppSidebar() {
                   <SidebarMenuItem key={page.title}>
                     <div className="flex items-center gap-2 px-3 py-2 opacity-50 cursor-not-allowed">
                       <Icon className="h-4 w-4" />
-                      <Text variant="default">{page.title}</Text>
+                      <Text variant="default">
+                        {page.title === "Requests" ? "Request" : page.title}
+                      </Text>
                     </div>
                   </SidebarMenuItem>
                 );
