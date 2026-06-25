@@ -277,10 +277,7 @@ export function CreateSpecialServiceModal({
               <Input
                 type="date"
                 value={startDate}
-                onChange={(e) => {
-                  setStartDate(e.target.value);
-                  if (!endDate) setEndDate(e.target.value);
-                }}
+                onChange={(e) => setStartDate(e.target.value)}
                 disabled={isLoading}
               />
             </div>
