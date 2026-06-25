@@ -619,6 +619,36 @@ export async function fetchAttendanceStats(): Promise<AttendanceStatsResponse> {
   });
 }
 
+export type Month =
+  | "January"
+  | "February"
+  | "March"
+  | "April"
+  | "May"
+  | "June"
+  | "July"
+  | "August"
+  | "September"
+  | "October"
+  | "November"
+  | "December";
+
+export interface MonthlyAttendance {
+  month: Month;
+  totalAttendance: number;
+}
+
+export interface AttendanceTrendResponse {
+  regularService: MonthlyAttendance[];
+  specialService: MonthlyAttendance[];
+}
+
+export async function fetchAttendanceTrend(): Promise<AttendanceTrendResponse> {
+  return authenticatedFetch<AttendanceTrendResponse>("/attendance/trend", {
+    method: "GET",
+  });
+}
+
 export async function fetchMembers(
   page: number = 1,
   limit: number = 10,

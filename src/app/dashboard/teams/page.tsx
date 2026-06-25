@@ -10,7 +10,9 @@ import { getTeamColumns } from "@/components/features/dashboard/teams/team-colum
 import TeamsDeleteDialog from "@/components/features/dashboard/teams/team-delete-dialog";
 import { TeamStatusFilter } from "@/components/features/dashboard/teams/teams-filter-dropdown";
 import TeamsSearchBar from "@/components/features/dashboard/teams/teams-search-bar";
+import { ViewTeamReportDialog } from "@/components/features/dashboard/teams/view-team-report-dialog";
 import { Button } from "@/components/ui/button";
+import { Loader } from "@/components/ui/loader";
 import Heading from "@/components/ui/typography/Heading";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useToast } from "@/hooks/use-toast";
@@ -61,6 +63,10 @@ export default function TeamsPage() {
   const [markTarget, setMarkTarget] = useState<TeamRow | null>(null);
   const [teamMembers, setTeamMembers] = useState<Record<string, string[]>>({});
   const [isLoading, setIsLoading] = useState(true);
+
+  const [reportTarget, setReportTarget] = useState<TeamRow | null>(null);
+  const [reportData, setReportData] = useState<any>(null);
+  const [isReportLoading, setIsReportLoading] = useState(false);
 
   const mapTeamToRow = (team: TeamApiEntity): TeamRow => ({
     id: team._id,
@@ -190,18 +196,20 @@ export default function TeamsPage() {
   const handleMarkAttendance = (row: TeamRow) => setMarkTarget(row);
 
   const handleViewReport = async (row: TeamRow) => {
+    setReportTarget(row);
+    setIsReportLoading(true);
     try {
       const report = await fetchSmallTeamReport(row.id);
-      toast({
-        title: `${row.name} Attendance`,
-        description: `${report.attendancePercentage}% attendance, ${report.lowAttendanceMembers.length} low-attendance members.`,
-      });
+      setReportData(report);
     } catch (error: any) {
       toast({
         title: "Unable to load report",
         description: error?.message || "Please try again.",
         variant: "destructive",
       });
+      setReportTarget(null);
+    } finally {
+      setIsReportLoading(false);
     }
   };
 
@@ -308,6 +316,19 @@ export default function TeamsPage() {
         onOpenChange={(open) => !open && setDeleteTarget(null)}
         onConfirm={handleConfirmDelete}
       />
+
+      <ViewTeamReportDialog
+        open={!!reportTarget}
+        onOpenChange={(open) => {
+          if (!open) {
+            setReportTarget(null);
+            setReportData(null);
+          }
+        }}
+        team={reportTarget}
+        reportData={reportData}
+        isLoading={isReportLoading}
+      />
     </>
   );
 
@@ -331,7 +352,9 @@ export default function TeamsPage() {
       <div className="max-h-[65vh] overflow-auto">
         {isLoading ? (
           <div className="rounded-xl border bg-white px-4 py-6 text-sm text-gray-500">
-            Loading teams...
+            <div className="absolute inset-0 flex items-center justify-center bg-white/60 z-10">
+              <Loader className="h-6 w-6" />
+            </div>
           </div>
         ) : (
           <Table
