@@ -122,9 +122,16 @@ export function CreateRegularServiceModal({
         const startTime = convertTo12Hour(service.startTime);
         const endTime = convertTo12Hour(service.endTime || "");
 
-        for (const day of service.day) {
+        // Handle both string and array cases
+        const days = Array.isArray(service.day) ? service.day : [service.day];
+
+        for (const day of days) {
           const dayEnum = SERVICE_DAY_ENUM_MAP[day];
-          if (!dayEnum) continue;
+
+          if (!dayEnum) {
+            console.error(`Invalid day: ${day}`);
+            continue;
+          }
 
           const createdService: any = await createWeeklyService({
             title: service.serviceName,
@@ -139,7 +146,7 @@ export function CreateRegularServiceModal({
             id: createdService._id,
             serviceName: createdService.serviceName,
             type: "REGULAR",
-            day,
+            day: day,
             startTime: createdService.startTime,
             endTime: createdService.endTime,
             location: createdService.location,

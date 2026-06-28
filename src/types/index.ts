@@ -87,6 +87,7 @@ export type DepartmentRow = {
 export type TeamRow = {
   id: string;
   name: string;
+  description?: string;
   leader: { name: string; initials?: string } | null;
   members: number;
   status: "Active" | "Inactive";

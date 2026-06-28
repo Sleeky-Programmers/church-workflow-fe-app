@@ -128,8 +128,6 @@ export function ViewTeamReportDialog({
     return null;
   }
 
-  console.log({ reportData: reportData.team });
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent

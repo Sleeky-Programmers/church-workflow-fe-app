@@ -139,14 +139,14 @@ export default function AttendancePage() {
         description: `${newServices.length} service(s) created successfully`,
       });
 
-      setIsRegularModalOpen(false); // Close the modal on success
+      setIsRegularModalOpen(false);
     } catch (error: any) {
       toast({
         title: "Error",
         description: error.message || "Failed to create services",
         variant: "destructive",
       });
-      throw error; // Re-throw to let modal know it failed
+      throw error;
     }
   };
 

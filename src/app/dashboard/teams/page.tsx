@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 
 import Table from "@/components/features/dashboard/Table";
-import AddSmallTeamDialog from "@/components/features/dashboard/teams/add-small-team-dialog";
+import { EditSmallTeamDialog } from "@/components/features/dashboard/teams/edit-small-team-dialog";
 import ManageTeamMembersDialog from "@/components/features/dashboard/teams/manage-team-members-dialog";
 import MarkTeamAttendanceDialog from "@/components/features/dashboard/teams/mark-team-attendance-dialog";
 import { getTeamColumns } from "@/components/features/dashboard/teams/team-columns";
@@ -11,9 +11,7 @@ import TeamsDeleteDialog from "@/components/features/dashboard/teams/team-delete
 import { TeamStatusFilter } from "@/components/features/dashboard/teams/teams-filter-dropdown";
 import TeamsSearchBar from "@/components/features/dashboard/teams/teams-search-bar";
 import { ViewTeamReportDialog } from "@/components/features/dashboard/teams/view-team-report-dialog";
-import { Button } from "@/components/ui/button";
 import { Loader } from "@/components/ui/loader";
-import Heading from "@/components/ui/typography/Heading";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -23,6 +21,7 @@ import {
   fetchSmallTeamReport,
   fetchSmallTeams,
   markSmallTeamAttendance,
+  updateSmallTeam,
   updateSmallTeamMembers,
 } from "@/lib/api";
 import { TeamStatus } from "@/lib/enums";
@@ -39,6 +38,7 @@ function getInitials(fullName: string) {
 type TeamApiEntity = {
   _id: string;
   name: string;
+  description?: string;
   status: "ACTIVE" | "INACTIVE";
   leader: { id: string; fullName: string } | null;
   members: { id: string; fullName: string; email: string }[];
@@ -68,9 +68,13 @@ export default function TeamsPage() {
   const [reportData, setReportData] = useState<any>(null);
   const [isReportLoading, setIsReportLoading] = useState(false);
 
+  const [editTarget, setEditTarget] = useState<TeamRow | null>(null);
+  const [isSavingTeam, setIsSavingTeam] = useState(false);
+
   const mapTeamToRow = (team: TeamApiEntity): TeamRow => ({
     id: team._id,
     name: team.name,
+    description: team.description || "", // ✅ Add description field
     leader: team.leader
       ? {
           name: team.leader.fullName,
@@ -141,26 +145,24 @@ export default function TeamsPage() {
   const filtered = useMemo(() => {
     let filteredTeams = data;
 
-    // Search filter
     if (query) {
       const q = query.toLowerCase();
       filteredTeams = filteredTeams.filter(
         (team) =>
           team.name.toLowerCase().includes(q) ||
           (team.leader?.name ?? "").toLowerCase().includes(q) ||
+          (team.description?.toLowerCase() || "").includes(q) || // ✅ Add description to search
           String(team.members).includes(q) ||
           team.status.toLowerCase().includes(q),
       );
     }
 
-    // Status filter
     if (statusFilter !== "all") {
       filteredTeams = filteredTeams.filter(
         (team) => team.status === statusFilter,
       );
     }
 
-    // Member filter
     if (selectedMemberId !== "all") {
       filteredTeams = filteredTeams.filter((team) => {
         const teamMemberIds = teamMembers[team.id] || [];
@@ -168,7 +170,6 @@ export default function TeamsPage() {
       });
     }
 
-    // Min members filter
     if (minMembers > 0) {
       filteredTeams = filteredTeams.filter(
         (team) => team.members >= minMembers,
@@ -186,10 +187,43 @@ export default function TeamsPage() {
   };
 
   const handleEdit = (row: TeamRow) => {
-    toast({
-      title: "Edit Team",
-      description: `Edit ${row.name} is not enabled yet.`,
-    });
+    setEditTarget(row);
+  };
+
+  const handleSaveEdit = async (data: {
+    name: string;
+    leaderId: string | null;
+    memberIds: string[];
+    status: "ACTIVE" | "INACTIVE";
+    description: string;
+  }) => {
+    if (!editTarget) return;
+
+    setIsSavingTeam(true);
+    try {
+      await updateSmallTeam({
+        teamId: editTarget.id,
+        name: data.name,
+        leaderId: data.leaderId || undefined,
+        memberIds: data.memberIds,
+        status: data.status,
+        description: data.description,
+      });
+      await loadTeams();
+      toast({
+        title: "Team updated",
+        description: `${data.name} has been updated successfully.`,
+      });
+      setEditTarget(null);
+    } catch (error: any) {
+      toast({
+        title: "Update failed",
+        description: error?.message || "Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSavingTeam(false);
+    }
   };
 
   const handleManageMembers = (row: TeamRow) => setManageTarget(row);
@@ -329,10 +363,24 @@ export default function TeamsPage() {
         reportData={reportData}
         isLoading={isReportLoading}
       />
+
+      <EditSmallTeamDialog
+        open={!!editTarget}
+        onOpenChange={(open) => {
+          if (!open) {
+            setEditTarget(null);
+            setIsSavingTeam(false);
+          }
+        }}
+        team={editTarget}
+        members={members}
+        currentMemberIds={editTarget ? teamMembers[editTarget.id] || [] : []}
+        onSave={handleSaveEdit}
+        isSaving={isSavingTeam}
+      />
     </>
   );
 
-  // For non-mobile view (desktop)
   return (
     <div className="space-y-6">
       <TeamsSearchBar
