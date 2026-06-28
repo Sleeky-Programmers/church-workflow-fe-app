@@ -1,26 +1,29 @@
 "use client";
 
-import { useMemo, useState } from "react";
 import {
+  ChevronRight,
+  ExternalLink,
   Plus,
   RefreshCw,
-  ExternalLink,
-  X,
-  ChevronRight,
   Search,
+  X,
 } from "lucide-react";
+import { useMemo, useState } from "react";
+
+import {
+  MemberMultiSelect,
+  MemberSingleSelect,
+} from "@/components/features/dashboard/departments/member-selectors";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
-  DialogTrigger,
-  DialogContent,
   DialogClose,
+  DialogContent,
+  DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { MemberProfile } from "@/types";
-import { Textarea } from "@/components/ui/textarea";
-import Heading from "@/components/ui/typography/Heading";
 import {
   Select,
   SelectContent,
@@ -28,16 +31,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  MemberMultiSelect,
-  MemberSingleSelect,
-} from "@/components/features/dashboard/departments/member-selectors";
-import { fetchAdmins } from "@/services/userServices";
-import { fetchMembers } from "@/services/memberService";
+import { Textarea } from "@/components/ui/textarea";
+import Heading from "@/components/ui/typography/Heading";
 import { Span, Text } from "@/components/ui/typography/Text";
-import { cn } from "@/lib/utils";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { cn } from "@/lib/utils";
+import { fetchMembers } from "@/services/memberService";
+import { fetchAdmins } from "@/services/userServices";
+import { MemberProfile } from "@/types";
 
 const PANEL_PAGE_SIZE = 8;
 
@@ -293,11 +294,15 @@ export default function AddSmallTeamDialog({
           className={cn(
             "!p-0 !bg-white !shadow-lg !border !border-gray-200",
             isMobile && "!rounded-t-2xl",
+            // Make modal responsive - full width on mobile, fixed max-width on desktop
+            "w-[95vw] max-w-[95vw] sm:w-[510px] sm:max-w-[510px]",
+            "lg:w-[560px] lg:max-w-[560px]",
+            "xl:w-[600px] xl:max-w-[600px]",
           )}
         >
-          <div className="flex items-start gap-4">
-            <div className="rounded-xl w-full sm:w-[510px] h-full flex flex-col overflow-hidden bg-white">
-              <div className="flex justify-between items-center border-b px-6 py-4">
+          <div className="flex items-start gap-4 w-full">
+            <div className="rounded-xl w-full h-full flex flex-col overflow-hidden bg-white">
+              <div className="flex justify-between items-center border-b px-4 sm:px-6 py-4">
                 <Heading level={2}>Add a Small Team</Heading>
 
                 <DialogClose asChild>
@@ -312,20 +317,23 @@ export default function AddSmallTeamDialog({
                 </DialogClose>
               </div>
 
-              <div className="max-h-[70vh] space-y-5 overflow-y-auto px-6 py-5">
-                <div className="space-y-1.5">
-                  <Label>Team Name</Label>
+              <div className="max-h-[70vh] space-y-4 sm:space-y-5 overflow-y-auto px-4 sm:px-6 py-4 sm:py-5">
+                {/* Team Name - Full width */}
+                <div className="space-y-1.5 w-full">
+                  <Label className="text-sm sm:text-base">Team Name</Label>
                   <Input
                     placeholder="e.g. Youth Group A"
                     value={teamName}
                     onChange={(e) => setTeamName(e.target.value)}
+                    className="w-full"
                   />
                 </div>
 
-                <div className="space-y-1.5">
-                  <Label>Assign Leader</Label>
-                  <div className="flex items-center gap-2">
-                    <div className="flex-1">
+                {/* Assign Leader - Full width with flexible button */}
+                <div className="space-y-1.5 w-full">
+                  <Label className="text-sm sm:text-base">Assign Leader</Label>
+                  <div className="flex items-center gap-2 w-full">
+                    <div className="flex-1 min-w-0">
                       <MemberSingleSelect
                         fetchOptions={fetchAdmins}
                         value={leaderId}
@@ -339,6 +347,7 @@ export default function AddSmallTeamDialog({
                       title="Reset leader"
                       variant="outline"
                       onClick={handleResetLeader}
+                      className="shrink-0"
                     >
                       <RefreshCw className="h-4 w-4 text-gray-500" />
                     </Button>
@@ -354,16 +363,22 @@ export default function AddSmallTeamDialog({
                   </a>
                 </div>
 
-                <div className="space-y-2">
+                {/* Members Section - Full width */}
+                <div className="space-y-2 w-full">
                   {memberIds.length > 0 && (
                     <div className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <Span variant="default">Selected Members</Span>
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <Span
+                          variant="default"
+                          className="text-sm sm:text-base"
+                        >
+                          Selected Members
+                        </Span>
                         <Button
                           variant="outline"
                           size="sm"
                           onClick={() => setShowSelectedPanel(true)}
-                          className="h-7"
+                          className="h-7 text-xs sm:text-sm"
                         >
                           View All Members
                           <ChevronRight className="h-3 w-3 ml-1" />
@@ -380,7 +395,7 @@ export default function AddSmallTeamDialog({
                             <Span
                               key={id}
                               variant="chip"
-                              className="flex items-center gap-1"
+                              className="flex items-center gap-1 text-xs sm:text-sm"
                             >
                               {member.fullName.split(" ")[0]}
                               <Button
@@ -394,14 +409,17 @@ export default function AddSmallTeamDialog({
                           );
                         })}
                         {memberIds.length > 3 && (
-                          <Span variant="chip" className="inline-flex">
+                          <Span
+                            variant="chip"
+                            className="inline-flex text-xs sm:text-sm"
+                          >
                             +{memberIds.length - 3} others
                           </Span>
                         )}
                       </div>
                     </div>
                   )}
-                  <Label>Add Members</Label>
+                  <Label className="text-sm sm:text-base">Add Members</Label>
 
                   <MemberMultiSelect
                     fetchOptions={fetchMembers}
@@ -411,10 +429,11 @@ export default function AddSmallTeamDialog({
                   />
                 </div>
 
-                <div className="space-y-1.5">
-                  <Label>Status</Label>
+                {/* Status - Full width */}
+                <div className="space-y-1.5 w-full">
+                  <Label className="text-sm sm:text-base">Status</Label>
                   <Select value={status} onValueChange={setStatus}>
-                    <SelectTrigger>
+                    <SelectTrigger className="w-full">
                       <SelectValue placeholder="Select status" />
                     </SelectTrigger>
                     <SelectContent>
@@ -424,31 +443,34 @@ export default function AddSmallTeamDialog({
                   </Select>
                 </div>
 
-                <div className="space-y-1.5">
-                  <Label>Description</Label>
+                {/* Description - Full width */}
+                <div className="space-y-1.5 w-full">
+                  <Label className="text-sm sm:text-base">Description</Label>
                   <Textarea
                     rows={4}
                     placeholder="Add description"
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
-                    className="flex w-full px-3 py-2"
+                    className="flex w-full px-3 py-2 resize-y"
                   />
                 </div>
               </div>
 
-              <div className="flex justify-end border-t border-gray-200 px-6 py-4">
+              {/* Footer - Full width */}
+              <div className="flex justify-end border-t border-gray-200 px-4 sm:px-6 py-4">
                 <Button
                   onClick={handleSave}
                   disabled={!teamName.trim() || isSaving}
-                  className="px-6"
+                  className="px-4 sm:px-6 w-full sm:w-auto"
                 >
                   {isSaving ? "Saving..." : "Add Team"}
                 </Button>
               </div>
             </div>
 
+            {/* Side Panel - Dynamic width */}
             {!isMobile && showSelectedPanel && (
-              <div className="hidden sm:flex w-[340px] max-h-[80vh] h-[80vh]">
+              <div className="hidden sm:flex w-[280px] sm:w-[320px] md:w-[340px] lg:w-[380px] max-h-[80vh] h-[80vh]">
                 <PanelContent />
               </div>
             )}
@@ -456,12 +478,13 @@ export default function AddSmallTeamDialog({
         </DialogContent>
       </Dialog>
 
+      {/* Mobile Panel - Full width */}
       {isMobile && showSelectedPanel && (
         <Dialog open={showSelectedPanel} onOpenChange={setShowSelectedPanel}>
           <DialogContent
             showClose={false}
             mobileSheet
-            className="w-full max-w-[520px] p-0 overflow-hidden max-sm:max-h-[88vh] h-[80vh] !bg-transparent !shadow-none !border-none"
+            className="w-[95vw] max-w-[95vw] sm:w-[520px] sm:max-w-[520px] p-0 overflow-hidden max-sm:max-h-[88vh] h-[80vh] !bg-transparent !shadow-none !border-none"
           >
             <PanelContent />
           </DialogContent>
