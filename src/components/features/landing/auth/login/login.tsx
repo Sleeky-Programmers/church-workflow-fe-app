@@ -22,6 +22,7 @@ import { RouteConfig } from "@/config/routes";
 import { googleAuth, login } from "@/lib/api";
 import { initializeAuthSession } from "@/lib/auth/session";
 import { useAuthStore } from "@/stores/useAuthStore";
+import { getSelectedPlan } from "@/lib/plan-selection";
 
 interface LoginFormProps {
   onForgotPassword: () => void;
@@ -55,7 +56,11 @@ export default function LoginForm({ onForgotPassword }: LoginFormProps) {
         email: profile.email || values.email,
       });
 
-      if (data.user?.churchId) {
+      const pendingPlan = getSelectedPlan();
+
+      if (pendingPlan && data.user?.churchId) {
+        router.push(RouteConfig.checkout);
+      } else if (data.user?.churchId) {
         router.push(RouteConfig.dashboard.home);
       } else {
         router.push(RouteConfig.onboarding);
@@ -109,7 +114,11 @@ export default function LoginForm({ onForgotPassword }: LoginFormProps) {
         email: profile.email || data.user?.email || "",
       });
 
-      if (data.user?.churchId) {
+      const pendingPlan = getSelectedPlan();
+
+      if (pendingPlan && data.user?.churchId) {
+        router.push(RouteConfig.checkout);
+      } else if (data.user?.churchId) {
         router.push(RouteConfig.dashboard.home);
       } else {
         router.push(RouteConfig.onboarding);

@@ -14,6 +14,7 @@ import AuthLayout from "@/components/features/landing/auth/signup/auth-layout";
 import { resendOtp, verifyOtp } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
 import { initializeAuthSession } from "@/lib/auth/session";
+import { getSelectedPlan } from "@/lib/plan-selection";
 
 export function SignupPageContent() {
   const router = useRouter();
@@ -132,7 +133,13 @@ export function SignupPageContent() {
 
       sessionStorage.setItem("signupData", JSON.stringify(signupData));
 
-      router.push(RouteConfig.onboarding);
+      const pendingPlan = getSelectedPlan();
+      if (pendingPlan) {
+        router.push(RouteConfig.checkout);
+      } else {
+        router.push(RouteConfig.onboarding);
+      }
+
       return true;
     } catch (error: any) {
       toast({
