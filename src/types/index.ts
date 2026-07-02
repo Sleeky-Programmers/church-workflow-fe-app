@@ -1,24 +1,24 @@
+import { LucideIcon } from "lucide-react";
+
 import {
+  BillingCycle,
+  ChurchSubscriptionStatus,
   EventCalendarView,
+  EventCategory,
   EventRecurrence,
   EventReminderType,
   EventType,
+  Gender,
+  MaritalStatus,
+  MembershipStatus,
+  MemberTitle,
   NotificationType,
+  PaymentProvider,
+  PlanType,
+  SubscriptionStatus,
   UserRole,
   UserStatus,
-  MemberTitle,
-  MaritalStatus,
-  Gender,
-  MembershipStatus,
-  EventCategory,
-  PlanType,
-  ChurchSubscriptionStatus,
-  PaymentProvider,
-  BillingCycle,
-  SubscriptionStatus,
 } from "@/lib/enums";
-
-import { LucideIcon } from "lucide-react";
 
 export type ActivityRow = {
   _id: string;
@@ -87,6 +87,7 @@ export type DepartmentRow = {
 export type TeamRow = {
   id: string;
   name: string;
+  description?: string;
   leader: { name: string; initials?: string } | null;
   members: number;
   status: "Active" | "Inactive";
@@ -194,22 +195,24 @@ export type AttendanceRecord = {
 export type RegularService = {
   id: string;
   serviceName: string;
-  days: string[];
+  type: "REGULAR" | "SPECIAL";
+  day: string;
   startTime: string;
   endTime?: string;
   location?: string;
-  frequency: "weekly";
-  attendanceRecords?: AttendanceRecord[];
+  description?: string;
+  frequency?: "weekly" | "monthly";
+  attendanceRecords?: any[];
 };
 
 export type SpecialService = {
   id: string;
   serviceName: string;
+  type: "REGULAR" | "SPECIAL";
   date: string;
   startTime: string;
   endTime?: string;
   location?: string;
-  type: string;
   attendanceRecord?: AttendanceRecord;
 };
 
@@ -311,6 +314,32 @@ export type ChurchEvent = {
   colorClass: string;
 };
 
+export interface ChurchService {
+  id: string;
+  churchId: string;
+  serviceName: string;
+  type: string; // "REGULAR" | "SPECIAL" etc.
+  day: string; // "SUNDAY", "MONDAY", etc.
+  startTime: string;
+  endTime: string;
+  location: string;
+  specialDays: string[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ChurchServicesResponse {
+  data: ChurchService[];
+  pagination: {
+    page: number;
+    limit: number;
+    itemCount: number;
+    totalPages: number;
+    hasPreviousPage: boolean;
+    hasNextPage: boolean;
+  };
+}
+
 export type EventFormData = Omit<ChurchEvent, "id" | "colorClass">;
 
 export type EventTypeOption = {
@@ -337,7 +366,17 @@ export type SpecialServiceEvent = {
   endDate?: string;
   location?: string;
   description?: string;
-  recurrence: "none" | "monthly-first-sunday";
+  recurrence?:
+    | "NO_REPEAT"
+    | "WEEKLY_MONDAY"
+    | "MONTHLY_FIRST_MONDAY"
+    | "ANNUALLY";
+  eventType?:
+    | "WORSHIP_SERVICE"
+    | "BIRTHDAY"
+    | "MEETING"
+    | "WEDDING_ANNIVERSARY"
+    | "OTHERS";
   daySchedules: SpecialServiceDaySchedule[];
 };
 
@@ -347,6 +386,7 @@ export type UploadFile = {
   status: "uploading" | "paused" | "success" | "error";
   error?: string;
   controller?: AbortController;
+  errorDetails?: string;
 };
 
 export type FileInputProps = {

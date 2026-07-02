@@ -1,6 +1,5 @@
 "use client";
 
-import { useMemo, useState } from "react";
 import {
   addDays,
   addMonths,
@@ -13,7 +12,6 @@ import {
   format,
   isBefore,
   isSameDay,
-  isSameMonth as isCalendarSameMonth,
   isSameMonth,
   parseISO,
   startOfMonth,
@@ -24,9 +22,8 @@ import {
   subYears,
 } from "date-fns";
 import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
-import { EventCalendarView, EventRecurrence, EventType } from "@/lib/enums";
-import { cn } from "@/lib/utils";
-import { ChurchEvent } from "@/types";
+import { useMemo, useState } from "react";
+
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -41,16 +38,26 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Span, Text } from "@/components/ui/typography/Text";
+import {
+  EventCalendarView,
+  EventRecurrence,
+  EventReminderType,
+  EventType,
+} from "@/lib/enums";
+import { cn } from "@/lib/utils";
+import { ChurchEvent, ChurchService } from "@/types";
+
 import {
   EVENT_TYPE_LABEL_MAP,
   EVENT_TYPE_OPTIONS,
   EVENT_VIEW_DROPDOWN_OPTIONS,
   EVENT_VIEW_OPTIONS,
 } from "./constants";
-import { Text, Span } from "@/components/ui/typography/Text";
 
 type EventsCalendarProps = {
   events: ChurchEvent[];
+  churchServices?: ChurchService[]; // Add churchServices prop
   onCreateEvent: (date?: string) => void;
   onSelectEvent: (event: ChurchEvent) => void;
 };
@@ -101,8 +108,31 @@ function occursOnDate(event: ChurchEvent, date: Date) {
   return false;
 }
 
+// Helper to convert church service to event format
+const convertChurchServiceToEvent = (service: ChurchService): ChurchEvent => {
+  // Parse the date (you might need to adjust this based on your needs)
+  const [month, day, year] = new Date().toLocaleDateString().split("/");
+
+  return {
+    id: service.id,
+    title: service.serviceName,
+    type: EventType.WORSHIP_SERVICE,
+    recurrence: EventRecurrence.WEEKLY, // Services typically repeat weekly
+    date: new Date().toISOString().split("T")[0], // You'll need to set proper dates
+    startTime: service.startTime,
+    endTime: service.endTime,
+    location: service.location,
+    description: `${service.type} service on ${service.day}s`,
+    sendReminder: true,
+    reminderType: EventReminderType.IN_APP,
+    remindBeforeMinutes: 30,
+    colorClass: "bg-blue-500",
+  };
+};
+
 export function EventsCalendar({
   events,
+  churchServices = [],
   onCreateEvent,
   onSelectEvent,
 }: EventsCalendarProps) {
@@ -115,9 +145,19 @@ export function EventsCalendar({
   const [selectedDateForList, setSelectedDateForList] = useState<Date | null>(
     null,
   );
+  const [showChurchServices, setShowChurchServices] = useState(true); // Toggle for church services
+
+  // Combine events with church services
+  const allEvents = useMemo(() => {
+    if (!showChurchServices) return events;
+
+    // Convert church services to events and combine
+    const serviceEvents = churchServices.map(convertChurchServiceToEvent);
+    return [...events, ...serviceEvents];
+  }, [events, churchServices, showChurchServices]);
 
   const filteredEvents = useMemo(() => {
-    const next = [...events];
+    const next = [...allEvents];
     const filteredByType =
       typeFilter === "ALL"
         ? next
@@ -125,7 +165,7 @@ export function EventsCalendar({
     return filteredByType.sort((a, b) =>
       `${a.date}${a.startTime}`.localeCompare(`${b.date}${b.startTime}`),
     );
-  }, [events, typeFilter]);
+  }, [allEvents, typeFilter]);
 
   const monthDays = useMemo(() => {
     const start = startOfWeek(startOfMonth(currentDate), { weekStartsOn: 0 });
@@ -208,9 +248,7 @@ export function EventsCalendar({
               key={day.toISOString()}
               className={cn(
                 "group min-h-[150px] border-r border-b p-2",
-                isCalendarSameMonth(day, currentDate)
-                  ? "bg-background"
-                  : "bg-muted/20",
+                isSameMonth(day, currentDate) ? "bg-background" : "bg-muted/20",
               )}
             >
               <div
@@ -250,7 +288,7 @@ export function EventsCalendar({
                   </Button>
                 ) : null}
 
-                {isCalendarSameMonth(day, currentDate) ? (
+                {isSameMonth(day, currentDate) ? (
                   <Button
                     type="button"
                     variant="ghost"
@@ -406,6 +444,18 @@ export function EventsCalendar({
           </div>
 
           <div className="flex items-center gap-2">
+            {/* Toggle for church services */}
+            {churchServices.length > 0 && (
+              <Button
+                variant={showChurchServices ? "default" : "outline"}
+                size="sm"
+                onClick={() => setShowChurchServices(!showChurchServices)}
+                className="h-9"
+              >
+                {showChurchServices ? "Hide Services" : "Show Services"}
+              </Button>
+            )}
+
             <Select
               value={viewMode}
               onValueChange={(value) => setViewMode(value as EventCalendarView)}

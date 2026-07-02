@@ -1,56 +1,51 @@
 "use client";
 
+import { Edit, LockOpenIcon } from "lucide-react";
+import Image from "next/image";
 import { useEffect, useState } from "react";
-import Heading from "@/components/ui/typography/Heading";
-import { Text } from "@/components/ui/typography/Text";
+
+import { EditChurchModal } from "@/components/features/dashboard/admin/edit-church-modal";
+import { EditPersonalInfoModal } from "@/components/features/dashboard/admin/edit-user-modal";
+import { UpdatePasswordModal } from "@/components/features/dashboard/admin/update-password-modal";
 import { Button } from "@/components/ui/button";
 import { Loader } from "@/components/ui/loader";
+import Heading from "@/components/ui/typography/Heading";
+import { Span, Text } from "@/components/ui/typography/Text";
 import { useToast } from "@/hooks/use-toast";
-import { Span } from "@/components/ui/typography/Text";
-import { Edit } from "lucide-react";
-import { LockOpenIcon } from "lucide-react";
+import { useUserStore } from "@/stores/useUserStore";
 
-import { getCurrentUserProfile } from "@/lib/auth/session";
-import { getMyChurch } from "@/lib/api";
-
-import { EditPersonalInfoModal } from "@/components/features/dashboard/admin/edit-user-modal";
-import { EditChurchModal } from "@/components/features/dashboard/admin/edit-church-modal";
-import { UpdatePasswordModal } from "@/components/features/dashboard/admin/update-password-modal";
-import Image from "next/image";
 export default function UserProfilePage() {
   const { toast } = useToast();
-
-  const [user, setUser] = useState<any>(null);
-  const [church, setChurch] = useState<any>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const {
+    user,
+    church,
+    isLoading,
+    error,
+    fetchUserData,
+    updateUser,
+    updateChurch,
+    getUserFullName,
+    getUserChurchRole,
+  } = useUserStore();
 
   const [openPersonalModal, setOpenPersonalModal] = useState(false);
   const [openChurchModal, setOpenChurchModal] = useState(false);
   const [openPasswordModal, setOpenPasswordModal] = useState(false);
 
   useEffect(() => {
-    loadData();
-  }, []);
+    fetchUserData();
+  }, [fetchUserData]);
 
-  const loadData = async () => {
-    try {
-      setIsLoading(true);
-
-      const userData = getCurrentUserProfile();
-      const churchData = await getMyChurch();
-
-      setUser(userData);
-      setChurch(churchData);
-    } catch (error: any) {
+  // Show error toast if there's an error
+  useEffect(() => {
+    if (error) {
       toast({
         title: "Error",
-        description: error.message || "Failed to load profile",
+        description: error,
         variant: "destructive",
       });
-    } finally {
-      setIsLoading(false);
     }
-  };
+  }, [error, toast]);
 
   if (isLoading) {
     return (
@@ -61,31 +56,53 @@ export default function UserProfilePage() {
     );
   }
 
+  const fullName = getUserFullName();
+  const churchRole = getUserChurchRole();
+
   return (
     <div className="space-y-6">
-      <Heading level={2}>User & Church Info</Heading>
+      <div className="flex justify-between items-center">
+        <Heading level={2}>User & Church Info</Heading>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => fetchUserData(true)}
+          className="gap-2"
+        >
+          Refresh
+        </Button>
+      </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* User Section */}
         <div className="space-y-6">
-          <div className="bg-black border rounded-xl p-4 flex items-center justify-between">
-            <div className="w-12 h-12 rounded-full bg-gray-700 flex items-center justify-center text-white">
-              {user?.logo || (
+          <div className="bg-white border rounded-xl p-4 flex items-center justify-between">
+            <div className="w-12 h-12 rounded-full bg-primary-100 flex items-center justify-center text-primary-700 font-semibold">
+              {user?.profileImage ? (
                 <Image
-                  src="/assets/avatar/Image.png"
+                  src={user.profileImage}
                   alt="Profile"
-                  width={200}
-                  height={200}
+                  width={48}
+                  height={48}
+                  className="rounded-full object-cover"
                 />
+              ) : (
+                <span className="text-lg font-bold">
+                  {fullName.charAt(0).toUpperCase()}
+                </span>
               )}
             </div>
 
-            <div className="flex flex-col">
-              <div>
-                <Text variant="label">{user?.fullName}</Text>
-              </div>
-              <div>
-                <Text>{user?.email}</Text>
-              </div>
+            <div className="flex flex-col flex-1 ml-4">
+              <Text variant="label" className="font-semibold">
+                {fullName}
+              </Text>
+              <Text variant="muted" className="text-sm">
+                {churchRole}
+              </Text>
+              <Text variant="muted" className="text-sm">
+                {user?.email}
+              </Text>
             </div>
 
             <Button
@@ -99,22 +116,41 @@ export default function UserProfilePage() {
             </Button>
           </div>
 
-          <div className="bg-black border rounded-xl p-6 space-y-6">
-            <Text variant="label">Personal Information</Text>
+          <div className="bg-white border rounded-xl p-6 space-y-6">
+            <Text variant="label" className="font-semibold">
+              Personal Information
+            </Text>
             <div className="grid grid-cols-2 gap-6">
               <div>
-                <Text className="text-gray-400">First Name</Text>
-                <Text>{user?.firstName || "-"}</Text>
+                <Text className="text-gray-500 text-sm">First Name</Text>
+                <Text className="font-medium">{user?.firstName || "-"}</Text>
               </div>
 
               <div>
-                <Text className="text-gray-400">Last Name</Text>
-                <Text>{user?.lastName || "-"}</Text>
+                <Text className="text-gray-500 text-sm">Last Name</Text>
+                <Text className="font-medium">{user?.lastName || "-"}</Text>
               </div>
 
               <div className="col-span-2">
-                <Text className="text-gray-400">Email</Text>
-                <Text>{user?.email || "-"}</Text>
+                <Text className="text-gray-500 text-sm">Email</Text>
+                <Text className="font-medium">{user?.email || "-"}</Text>
+              </div>
+
+              <div className="col-span-2">
+                <Text className="text-gray-500 text-sm">Phone Number</Text>
+                <Text className="font-medium">{user?.phoneNumber || "-"}</Text>
+              </div>
+
+              <div className="col-span-2">
+                <Text className="text-gray-500 text-sm">Church Role</Text>
+                <Text className="font-medium">{churchRole}</Text>
+              </div>
+
+              <div className="col-span-2">
+                <Text className="text-gray-500 text-sm">Account Status</Text>
+                <Text className="font-medium text-green-600">
+                  {user?.isVerified ? "Verified" : "Not Verified"}
+                </Text>
               </div>
             </div>
 
@@ -122,36 +158,46 @@ export default function UserProfilePage() {
               variant="outline"
               size="sm"
               onClick={() => setOpenPasswordModal(true)}
+              className="gap-2"
             >
-              <LockOpenIcon />
+              <LockOpenIcon className="h-4 w-4" />
               Change Password
             </Button>
           </div>
         </div>
 
+        {/* Church Section */}
         <div className="space-y-6">
-          <div className="bg-black border rounded-xl p-4 flex items-center justify-between">
-            <div className="w-12 h-12 rounded-full bg-gray-700 flex items-center justify-center text-white">
-              {church?.logo || (
+          <div className="bg-white border rounded-xl p-4 flex items-center justify-between">
+            <div className="w-12 h-12 rounded-full bg-primary-100 flex items-center justify-center text-primary-700 font-semibold">
+              {church?.logoUrl ? (
                 <Image
-                  src="/assets/avatar/Avatar.png"
-                  alt="Profile"
-                  width={200}
-                  height={200}
+                  src={church.logoUrl}
+                  alt="Church Logo"
+                  width={48}
+                  height={48}
+                  className="rounded-full object-cover"
                 />
+              ) : (
+                <span className="text-lg font-bold">
+                  {church?.name?.charAt(0).toUpperCase() || "C"}
+                </span>
               )}
             </div>
 
-            <div className="flex flex-col">
-              <div>
-                <Text variant="label">{church?.alias}</Text>
-              </div>
-              <div>
-                <Text>
-                  {" "}
-                  {church?.state}, {church?.country}
+            <div className="flex flex-col flex-1 ml-4">
+              <Text variant="label" className="font-semibold">
+                {church?.name || "Your Church"}
+              </Text>
+              {church?.alias && (
+                <Text variant="muted" className="text-sm">
+                  @{church.alias}
                 </Text>
-              </div>
+              )}
+              <Text variant="muted" className="text-sm">
+                {[church?.state, church?.country].filter(Boolean).join(", ") ||
+                  "Location not set"}
+              </Text>
             </div>
 
             <Button
@@ -165,46 +211,56 @@ export default function UserProfilePage() {
             </Button>
           </div>
 
-          <div className="bg-black border rounded-xl p-6">
-            <Text variant="label">Church Information</Text>
-            <div className="grid grid-cols-2 gap-6">
-              <div>
-                <Text className="text-gray-400">Church Name</Text>
-                <Text>{church?.name || "-"}</Text>
+          <div className="bg-white border rounded-xl p-6">
+            <Text variant="label" className="font-semibold">
+              Church Information
+            </Text>
+            <div className="grid grid-cols-2 gap-6 mt-4">
+              <div className="col-span-2">
+                <Text className="text-gray-500 text-sm">Church Name</Text>
+                <Text className="font-medium">{church?.name || "-"}</Text>
               </div>
 
               <div>
-                <Text className="text-gray-400">Church Alias</Text>
-                <Text>{church?.alias || "-"}</Text>
+                <Text className="text-gray-500 text-sm">Church Alias</Text>
+                <Text className="font-medium">{church?.alias || "-"}</Text>
               </div>
 
               <div>
-                <Text className="text-gray-400">Church Address</Text>
-                <Text>{church?.address || "-"}</Text>
-              </div>
-
-              <div>
-                <Text className="text-gray-400">State & Country</Text>
-                <Text>
-                  {[church?.state, church?.country]
-                    .filter(Boolean)
-                    .join(", ") || "-"}
+                <Text className="text-gray-500 text-sm">Default Currency</Text>
+                <Text className="font-medium">
+                  {church?.defaultCurrency || "NGN"}
                 </Text>
+              </div>
+
+              <div className="col-span-2">
+                <Text className="text-gray-500 text-sm">Address</Text>
+                <Text className="font-medium">{church?.address || "-"}</Text>
+              </div>
+
+              <div>
+                <Text className="text-gray-500 text-sm">State</Text>
+                <Text className="font-medium">{church?.state || "-"}</Text>
+              </div>
+
+              <div>
+                <Text className="text-gray-500 text-sm">Country</Text>
+                <Text className="font-medium">{church?.country || "-"}</Text>
               </div>
             </div>
           </div>
         </div>
       </div>
 
+      {/* Modals */}
       <EditPersonalInfoModal
         open={openPersonalModal}
         onOpenChange={setOpenPersonalModal}
         user={user}
         onUpdated={(updated: any) => {
-          setUser((prev: any) => ({
-            ...prev,
-            ...updated,
-          }));
+          updateUser(updated);
+          // Optionally force refresh to get latest from server
+          fetchUserData(true);
         }}
       />
 
@@ -213,10 +269,8 @@ export default function UserProfilePage() {
         onOpenChange={setOpenChurchModal}
         church={church}
         onUpdated={(updated: any) => {
-          setChurch((prev: any) => ({
-            ...prev,
-            ...updated,
-          }));
+          updateChurch(updated);
+          fetchUserData(true);
         }}
       />
 

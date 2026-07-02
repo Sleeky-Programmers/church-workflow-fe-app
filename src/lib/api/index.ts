@@ -1,29 +1,31 @@
-import { InviteFormData, PendingInvite, User, UserAction } from "@/types/user";
-import { MOCK_USERS } from "../user-data";
-
-import {
-  SignupPayload,
-  AdminRegisterPayload,
-  AdminRegisterResponse,
-  AttendanceStatsResponse,
-  VerifyOtpPayload,
-  VerifyOtpResponse,
-  LoginPayload,
-  LoginResponse,
-  ResetPasswordPayload,
-  ResetPasswordResponse,
-  CreateChurchPayload,
-  CreateWeeklyServicePayload,
-  GoogleAuthResponse,
-} from "@/types/payload";
-import { MOCK_ADMIN } from "../data";
+import { getInitials } from "@/lib/utils";
 import {
   ActivityLogApiResponse,
   Member,
   NotificationApiResponse,
   RegularService,
+  SpecialServiceDaySchedule,
+  SpecialServiceEvent,
 } from "@/types";
-import { getInitials } from "@/lib/utils";
+import {
+  AdminRegisterPayload,
+  AdminRegisterResponse,
+  AttendanceStatsResponse,
+  CreateChurchPayload,
+  CreateWeeklyServicePayload,
+  GoogleAuthResponse,
+  LoginPayload,
+  LoginResponse,
+  ResetPasswordPayload,
+  ResetPasswordResponse,
+  SignupPayload,
+  VerifyOtpPayload,
+  VerifyOtpResponse,
+} from "@/types/payload";
+import { InviteFormData, PendingInvite, User, UserAction } from "@/types/user";
+
+import { MOCK_ADMIN } from "../data";
+import { MOCK_USERS } from "../user-data";
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -396,7 +398,14 @@ type ChurchServiceApi = {
   _id: string;
   serviceName: string;
   type: "REGULAR" | "SPECIAL";
+  recurrence:
+    | "WEEKLY_MONDAY"
+    | "NO_REPEAT"
+    | "MONTHLY_FIRST_MONDAY"
+    | "ANNUALLY";
   day?: string;
+  daySchedules: SpecialServiceDaySchedule[];
+  eventType: any;
   startTime: string;
   endTime?: string;
   location?: string;
@@ -509,8 +518,9 @@ function mapChurchServiceToRegular(service: ChurchServiceApi): RegularService {
   return {
     id: service._id,
     serviceName: service.serviceName,
-    days,
     startTime: service.startTime,
+    day: service.day ? service.day : "",
+    type: service.type,
     endTime: service.endTime,
     location: service.location,
     frequency: "weekly",
@@ -518,10 +528,73 @@ function mapChurchServiceToRegular(service: ChurchServiceApi): RegularService {
   };
 }
 
+export const mapToRegularService = (
+  apiService: ChurchServiceApi,
+): RegularService => {
+  return {
+    id: apiService._id,
+    serviceName: apiService.serviceName,
+    type: apiService.type,
+    day: apiService.day ? apiService.day : "",
+    startTime: apiService.startTime,
+    endTime: apiService.endTime,
+    location: apiService.location,
+    description: apiService.description,
+    frequency: apiService.recurrence === "WEEKLY_MONDAY" ? "weekly" : "monthly",
+    attendanceRecords: [],
+  };
+};
+
+// Helper function to map API response to SpecialServiceEvent
+export const mapToSpecialService = (
+  apiService: ChurchServiceApi,
+): SpecialServiceEvent => {
+  return {
+    id: apiService._id,
+    serviceName: apiService.serviceName,
+    startDate: apiService.startDate || "",
+    endDate: apiService.endDate,
+    location: apiService.location,
+    description: apiService.description,
+    recurrence: apiService.recurrence as any,
+    eventType: apiService.eventType as any,
+    daySchedules:
+      apiService.specialDays?.map((day) => ({
+        date: day.date,
+        startTime: day.startTime,
+        endTime: day.endTime ? day.endTime : "",
+      })) || [],
+  };
+};
+
 export async function fetchServices(_month: string): Promise<RegularService[]> {
   const response = await authenticatedFetch<
     PaginatedResponse<ChurchServiceApi>
   >("/church-services?page=1&limit=100", { method: "GET" });
+
+  return (response.data || [])
+    .filter(
+      (service) =>
+        typeof service.type === "string" &&
+        service.type.toUpperCase() === "REGULAR",
+    )
+    .map(mapChurchServiceToRegular);
+}
+
+export async function fetchAllServices(_month: string) {
+  const response = await authenticatedFetch<
+    PaginatedResponse<ChurchServiceApi>
+  >("/church-services?page=1&limit=100", { method: "GET" });
+
+  return response.data || [];
+}
+
+export async function createSpecialServices(
+  _month: string,
+): Promise<RegularService[]> {
+  const response = await authenticatedFetch<
+    PaginatedResponse<ChurchServiceApi>
+  >("/church-services", { method: "POST" });
 
   return (response.data || [])
     .filter(
@@ -542,6 +615,36 @@ export async function fetchTotalMembers(): Promise<{
 
 export async function fetchAttendanceStats(): Promise<AttendanceStatsResponse> {
   return authenticatedFetch<AttendanceStatsResponse>("/attendance/stats", {
+    method: "GET",
+  });
+}
+
+export type Month =
+  | "January"
+  | "February"
+  | "March"
+  | "April"
+  | "May"
+  | "June"
+  | "July"
+  | "August"
+  | "September"
+  | "October"
+  | "November"
+  | "December";
+
+export interface MonthlyAttendance {
+  month: Month;
+  totalAttendance: number;
+}
+
+export interface AttendanceTrendResponse {
+  regularService: MonthlyAttendance[];
+  specialService: MonthlyAttendance[];
+}
+
+export async function fetchAttendanceTrend(): Promise<AttendanceTrendResponse> {
+  return authenticatedFetch<AttendanceTrendResponse>("/attendance/trend", {
     method: "GET",
   });
 }

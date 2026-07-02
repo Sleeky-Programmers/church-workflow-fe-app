@@ -2,7 +2,7 @@
 
 import { ExternalLink, X } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -23,12 +23,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import {
-  ROLE_OPTIONS,
-  ROLE_PERMISSIONS,
-  TITLE_OPTIONS,
-} from "@/lib/permissions";
+import { ROLE_PERMISSIONS, TITLE_OPTIONS } from "@/lib/permissions";
 import { backendToFrontendModule } from "@/lib/role-constants";
+import { fetchRoles } from "@/services/rolesService";
 import { InviteFormData, PendingInvite } from "@/types/user";
 
 import { CreateRoleDialog } from "./mini-components/create-role-dialog";
@@ -41,7 +38,6 @@ type InviteUserDialogProps = {
   onSubmit: (data: InviteFormData) => Promise<any> | void;
   pendingInvites?: PendingInvite[];
   isLoading?: boolean;
-  roles?: any[];
   title?: string;
   onRoleCreated?: () => Promise<void> | void;
 };
@@ -55,13 +51,14 @@ export function InviteUserDialog({
   onSubmit,
   pendingInvites = [],
   isLoading = false,
-  roles = [],
   title = "Invite User",
 }: InviteUserDialogProps) {
   const [showPermissions, setShowPermissions] = useState(false);
   const [selectedRole, setSelectedRole] = useState("");
   const [localInvites, setLocalInvites] = useState<PendingInvite[]>([]);
   const [isCreateRoleDialogOpen, setIsCreateRoleDialogOpen] = useState(false);
+  const [roles, setRoles] = useState<any[]>([]);
+  const [isLoadingRoles, setIsLoadingRoles] = useState(false);
   const router = useRouter();
 
   const [formData, setFormData] = useState<InviteFormData>({
@@ -73,6 +70,29 @@ export function InviteUserDialog({
   });
 
   const { toast } = useToast();
+
+  // Fetch roles when dialog opens
+  useEffect(() => {
+    if (open) {
+      loadRoles();
+    }
+  }, [open]);
+
+  const loadRoles = async () => {
+    setIsLoadingRoles(true);
+    try {
+      const data = await fetchRoles();
+      setRoles(data);
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to load roles",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoadingRoles(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -148,15 +168,14 @@ export function InviteUserDialog({
           description: `Access Level: ${p.accessLevel}`,
         })) || [],
     };
-  } else {
-    rolePermissions = selectedRole ? ROLE_PERMISSIONS[selectedRole] : null;
   }
 
   const handleRoleCreated = async (newRole: any) => {
     if (onRoleCreated) {
       await onRoleCreated();
     }
-
+    // Refresh roles list
+    await loadRoles();
     setFormData({ ...formData, role: newRole._id });
   };
 
@@ -274,17 +293,25 @@ export function InviteUserDialog({
                     required
                   >
                     <SelectTrigger id="role" className="h-9">
-                      <SelectValue placeholder="Select a role" />
+                      <SelectValue
+                        placeholder={
+                          isLoadingRoles ? "Loading roles..." : "Select a role"
+                        }
+                      />
                     </SelectTrigger>
                     <SelectContent>
-                      {roles.length > 0
-                        ? roles.map((role: any) => (
+                      {isLoadingRoles ? (
+                        <div className="px-2 py-4 text-center text-sm text-muted-foreground">
+                          Loading roles...
+                        </div>
+                      ) : (
+                        <>
+                          {roles.map((role: any) => (
                             <SelectItem key={role._id} value={role._id}>
                               {role.type === "CUSTOM" ? (
                                 <>
                                   {role.roleName}
-                                  <span className="text-muted-foreground">
-                                    {" "}
+                                  <span className="text-muted-foreground ml-1">
                                     - Custom Role
                                   </span>
                                 </>
@@ -292,36 +319,33 @@ export function InviteUserDialog({
                                 role.roleName
                               )}
                             </SelectItem>
-                          ))
-                        : ROLE_OPTIONS.map((role) => (
-                            <SelectItem key={role} value={role}>
-                              {role}
-                            </SelectItem>
                           ))}
 
-                      <div className="border-t pt-2 mt-1">
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          className="w-full justify-start text-primary text-xs"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            const selectTrigger = document.querySelector(
-                              "[data-radix-select-trigger]",
-                            );
-                            if (selectTrigger) {
-                              (selectTrigger as HTMLElement).click();
-                            }
-                            setTimeout(() => {
-                              setIsCreateRoleDialogOpen(true);
-                            }, 50);
-                          }}
-                        >
-                          <ExternalLink className="h-3 w-3 mr-2" />
-                          Add new role
-                        </Button>
-                      </div>
+                          <div className="border-t pt-2 mt-1">
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              className="w-full justify-start text-primary text-xs"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                const selectTrigger = document.querySelector(
+                                  "[data-radix-select-trigger]",
+                                );
+                                if (selectTrigger) {
+                                  (selectTrigger as HTMLElement).click();
+                                }
+                                setTimeout(() => {
+                                  setIsCreateRoleDialogOpen(true);
+                                }, 50);
+                              }}
+                            >
+                              <ExternalLink className="h-3 w-3 mr-2" />
+                              Add new role
+                            </Button>
+                          </div>
+                        </>
+                      )}
                     </SelectContent>
                   </Select>
                 </div>
@@ -340,7 +364,12 @@ export function InviteUserDialog({
 
                 <Button
                   type="submit"
-                  disabled={isLoading || !formData.email || !formData.role}
+                  disabled={
+                    isLoading ||
+                    !formData.email ||
+                    !formData.role ||
+                    isLoadingRoles
+                  }
                   className="w-full"
                 >
                   {isLoading ? "Sending..." : "Send Invite"}

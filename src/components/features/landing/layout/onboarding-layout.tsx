@@ -7,7 +7,7 @@ type OnboardingLayoutProps = {
 export function OnboardingLayout({ children }: OnboardingLayoutProps) {
   return (
     <div
-      className="min-h-screen flex items-start sm:items-center justify-center relative px-4 py-6 sm:px-6 sm:py-10"
+      className="min-h-screen w-screen flex items-start sm:items-center justify-center relative px-4 py-6 sm:px-6 sm:py-10"
       style={{
         backgroundImage: "url(/assets/onboarding-bg.webp)",
         backgroundSize: "cover",

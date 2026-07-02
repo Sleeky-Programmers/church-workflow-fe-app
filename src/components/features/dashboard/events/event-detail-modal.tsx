@@ -1,8 +1,8 @@
 "use client";
 
-import { format, parseISO } from "date-fns";
+import { format, isValid, parseISO } from "date-fns";
 import { Calendar, Clock3, MapPin, Repeat, Trash2, X } from "lucide-react";
-import { ChurchEvent } from "@/types";
+
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -11,13 +11,16 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import Heading from "@/components/ui/typography/Heading";
+import { Span, Text } from "@/components/ui/typography/Text";
+import { formatDateSafely } from "@/lib/utils";
+import { ChurchEvent } from "@/types";
+
 import {
   EVENT_REMINDER_LABEL_MAP,
   EVENT_TYPE_LABEL_MAP,
   formatRecurrenceLabel,
 } from "./constants";
-import { Span, Text } from "@/components/ui/typography/Text";
-import Heading from "@/components/ui/typography/Heading";
 
 type EventDetailModalProps = {
   open: boolean;
@@ -26,6 +29,39 @@ type EventDetailModalProps = {
   onDelete: (eventId: string) => void;
   onEdit: (event: ChurchEvent) => void;
 };
+
+// Helper function to parse time string safely
+function parseTimeString(date: string, time: string): Date | null {
+  if (!date || !time) return null;
+
+  // Remove AM/PM and trim
+  const cleanTime = time.replace(/\s*(AM|PM)/i, "").trim();
+  const [hours, minutes] = cleanTime.split(":").map(Number);
+
+  const parsedDate = parseISO(date);
+  if (!isValid(parsedDate)) return null;
+
+  // Set the time
+  parsedDate.setHours(hours || 0, minutes || 0, 0, 0);
+
+  // Adjust for PM if needed
+  if (time.toLowerCase().includes("pm") && hours !== 12) {
+    parsedDate.setHours(hours + 12);
+  } else if (time.toLowerCase().includes("am") && hours === 12) {
+    parsedDate.setHours(0);
+  }
+
+  return parsedDate;
+}
+
+// Helper to format time safely
+function formatTimeSafely(date: string, time: string): string {
+  const dateTime = parseTimeString(date, time);
+  if (!dateTime || !isValid(dateTime)) {
+    return time;
+  }
+  return format(dateTime, "p");
+}
 
 export function EventDetailModal({
   open,
@@ -77,15 +113,15 @@ export function EventDetailModal({
           <div className="space-y-3">
             <div className="flex items-center gap-2">
               <Calendar className="h-4 w-4" />
-              <Span>{format(parseISO(event.date), "EEEE, MMMM do, yyyy")}</Span>
+              <Span>{formatDateSafely(event.date)}</Span>
             </div>
 
             <div className="flex items-center gap-2">
               <Clock3 className="h-4 w-4" />
               <Span>
-                {format(parseISO(`${event.date}T${event.startTime}`), "p")}
+                {formatTimeSafely(event.date, event.startTime)}
                 {event.endTime
-                  ? ` - ${format(parseISO(`${event.date}T${event.endTime}`), "p")}`
+                  ? ` - ${formatTimeSafely(event.date, event.endTime)}`
                   : ""}
               </Span>
             </div>

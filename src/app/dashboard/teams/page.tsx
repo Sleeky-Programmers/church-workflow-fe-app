@@ -1,20 +1,19 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+
 import Table from "@/components/features/dashboard/Table";
-import Heading from "@/components/ui/typography/Heading";
-import { MoreVertical } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
-import { MemberProfile, RegularService, TeamRow } from "@/types";
-import { Button } from "@/components/ui/button";
-import AddSmallTeamDialog from "@/components/features/dashboard/teams/add-small-team-dialog";
-import { getTeamColumns } from "@/components/features/dashboard/teams/team-columns";
+import { EditSmallTeamDialog } from "@/components/features/dashboard/teams/edit-small-team-dialog";
 import ManageTeamMembersDialog from "@/components/features/dashboard/teams/manage-team-members-dialog";
 import MarkTeamAttendanceDialog from "@/components/features/dashboard/teams/mark-team-attendance-dialog";
-import TeamActionsSheet from "@/components/features/dashboard/teams/team-actions-sheet";
+import { getTeamColumns } from "@/components/features/dashboard/teams/team-columns";
+import TeamsDeleteDialog from "@/components/features/dashboard/teams/team-delete-dialog";
+import { TeamStatusFilter } from "@/components/features/dashboard/teams/teams-filter-dropdown";
+import TeamsSearchBar from "@/components/features/dashboard/teams/teams-search-bar";
+import { ViewTeamReportDialog } from "@/components/features/dashboard/teams/view-team-report-dialog";
+import { Loader } from "@/components/ui/loader";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { TeamStatus } from "@/lib/enums";
-import { SidebarTrigger } from "@/components/ui/sidebar";
+import { useToast } from "@/hooks/use-toast";
 import {
   createSmallTeam,
   deleteSmallTeam,
@@ -22,12 +21,12 @@ import {
   fetchSmallTeamReport,
   fetchSmallTeams,
   markSmallTeamAttendance,
+  updateSmallTeam,
   updateSmallTeamMembers,
 } from "@/lib/api";
+import { TeamStatus } from "@/lib/enums";
 import { fetchMembers as fetchMemberProfiles } from "@/services/memberService";
-import TeamsDeleteDialog from "@/components/features/dashboard/teams/team-delete-dialog";
-import TeamsMobileCard from "@/components/features/dashboard/teams/teams-mobile-card";
-import TeamsSearchBar from "@/components/features/dashboard/teams/teams-search-bar";
+import { MemberProfile, RegularService, TeamRow } from "@/types";
 
 function getInitials(fullName: string) {
   const names = fullName.trim().split(" ").filter(Boolean);
@@ -39,6 +38,7 @@ function getInitials(fullName: string) {
 type TeamApiEntity = {
   _id: string;
   name: string;
+  description?: string;
   status: "ACTIVE" | "INACTIVE";
   leader: { id: string; fullName: string } | null;
   members: { id: string; fullName: string; email: string }[];
@@ -48,23 +48,33 @@ type TeamApiEntity = {
 export default function TeamsPage() {
   const isMobile = useIsMobile();
   const { toast } = useToast();
+
+  // Search and filters
   const [query, setQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState<TeamStatusFilter>("all");
+  const [selectedMemberId, setSelectedMemberId] = useState("all");
+  const [minMembers, setMinMembers] = useState(0);
+
   const [data, setData] = useState<TeamRow[]>([]);
   const [members, setMembers] = useState<MemberProfile[]>([]);
   const [services, setServices] = useState<RegularService[]>([]);
   const [deleteTarget, setDeleteTarget] = useState<TeamRow | null>(null);
   const [manageTarget, setManageTarget] = useState<TeamRow | null>(null);
   const [markTarget, setMarkTarget] = useState<TeamRow | null>(null);
-  const [mobileActionTarget, setMobileActionTarget] = useState<TeamRow | null>(
-    null,
-  );
-  const [isAddOpen, setIsAddOpen] = useState(false);
   const [teamMembers, setTeamMembers] = useState<Record<string, string[]>>({});
   const [isLoading, setIsLoading] = useState(true);
+
+  const [reportTarget, setReportTarget] = useState<TeamRow | null>(null);
+  const [reportData, setReportData] = useState<any>(null);
+  const [isReportLoading, setIsReportLoading] = useState(false);
+
+  const [editTarget, setEditTarget] = useState<TeamRow | null>(null);
+  const [isSavingTeam, setIsSavingTeam] = useState(false);
 
   const mapTeamToRow = (team: TeamApiEntity): TeamRow => ({
     id: team._id,
     name: team.name,
+    description: team.description || "", // ✅ Add description field
     leader: team.leader
       ? {
           name: team.leader.fullName,
@@ -133,40 +143,107 @@ export default function TeamsPage() {
   }, []);
 
   const filtered = useMemo(() => {
-    if (!query) return data;
-    const q = query.toLowerCase();
-    return data.filter(
-      (team) =>
-        team.name.toLowerCase().includes(q) ||
-        (team.leader?.name ?? "").toLowerCase().includes(q) ||
-        String(team.members).includes(q) ||
-        team.status.toLowerCase().includes(q),
-    );
-  }, [data, query]);
+    let filteredTeams = data;
+
+    if (query) {
+      const q = query.toLowerCase();
+      filteredTeams = filteredTeams.filter(
+        (team) =>
+          team.name.toLowerCase().includes(q) ||
+          (team.leader?.name ?? "").toLowerCase().includes(q) ||
+          (team.description?.toLowerCase() || "").includes(q) || // ✅ Add description to search
+          String(team.members).includes(q) ||
+          team.status.toLowerCase().includes(q),
+      );
+    }
+
+    if (statusFilter !== "all") {
+      filteredTeams = filteredTeams.filter(
+        (team) => team.status === statusFilter,
+      );
+    }
+
+    if (selectedMemberId !== "all") {
+      filteredTeams = filteredTeams.filter((team) => {
+        const teamMemberIds = teamMembers[team.id] || [];
+        return teamMemberIds.includes(selectedMemberId);
+      });
+    }
+
+    if (minMembers > 0) {
+      filteredTeams = filteredTeams.filter(
+        (team) => team.members >= minMembers,
+      );
+    }
+
+    return filteredTeams;
+  }, [data, query, statusFilter, selectedMemberId, minMembers, teamMembers]);
+
+  const handleClearFilters = () => {
+    setQuery("");
+    setStatusFilter("all");
+    setSelectedMemberId("all");
+    setMinMembers(0);
+  };
 
   const handleEdit = (row: TeamRow) => {
-    toast({
-      title: "Edit Team",
-      description: `Edit ${row.name} is not enabled yet.`,
-    });
+    setEditTarget(row);
+  };
+
+  const handleSaveEdit = async (data: {
+    name: string;
+    leaderId: string | null;
+    memberIds: string[];
+    status: "ACTIVE" | "INACTIVE";
+    description: string;
+  }) => {
+    if (!editTarget) return;
+
+    setIsSavingTeam(true);
+    try {
+      await updateSmallTeam({
+        teamId: editTarget.id,
+        name: data.name,
+        leaderId: data.leaderId || undefined,
+        memberIds: data.memberIds,
+        status: data.status,
+        description: data.description,
+      });
+      await loadTeams();
+      toast({
+        title: "Team updated",
+        description: `${data.name} has been updated successfully.`,
+      });
+      setEditTarget(null);
+    } catch (error: any) {
+      toast({
+        title: "Update failed",
+        description: error?.message || "Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSavingTeam(false);
+    }
   };
 
   const handleManageMembers = (row: TeamRow) => setManageTarget(row);
   const handleMarkAttendance = (row: TeamRow) => setMarkTarget(row);
 
   const handleViewReport = async (row: TeamRow) => {
+    setReportTarget(row);
+    setIsReportLoading(true);
     try {
       const report = await fetchSmallTeamReport(row.id);
-      toast({
-        title: `${row.name} Attendance`,
-        description: `${report.attendancePercentage}% attendance, ${report.lowAttendanceMembers.length} low-attendance members.`,
-      });
+      setReportData(report);
     } catch (error: any) {
       toast({
         title: "Unable to load report",
         description: error?.message || "Please try again.",
         variant: "destructive",
       });
+      setReportTarget(null);
+    } finally {
+      setIsReportLoading(false);
     }
   };
 
@@ -273,106 +350,59 @@ export default function TeamsPage() {
         onOpenChange={(open) => !open && setDeleteTarget(null)}
         onConfirm={handleConfirmDelete}
       />
+
+      <ViewTeamReportDialog
+        open={!!reportTarget}
+        onOpenChange={(open) => {
+          if (!open) {
+            setReportTarget(null);
+            setReportData(null);
+          }
+        }}
+        team={reportTarget}
+        reportData={reportData}
+        isLoading={isReportLoading}
+      />
+
+      <EditSmallTeamDialog
+        open={!!editTarget}
+        onOpenChange={(open) => {
+          if (!open) {
+            setEditTarget(null);
+            setIsSavingTeam(false);
+          }
+        }}
+        team={editTarget}
+        members={members}
+        currentMemberIds={editTarget ? teamMembers[editTarget.id] || [] : []}
+        onSave={handleSaveEdit}
+        isSaving={isSavingTeam}
+      />
     </>
   );
 
-  if (isMobile) {
-    return (
-      <div className="min-h-screen bg-gray-50">
-        <div className="bg-white">
-          <div className="px-4 py-4 flex items-center justify-between gap-2">
-            <div className="flex items-center gap-3">
-              <SidebarTrigger />
-              <Heading level={3}>Small Teams</Heading>
-            </div>
-            <Button variant="ghost" size="icon" className="h-8 w-8">
-              <MoreVertical className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
-
-        <div className="px-3 py-4">
-          <div className="rounded-xl border bg-white overflow-hidden">
-            <div className="flex items-center justify-between px-4 py-3 border-b">
-              <Heading level={4}>All Teams</Heading>
-              <Button size="sm" onClick={() => setIsAddOpen(true)}>
-                Add
-              </Button>
-            </div>
-            <div className="divide-y">
-              {isLoading ? (
-                <div className="px-4 py-6 text-sm text-gray-500">
-                  Loading teams...
-                </div>
-              ) : (
-                filtered.map((team) => (
-                  <TeamsMobileCard
-                    key={team.id}
-                    team={team}
-                    onViewTeam={(t) => setMobileActionTarget(t)}
-                  />
-                ))
-              )}
-            </div>
-          </div>
-        </div>
-
-        <AddSmallTeamDialog
-          open={isAddOpen}
-          onOpenChange={setIsAddOpen}
-          hideTrigger
-          triggerLabel="Add"
-          members={members}
-          onSave={handleAddTeam}
-        />
-
-        <TeamActionsSheet
-          open={!!mobileActionTarget}
-          onOpenChange={(open) => !open && setMobileActionTarget(null)}
-          team={mobileActionTarget}
-          onManage={() => {
-            if (!mobileActionTarget) return;
-            setManageTarget(mobileActionTarget);
-            setMobileActionTarget(null);
-          }}
-          onMarkAttendance={() => {
-            if (!mobileActionTarget) return;
-            setMarkTarget(mobileActionTarget);
-            setMobileActionTarget(null);
-          }}
-          onViewReport={async () => {
-            if (!mobileActionTarget) return;
-            await handleViewReport(mobileActionTarget);
-            setMobileActionTarget(null);
-          }}
-          onDelete={() => {
-            if (!mobileActionTarget) return;
-            setDeleteTarget(mobileActionTarget);
-            setMobileActionTarget(null);
-          }}
-        />
-
-        {sharedDialogs}
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <Heading level={2} text="Small Teams" />
-        <TeamsSearchBar
-          query={query}
-          onQueryChange={setQuery}
-          members={members}
-          onSave={handleAddTeam}
-        />
-      </div>
+      <TeamsSearchBar
+        query={query}
+        onQueryChange={setQuery}
+        members={members}
+        onSave={handleAddTeam}
+        statusFilter={statusFilter}
+        setStatusFilter={setStatusFilter}
+        selectedMemberId={selectedMemberId}
+        setSelectedMemberId={setSelectedMemberId}
+        minMembers={minMembers}
+        setMinMembers={setMinMembers}
+        onClearFilters={handleClearFilters}
+      />
 
       <div className="max-h-[65vh] overflow-auto">
         {isLoading ? (
           <div className="rounded-xl border bg-white px-4 py-6 text-sm text-gray-500">
-            Loading teams...
+            <div className="absolute inset-0 flex items-center justify-center bg-white/60 z-10">
+              <Loader className="h-6 w-6" />
+            </div>
           </div>
         ) : (
           <Table

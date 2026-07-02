@@ -1,7 +1,17 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
-import { Bell, Search, Star, User } from "lucide-react";
+import { Bell, Search, Star, User, X } from "lucide-react";
+import Link from "next/link";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import React, { useEffect, useMemo } from "react";
+
+import { RouteConfig } from "@/config/routes";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { useFavoritesStore } from "@/stores/useFavoritesStore";
+import { useSearchStore } from "@/stores/useSearchStore";
+import { useUserStore } from "@/stores/useUserStore";
+
+import { Avatar, AvatarFallback } from "../ui/avatar";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -10,40 +20,39 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "../ui/breadcrumb";
-import { usePathname, useRouter } from "next/navigation";
+import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { SidebarTrigger } from "../ui/sidebar";
-import { Button } from "../ui/button";
-import { Avatar, AvatarFallback } from "../ui/avatar";
-import Link from "next/link";
 import { Text } from "../ui/typography/Text";
-import { RouteConfig } from "@/config/routes";
-import { useFavoritesStore } from "@/stores/useFavoritesStore";
-import { useAuthStore } from "@/stores/useAuthStore";
-import { getCurrentUserProfile } from "@/lib/auth/session";
-import { useIsMobile } from "@/hooks/use-mobile";
 
 export function Navbar() {
   const pathname = usePathname() || RouteConfig.dashboard.home;
   const router = useRouter();
   const isMobile = useIsMobile();
+  const searchParams = useSearchParams();
 
-  const [search, setSearch] = useState("");
-  const [fallbackName, setFallbackName] = useState("John Doe");
+  // Use Zustand store instead of local state
+  const {
+    searchQuery,
+    setSearchQuery,
+    clearSearch,
+    updateURLSearch,
+    syncFromURL,
+  } = useSearchStore();
+
   const { toggleFavorite, isFavorite } = useFavoritesStore();
-  const { user } = useAuthStore();
+  const { user, getUserFullName, fetchUserData } = useUserStore();
   const starred = isFavorite(pathname);
 
+  // Fetch user data if not already loaded
   useEffect(() => {
-    const profile = getCurrentUserProfile();
-    if (profile?.firstName) {
-      setFallbackName(profile.firstName);
-      return;
-    }
-    if (profile?.fullName) {
-      setFallbackName(profile.fullName);
-    }
-  }, []);
+    fetchUserData();
+  }, [fetchUserData]);
+
+  // Sync URL changes with store
+  useEffect(() => {
+    syncFromURL(searchParams);
+  }, [searchParams, syncFromURL]);
 
   const pageLabel = useMemo(() => {
     const path = pathname.replace(/\/+$/, "");
@@ -57,14 +66,23 @@ export function Navbar() {
   }, [pathname]);
 
   const handleSearch = () => {
-    if (!search.trim()) return;
-    router.push(
-      `${RouteConfig.dashboard.search}?q=${encodeURIComponent(search)}`,
-    );
-    setSearch("");
+    if (!searchQuery.trim()) return;
+    updateURLSearch(pathname, router);
   };
 
+  const handleClearSearch = () => {
+    clearSearch();
+    updateURLSearch(pathname, router);
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+  };
+
+  const displayName = getUserFullName();
+
   if (isMobile) return null;
+
   return (
     <header className="w-full hidden md:flex flex items-center h-16 gap-2 px-3 md:px-6 border-b">
       <div className="flex items-center gap-2 min-w-0">
@@ -110,15 +128,25 @@ export function Navbar() {
           <Search className="w-4 h-4" />
         </Button>
 
-        <div className="hidden sm:block">
+        <div className="hidden sm:block relative">
           <Input
             leftIcon={<Search className="w-4 h-4" />}
             placeholder="Search"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            value={searchQuery}
+            onChange={handleChange}
             onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-            className="w-48 md:w-64"
+            className="w-48 md:w-64 pr-8"
           />
+          {searchQuery && (
+            <Button
+              size="icon"
+              variant="ghost"
+              className="absolute right-0 top-0 h-full px-3"
+              onClick={handleClearSearch}
+            >
+              <X className="w-4 h-4" />
+            </Button>
+          )}
         </div>
 
         <Link href={RouteConfig.dashboard.notifications}>
@@ -131,11 +159,13 @@ export function Navbar() {
           <Button variant="ghost" className="flex items-center gap-2 p-0">
             <Avatar>
               <AvatarFallback>
-                <User className="w-4 h-4" />
+                {displayName.charAt(0).toUpperCase() || (
+                  <User className="w-4 h-4" />
+                )}
               </AvatarFallback>
             </Avatar>
             <Text variant="default" className="hidden sm:block">
-              {user?.name || fallbackName}
+              {displayName}
             </Text>
           </Button>
         </Link>

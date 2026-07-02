@@ -1,17 +1,23 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { EventRecurrence, EventReminderType, EventType } from "@/lib/enums";
-import { useToast } from "@/hooks/use-toast";
-import { ChurchEvent, EventFormData } from "@/types";
-import Heading from "@/components/ui/typography/Heading";
+
+import { getEventTypeMeta } from "@/components/features/dashboard/events/constants";
 import { EventDetailModal } from "@/components/features/dashboard/events/event-detail-modal";
 import { EventFormModal } from "@/components/features/dashboard/events/event-form-modal";
+import EventsMobile from "@/components/features/dashboard/events/event-mobile";
 import { EventsCalendar } from "@/components/features/dashboard/events/events-calendar";
 import { EventsEmptyState } from "@/components/features/dashboard/events/events-empty-state";
-import { getEventTypeMeta } from "@/components/features/dashboard/events/constants";
+import Heading from "@/components/ui/typography/Heading";
 import { useIsMobile } from "@/hooks/use-mobile";
-import EventsMobile from "@/components/features/dashboard/events/event-mobile";
+import { useToast } from "@/hooks/use-toast";
+import { EventRecurrence, EventReminderType, EventType } from "@/lib/enums";
+import {
+  deleteChurchService,
+  getAllChurchServices,
+  getChurchServiceById,
+} from "@/services/churchService";
+import { ChurchEvent, ChurchService, EventFormData } from "@/types";
 
 const EVENT_STORAGE_KEY = "dashboard:events";
 
@@ -43,9 +49,25 @@ const toFormData = (event: ChurchEvent): EventFormData => ({
   remindBeforeMinutes: event.remindBeforeMinutes,
 });
 
+// Transform API response to ChurchService type
+const transformChurchService = (apiService: any): ChurchService => ({
+  id: apiService._id,
+  churchId: apiService.churchId,
+  serviceName: apiService.serviceName,
+  type: apiService.type,
+  day: apiService.day,
+  startTime: apiService.startTime,
+  endTime: apiService.endTime,
+  location: apiService.location,
+  specialDays: apiService.specialDays || [],
+  createdAt: apiService.createdAt,
+  updatedAt: apiService.updatedAt,
+});
+
 export default function EventsPage() {
   const { toast } = useToast();
   const [events, setEvents] = useState<ChurchEvent[]>([]);
+  const [churchServices, setChurchServices] = useState<ChurchService[]>([]);
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<ChurchEvent | null>(null);
@@ -53,7 +75,42 @@ export default function EventsPage() {
   const [formInitialData, setFormInitialData] = useState<EventFormData | null>(
     null,
   );
+  const [loading, setLoading] = useState(true);
+  const [pagination, setPagination] = useState({
+    page: 1,
+    limit: 20,
+    itemCount: 0,
+    totalPages: 1,
+  });
   const isMobile = useIsMobile();
+
+  // Fetch church services from API
+  const fetchChurchServices = async (page = 1, limit = 20) => {
+    try {
+      setLoading(true);
+      const response = await getAllChurchServices({ page, limit });
+      const result = response as any;
+      const transformedServices = (result.data || []).map(
+        transformChurchService,
+      );
+      setChurchServices(transformedServices);
+
+      if (result.pagination) {
+        setPagination(result.pagination);
+      }
+    } catch (error) {
+      console.error("Failed to fetch church services:", error);
+      toast({
+        title: "Error",
+        description: "Failed to load church services",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Load events from localStorage
   useEffect(() => {
     if (typeof window === "undefined") return;
 
@@ -69,6 +126,12 @@ export default function EventsPage() {
     }
   }, []);
 
+  // Fetch church services on component mount
+  useEffect(() => {
+    fetchChurchServices();
+  }, []);
+
+  // Save events to localStorage
   useEffect(() => {
     if (typeof window === "undefined") return;
     window.localStorage.setItem(EVENT_STORAGE_KEY, JSON.stringify(events));
@@ -82,7 +145,7 @@ export default function EventsPage() {
     setIsFormModalOpen(true);
   };
 
-  const handleSubmitEvent = (payload: EventFormData) => {
+  const handleSubmitEvent = async (payload: EventFormData) => {
     const typeMeta = getEventTypeMeta(payload.type);
 
     if (editingEvent) {
@@ -123,11 +186,44 @@ export default function EventsPage() {
     setIsDetailModalOpen(true);
   };
 
-  const handleDeleteEvent = (eventId: string) => {
-    setEvents((prev) => prev.filter((event) => event.id !== eventId));
+  const handleDeleteEvent = async (eventId: string) => {
+    // Check if this is a church service (has MongoDB _id format) or custom event (has "event-" prefix)
+    const isChurchService =
+      !eventId.startsWith("event-") && eventId.length > 12;
+
+    if (isChurchService) {
+      try {
+        // Call backend to delete church service
+        await deleteChurchService(eventId);
+
+        // Refetch church services to update the list
+        await fetchChurchServices(pagination.page, pagination.limit);
+
+        toast({
+          title: "Success",
+          description: "Church service deleted successfully",
+        });
+      } catch (error) {
+        console.error("Failed to delete church service:", error);
+        toast({
+          title: "Error",
+          description: "Failed to delete church service",
+          variant: "destructive",
+        });
+        return;
+      }
+    } else {
+      // Delete custom event from localStorage
+      setEvents((prev) => prev.filter((event) => event.id !== eventId));
+      toast({
+        title: "Deleted",
+        description: "Event deleted successfully",
+      });
+    }
+
+    // Close modal and clear selected event
     setIsDetailModalOpen(false);
     setSelectedEvent(null);
-    toast({ title: "Deleted", description: "Event deleted successfully" });
   };
 
   const handleEditEvent = (event: ChurchEvent) => {
@@ -136,11 +232,13 @@ export default function EventsPage() {
     setIsDetailModalOpen(false);
     setIsFormModalOpen(true);
   };
+
   if (isMobile) {
     return (
       <>
         <EventsMobile
           events={events}
+          churchServices={churchServices}
           onCreateEvent={handleCreateEvent}
           onSelectEvent={handleSelectEvent}
         />
@@ -162,23 +260,33 @@ export default function EventsPage() {
       </>
     );
   }
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="bg-white border-b">
         <div className="px-6 py-4 flex items-center justify-between">
           <Heading level={2}>Events &amp; Reminders</Heading>
+          {!loading && churchServices.length > 0 && (
+            <div className="text-sm text-gray-500">
+              {pagination.itemCount || churchServices.length} church services
+              available
+            </div>
+          )}
         </div>
       </div>
 
       <div className="p-6">
-        {hasEvents ? (
+        {loading ? (
+          <div className="flex justify-center items-center h-64">
+            <div className="text-gray-500">Loading church services...</div>
+          </div>
+        ) : (
           <EventsCalendar
             events={events}
+            churchServices={churchServices}
             onCreateEvent={handleCreateEvent}
             onSelectEvent={handleSelectEvent}
           />
-        ) : (
-          <EventsEmptyState onCreateEvent={() => handleCreateEvent()} />
         )}
       </div>
 
