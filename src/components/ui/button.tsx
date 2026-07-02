@@ -1,16 +1,17 @@
+import { cva } from "class-variance-authority";
 import * as React from "react";
-import { Slot } from "@radix-ui/react-slot";
-import { cva, type VariantProps } from "class-variance-authority";
 
 import { cn } from "@/lib/utils";
+import { Slot } from "@radix-ui/react-slot";
 
+import type { VariantProps } from "class-variance-authority";
 const buttonVariants = cva(
-  "inline-flex items-center justify-center  gap-2 whitespace-nowrap rounded-md text-sm transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
   {
     variants: {
       variant: {
         default:
-          "bg-primary font-medium  text-primary-foreground shadow hover:bg-primary/90",
+          "bg-primary font-medium text-primary-foreground shadow hover:bg-primary/90",
         destructive:
           "bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90",
         outline:
@@ -25,9 +26,13 @@ const buttonVariants = cva(
         starred: "bg-primary/15 text-primary hover:bg-primary/20",
         pill: "rounded-full px-4 py-1.5 text-sm font-medium transition-all",
         filter:
-          "bg-transparent border border-gray-300 text-gray-700 hover:bg-transparent active:bg-transparent focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1",
+          "bg-transparent hover:border border-gray-300 text-gray-700 hover:bg-transparent active:bg-transparent focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1",
         filterHeader:
-          "bg-transparent hover:bg-transparent text-sm  px-0 py-1 justify-between w-full focus-visible:ring-0 focus:outline-none",
+          "bg-transparent hover:bg-transparent text-sm px-0 py-1 justify-between w-full focus-visible:ring-0 focus:outline-none",
+        chipRemove:
+          "p-0 h-auto w-auto rounded-none bg-transparent text-current hover:text-red-500 focus-visible:ring-0",
+        rowRemove:
+          "p-1 h-auto w-auto rounded bg-transparent text-red-400 hover:text-red-600 focus-visible:ring-0",
       },
       size: {
         default: "h-9 px-4 py-2",

@@ -47,3 +47,9 @@ export async function updateProfile(data: {
     },
   });
 }
+
+export async function getProfile() {
+  return await authenticatedFetch("/admin/profile", {
+    method: "GET",
+  });
+}

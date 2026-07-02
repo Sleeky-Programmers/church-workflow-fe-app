@@ -196,6 +196,47 @@ export function initializeAuthSession(args: {
   return profile;
 }
 
+// Add this to your auth storage file (where initializeAuthSession is)
+
+export function clearAuthSession(): void {
+  if (!isClient()) return;
+
+  // Get current user key before clearing
+  const userKey = getCurrentUserKey();
+
+  // Clear main auth tokens
+  window.localStorage.removeItem(ACCESS_TOKEN_KEY);
+  window.localStorage.removeItem(REFRESH_TOKEN_KEY);
+  window.localStorage.removeItem(CURRENT_USER_KEY);
+  window.localStorage.removeItem("auth:type");
+
+  // Clear user-specific data if we have the key
+  if (userKey) {
+    window.localStorage.removeItem(profileStorageKey(userKey));
+    window.localStorage.removeItem(onboardingStorageKey(userKey));
+  }
+
+  // Optional: Clear all onboarding and profile data
+  // This is safer to ensure complete cleanup
+  const keysToRemove: string[] = [];
+  for (let i = 0; i < window.localStorage.length; i++) {
+    const key = window.localStorage.key(i);
+    if (
+      key &&
+      (key.startsWith(USER_PROFILE_PREFIX) || key.startsWith(ONBOARDING_PREFIX))
+    ) {
+      keysToRemove.push(key);
+    }
+  }
+  keysToRemove.forEach((key) => window.localStorage.removeItem(key));
+}
+
+export async function logout(): Promise<void> {
+  getAccessToken();
+
+  clearAuthSession();
+}
+
 export function getCurrentUserProfile(): UserProfile | null {
   if (!isClient()) return null;
   const userKey = getCurrentUserKey();

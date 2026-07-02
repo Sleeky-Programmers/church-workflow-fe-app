@@ -20,6 +20,14 @@ import {
 } from "@/components/ui/popover";
 import { MemberProfile } from "@/types";
 import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationPrevious,
+  PaginationNext,
+} from "@/components/ui/pagination";
 
 type FetchOptionsParams = {
   page?: number;
@@ -68,6 +76,7 @@ export function MemberSingleSelect({
   );
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
+  const [pagination, setPagination] = useState<any | null>(null);
 
   const debouncedSearch = useDebounce(search, 400);
 
@@ -84,6 +93,7 @@ export function MemberSingleSelect({
 
       setInternalOptions(response.data);
       setPage(1);
+      setPagination(response.pagination ?? null);
     };
 
     load();
@@ -116,6 +126,7 @@ export function MemberSingleSelect({
 
     setInternalOptions((prev) => [...prev, ...response.data]);
     setPage(next);
+    setPagination(response.pagination ?? null);
   };
 
   return (
@@ -127,7 +138,11 @@ export function MemberSingleSelect({
         </Button>
       </PopoverTrigger>
 
-      <PopoverContent className="p-0 w-full">
+      <PopoverContent
+        className="p-0"
+        align="start"
+        style={{ width: "var(--radix-popover-trigger-width)" }}
+      >
         <Command>
           <CommandInput onValueChange={setSearch} placeholder="Search..." />
 
@@ -156,14 +171,77 @@ export function MemberSingleSelect({
 
             {fetchOptions && (
               <div className="p-2">
-                <Button
-                  onClick={loadMore}
-                  variant="ghost"
-                  size="sm"
-                  className="w-full"
-                >
-                  Load more
-                </Button>
+                {pagination ? (
+                  <Pagination className="w-full">
+                    <div className="flex w-full items-center justify-between px-2">
+                      <PaginationPrevious
+                        onClick={async () => {
+                          if (pagination.page <= 1) return;
+                          const p = pagination.page - 1;
+                          const response = await fetchOptions({
+                            page: p,
+                            limit: pagination.limit,
+                            search: debouncedSearch,
+                          });
+                          setInternalOptions(response.data);
+                          setPage(p);
+                          setPagination(response.pagination ?? null);
+                        }}
+                      />
+
+                      <PaginationContent>
+                        {Array.from({ length: pagination.totalPages }).map(
+                          (_, i) => (
+                            <PaginationItem key={i}>
+                              <PaginationLink
+                                isActive={pagination.page === i + 1}
+                                onClick={async () => {
+                                  const p = i + 1;
+                                  const response = await fetchOptions({
+                                    page: p,
+                                    limit: pagination.limit,
+                                    search: debouncedSearch,
+                                  });
+                                  setInternalOptions(response.data);
+                                  setPage(p);
+                                  setPagination(response.pagination ?? null);
+                                }}
+                              >
+                                {i + 1}
+                              </PaginationLink>
+                            </PaginationItem>
+                          ),
+                        )}
+                      </PaginationContent>
+
+                      <PaginationNext
+                        onClick={async () => {
+                          if (!pagination.hasNextPage) return;
+                          const p = pagination.page + 1;
+                          const response = await fetchOptions({
+                            page: p,
+                            limit: pagination.limit,
+                            search: debouncedSearch,
+                          });
+                          setInternalOptions(response.data);
+                          setPage(p);
+                          setPagination(response.pagination ?? null);
+                        }}
+                      />
+                    </div>
+                  </Pagination>
+                ) : (
+                  <div className="p-2">
+                    <Button
+                      onClick={loadMore}
+                      variant="ghost"
+                      size="sm"
+                      className="w-full"
+                    >
+                      Load more
+                    </Button>
+                  </div>
+                )}
               </div>
             )}
           </CommandList>
@@ -207,6 +285,7 @@ export function MemberMultiSelect({
   const [internalOptions, setInternalOptions] = useState<MemberProfile[]>([]);
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
+  const [pagination, setPagination] = useState<any | null>(null);
 
   const debouncedSearch = useDebounce(search, 400);
 
@@ -218,6 +297,7 @@ export function MemberMultiSelect({
       const response = await fetchOptions(1, 10, debouncedSearch);
       setInternalOptions(response.data);
       setPage(1);
+      setPagination(response.pagination ?? null);
     };
 
     load();
@@ -239,6 +319,7 @@ export function MemberMultiSelect({
 
     setInternalOptions((prev) => [...prev, ...response.data]);
     setPage(next);
+    setPagination(response.pagination ?? null);
   };
 
   const summary =
@@ -260,7 +341,11 @@ export function MemberMultiSelect({
         </Button>
       </PopoverTrigger>
 
-      <PopoverContent className="p-0 w-full">
+      <PopoverContent
+        className="p-0"
+        align="start"
+        style={{ width: "var(--radix-popover-trigger-width)" }}
+      >
         <Command>
           <CommandInput onValueChange={setSearch} placeholder="Search..." />
 
@@ -295,14 +380,77 @@ export function MemberMultiSelect({
 
             {fetchOptions && (
               <div className="p-2">
-                <Button
-                  onClick={loadMore}
-                  variant="ghost"
-                  size="sm"
-                  className="w-full"
-                >
-                  Load more
-                </Button>
+                {pagination ? (
+                  <Pagination className="w-full">
+                    <div className="flex w-full items-center justify-between px-2">
+                      <PaginationPrevious
+                        onClick={async () => {
+                          if (pagination.page <= 1) return;
+                          const p = pagination.page - 1;
+                          const response = await fetchOptions(
+                            p,
+                            pagination.limit,
+                            debouncedSearch,
+                          );
+                          setInternalOptions(response.data);
+                          setPage(p);
+                          setPagination(response.pagination ?? null);
+                        }}
+                      />
+
+                      <PaginationContent>
+                        {Array.from({ length: pagination.totalPages }).map(
+                          (_, i) => (
+                            <PaginationItem key={i}>
+                              <PaginationLink
+                                isActive={pagination.page === i + 1}
+                                onClick={async () => {
+                                  const p = i + 1;
+                                  const response = await fetchOptions(
+                                    p,
+                                    pagination.limit,
+                                    debouncedSearch,
+                                  );
+                                  setInternalOptions(response.data);
+                                  setPage(p);
+                                  setPagination(response.pagination ?? null);
+                                }}
+                              >
+                                {i + 1}
+                              </PaginationLink>
+                            </PaginationItem>
+                          ),
+                        )}
+                      </PaginationContent>
+
+                      <PaginationNext
+                        onClick={async () => {
+                          if (!pagination.hasNextPage) return;
+                          const p = pagination.page + 1;
+                          const response = await fetchOptions(
+                            p,
+                            pagination.limit,
+                            debouncedSearch,
+                          );
+                          setInternalOptions(response.data);
+                          setPage(p);
+                          setPagination(response.pagination ?? null);
+                        }}
+                      />
+                    </div>
+                  </Pagination>
+                ) : (
+                  <div className="p-2">
+                    <Button
+                      onClick={loadMore}
+                      variant="ghost"
+                      size="sm"
+                      className="w-full"
+                    >
+                      Load more
+                    </Button>
+                  </div>
+                )}
               </div>
             )}
           </CommandList>

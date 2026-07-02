@@ -1,18 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { ChevronDown, MoreVertical, Search, X } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { Search, ChevronDown, MoreVertical } from "lucide-react";
+import { useEffect, useState } from "react";
 
+import AddDepartmentDialog from "@/components/features/dashboard/departments/AddDepartmentDialog";
+import { getDepartmentColumns } from "@/components/features/dashboard/departments/department-columns";
 import Table from "@/components/features/dashboard/Table";
-import Heading from "@/components/ui/typography/Heading";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { useToast } from "@/hooks/use-toast";
-import { useIsMobile } from "@/hooks/use-mobile";
-import { Loader } from "@/components/ui/loader";
-
-import { mapDepartmentToRow } from "@/mappers/department.mapper";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -23,25 +17,29 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-
-import AddDepartmentDialog from "@/components/features/dashboard/departments/AddDepartmentDialog";
-import { DepartmentRow } from "@/types";
-
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Loader } from "@/components/ui/loader";
+import { SidebarTrigger } from "@/components/ui/sidebar";
+import Heading from "@/components/ui/typography/Heading";
+import { RouteConfig } from "@/config/routes";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { useToast } from "@/hooks/use-toast";
+import { mapDepartmentToRow } from "@/mappers/department.mapper";
 import {
-  fetchDepartments,
   deleteDepartment,
   exportDepartments,
+  fetchDepartments,
 } from "@/services/departmentService";
+import { DepartmentRow } from "@/types";
 
-import { getDepartmentColumns } from "@/components/features/dashboard/departments/department-columns";
-import { RouteConfig } from "@/config/routes";
-import { SidebarTrigger } from "@/components/ui/sidebar";
 export default function DepartmentPage() {
   const router = useRouter();
   const isMobile = useIsMobile();
   const { toast } = useToast();
 
-  const [query, setQuery] = useState("");
+  const [searchInput, setSearchInput] = useState(""); // For input value
+  const [searchTerm, setSearchTerm] = useState(""); // For actual search query
   const [data, setData] = useState<DepartmentRow[]>([]);
   const [loading, setLoading] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<DepartmentRow | null>(null);
@@ -55,7 +53,7 @@ export default function DepartmentPage() {
       const response = await fetchDepartments({
         page: 1,
         limit: 20,
-        search: searchValue,
+        search: searchValue, // This will map to 'search' param in DTO
       });
 
       setData(response.data.map(mapDepartmentToRow));
@@ -70,21 +68,30 @@ export default function DepartmentPage() {
     }
   };
 
+  const handleSearch = () => {
+    setSearchTerm(searchInput);
+    loadDepartments(searchInput);
+  };
+
+  const handleClearSearch = () => {
+    setSearchInput("");
+    setSearchTerm("");
+    loadDepartments("");
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      handleSearch();
+    }
+  };
+
   const handleAddDepartment = async () => {
-    await loadDepartments();
+    await loadDepartments(searchTerm);
   };
 
   useEffect(() => {
     loadDepartments();
   }, []);
-
-  useEffect(() => {
-    const delay = setTimeout(() => {
-      loadDepartments(query);
-    }, 400);
-
-    return () => clearTimeout(delay);
-  }, [query]);
 
   const handleEdit = (row: DepartmentRow) => {
     router.push(RouteConfig.dashboard.departmentEdit(row.id));
@@ -125,7 +132,7 @@ export default function DepartmentPage() {
 
     try {
       await deleteDepartment(deleteTarget.id);
-      await loadDepartments();
+      await loadDepartments(searchTerm);
 
       toast({
         title: "Deleted",
@@ -209,19 +216,35 @@ export default function DepartmentPage() {
       </div>
     );
   }
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Heading level={2} text="Departments/Units" />
 
-          <Input
-            placeholder="Search by HOD, member..."
-            leftIcon={<Search className="w-4 h-4" />}
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            className="w-[300px]"
-          />
+          <div className="relative flex items-center">
+            <div className="relative">
+              <Input
+                placeholder="Search by HOD, member..."
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
+                onKeyPress={handleKeyPress}
+                className="w-[300px] pr-20"
+              />
+              {searchInput && (
+                <button
+                  onClick={handleClearSearch}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              )}
+            </div>
+            <Button onClick={handleSearch} className="ml-2" size="default">
+              <Search className="size-6" />
+            </Button>
+          </div>
         </div>
 
         <div className="flex items-center gap-3">
@@ -238,6 +261,21 @@ export default function DepartmentPage() {
           <AddDepartmentDialog onSave={handleAddDepartment} />
         </div>
       </div>
+
+      {/* Optional: Show active search term */}
+      {searchTerm && (
+        <div className="text-sm text-gray-500">
+          Showing results for: <span className="font-medium">{searchTerm}</span>
+          <Button
+            variant="link"
+            size="sm"
+            onClick={handleClearSearch}
+            className="ml-2"
+          >
+            Clear
+          </Button>
+        </div>
+      )}
 
       <div className="max-h-[65vh] overflow-auto">
         <Table

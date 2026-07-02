@@ -1,31 +1,22 @@
 "use client";
 
-import {
-  ArrowDownRight,
-  ArrowUpRight,
-  ChevronDown,
-  TrendingDown,
-  TrendingUp,
-} from "lucide-react";
+import { ChevronDown } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import Heading from "@/components/ui/typography/Heading";
-import { Span } from "@/components/ui/typography/Text";
-import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 
-// ─────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
 // Types
-// ─────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
+
 interface StatCardProps {
   title: string;
   count: string | number;
-  growth: string;
-  /** Optional small label shown above the growth % e.g. "Last Event" */
+  growth?: string;
   growthLabel?: string;
+  /** "blue" → blue rounded-square icon  |  "orange" → orange rounded-square icon */
+  iconVariant?: "blue" | "orange";
+  icon?: React.ReactNode;
   className?: string;
-  compact?: boolean;
 }
 
 interface TotalIncomeCardProps {
@@ -34,90 +25,112 @@ interface TotalIncomeCardProps {
   monthFilter: "This Month" | "Last Month";
   onToggleMonth: () => void;
   className?: string;
-  compact?: boolean;
 }
 
-const GrowthBadge = ({
-  isPositive,
-  size = "md",
-}: {
-  isPositive: boolean;
-  size?: "sm" | "md";
-}) => {
-  const Icon = isPositive ? TrendingUp : TrendingDown;
-  return (
-    <span
-      className={cn(
-        "inline-flex items-center justify-center rounded-xl shrink-0",
-        isPositive ? "bg-emerald-500" : "bg-red-500",
-        size === "sm" ? "w-6 h-6" : "w-8 h-8",
-      )}
-    >
-      <Icon
-        className={
-          size === "sm" ? "w-3.5 h-3.5 text-white" : "w-4 h-4 text-white"
-        }
-        strokeWidth={2.5}
-      />
-    </span>
-  );
-};
+// ─────────────────────────────────────────────────────────────────────────────
+// Icons (inline SVG so zero extra deps)
+// ─────────────────────────────────────────────────────────────────────────────
+
+const MembersIcon = () => (
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="white"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className="w-5 h-5"
+  >
+    <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
+    <circle cx="9" cy="7" r="4" />
+    <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" />
+  </svg>
+);
+
+const AttendanceIcon = () => (
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="white"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className="w-6 h-6"
+  >
+    <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2" />
+    <rect x="9" y="3" width="6" height="4" rx="1" />
+    <path d="M9 12l2 2 4-4" />
+  </svg>
+);
+
+const IncomeIcon = () => (
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="white"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className="w-5 h-5"
+  >
+    <line x1="12" y1="1" x2="12" y2="23" />
+    <path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6" />
+  </svg>
+);
+
+// ─────────────────────────────────────────────────────────────────────────────
+// StatCard — matches the design: white card, coloured icon box, big number
+// ─────────────────────────────────────────────────────────────────────────────
 
 export const StatCard = ({
   title,
   count,
   growth,
   growthLabel,
+  iconVariant = "blue",
+  icon,
   className,
-  compact = false,
 }: StatCardProps) => {
-  const isPositive = !growth.startsWith("-");
-  const growthColor = isPositive ? "text-emerald-600" : "text-red-500";
+  const isPositive = growth ? !growth.startsWith("-") : true;
 
   return (
     <div
       className={cn(
-        "bg-[#E8EFF8] rounded-3xl flex flex-col justify-between",
-        compact ? "p-4 min-h-[110px]" : "p-5 min-h-[130px]",
+        "bg-white rounded-2xl border border-gray-300 p-5 flex flex-col items-center gap-0",
+        "shadow-[0_1px_4px_rgba(0,0,0,0.06)] hover:shadow-[0_4px_16px_rgba(0,0,0,0.08)]",
+        "transition-shadow duration-200",
         className,
       )}
     >
-      {/* ── Title ── */}
-      <p className="text-[13px] font-medium text-gray-500 leading-none">
-        {title}
-      </p>
+      {/* Coloured icon box */}
+      <div
+        className={cn(
+          "w-12 h-12 rounded-[13px] flex items-center justify-center shrink-0",
+          iconVariant === "blue"
+            ? "bg-primary-400"
+            : "bg-secondary-400 orange-500",
+        )}
+      >
+        {icon ??
+          (iconVariant === "blue" ? <MembersIcon /> : <AttendanceIcon />)}
+      </div>
 
-      {/* ── Count + growth row ── */}
-      <div className="flex items-center gap-3 flex-wrap">
-        {/* Big number */}
-        <span
-          className={cn(
-            "font-bold text-gray-900 tracking-tight leading-none",
-            compact ? "text-[26px]" : "text-[32px] md:text-[36px]",
-          )}
-        >
+      {/* Text */}
+      <div className="flex flex-col min-w-0">
+        <p className="text-[13px] font-bold text-black mb-1 truncate">
+          {title}
+        </p>
+        <span className="text-[30px] text-center font-bold text-black leading-none tracking-tight">
           {count}
         </span>
-
-        {/* Growth cluster */}
-        <div className="flex items-center gap-1.5">
-          <div className="flex flex-col items-end leading-none gap-0.5">
-            {growthLabel && (
-              <span className="text-[10px] text-gray-400 font-medium whitespace-nowrap">
-                {growthLabel}
-              </span>
-            )}
-            <span className={cn("text-[13px] font-semibold", growthColor)}>
-              {growth}
-            </span>
-          </div>
-
-          <GrowthBadge isPositive={isPositive} size={compact ? "sm" : "md"} />
-        </div>
       </div>
     </div>
   );
 };
+
+// ─────────────────────────────────────────────────────────────────────────────
+// TotalIncomeCard
+// ─────────────────────────────────────────────────────────────────────────────
 
 export const TotalIncomeCard = ({
   amount,
@@ -125,7 +138,6 @@ export const TotalIncomeCard = ({
   monthFilter,
   onToggleMonth,
   className,
-  compact = false,
 }: TotalIncomeCardProps) => {
   const isPositive = !growth.startsWith("-");
   const growthColor = isPositive ? "text-emerald-600" : "text-red-500";
@@ -133,47 +145,39 @@ export const TotalIncomeCard = ({
   return (
     <div
       className={cn(
-        "bg-[#E8EFF8] rounded-3xl flex flex-col justify-between",
-        compact ? "p-4 min-h-[110px]" : "p-5 min-h-[130px]",
+        "bg-white rounded-2xl border border-gray-100 p-5 flex items-center gap-4",
+        "shadow-[0_1px_4px_rgba(0,0,0,0.06)] hover:shadow-[0_4px_16px_rgba(0,0,0,0.08)]",
+        "transition-shadow duration-200",
         className,
       )}
     >
-      {/* ── Top row: title + month dropdown ── */}
-      <div className="flex items-center justify-between gap-2">
-        <p className="text-[13px] font-medium text-gray-500 leading-none">
-          Total Income
-        </p>
-
-        <button
-          onClick={onToggleMonth}
-          className="flex items-center gap-1 text-[12px] text-gray-500 font-medium
-                     border border-gray-300/70 rounded-lg px-2.5 py-1
-                     bg-white/30 hover:bg-white/60 transition-colors whitespace-nowrap"
-        >
-          {monthFilter}
-          <ChevronDown className="w-3 h-3 shrink-0" />
-        </button>
+      {/* Icon */}
+      <div className="w-12 h-12 rounded-[13px] bg-emerald-500 flex items-center justify-center shrink-0">
+        <IncomeIcon />
       </div>
 
-      {/* ── Bottom row: amount + growth ── */}
-      <div className="flex items-center gap-3 flex-wrap">
-        {/* Amount */}
-        <span
-          className={cn(
-            "font-bold text-gray-900 tracking-tight leading-none",
-            compact ? "text-[26px]" : "text-[32px] md:text-[36px]",
-          )}
-        >
+      {/* Text */}
+      <div className="flex flex-col min-w-0 flex-1">
+        <div className="flex items-center justify-between gap-2 mb-1">
+          <p className="text-[13px] font-medium text-gray-400 truncate">
+            Total Income
+          </p>
+          <button
+            onClick={onToggleMonth}
+            className="flex items-center gap-1 text-[11px] text-gray-500 font-medium
+                       border border-gray-200 rounded-lg px-2 py-1 bg-gray-50
+                       hover:bg-gray-100 transition-colors whitespace-nowrap shrink-0"
+          >
+            {monthFilter}
+            <ChevronDown className="w-3 h-3" />
+          </button>
+        </div>
+        <span className="text-[28px] font-extrabold text-gray-900 leading-none tracking-tight">
           {amount}
         </span>
-
-        {/* Growth cluster */}
-        <div className="flex items-center gap-1.5">
-          <span className={cn("text-[13px] font-semibold", growthColor)}>
-            {growth}
-          </span>
-          <GrowthBadge isPositive={isPositive} size={compact ? "sm" : "md"} />
-        </div>
+        <span className={cn("text-[12px] font-semibold mt-1", growthColor)}>
+          {growth}
+        </span>
       </div>
     </div>
   );

@@ -1,6 +1,9 @@
 "use client";
 
+import { Info, Plus, Trash2, X } from "lucide-react";
 import { useState } from "react";
+
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -8,15 +11,13 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Plus, Trash2, Info, X } from "lucide-react";
 import { Span, Text } from "@/components/ui/typography/Text";
-import { RegularService } from "@/types";
 import { useToast } from "@/hooks/use-toast";
-import { convertTo12Hour } from "@/lib/utils";
 import { createWeeklyService } from "@/lib/api";
+import { convertTo12Hour } from "@/lib/utils";
+import { RegularService } from "@/types";
 
 type CreateRegularServiceModalProps = {
   open: boolean;
@@ -57,7 +58,8 @@ export function CreateRegularServiceModal({
   const [formData, setFormData] = useState<RegularService>({
     id: "",
     serviceName: "",
-    days: [],
+    type: "REGULAR",
+    day: "",
     startTime: "",
     endTime: "",
     location: "",
@@ -67,9 +69,7 @@ export function CreateRegularServiceModal({
   const handleDayToggle = (day: string) => {
     setFormData((prev) => ({
       ...prev,
-      days: prev.days.includes(day)
-        ? prev.days.filter((d) => d !== day)
-        : [...prev.days, day],
+      day,
     }));
   };
 
@@ -78,7 +78,7 @@ export function CreateRegularServiceModal({
       alert("Please enter a service name");
       return;
     }
-    if (formData.days.length === 0) {
+    if (formData.day.length === 0) {
       alert("Please select at least one day");
       return;
     }
@@ -96,7 +96,8 @@ export function CreateRegularServiceModal({
     setFormData({
       id: "",
       serviceName: "",
-      days: [],
+      type: "REGULAR",
+      day: "",
       startTime: "",
       endTime: "",
       location: "",
@@ -121,12 +122,19 @@ export function CreateRegularServiceModal({
         const startTime = convertTo12Hour(service.startTime);
         const endTime = convertTo12Hour(service.endTime || "");
 
-        for (const day of service.days) {
+        // Handle both string and array cases
+        const days = Array.isArray(service.day) ? service.day : [service.day];
+
+        for (const day of days) {
           const dayEnum = SERVICE_DAY_ENUM_MAP[day];
-          if (!dayEnum) continue;
+
+          if (!dayEnum) {
+            console.error(`Invalid day: ${day}`);
+            continue;
+          }
 
           const createdService: any = await createWeeklyService({
-            serviceName: service.serviceName,
+            title: service.serviceName,
             type: "REGULAR",
             day: dayEnum,
             startTime,
@@ -137,7 +145,8 @@ export function CreateRegularServiceModal({
           created.push({
             id: createdService._id,
             serviceName: createdService.serviceName,
-            days: [day],
+            type: "REGULAR",
+            day: day,
             startTime: createdService.startTime,
             endTime: createdService.endTime,
             location: createdService.location,
@@ -157,7 +166,8 @@ export function CreateRegularServiceModal({
       setFormData({
         id: "",
         serviceName: "",
-        days: [],
+        type: "REGULAR",
+        day: "",
         startTime: "",
         endTime: "",
         location: "",
@@ -180,7 +190,8 @@ export function CreateRegularServiceModal({
     setFormData({
       id: "",
       serviceName: "",
-      days: [],
+      type: "REGULAR",
+      day: "",
       startTime: "",
       endTime: "",
       location: "",
@@ -263,7 +274,7 @@ export function CreateRegularServiceModal({
                   key={day.short}
                   type="button"
                   variant={
-                    formData.days.includes(day.full) ? "default" : "outline"
+                    formData.day.includes(day.full) ? "default" : "outline"
                   }
                   size="sm"
                   onClick={() => handleDayToggle(day.full)}
@@ -332,7 +343,7 @@ export function CreateRegularServiceModal({
                   <div className="flex-1">
                     <Text variant="default">{service.serviceName}</Text>
                     <Text variant="muted">
-                      {service.days.join(", ")} - {service.startTime}
+                      {service.day} - {service.startTime}
                       {service.endTime && ` - ${service.endTime}`}
                       {service.location && ` - ${service.location}`}
                     </Text>

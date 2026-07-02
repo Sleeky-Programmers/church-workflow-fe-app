@@ -1,28 +1,37 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
-import { Input } from "@/components/ui/input";
+import { format } from "date-fns";
 import { Search } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
-import { RegularService, SpecialServiceEvent } from "@/types";
+import { useEffect, useMemo, useState } from "react";
+
 import { AttendanceEmptyState } from "@/components/features/dashboard/attendance/attendance-empty-state";
-import { ServiceTypeModal } from "@/components/features/dashboard/attendance/service-type";
+import { AttendanceModal } from "@/components/features/dashboard/attendance/attendance-modal";
+import { CalendarGrid } from "@/components/features/dashboard/attendance/calendar-grid";
 import { CreateRegularServiceModal } from "@/components/features/dashboard/attendance/create-regular-service";
 import { CreateSpecialServiceModal } from "@/components/features/dashboard/attendance/create-special-service";
-import { AttendanceModal } from "@/components/features/dashboard/attendance/attendance-modal";
+import {
+  GivingRecordModal,
+  GivingValues,
+} from "@/components/features/dashboard/attendance/giving-record-modal";
 import { MobileAttendanceView } from "@/components/features/dashboard/attendance/mobile-view";
-import { CalendarGrid } from "@/components/features/dashboard/attendance/calendar-grid";
-import { GivingRecordModal } from "@/components/features/dashboard/attendance/giving-record-modal";
 import { ServiceDetailModal } from "@/components/features/dashboard/attendance/service-detail-modal";
-import { GivingValues } from "@/components/features/dashboard/attendance/giving-record-modal";
+import { ServiceTypeModal } from "@/components/features/dashboard/attendance/service-type";
+import { Input } from "@/components/ui/input";
 import Heading from "@/components/ui/typography/Heading";
 import { Text } from "@/components/ui/typography/Text";
+import { useToast } from "@/hooks/use-toast";
+import {
+  fetchAllServices,
+  fetchServices,
+  mapToRegularService,
+  mapToSpecialService,
+} from "@/lib/api";
+import { getCurrentUserProfile } from "@/lib/auth/session";
 import { DEFAULT_ORDER } from "@/lib/data";
 import { ServiceFrequency, ServiceType } from "@/lib/enums";
-import { fetchServices } from "@/lib/api";
-import { format } from "date-fns";
+import { createChurchService, DAY } from "@/services/churchService";
+import { RegularService, SpecialServiceEvent } from "@/types";
 
-import { getCurrentUserProfile } from "@/lib/auth/session";
 function useIsMobile() {
   const [isMobile, setIsMobile] = useState(false);
 
@@ -44,7 +53,10 @@ export default function AttendancePage() {
   const isMobile = useIsMobile();
   const userProfile = getCurrentUserProfile();
   const Admin = userProfile?.fullName || "Unknown";
-  const [services, setServices] = useState<RegularService[]>([]);
+  const [regularServices, setRegularServices] = useState<RegularService[]>([]);
+  const [specialServices, setSpecialServices] = useState<SpecialServiceEvent[]>(
+    [],
+  );
   const [isLoading, setIsLoading] = useState(true);
   const [isTypeModalOpen, setIsTypeModalOpen] = useState(false);
   const [isRegularModalOpen, setIsRegularModalOpen] = useState(false);
@@ -64,29 +76,79 @@ export default function AttendancePage() {
   const [orderByServiceDate, setOrderByServiceDate] = useState<
     Record<string, string[]>
   >({});
-  const [specialServices, setSpecialServices] = useState<SpecialServiceEvent[]>(
-    [],
-  );
+
+  const loadServices = async () => {
+    setIsLoading(true);
+    try {
+      const data = await fetchAllServices(format(new Date(), "yyyy-MM"));
+
+      // Separate regular and special services
+      const regular = data
+        .filter((service) => service.type === "REGULAR")
+        .map(mapToRegularService);
+
+      const special = data
+        .filter((service) => service.type === "SPECIAL")
+        .map(mapToSpecialService);
+
+      setRegularServices(regular);
+      setSpecialServices(special);
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to load services",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const loadServices = async () => {
-      setIsLoading(true);
-      try {
-        const data = await fetchServices(format(new Date(), "yyyy-MM"));
-        setServices(data);
-      } catch (error: any) {
-        toast({
-          title: "Error",
-          description: error.message || "Failed to load services",
-          variant: "destructive",
-        });
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
     loadServices();
-  }, [toast]);
+  }, []);
+
+  const handleCreateServices = async (newServices: RegularService[]) => {
+    try {
+      const monday = "MONDAY" as DAY;
+      // Create each service in the array
+      for (const service of newServices) {
+        const aDay = service.day as DAY;
+        const day = aDay ? aDay : monday;
+        await createChurchService({
+          title: service.serviceName,
+          type: "REGULAR",
+          day,
+          startTime: service.startTime,
+          endTime: service.endTime,
+          location: service.location,
+          description: service.description,
+          recurrence:
+            service.frequency === "weekly"
+              ? "WEEKLY_MONDAY"
+              : "MONTHLY_FIRST_MONDAY",
+          eventType: "WORSHIP_SERVICE",
+          reminderEnabled: false,
+        });
+      }
+
+      await loadServices();
+
+      toast({
+        title: "Success",
+        description: `${newServices.length} service(s) created successfully`,
+      });
+
+      setIsRegularModalOpen(false);
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to create services",
+        variant: "destructive",
+      });
+      throw error;
+    }
+  };
 
   const setServiceContext = (service: RegularService, date: string) => {
     setSelectedService(service);
@@ -163,23 +225,61 @@ export default function AttendancePage() {
     }
   };
 
-  const handleCreateServices = (newServices: RegularService[]) => {
-    setServices((prev) => [...prev, ...newServices]);
-  };
-
   const handleAddService = () => {
     setIsTypeModalOpen(true);
   };
 
-  const handleCreateSpecialService = (service: SpecialServiceEvent) => {
-    setSpecialServices((prev) => [...prev, service]);
-    toast({
-      title: "Success",
-      description: "Special service created successfully",
-    });
+  const handleCreateSpecialService = async (service: SpecialServiceEvent) => {
+    try {
+      await createChurchService({
+        title: service.serviceName,
+        type: "SPECIAL",
+        startDate: service.startDate,
+        endDate: service.endDate || service.startDate,
+        location: service.location,
+        recurrence: service.recurrence || "NO_REPEAT",
+        specialDays:
+          service.daySchedules?.map((schedule) => ({
+            date: schedule.date,
+            startTime: schedule.startTime,
+            endTime: schedule.endTime || undefined,
+          })) || [],
+        description: service.description,
+        eventType: service.eventType || "WORSHIP_SERVICE",
+        reminderEnabled: false,
+      });
+      await loadServices();
+
+      toast({
+        title: "Success",
+        description: "Special service created successfully",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to create special service",
+        variant: "destructive",
+      });
+      throw error; // Re-throw to let modal know it failed
+    }
   };
 
   const handleAddAttendance = (service: RegularService, date: string) => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const selectedDate = new Date(date);
+    selectedDate.setHours(0, 0, 0, 0);
+
+    if (selectedDate > today) {
+      toast({
+        title: "Cannot Mark Attendance",
+        description: `You cannot mark attendance for future dates (${format(selectedDate, "MMMM d, yyyy")}). Attendance can only be recorded for past or current dates.`,
+        variant: "destructive",
+        duration: 5000, // Show for 5 seconds
+      });
+      return;
+    }
+
     setServiceContext(service, date);
     setIsAttendanceModalOpen(true);
   };
@@ -200,7 +300,7 @@ export default function AttendancePage() {
     presentMembers: string[];
     absentMembers: string[];
   }) => {
-    setServices((prev) =>
+    setRegularServices((prev) =>
       prev.map((service) => {
         if (service.id !== payload.serviceId) return service;
         const attendanceRecords = [...(service.attendanceRecords || [])];
@@ -232,13 +332,16 @@ export default function AttendancePage() {
     });
   };
 
-  const hasServices = services.length > 0 || specialServices.length > 0;
+  // Combine all services for the hasServices check
+  const allServices = [...regularServices, ...specialServices];
+  const hasServices = allServices.length > 0;
 
   if (isMobile) {
     return (
       <>
         <MobileAttendanceView
-          services={services}
+          regularServices={regularServices}
+          specialServices={specialServices}
           onAddAttendance={handleAddAttendance}
           onAddGivingRecord={handleAddGivingRecord}
           onViewServiceDetails={handleViewServiceDetails}
@@ -364,7 +467,7 @@ export default function AttendancePage() {
         ) : (
           <div>
             <CalendarGrid
-              services={services}
+              services={regularServices}
               specialServices={specialServices}
               searchQuery={searchQuery}
               givingTotals={givingTotals}
