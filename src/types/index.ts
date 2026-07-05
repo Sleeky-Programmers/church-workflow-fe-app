@@ -364,7 +364,7 @@ export type SpecialServiceEvent = {
   serviceName: string;
   startDate: string;
   endDate?: string;
-  startTime: string;
+  startTime?: string;
   endTime?: string;
   location?: string;
   description?: string;
@@ -380,8 +380,8 @@ export type SpecialServiceEvent = {
     | "WEDDING_ANNIVERSARY"
     | "OTHERS";
   daySchedules: SpecialServiceDaySchedule[];
-  attendanceRecords?: AttendanceRecord[]; // Add this
-  type?: "SPECIAL"; // Add type discriminator
+  attendanceRecords?: AttendanceRecord[];
+  type?: "SPECIAL";
 };
 
 export type UploadFile = {
