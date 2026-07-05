@@ -1,8 +1,8 @@
 "use client";
 
+import { X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import { EventRecurrence, EventReminderType, EventType } from "@/lib/enums";
-import { EventFormData } from "@/types";
+
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -22,20 +22,23 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { Text } from "@/components/ui/typography/Text";
+import { EventRecurrence, EventReminderType, EventType } from "@/lib/enums";
+import { EventFormData } from "@/types";
+
 import {
   EVENT_REMINDER_MINUTES_OPTIONS,
   EVENT_REMINDER_TYPE_OPTIONS,
   EVENT_TYPE_OPTIONS,
   getEventRecurrenceOptions,
 } from "./constants";
-import { Text } from "@/components/ui/typography/Text";
-import { X } from "lucide-react";
 
 type EventFormModalProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSubmit: (payload: EventFormData) => void;
+  onSubmit: (payload: EventFormData) => Promise<void>;
   initialData?: EventFormData | null;
+  isSubmitting?: boolean;
 };
 
 const DEFAULT_FORM_DATA: EventFormData = {
@@ -57,9 +60,11 @@ export function EventFormModal({
   onOpenChange,
   onSubmit,
   initialData,
+  isSubmitting = false,
 }: EventFormModalProps) {
   const [formData, setFormData] = useState<EventFormData>(DEFAULT_FORM_DATA);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const isEditMode = useMemo(() => Boolean(initialData), [initialData]);
   const recurrenceOptions = useMemo(
@@ -71,6 +76,7 @@ export function EventFormModal({
     if (!open) return;
     setFormData(initialData ?? DEFAULT_FORM_DATA);
     setErrors({});
+    setSubmitError(null);
   }, [open, initialData]);
 
   const handleFieldChange = <K extends keyof EventFormData>(
@@ -84,6 +90,8 @@ export function EventFormModal({
       delete next[field];
       return next;
     });
+    // Clear submit error when user makes changes
+    if (submitError) setSubmitError(null);
   };
 
   const validate = () => {
@@ -105,14 +113,47 @@ export function EventFormModal({
     return Object.keys(nextErrors).length === 0;
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!validate()) return;
-    onSubmit(formData);
-    onOpenChange(false);
+
+    try {
+      setSubmitError(null);
+      await onSubmit(formData);
+      onOpenChange(false);
+    } catch (error: any) {
+      // Extract error message from the error object
+      let errorMessage = "Failed to save event. Please try again.";
+
+      if (error?.message) {
+        errorMessage = error.message;
+      } else if (error?.response?.data?.message) {
+        // Handle API error response
+        const apiMessage = error.response.data.message;
+        if (Array.isArray(apiMessage)) {
+          errorMessage = apiMessage.join(", ");
+        } else {
+          errorMessage = apiMessage;
+        }
+      } else if (typeof error === "string") {
+        errorMessage = error;
+      }
+
+      setSubmitError(errorMessage);
+      console.error("Submission failed:", error);
+    }
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog
+      open={open}
+      onOpenChange={(newOpen) => {
+        if (isSubmitting) return;
+        if (!newOpen) {
+          setSubmitError(null);
+        }
+        onOpenChange(newOpen);
+      }}
+    >
       <DialogContent showClose={false} className="max-w-2xl p-0">
         <DialogHeader className="px-6 py-4 border-b">
           <div className="flex items-center justify-between">
@@ -125,6 +166,7 @@ export function EventFormModal({
                 size="icon"
                 variant="outline"
                 aria-label="Close dialog"
+                disabled={isSubmitting}
               >
                 <X className="w-4 h-4" />
               </Button>
@@ -133,6 +175,22 @@ export function EventFormModal({
         </DialogHeader>
 
         <div className="px-6 py-5 space-y-4 max-h-[80vh] overflow-y-auto">
+          {/* Error Alert */}
+          {submitError && (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-start gap-3">
+              <div className="text-red-500 text-sm font-medium">Error</div>
+              <div className="flex-1 text-sm text-red-700">{submitError}</div>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-6 w-6 p-0 text-red-500 hover:text-red-700 hover:bg-red-100"
+                onClick={() => setSubmitError(null)}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+          )}
+
           <div className="space-y-2">
             <Label htmlFor="event-title">Title *</Label>
             <Input
@@ -140,6 +198,8 @@ export function EventFormModal({
               placeholder="Event title..."
               value={formData.title}
               onChange={(e) => handleFieldChange("title", e.target.value)}
+              disabled={isSubmitting}
+              className={errors.title ? "border-red-500" : ""}
             />
             {errors.title ? <Text variant="error">{errors.title}</Text> : null}
           </div>
@@ -152,6 +212,7 @@ export function EventFormModal({
                 onValueChange={(value) =>
                   handleFieldChange("type", value as EventType)
                 }
+                disabled={isSubmitting}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select" />
@@ -173,6 +234,7 @@ export function EventFormModal({
                 onValueChange={(value) =>
                   handleFieldChange("recurrence", value as EventRecurrence)
                 }
+                disabled={isSubmitting}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Does not repeat" />
@@ -195,6 +257,8 @@ export function EventFormModal({
               type="date"
               value={formData.date}
               onChange={(e) => handleFieldChange("date", e.target.value)}
+              disabled={isSubmitting}
+              className={errors.date ? "border-red-500" : ""}
             />
             {errors.date ? <Text variant="error">{errors.date}</Text> : null}
           </div>
@@ -207,6 +271,8 @@ export function EventFormModal({
                 type="time"
                 value={formData.startTime}
                 onChange={(e) => handleFieldChange("startTime", e.target.value)}
+                disabled={isSubmitting}
+                className={errors.startTime ? "border-red-500" : ""}
               />
               {errors.startTime ? (
                 <Text variant="error">{errors.startTime}</Text>
@@ -220,6 +286,8 @@ export function EventFormModal({
                 type="time"
                 value={formData.endTime || ""}
                 onChange={(e) => handleFieldChange("endTime", e.target.value)}
+                disabled={isSubmitting}
+                className={errors.endTime ? "border-red-500" : ""}
               />
               {errors.endTime ? (
                 <Text variant="error">{errors.endTime}</Text>
@@ -234,6 +302,7 @@ export function EventFormModal({
               placeholder="e.g. Main Auditorium"
               value={formData.location || ""}
               onChange={(e) => handleFieldChange("location", e.target.value)}
+              disabled={isSubmitting}
             />
           </div>
 
@@ -244,6 +313,7 @@ export function EventFormModal({
               onCheckedChange={(checked) =>
                 handleFieldChange("sendReminder", checked === true)
               }
+              disabled={isSubmitting}
             />
             <Label htmlFor="send-reminder">Send reminder</Label>
           </div>
@@ -260,6 +330,7 @@ export function EventFormModal({
                       value as EventReminderType,
                     )
                   }
+                  disabled={isSubmitting}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="In-App Notification" />
@@ -281,6 +352,7 @@ export function EventFormModal({
                   onValueChange={(value) =>
                     handleFieldChange("remindBeforeMinutes", Number(value))
                   }
+                  disabled={isSubmitting}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="30 minutes" />
@@ -308,13 +380,18 @@ export function EventFormModal({
               value={formData.description || ""}
               onChange={(e) => handleFieldChange("description", e.target.value)}
               className="min-h-24"
+              disabled={isSubmitting}
             />
           </div>
         </div>
 
         <div className="px-6 py-4 border-t flex justify-end">
-          <Button onClick={handleSubmit}>
-            {isEditMode ? "Update event" : "Create event"}
+          <Button onClick={handleSubmit} disabled={isSubmitting}>
+            {isSubmitting
+              ? "Saving..."
+              : isEditMode
+                ? "Update event"
+                : "Create event"}
           </Button>
         </div>
       </DialogContent>

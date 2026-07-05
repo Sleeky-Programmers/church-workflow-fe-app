@@ -26,30 +26,135 @@ import {
   MemberFormType,
   MembershipStatus,
 } from "@/lib/enums";
+import { toSentenceCase } from "@/lib/utils";
 import { mapFiltersToBackend } from "@/mappers/filter.mapper";
-import { fetchMembers } from "@/services/memberService";
+import { fetchMembers, getMemberLimitStatus } from "@/services/memberService";
 import { useSearchStore } from "@/stores/useSearchStore";
-import { MemberProfile } from "@/types";
+import { MemberLimitStatus, MemberProfile } from "@/types";
 
-function ActionRequiredBanner() {
+type BannerColor = "blue" | "red" | "amber";
+
+const bannerStyles: Record<BannerColor, string> = {
+  blue: "border-blue-200 bg-blue-50",
+  red: "border-red-200 bg-red-50",
+  amber: "border-amber-200 bg-amber-50",
+};
+
+const iconColors: Record<BannerColor, string> = {
+  blue: "text-primary-500",
+  red: "text-red-500",
+  amber: "text-amber-500",
+};
+
+export function ActionRequiredBanner() {
+  const router = useRouter();
   const [isVisible, setIsVisible] = useState(true);
+  const [status, setStatus] = useState<MemberLimitStatus | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  if (!isVisible) return null;
+  useEffect(() => {
+    const fetchStatus = async () => {
+      setLoading(true);
+      setError(null);
+
+      try {
+        const data = await getMemberLimitStatus();
+        setStatus(data);
+      } catch (err) {
+        console.error("Failed to fetch member limit status:", err);
+        setError("Failed to load member limit status");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchStatus();
+  }, []);
+
+  // Check if banner was dismissed in this session
+  useEffect(() => {
+    const dismissedBanner = sessionStorage.getItem(
+      "memberLimitBannerDismissed",
+    );
+    if (dismissedBanner) {
+      setIsVisible(false);
+    }
+  }, []);
+
+  const handleDismiss = () => {
+    setIsVisible(false);
+    sessionStorage.setItem("memberLimitBannerDismissed", "true");
+  };
+
+  if (loading) return null;
+  if (error) {
+    console.warn("Banner error:", error);
+    return null;
+  }
+  if (!status || !isVisible) return null;
+
+  const {
+    currentMembers,
+    limit,
+    percentage,
+    isOverLimit,
+    isWithinGracePeriod,
+    isNearLimit,
+    daysRemaining,
+    planName,
+  } = status;
+
+  // No banner if not near limit and not over limit
+  if (!isNearLimit && !isOverLimit) return null;
+
+  // Determine banner styling
+  let bannerColor: BannerColor = "blue";
+  let title = "";
+  let message = "";
+
+  if (isOverLimit && isWithinGracePeriod) {
+    bannerColor = "blue";
+    title = "Action Required:";
+    const formattedDate = status.gracePeriodEnds
+      ? new Date(status.gracePeriodEnds).toLocaleDateString("en-US", {
+          month: "long",
+          day: "numeric",
+          year: "numeric",
+        })
+      : "soon";
+    message = `Your ${daysRemaining || 7}-day grace period to manage over-limit members ends on ${formattedDate}. Upgrade to prevent dashboard restrictions.`;
+  } else if (isOverLimit && !isWithinGracePeriod) {
+    bannerColor = "red";
+    title = "Over Limit:";
+    message = `Your ${toSentenceCase(planName || "")} plan has ${currentMembers} members, which exceeds the ${limit} member limit. Please upgrade now to continue.`;
+  } else if (isNearLimit) {
+    bannerColor = "amber";
+    title = "Approaching Limit:";
+    message = `You have ${currentMembers} out of ${limit} members (${Math.round(percentage)}%). Consider upgrading to avoid reaching the limit.`;
+  }
+
+  const Icon = isOverLimit ? MdError : isNearLimit ? MdWarning : MdInfo;
 
   return (
-    <div className="mx-4 sm:mx-6 mt-3 mb-1 flex items-center gap-3 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3">
-      <MdError className="text-primary-500" size={25} />
+    <div
+      className={`mx-4 sm:mx-6 mt-3 mb-1 flex items-center gap-3 rounded-lg border ${bannerStyles[bannerColor]} px-4 py-3`}
+    >
+      <Icon className={iconColors[bannerColor]} size={25} />
 
       <p className="flex-1 text-sm text-gray-700">
-        <span className="font-semibold">Action Required:</span> Your 7-day grace
-        period to manage over-limit members ends on April 5th, 2026. Upgrade to
-        prevent dashboard restrictions.
+        <span className="font-semibold">{title}</span> {message}
       </p>
-      <Button onClick={() => router.push("/dashboard/settings/billing")}>
+
+      <Button
+        onClick={() => router.push("/dashboard/settings/billing")}
+        variant={bannerColor === "red" ? "destructive" : "default"}
+      >
         Upgrade Now
       </Button>
+
       <button
-        onClick={() => setIsVisible(false)}
+        onClick={handleDismiss}
         className="shrink-0 text-gray-400 hover:text-gray-600"
         aria-label="Dismiss"
       >

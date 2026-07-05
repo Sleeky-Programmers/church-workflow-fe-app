@@ -1,4 +1,5 @@
 import { format, parseISO } from "date-fns";
+
 import {
   EventCalendarView,
   EventRecurrence,
@@ -23,6 +24,8 @@ export const EVENT_TYPE_OPTIONS: EventTypeOption[] = [
   { value: EventType.OTHER, label: "Others", colorClass: "bg-slate-600" },
 ];
 
+// components/features/dashboard/events/constants.ts
+
 export function getEventRecurrenceOptions(date?: string) {
   const baseDate = date ? parseISO(date) : new Date();
   const weekday = format(baseDate, "EEEE");
@@ -33,6 +36,7 @@ export function getEventRecurrenceOptions(date?: string) {
     { value: EventRecurrence.NONE, label: "Does not repeat" },
     { value: EventRecurrence.DAILY, label: "Daily" },
     { value: EventRecurrence.WEEKLY, label: `Weekly on ${weekday}` },
+    { value: EventRecurrence.SUNDAY, label: "Weekly on Sunday" },
     {
       value: EventRecurrence.MONTHLY,
       label: `Monthly on the ${weekdayOrder} ${weekday}`,

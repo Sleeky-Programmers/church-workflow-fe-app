@@ -364,6 +364,8 @@ export type SpecialServiceEvent = {
   serviceName: string;
   startDate: string;
   endDate?: string;
+  startTime: string;
+  endTime?: string;
   location?: string;
   description?: string;
   recurrence?:
@@ -378,6 +380,8 @@ export type SpecialServiceEvent = {
     | "WEDDING_ANNIVERSARY"
     | "OTHERS";
   daySchedules: SpecialServiceDaySchedule[];
+  attendanceRecords?: AttendanceRecord[]; // Add this
+  type?: "SPECIAL"; // Add type discriminator
 };
 
 export type UploadFile = {
@@ -440,3 +444,16 @@ export type InitializePaymentResponse = {
   reference: string;
   authorization_url: string;
 };
+
+export interface MemberLimitStatus {
+  currentMembers: number;
+  limit: number;
+  percentage: number;
+  isOverLimit: boolean;
+  isWithinGracePeriod: boolean;
+  gracePeriodEnds: string | null;
+  planName: string | null;
+  needsAction: boolean;
+  isNearLimit: boolean;
+  daysRemaining: number | null;
+}
