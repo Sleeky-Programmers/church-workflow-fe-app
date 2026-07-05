@@ -43,6 +43,7 @@ type CalendarGridProps = {
   onAddAttendance: (service: RegularService, date: string) => void;
   onViewServiceDetails: (service: RegularService, date: string) => void;
   onAddGivingRecord: (service: RegularService, date: string) => void;
+  onAddSpecialAttendance?: (service: SpecialServiceEvent, date: string) => void; // New prop
   onAddService: () => void;
 };
 
@@ -144,6 +145,7 @@ export function CalendarGrid({
   onAddAttendance,
   onViewServiceDetails,
   onAddGivingRecord,
+  onAddSpecialAttendance,
   onAddService,
 }: CalendarGridProps) {
   const [currentMonth, setCurrentMonth] = useState(new Date());
@@ -501,6 +503,7 @@ export function CalendarGrid({
                   givingTotals={givingTotals}
                   onAddAttendance={onAddAttendance}
                   onViewServiceDetails={onViewServiceDetails}
+                  onAddSpecialAttendance={onAddSpecialAttendance}
                   onAddGivingRecord={onAddGivingRecord}
                 />
               ))}

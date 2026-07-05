@@ -23,15 +23,17 @@ import {
   saveAttendance,
 } from "@/lib/api";
 import { getCurrentUserProfile } from "@/lib/auth/session";
-import { AttendanceRecord, RegularService } from "@/types";
+import { AttendanceRecord, RegularService, SpecialServiceEvent } from "@/types";
 
 import { AttendanceStatsView } from "./attendance-stats";
 import { SelectMembersView } from "./select-member-view";
 
+type ServiceType = RegularService | SpecialServiceEvent;
+
 type AttendanceModalProps = {
   isOpen: boolean;
   onClose: () => void;
-  service: RegularService | null;
+  service: ServiceType | null;
   date: string | null;
   onSave: (payload: {
     serviceId: string;
@@ -83,8 +85,30 @@ export function AttendanceModal({
   } | null>(null);
 
   const hasExistingAttendance = Boolean(attendanceRecord);
-
   const { toast } = useToast();
+
+  // Helper to load members
+  const ensureMembersLoaded = async (skipIfLoaded: boolean = true) => {
+    if (skipIfLoaded && hasMembersLoaded) return;
+    setLoading(true);
+    try {
+      const data = await fetchMembers(1, 100);
+      setMembers(data.members);
+
+      if (attendanceRecord?.presentMembers?.length) {
+        initializeAttendance(attendanceRecord.presentMembers);
+      }
+      setHasMembersLoaded(true);
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to load members",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     if (!isOpen) {
@@ -145,8 +169,8 @@ export function AttendanceModal({
             absentMembers: [],
             recordedBy: result.attendance.recordedBy,
             location: service.location || "",
-            startTime: service.startTime,
-            endTime: service.endTime,
+            startTime: service.startTime || "",
+            endTime: service.endTime || "",
           };
           setAttendanceRecord(record);
           setIsEditMode(false);
@@ -154,6 +178,9 @@ export function AttendanceModal({
           setAttendanceRecord(null);
           setIsEditMode(true);
         }
+
+        // Load members immediately after attendance is loaded
+        await ensureMembersLoaded(false);
       } catch (error: any) {
         if (!isActive) return;
         toast({
@@ -164,6 +191,8 @@ export function AttendanceModal({
         setAttendanceRecord(null);
         setAttendanceStats(null);
         setIsEditMode(true);
+        // Still try to load members even if attendance failed
+        await ensureMembersLoaded(false);
       }
     };
 
@@ -174,32 +203,8 @@ export function AttendanceModal({
     };
   }, [isOpen, service, date, toast]);
 
-  const ensureMembersLoaded = async () => {
-    if (hasMembersLoaded) {
-      return;
-    }
-    setLoading(true);
-    try {
-      const data = await fetchMembers(1, 100);
-      setMembers(data.members);
-
-      if (attendanceRecord?.presentMembers?.length) {
-        initializeAttendance(attendanceRecord.presentMembers);
-      }
-      setHasMembersLoaded(true);
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to load members",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const loadAllMembers = async () => {
-    await ensureMembersLoaded();
+    await ensureMembersLoaded(false);
     setSearch("");
     setMembersViewMode("select");
     setIsMembersDialogOpen(true);
@@ -237,14 +242,14 @@ export function AttendanceModal({
   };
 
   const openPresentMembersView = async () => {
-    await ensureMembersLoaded();
+    await ensureMembersLoaded(false);
     setMembersViewMode("present");
     setSearch("");
     setIsMembersDialogOpen(true);
   };
 
   const openAbsentMembersView = async () => {
-    await ensureMembersLoaded();
+    await ensureMembersLoaded(false);
     setMembersViewMode("absent");
     setSearch("");
     setAbsentSelections([]);
@@ -308,6 +313,13 @@ export function AttendanceModal({
     return null;
   }
 
+  // Get service name safely
+  const serviceName =
+    "serviceName" in service ? service.serviceName : "Service";
+  const serviceLocation = service.location || "";
+  const serviceStartTime = service.startTime || "";
+  const serviceEndTime = service.endTime || "";
+
   const parsedDate = new Date(date);
   const presentMembers = getPresentMembers();
   const absentMembers = getAbsentMembers();
@@ -353,7 +365,7 @@ export function AttendanceModal({
         <div className="flex items-start justify-between">
           <div className="flex-1">
             <DialogTitle className="text-xl font-semibold mb-3">
-              {service.serviceName} attendance
+              {serviceName} attendance
             </DialogTitle>
             <DialogDescription className="sr-only">
               Review attendance details and manage present or absent members.
@@ -383,14 +395,14 @@ export function AttendanceModal({
           <div className="flex items-center gap-2">
             <Clock className="h-4 w-4" />
             <Span>
-              {service.startTime}
-              {service.endTime && ` - ${service.endTime}`}
+              {serviceStartTime}
+              {serviceEndTime && ` - ${serviceEndTime}`}
             </Span>
           </div>
-          {service.location && (
+          {serviceLocation && (
             <div className="flex items-center gap-2">
               <MapPin className="h-4 w-4" />
-              <Span className="truncate">{service.location}</Span>
+              <Span className="truncate">{serviceLocation}</Span>
             </div>
           )}
         </div>
@@ -403,7 +415,7 @@ export function AttendanceModal({
         absentCount={absentCount}
         isMembersLoaded={hasMembersLoaded}
         isAttendanceMarked={hasExistingAttendance || state.hasChanges}
-        showLoadMembersButton={isEditMode || !hasExistingAttendance}
+        showLoadMembersButton={!hasMembersLoaded}
         loadMembersMuted={isEditMode}
         onLoadMembers={loadAllMembers}
         onOpenPresentMembers={openPresentMembersView}
@@ -431,6 +443,7 @@ export function AttendanceModal({
       </div>
     </div>
   );
+
   const membersCard = (
     <div className="rounded-xl shadow-lg w-full sm:w-[480px] h-[80vh] flex flex-col overflow-hidden bg-gray-50">
       <SelectMembersView

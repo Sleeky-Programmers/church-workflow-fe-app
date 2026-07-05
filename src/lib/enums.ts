@@ -89,6 +89,7 @@ export enum EventRecurrence {
   MONTHLY = "MONTHLY",
   YEARLY = "YEARLY",
   WEEKDAYS = "WEEKDAYS",
+  SUNDAY = "SUNDAY",
 }
 
 export enum EventReminderType {

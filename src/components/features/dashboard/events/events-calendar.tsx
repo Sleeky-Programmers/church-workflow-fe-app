@@ -108,26 +108,59 @@ function occursOnDate(event: ChurchEvent, date: Date) {
   return false;
 }
 
-// Helper to convert church service to event format
-const convertChurchServiceToEvent = (service: ChurchService): ChurchEvent => {
-  // Parse the date (you might need to adjust this based on your needs)
-  const [month, day, year] = new Date().toLocaleDateString().split("/");
+// Helper to convert church service to event format with proper date mapping
+const convertChurchServiceToEvent = (
+  service: ChurchService,
+  referenceDate?: Date,
+): ChurchEvent => {
+  // Use the reference date if provided, otherwise use today
+  const baseDate = referenceDate || new Date();
+
+  // Find the date for the service's day in the current week
+  const serviceDate = getDateForDayOfWeek(baseDate, service.day);
 
   return {
     id: service.id,
     title: service.serviceName,
     type: EventType.WORSHIP_SERVICE,
-    recurrence: EventRecurrence.WEEKLY, // Services typically repeat weekly
-    date: new Date().toISOString().split("T")[0], // You'll need to set proper dates
+    recurrence: EventRecurrence.WEEKLY,
+    date: serviceDate.toISOString().split("T")[0],
     startTime: service.startTime,
-    endTime: service.endTime,
-    location: service.location,
+    endTime: service.endTime || "",
+    location: service.location || "",
     description: `${service.type} service on ${service.day}s`,
     sendReminder: true,
     reminderType: EventReminderType.IN_APP,
     remindBeforeMinutes: 30,
     colorClass: "bg-blue-500",
   };
+};
+
+/**
+ * Get the date for a specific day of the week in the current week
+ */
+const getDateForDayOfWeek = (baseDate: Date, day: string): Date => {
+  const dayMap: Record<string, number> = {
+    SUNDAY: 0,
+    MONDAY: 1,
+    TUESDAY: 2,
+    WEDNESDAY: 3,
+    THURSDAY: 4,
+    FRIDAY: 5,
+    SATURDAY: 6,
+  };
+
+  const targetDay = dayMap[day];
+  if (targetDay === undefined) {
+    return new Date(baseDate);
+  }
+
+  const currentDay = baseDate.getDay();
+  const diff = targetDay - currentDay;
+  const result = new Date(baseDate);
+  result.setDate(result.getDate() + diff);
+
+  return result;
 };
 
 export function EventsCalendar({
@@ -151,10 +184,12 @@ export function EventsCalendar({
   const allEvents = useMemo(() => {
     if (!showChurchServices) return events;
 
-    // Convert church services to events and combine
-    const serviceEvents = churchServices.map(convertChurchServiceToEvent);
+    // Convert church services to events with proper date mapping
+    const serviceEvents = churchServices.map((service) =>
+      convertChurchServiceToEvent(service, currentDate),
+    );
     return [...events, ...serviceEvents];
-  }, [events, churchServices, showChurchServices]);
+  }, [events, churchServices, showChurchServices, currentDate]);
 
   const filteredEvents = useMemo(() => {
     const next = [...allEvents];
