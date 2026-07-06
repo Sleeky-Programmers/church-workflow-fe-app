@@ -1,3 +1,5 @@
+import { generateSeoMetadata } from "@/lib/seo";
+import { FaqJsonLd } from "@/components/seo/JsonLd";
 import HeroSection from "@/components/features/landing/home/hero";
 import ChallengesSection from "@/components/features/landing/home/ChallengesSection";
 import SmarterWaySection from "@/components/features/landing/home/SmarterWaySection";
@@ -8,6 +10,13 @@ import PricingSection from "@/components/features/landing/home/PricingSection";
 import CtaSection from "@/components/features/landing/home/CtaSection";
 import Footer from "@/components/features/landing/layout/footer";
 import Header from "@/components/features/landing/layout/header";
+
+export const metadata = generateSeoMetadata({
+  title: "Church Management Software in Nigeria | Church Workflow",
+  description:
+    "Church Workflow is an all-in-one church administration platform. Manage members, attendance, finance, and ministry operations with ease.",
+  path: "/",
+});
 
 export default function Home() {
   return (
@@ -21,6 +30,7 @@ export default function Home() {
       <BuiltForChurchSection />
       <PricingSection />
       <CtaSection />
+      <FaqJsonLd />
       <Footer />
     </main>
   );

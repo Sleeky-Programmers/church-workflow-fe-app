@@ -1,4 +1,10 @@
 import type { Metadata } from "next";
+import { Inter } from "next/font/google";
+import { GoogleAnalytics } from "@/components/analytics/GoogleAnalytics";
+import {
+  OrganizationJsonLd,
+  SoftwareApplicationJsonLd,
+} from "@/components/seo/JsonLd";
 import "./globals.css";
 
 import { Toaster } from "@/components/ui/toaster";
@@ -14,7 +20,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="overflow-x-hidden">
+    <html lang="en" className={`overflow-x-hidden ${inter.variable}`}>
+      <head>
+        <OrganizationJsonLd />
+        <SoftwareApplicationJsonLd />
+      </head>
       <body>
         {children}
         <Toaster />
