@@ -397,6 +397,7 @@ export async function sendInvitation(
 type ChurchServiceApi = {
   _id: string;
   serviceName: string;
+  title?: string;
   type: "REGULAR" | "SPECIAL";
   recurrence:
     | "WEEKLY_MONDAY"
@@ -551,9 +552,11 @@ export const mapToSpecialService = (
 ): SpecialServiceEvent => {
   return {
     id: apiService._id,
-    serviceName: apiService.serviceName,
+    serviceName: apiService.title ? apiService.title : "",
     startDate: apiService.startDate || "",
     endDate: apiService.endDate,
+    startTime: apiService.startTime || "",
+    endTime: apiService.endTime,
     location: apiService.location,
     description: apiService.description,
     recurrence: apiService.recurrence as any,

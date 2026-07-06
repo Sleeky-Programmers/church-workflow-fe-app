@@ -13,11 +13,17 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { useToast } from "@/hooks/use-toast";
 import { EventRecurrence, EventReminderType, EventType } from "@/lib/enums";
 import {
+  createChurchService,
+  CreateChurchServiceDto,
+  DAY,
   deleteChurchService,
   getAllChurchServices,
   getChurchServiceById,
+  updateChurchService,
+  UpdateChurchServiceDto,
 } from "@/services/churchService";
 import { ChurchEvent, ChurchService, EventFormData } from "@/types";
+import { convertTo12HourFormat } from "@/utils/helpers";
 
 const EVENT_STORAGE_KEY = "dashboard:events";
 
@@ -53,7 +59,7 @@ const toFormData = (event: ChurchEvent): EventFormData => ({
 const transformChurchService = (apiService: any): ChurchService => ({
   id: apiService._id,
   churchId: apiService.churchId,
-  serviceName: apiService.serviceName,
+  serviceName: apiService.title || apiService.serviceName,
   type: apiService.type,
   day: apiService.day,
   startTime: apiService.startTime,
@@ -63,6 +69,73 @@ const transformChurchService = (apiService: any): ChurchService => ({
   createdAt: apiService.createdAt,
   updatedAt: apiService.updatedAt,
 });
+
+// Helper to map form data to API DTO
+const mapFormDataToApiDto = (
+  payload: EventFormData,
+  isSpecial: boolean = false,
+): CreateChurchServiceDto => {
+  const baseDto: CreateChurchServiceDto = {
+    title: payload.title,
+    type: isSpecial ? "SPECIAL" : "REGULAR",
+    startTime: payload.startTime
+      ? convertTo12HourFormat(payload.startTime)
+      : undefined,
+    endTime: payload.endTime
+      ? convertTo12HourFormat(payload.endTime)
+      : undefined,
+    location: payload.location || undefined,
+    description: payload.description || undefined,
+    eventType: payload.type as any,
+    reminderEnabled: payload.sendReminder,
+    reminderType: payload.reminderType as any,
+    reminderTimeBefore: `${payload.remindBeforeMinutes}_MINS` as any,
+  };
+
+  if (isSpecial) {
+    baseDto.startDate = payload.date;
+  } else {
+    // For REGULAR services - handle all recurrence types including SUNDAY
+    switch (payload.recurrence) {
+      case EventRecurrence.SUNDAY:
+        baseDto.day = "SUNDAY";
+        baseDto.recurrence = "SUNDAY";
+        break;
+      case EventRecurrence.WEEKLY:
+        if (payload.date) {
+          const dateObj = new Date(payload.date);
+          const dayName = dateObj
+            .toLocaleDateString("en-US", {
+              weekday: "long",
+            })
+            .toUpperCase() as DAY;
+          baseDto.day = dayName;
+          baseDto.recurrence = "WEEKLY_MONDAY";
+        }
+        break;
+      case EventRecurrence.NONE:
+        baseDto.recurrence = "NO_REPEAT";
+        break;
+      case EventRecurrence.DAILY:
+        baseDto.recurrence = "DAILY";
+        break;
+      case EventRecurrence.MONTHLY:
+        baseDto.recurrence = "MONTHLY_FIRST_MONDAY";
+        break;
+      case EventRecurrence.YEARLY:
+        baseDto.recurrence = "ANNUALLY";
+        break;
+      case EventRecurrence.WEEKDAYS:
+        baseDto.recurrence = "WEEKDAYS";
+        break;
+      default:
+        baseDto.recurrence = "NO_REPEAT";
+        break;
+    }
+  }
+
+  return baseDto;
+};
 
 export default function EventsPage() {
   const { toast } = useToast();
@@ -76,6 +149,7 @@ export default function EventsPage() {
     null,
   );
   const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
   const [pagination, setPagination] = useState({
     page: 1,
     limit: 20,
@@ -147,38 +221,117 @@ export default function EventsPage() {
 
   const handleSubmitEvent = async (payload: EventFormData) => {
     const typeMeta = getEventTypeMeta(payload.type);
+    setSubmitting(true);
 
-    if (editingEvent) {
-      setEvents((prev) =>
-        prev.map((event) =>
-          event.id === editingEvent.id
-            ? {
-                ...event,
-                ...payload,
-                endTime: payload.endTime || undefined,
-                location: payload.location || undefined,
-                description: payload.description || undefined,
-                colorClass: typeMeta.colorClass,
-              }
-            : event,
-        ),
-      );
-      toast({ title: "Success", description: "Event updated successfully" });
-      setEditingEvent(null);
-      return;
+    try {
+      const isChurchService =
+        editingEvent?.id &&
+        !editingEvent.id.startsWith("event-") &&
+        editingEvent.id.length > 12;
+
+      if (isChurchService && editingEvent) {
+        // UPDATE existing church service
+        const updateData: UpdateChurchServiceDto = {
+          title: payload.title,
+          type: "REGULAR",
+          startTime: payload.startTime
+            ? convertTo12HourFormat(payload.startTime)
+            : undefined,
+          endTime: payload.endTime
+            ? convertTo12HourFormat(payload.endTime)
+            : undefined,
+          location: payload.location || undefined,
+          description: payload.description || undefined,
+          eventType: payload.type as any,
+          reminderEnabled: payload.sendReminder,
+          reminderType: payload.reminderType as any,
+          reminderTimeBefore: `${payload.remindBeforeMinutes}_MINS` as any,
+        };
+
+        // Handle recurrence and day mapping for updates
+        switch (payload.recurrence) {
+          case EventRecurrence.SUNDAY:
+            updateData.day = "SUNDAY";
+            updateData.recurrence = "SUNDAY";
+            break;
+          case EventRecurrence.WEEKLY:
+            if (payload.date) {
+              const dateObj = new Date(payload.date);
+              const dayName = dateObj
+                .toLocaleDateString("en-US", {
+                  weekday: "long",
+                })
+                .toUpperCase() as DAY;
+              updateData.day = dayName;
+              updateData.recurrence = "WEEKLY_MONDAY";
+            }
+            break;
+          case EventRecurrence.NONE:
+            updateData.recurrence = "NO_REPEAT";
+            break;
+          case EventRecurrence.DAILY:
+            updateData.recurrence = "DAILY";
+            break;
+          case EventRecurrence.MONTHLY:
+            updateData.recurrence = "MONTHLY_FIRST_MONDAY";
+            break;
+          case EventRecurrence.YEARLY:
+            updateData.recurrence = "ANNUALLY";
+            break;
+          case EventRecurrence.WEEKDAYS:
+            updateData.recurrence = "WEEKDAYS";
+            break;
+          default:
+            updateData.recurrence = "NO_REPEAT";
+            break;
+        }
+
+        await updateChurchService(editingEvent.id, updateData);
+        await fetchChurchServices(pagination.page, pagination.limit);
+
+        toast({
+          title: "Success",
+          description: "Church service updated successfully",
+        });
+        setEditingEvent(null);
+        setIsFormModalOpen(false);
+        return; // Success - modal will be closed by the parent
+      }
+
+      // CREATE new church service
+      const createData = mapFormDataToApiDto(payload);
+      await createChurchService(createData);
+
+      await fetchChurchServices(pagination.page, pagination.limit);
+
+      const newEvent: ChurchEvent = {
+        id: `event-${Date.now()}`,
+        ...payload,
+        endTime: payload.endTime || undefined,
+        location: payload.location || undefined,
+        description: payload.description || undefined,
+        colorClass: typeMeta.colorClass,
+      };
+
+      setEvents((prev) => [...prev, newEvent]);
+
+      toast({
+        title: "Success",
+        description: "Event created successfully",
+      });
+      setIsFormModalOpen(false); // Success - close modal
+    } catch (error: any) {
+      console.error("Failed to create/update event:", error);
+      toast({
+        title: "Error",
+        description: error?.message || "Failed to save event",
+        variant: "destructive",
+      });
+      // Re-throw the error so the modal knows submission failed
+      throw error;
+    } finally {
+      setSubmitting(false);
     }
-
-    const newEvent: ChurchEvent = {
-      id: `event-${Date.now()}`,
-      ...payload,
-      endTime: payload.endTime || undefined,
-      location: payload.location || undefined,
-      description: payload.description || undefined,
-      colorClass: typeMeta.colorClass,
-    };
-
-    setEvents((prev) => [...prev, newEvent]);
-    toast({ title: "Success", description: "Event created successfully" });
   };
 
   const handleSelectEvent = (event: ChurchEvent) => {
@@ -248,6 +401,7 @@ export default function EventsPage() {
           onOpenChange={setIsFormModalOpen}
           onSubmit={handleSubmitEvent}
           initialData={formInitialData}
+          isSubmitting={submitting}
         />
 
         <EventDetailModal
@@ -295,6 +449,7 @@ export default function EventsPage() {
         onOpenChange={setIsFormModalOpen}
         onSubmit={handleSubmitEvent}
         initialData={formInitialData}
+        isSubmitting={submitting}
       />
 
       <EventDetailModal
