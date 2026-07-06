@@ -92,13 +92,11 @@ export function AppSidebar() {
   const comingSoonTitles = ["Communication", "Requests", "Finance"];
 
   const mainPages = SidebarData.pages.filter(
-    (p) =>
-      !comingSoonTitles.includes(p.title) && !hiddenTitles.includes(p.title),
+    (p) => !comingSoonTitles.includes(p.title),
   );
 
-  const comingSoonPages = SidebarData.pages.filter(
-    (p) =>
-      comingSoonTitles.includes(p.title) && !hiddenTitles.includes(p.title),
+  const comingSoonPages = SidebarData.pages.filter((p) =>
+    comingSoonTitles.includes(p.title),
   );
 
   return (

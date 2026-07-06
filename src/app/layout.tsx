@@ -1,13 +1,20 @@
 import type { Metadata } from "next";
+import "./globals.css";
+
 import { Inter } from "next/font/google";
+
 import { GoogleAnalytics } from "@/components/analytics/GoogleAnalytics";
 import {
   OrganizationJsonLd,
   SoftwareApplicationJsonLd,
 } from "@/components/seo/JsonLd";
-import "./globals.css";
-
 import { Toaster } from "@/components/ui/toaster";
+
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: process.env.NEXT_PUBLIC_APP_NAME,
@@ -24,6 +31,7 @@ export default function RootLayout({
       <head>
         <OrganizationJsonLd />
         <SoftwareApplicationJsonLd />
+        <GoogleAnalytics />
       </head>
       <body>
         {children}
