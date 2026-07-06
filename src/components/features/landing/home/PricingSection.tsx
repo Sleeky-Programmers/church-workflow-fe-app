@@ -1,9 +1,13 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Text } from "@/components/ui/typography/Text";
 import Heading from "@/components/ui/typography/Heading";
 import { Check } from "lucide-react";
+import { saveSelectedPlan } from "@/lib/plan-selection";
+import { getAccessToken } from "@/lib/auth/session";
+import { RouteConfig } from "@/config/routes";
 
 type BillingCycle = "monthly" | "yearly";
 
@@ -11,6 +15,7 @@ const plans = {
   monthly: [
     {
       name: "Starter",
+      planKey: "STARTER",
       price: "₦0",
       period: "/ month",
       features: [
@@ -20,11 +25,12 @@ const plans = {
         "Up to 100 members",
         "Attendance tracking",
       ],
-      boldFeatures: [],
+      boldFeatures: [] as string[],
       popular: false,
     },
     {
       name: "Growth",
+      planKey: "GROWTH",
       price: "₦20,000",
       period: "/ month",
       features: [
@@ -38,6 +44,7 @@ const plans = {
     },
     {
       name: "Expansion",
+      planKey: "EXPANSION",
       price: "₦45,000",
       period: "/ month",
       features: [
@@ -45,11 +52,12 @@ const plans = {
         "Up to 25 users",
         "Up to 1,500 members",
       ],
-      boldFeatures: [],
+      boldFeatures: [] as string[],
       popular: false,
     },
     {
       name: "Enterprise",
+      planKey: "ENTERPRISE",
       price: "₦100,000",
       period: "/ month",
       features: [
@@ -66,6 +74,7 @@ const plans = {
   yearly: [
     {
       name: "Starter",
+      planKey: "STARTER",
       price: "₦0",
       period: "/ month",
       features: [
@@ -75,11 +84,12 @@ const plans = {
         "Up to 100 members",
         "Attendance tracking",
       ],
-      boldFeatures: [],
+      boldFeatures: [] as string[],
       popular: false,
     },
     {
       name: "Growth",
+      planKey: "GROWTH",
       price: "₦16,600",
       period: "/ month",
       features: [
@@ -93,6 +103,7 @@ const plans = {
     },
     {
       name: "Expansion",
+      planKey: "EXPANSION",
       price: "₦37,350",
       period: "/ month",
       features: [
@@ -100,11 +111,12 @@ const plans = {
         "Up to 25 users",
         "Up to 1,500 members",
       ],
-      boldFeatures: [],
+      boldFeatures: [] as string[],
       popular: false,
     },
     {
       name: "Enterprise",
+      planKey: "ENTERPRISE",
       price: "₦83,000",
       period: "/ month",
       features: [
@@ -122,6 +134,37 @@ const plans = {
 
 export default function PricingSection() {
   const [billing, setBilling] = useState<BillingCycle>("yearly");
+  const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
+  const router = useRouter();
+
+  const handleGetStarted = (planKey: string) => {
+    if (loadingPlan) {
+      return;
+    }
+    setLoadingPlan(planKey);
+
+    if (planKey === "STARTER") {
+      const token = getAccessToken();
+      if (token) {
+        router.push(RouteConfig.dashboard.home);
+      } else {
+        router.push(RouteConfig.auth.signUp);
+      }
+      return;
+    }
+
+    saveSelectedPlan({
+      plan: planKey,
+      billingCycle: billing.toUpperCase() as "MONTHLY" | "YEARLY",
+    });
+
+    const token = getAccessToken();
+    if (token) {
+      router.push(RouteConfig.checkout);
+    } else {
+      router.push(RouteConfig.auth.signUp);
+    }
+  };
 
   return (
     <section id="pricing" className="relative w-full">
@@ -245,8 +288,16 @@ export default function PricingSection() {
                 ))}
               </div>
 
-              <button className="w-full rounded-lg mt-auto py-2 px-4 text-sm font-semibold text-[#0C5FB3] bg-[#0C5FB3]/10 cursor-pointer">
-                Get Started
+              <button
+                onClick={() => handleGetStarted(plan.planKey)}
+                disabled={loadingPlan !== null}
+                className="w-full rounded-lg mt-auto py-2 px-4 text-sm font-semibold text-[#0C5FB3] bg-[#0C5FB3]/10 cursor-pointer hover:bg-[#0C5FB3]/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {loadingPlan === plan.planKey
+                  ? "Redirecting..."
+                  : plan.planKey === "STARTER"
+                    ? "Get Started Free"
+                    : "Get Started"}
               </button>
             </div>
           ))}

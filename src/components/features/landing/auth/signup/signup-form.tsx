@@ -25,6 +25,7 @@ import { signupSchema } from "@/types/schema";
 import { googleAuth, signup } from "@/lib/api";
 import { RouteConfig } from "@/config/routes";
 import { initializeAuthSession } from "@/lib/auth/session";
+import { getSelectedPlan } from "@/lib/plan-selection";
 
 type SignupFormValues = z.infer<typeof signupSchema>;
 
@@ -104,7 +105,13 @@ export default function SignupForm({
         emailHint: data.user?.email,
         user: data.user,
       });
-      router.push(RouteConfig.onboarding);
+
+      const pendingPlan = getSelectedPlan();
+      if (pendingPlan) {
+        router.push(RouteConfig.checkout);
+      } else {
+        router.push(RouteConfig.onboarding);
+      }
     } catch (error: any) {
       form.setError("email", {
         message: error.message || "Google signup failed",
