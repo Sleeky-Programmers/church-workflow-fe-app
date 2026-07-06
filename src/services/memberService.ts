@@ -1,6 +1,6 @@
 import { authenticatedFetch } from "@/lib/api";
-import { MemberProfile, NewMemberData } from "@/types";
 import { mapMember } from "@/mappers/member.mapper";
+import { MemberLimitStatus, MemberProfile, NewMemberData } from "@/types";
 
 export interface FetchMembersResponse {
   data: MemberProfile[];
@@ -174,4 +174,12 @@ export async function deleteMember(id: string): Promise<void> {
   await authenticatedFetch(`/members/${id}`, {
     method: "DELETE",
   });
+}
+
+export async function getMemberLimitStatus(): Promise<MemberLimitStatus> {
+  const response = await authenticatedFetch<{
+    success: boolean;
+    data: MemberLimitStatus;
+  }>("/members/member-limit-status", { method: "GET" });
+  return response.data;
 }

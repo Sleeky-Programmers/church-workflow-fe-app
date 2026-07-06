@@ -394,3 +394,8 @@ export const notificationConfig: Record<NotificationType, NotificationMeta> = {
 export const toUpperCaseStatus = (status: any): string => {
   return status.toUpperCase();
 };
+
+export const toSentenceCase = (string: string): string => {
+  if (!string) return "current";
+  return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
+};

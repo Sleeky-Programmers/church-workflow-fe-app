@@ -16,6 +16,7 @@ import {
 import { MobileAttendanceView } from "@/components/features/dashboard/attendance/mobile-view";
 import { ServiceDetailModal } from "@/components/features/dashboard/attendance/service-detail-modal";
 import { ServiceTypeModal } from "@/components/features/dashboard/attendance/service-type";
+import { SpecialAttendanceModal } from "@/components/features/dashboard/attendance/special-attendance-modal";
 import { Input } from "@/components/ui/input";
 import Heading from "@/components/ui/typography/Heading";
 import { Text } from "@/components/ui/typography/Text";
@@ -76,6 +77,10 @@ export default function AttendancePage() {
   const [orderByServiceDate, setOrderByServiceDate] = useState<
     Record<string, string[]>
   >({});
+  const [isSpecialAttendanceModalOpen, setIsSpecialAttendanceModalOpen] =
+    useState(false);
+  const [selectedSpecialService, setSelectedSpecialService] =
+    useState<SpecialServiceEvent | null>(null);
 
   const loadServices = async () => {
     setIsLoading(true);
@@ -284,6 +289,72 @@ export default function AttendancePage() {
     setIsAttendanceModalOpen(true);
   };
 
+  const handleAddSpecialAttendance = (
+    service: SpecialServiceEvent,
+    date: string,
+  ) => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const selectedDate = new Date(date);
+    selectedDate.setHours(0, 0, 0, 0);
+
+    if (selectedDate > today) {
+      toast({
+        title: "Cannot Mark Attendance",
+        description: `You cannot mark attendance for future dates (${format(selectedDate, "MMMM d, yyyy")}). Attendance can only be recorded for past or current dates.`,
+        variant: "destructive",
+        duration: 5000,
+      });
+      return;
+    }
+
+    setSelectedSpecialService(service);
+    setSelectedDate(date);
+    setIsSpecialAttendanceModalOpen(true);
+  };
+
+  // Handler for saving special attendance - mirrors the regular one
+  const handleSpecialAttendanceSaved = (payload: {
+    serviceId: string;
+    date: string;
+    presentMembers: string[];
+    absentMembers: string[];
+  }) => {
+    setSpecialServices((prev) =>
+      prev.map((service) => {
+        if (service.id !== payload.serviceId) return service;
+        const attendanceRecords = [...(service.attendanceRecords || [])];
+        const schedule = service.daySchedules?.find(
+          (s) => s.date === payload.date,
+        );
+        const nextRecord = {
+          serviceId: payload.serviceId,
+          date: payload.date,
+          presentMembers: payload.presentMembers,
+          absentMembers: payload.absentMembers,
+          recordedBy: Admin,
+          location: service.location || "",
+          startTime: schedule?.startTime || "",
+          endTime: schedule?.endTime || "",
+        };
+        const existingIndex = attendanceRecords.findIndex(
+          (record) => record.date === payload.date,
+        );
+        if (existingIndex >= 0) attendanceRecords[existingIndex] = nextRecord;
+        else attendanceRecords.push(nextRecord);
+
+        return {
+          ...service,
+          attendanceRecords,
+        };
+      }),
+    );
+    toast({
+      title: "Success",
+      description: "Special service attendance saved successfully",
+    });
+  };
+
   const handleAddGivingRecord = (service: RegularService, date: string) => {
     setServiceContext(service, date);
     setIsGivingRecordModalOpen(true);
@@ -475,6 +546,7 @@ export default function AttendancePage() {
               onViewServiceDetails={handleViewServiceDetails}
               onAddGivingRecord={handleAddGivingRecord}
               onAddService={handleAddService}
+              onAddSpecialAttendance={handleAddSpecialAttendance}
             />
           </div>
         )}
@@ -551,6 +623,18 @@ export default function AttendancePage() {
             description: "Order of service updated",
           });
         }}
+      />
+
+      <SpecialAttendanceModal
+        isOpen={isSpecialAttendanceModalOpen}
+        onClose={() => {
+          setIsSpecialAttendanceModalOpen(false);
+          setSelectedSpecialService(null);
+          setSelectedDate(null);
+        }}
+        service={selectedSpecialService}
+        date={selectedDate}
+        onSave={handleSpecialAttendanceSaved}
       />
     </div>
   );
