@@ -51,7 +51,10 @@ const features = [
 
 export default function BuiltForChurchSection() {
   return (
-    <section className="relative bg-white py-20 px-6 overflow-hidden">
+    <section
+      id="features-built"
+      className="relative bg-white py-20 px-6 overflow-hidden"
+    >
       <img
         src="/assets/icons/star.svg"
         alt=""

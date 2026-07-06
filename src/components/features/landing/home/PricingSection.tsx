@@ -124,7 +124,7 @@ export default function PricingSection() {
   const [billing, setBilling] = useState<BillingCycle>("yearly");
 
   return (
-    <section className="relative w-full">
+    <section id="pricing" className="relative w-full">
       <img
         src="/landing-page/light-blue.png"
         alt=""

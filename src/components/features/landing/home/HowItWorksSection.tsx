@@ -47,7 +47,10 @@ const steps = [
 
 export default function HowItWorksSection() {
   return (
-    <section className="relative bg-white py-20 px-6 overflow-hidden">
+    <section
+      id="how-it-works"
+      className="relative bg-white py-20 px-6 overflow-hidden"
+    >
       <img
         src="/assets/icons/star.svg"
         alt=""

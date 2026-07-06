@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import Image from "next/image";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Text } from "@/components/ui/typography/Text";
 import Heading from "@/components/ui/typography/Heading";
@@ -71,9 +72,15 @@ export default function HeroSection() {
           </div>
 
           <div className="flex flex-wrap gap-3 pt-2">
-            <Button variant="default" size="lg" className="rounded-[8px] px-7">
-              Request a Demo
-            </Button>
+            <Link href="/auth/signup">
+              <Button
+                variant="default"
+                size="lg"
+                className="rounded-[8px] px-7"
+              >
+                Sign Up
+              </Button>
+            </Link>
             <Button
               variant="outline"
               size="lg"
