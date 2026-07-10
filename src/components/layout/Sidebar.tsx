@@ -89,7 +89,7 @@ export function AppSidebar() {
     }
   };
 
-  const comingSoonTitles = ["Communication", "Requests", "Finance"];
+  const comingSoonTitles = ["Departments/Units", "Request", "Finance"];
 
   const mainPages = SidebarData.pages.filter(
     (p) => !comingSoonTitles.includes(p.title),
@@ -231,9 +231,7 @@ export function AppSidebar() {
                   <SidebarMenuItem key={page.title}>
                     <div className="flex items-center gap-2 px-3 py-2 opacity-50 cursor-not-allowed">
                       <Icon className="h-4 w-4" />
-                      <Text variant="default">
-                        {page.title === "Requests" ? "Request" : page.title}
-                      </Text>
+                      <Text variant="default">{page.title}</Text>
                     </div>
                   </SidebarMenuItem>
                 );
