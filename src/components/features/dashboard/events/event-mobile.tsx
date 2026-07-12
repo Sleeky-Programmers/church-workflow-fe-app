@@ -1,16 +1,14 @@
 "use client";
 
-import { MoreVertical } from "lucide-react";
 import { useState } from "react";
 
 import { getEventTypeMeta } from "@/components/features/dashboard/events/constants";
 import MobileHeader from "@/components/layout/mobile-header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { SidebarTrigger } from "@/components/ui/sidebar";
 import Heading from "@/components/ui/typography/Heading";
 import { EventRecurrence, EventReminderType, EventType } from "@/lib/enums";
-import { formatDateSafely, formatEventDate } from "@/lib/utils";
+import { formatDateSafely } from "@/lib/utils";
 import { ChurchEvent, ChurchService } from "@/types";
 
 type Props = {
@@ -27,7 +25,7 @@ const convertChurchServiceToEvent = (service: ChurchService): ChurchEvent => {
     title: service.serviceName,
     type: EventType.WORSHIP_SERVICE,
     recurrence: EventRecurrence.WEEKLY,
-    date: new Date().toISOString().split("T")[0], // You'll need to adjust based on your needs
+    date: new Date().toISOString().split("T")[0],
     startTime: service.startTime,
     endTime: service.endTime,
     location: service.location,

@@ -70,7 +70,51 @@ export function EventDetailModal({
   onDelete,
   onEdit,
 }: EventDetailModalProps) {
-  if (!event) return null;
+  if (!event) {
+    return null;
+  }
+
+  console.log({ event });
+
+  const getDisplayDate = () => {
+    if (event.specialDays && event.specialDays.length > 0) {
+      // For special services, show all special days
+      return event.specialDays.map((day, index) => {
+        const startTimeFormatted = formatTimeSafely(day.date, day.startTime);
+        const endTimeFormatted = formatTimeSafely(day.date, day.endTime);
+        return (
+          <div key={index} className="flex items-center gap-2 mb-1">
+            <Calendar className="h-4 w-4" />
+            <Span>
+              {formatDateSafely(day.date)} - {startTimeFormatted} to{" "}
+              {endTimeFormatted}
+            </Span>
+          </div>
+        );
+      });
+    } else {
+      // Regular event display
+      return (
+        <>
+          <div className="flex items-center gap-2">
+            <Calendar className="h-4 w-4" />
+            <Span>{formatDateSafely(event.date)}</Span>
+          </div>
+          {event.endTime && (
+            <div className="flex items-center gap-2">
+              <Clock3 className="h-4 w-4" />
+              <Span>
+                {formatTimeSafely(event.date, event.startTime)}
+                {event.endTime
+                  ? ` - ${formatTimeSafely(event.date, event.endTime)}`
+                  : ""}
+              </Span>
+            </div>
+          )}
+        </>
+      );
+    }
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -111,20 +155,7 @@ export function EventDetailModal({
           </div>
 
           <div className="space-y-3">
-            <div className="flex items-center gap-2">
-              <Calendar className="h-4 w-4" />
-              <Span>{formatDateSafely(event.date)}</Span>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <Clock3 className="h-4 w-4" />
-              <Span>
-                {formatTimeSafely(event.date, event.startTime)}
-                {event.endTime
-                  ? ` - ${formatTimeSafely(event.date, event.endTime)}`
-                  : ""}
-              </Span>
-            </div>
+            {getDisplayDate()}
 
             {event.location ? (
               <div className="flex items-center gap-2">
@@ -135,7 +166,11 @@ export function EventDetailModal({
 
             <div className="flex items-center gap-2">
               <Repeat className="h-4 w-4" />
-              <Span>{formatRecurrenceLabel(event.recurrence, event.date)}</Span>
+              <Span>
+                {event.specialDays && event.specialDays.length > 0
+                  ? `Special Service (${event.specialDays.length} sessions)`
+                  : formatRecurrenceLabel(event.recurrence, event.date)}
+              </Span>
             </div>
           </div>
 

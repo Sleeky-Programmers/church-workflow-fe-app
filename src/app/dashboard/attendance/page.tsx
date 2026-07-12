@@ -416,6 +416,7 @@ export default function AttendancePage() {
           onAddAttendance={handleAddAttendance}
           onAddGivingRecord={handleAddGivingRecord}
           onViewServiceDetails={handleViewServiceDetails}
+          onAddSpecialAttendance={handleAddSpecialAttendance}
           onAddService={handleAddService}
           onSelectRegularService={() => {
             setIsTypeModalOpen(false);
@@ -498,6 +499,18 @@ export default function AttendancePage() {
               description: "Order of service updated",
             });
           }}
+        />
+
+        <SpecialAttendanceModal
+          isOpen={isSpecialAttendanceModalOpen}
+          onClose={() => {
+            setIsSpecialAttendanceModalOpen(false);
+            setSelectedSpecialService(null);
+            setSelectedDate(null);
+          }}
+          service={selectedSpecialService}
+          date={selectedDate}
+          onSave={handleSpecialAttendanceSaved}
         />
       </>
     );

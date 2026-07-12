@@ -1,6 +1,7 @@
 // services/churchService.ts
 
 import { authenticatedFetch } from "@/lib/api";
+import { ReminderTimeBefore } from "@/types";
 
 export interface SpecialDayDto {
   date: string;
@@ -58,7 +59,7 @@ export interface CreateChurchServiceDto {
   eventType?: EventTypeType;
   reminderEnabled?: boolean;
   reminderType?: ReminderTypeType;
-  reminderTimeBefore?: ReminderTimeBeforeType;
+  reminderTimeBefore?: ReminderTimeBefore;
 }
 
 export interface UpdateChurchServiceDto extends Partial<CreateChurchServiceDto> {}

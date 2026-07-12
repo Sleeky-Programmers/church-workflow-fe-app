@@ -6,6 +6,7 @@ import {
   format,
   isSameMonth,
   isToday,
+  isTomorrow,
   isValid,
   parseISO,
   startOfMonth,
@@ -94,26 +95,19 @@ export function formatEventDate(dateStr: string) {
 }
 
 export function formatDateSafely(dateString: string): string {
+  if (!dateString) {
+    return "";
+  }
   const date = parseISO(dateString);
   if (!isValid(date)) {
     return dateString;
   }
 
-  const today = new Date();
-  const tomorrow = new Date(today);
-  tomorrow.setDate(tomorrow.getDate() + 1);
-
-  // Reset time portion for accurate date comparison
-  today.setHours(0, 0, 0, 0);
-  tomorrow.setHours(0, 0, 0, 0);
-  const targetDate = new Date(date);
-  targetDate.setHours(0, 0, 0, 0);
-
-  if (targetDate.getTime() === today.getTime()) {
+  if (isToday(date)) {
     return "Today";
   }
 
-  if (targetDate.getTime() === tomorrow.getTime()) {
+  if (isTomorrow(date)) {
     return "Tomorrow";
   }
 
