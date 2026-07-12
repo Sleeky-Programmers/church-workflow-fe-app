@@ -298,6 +298,23 @@ export type NewMemberData = AddMemberStep1Data &
   AddMemberStep2Data &
   AddMemberStep3Data;
 
+// export type ChurchEvent = {
+//   id: string;
+//   title: string;
+//   type: EventType;
+//   recurrence: EventRecurrence;
+//   date: string;
+//   startTime: string;
+//   endTime?: string;
+//   location?: string;
+//   description?: string;
+//   sendReminder: boolean;
+//   reminderType: EventReminderType;
+//   remindBeforeMinutes: number;
+//   colorClass: string;
+// };
+
+// types/index.ts
 export type ChurchEvent = {
   id: string;
   title: string;
@@ -312,6 +329,13 @@ export type ChurchEvent = {
   reminderType: EventReminderType;
   remindBeforeMinutes: number;
   colorClass: string;
+  // Add specialDays support
+  specialDays?: Array<{
+    date: string;
+    startTime: string;
+    endTime: string;
+  }>;
+  serviceType?: "REGULAR" | "SPECIAL";
 };
 
 export interface ChurchService {
@@ -340,7 +364,15 @@ export interface ChurchServicesResponse {
   };
 }
 
-export type EventFormData = Omit<ChurchEvent, "id" | "colorClass">;
+export enum ReminderTimeBefore {
+  MINUTES_30 = "MINUTES_30",
+  HOUR_1 = "HOUR_1",
+}
+
+export type EventFormData = Omit<
+  ChurchEvent,
+  "id" | "colorClass" | "remindBeforeMinutes"
+> & { remindBeforeMinutes: ReminderTimeBefore };
 
 export type EventTypeOption = {
   value: EventType;

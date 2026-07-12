@@ -495,13 +495,20 @@ export function SpecialAttendanceModal({
     </div>
   );
 
+  // Mobile view
   if (isMobile) {
     const isSummaryOpen = isOpen && !isMembersDialogOpen;
     const isMembersOpen = isOpen && isMembersDialogOpen;
 
     return (
       <>
-        <Dialog open={isSummaryOpen} onOpenChange={handleClose}>
+        {/* Summary Dialog */}
+        <Dialog
+          open={isSummaryOpen}
+          onOpenChange={(open) => {
+            if (!open) handleClose();
+          }}
+        >
           <DialogContent
             showClose={false}
             mobileSheet
@@ -514,6 +521,7 @@ export function SpecialAttendanceModal({
           </DialogContent>
         </Dialog>
 
+        {/* Members Selection Dialog */}
         <Dialog
           open={isMembersOpen}
           onOpenChange={(open) => {
@@ -535,8 +543,14 @@ export function SpecialAttendanceModal({
     );
   }
 
+  // Desktop view
   return (
-    <Dialog open={isOpen} onOpenChange={handleClose}>
+    <Dialog
+      open={isOpen}
+      onOpenChange={(open) => {
+        if (!open) handleClose();
+      }}
+    >
       <DialogContent
         showClose={false}
         className="!p-0 !bg-transparent !shadow-none !border-none !max-w-none !w-auto !h-auto"

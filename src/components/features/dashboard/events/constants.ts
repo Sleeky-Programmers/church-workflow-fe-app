@@ -1,3 +1,5 @@
+// components/features/dashboard/events/constants.ts
+
 import { format, parseISO } from "date-fns";
 
 import {
@@ -6,7 +8,7 @@ import {
   EventReminderType,
   EventType,
 } from "@/lib/enums";
-import { EventTypeOption, EventViewOption } from "@/types";
+import { EventTypeOption, EventViewOption, ReminderTimeBefore } from "@/types";
 
 export const EVENT_TYPE_OPTIONS: EventTypeOption[] = [
   {
@@ -24,8 +26,6 @@ export const EVENT_TYPE_OPTIONS: EventTypeOption[] = [
   { value: EventType.OTHER, label: "Others", colorClass: "bg-slate-600" },
 ];
 
-// components/features/dashboard/events/constants.ts
-
 export function getEventRecurrenceOptions(date?: string) {
   const baseDate = date ? parseISO(date) : new Date();
   const weekday = format(baseDate, "EEEE");
@@ -36,7 +36,7 @@ export function getEventRecurrenceOptions(date?: string) {
     { value: EventRecurrence.NONE, label: "Does not repeat" },
     { value: EventRecurrence.DAILY, label: "Daily" },
     { value: EventRecurrence.WEEKLY, label: `Weekly on ${weekday}` },
-    { value: EventRecurrence.SUNDAY, label: "Weekly on Sunday" },
+    { value: EventRecurrence.SUNDAY, label: "Weekly on Sunday only" },
     {
       value: EventRecurrence.MONTHLY,
       label: `Monthly on the ${weekdayOrder} ${weekday}`,
@@ -78,13 +78,23 @@ export const EVENT_REMINDER_TYPE_OPTIONS = [
   { value: EventReminderType.SMS, label: "SMS" },
 ];
 
+// Update to use ReminderTimeBefore enum values
 export const EVENT_REMINDER_MINUTES_OPTIONS = [
-  { value: 15, label: "15 minutes" },
-  { value: 30, label: "30 minutes" },
-  { value: 60, label: "1 hour" },
-  { value: 120, label: "2 hours" },
-  { value: 1440, label: "1 day" },
+  { value: ReminderTimeBefore.MINUTES_30, label: "30 minutes" },
+  { value: ReminderTimeBefore.HOUR_1, label: "1 hour" },
 ];
+
+// Map ReminderTimeBefore to display label
+export const REMINDER_TIME_LABEL_MAP: Record<ReminderTimeBefore, string> = {
+  [ReminderTimeBefore.MINUTES_30]: "30 minutes",
+  [ReminderTimeBefore.HOUR_1]: "1 hour",
+};
+
+// Map ReminderTimeBefore to number for display (view only)
+export const REMINDER_TIME_TO_NUMBER: Record<ReminderTimeBefore, number> = {
+  [ReminderTimeBefore.MINUTES_30]: 30,
+  [ReminderTimeBefore.HOUR_1]: 60,
+};
 
 export const EVENT_VIEW_OPTIONS: EventViewOption[] = [
   { value: EventCalendarView.MONTH, label: "Month" },

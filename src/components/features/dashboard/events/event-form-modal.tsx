@@ -24,13 +24,14 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { Text } from "@/components/ui/typography/Text";
 import { EventRecurrence, EventReminderType, EventType } from "@/lib/enums";
-import { EventFormData } from "@/types";
+import { EventFormData, ReminderTimeBefore } from "@/types";
 
 import {
   EVENT_REMINDER_MINUTES_OPTIONS,
   EVENT_REMINDER_TYPE_OPTIONS,
   EVENT_TYPE_OPTIONS,
   getEventRecurrenceOptions,
+  REMINDER_TIME_LABEL_MAP,
 } from "./constants";
 
 type EventFormModalProps = {
@@ -52,7 +53,7 @@ const DEFAULT_FORM_DATA: EventFormData = {
   description: "",
   sendReminder: true,
   reminderType: EventReminderType.IN_APP,
-  remindBeforeMinutes: 30,
+  remindBeforeMinutes: ReminderTimeBefore.MINUTES_30,
 };
 
 export function EventFormModal({
@@ -90,7 +91,6 @@ export function EventFormModal({
       delete next[field];
       return next;
     });
-    // Clear submit error when user makes changes
     if (submitError) setSubmitError(null);
   };
 
@@ -121,13 +121,11 @@ export function EventFormModal({
       await onSubmit(formData);
       onOpenChange(false);
     } catch (error: any) {
-      // Extract error message from the error object
       let errorMessage = "Failed to save event. Please try again.";
 
       if (error?.message) {
         errorMessage = error.message;
       } else if (error?.response?.data?.message) {
-        // Handle API error response
         const apiMessage = error.response.data.message;
         if (Array.isArray(apiMessage)) {
           errorMessage = apiMessage.join(", ");
@@ -139,7 +137,6 @@ export function EventFormModal({
       }
 
       setSubmitError(errorMessage);
-      console.error("Submission failed:", error);
     }
   };
 
@@ -175,7 +172,6 @@ export function EventFormModal({
         </DialogHeader>
 
         <div className="px-6 py-5 space-y-4 max-h-[80vh] overflow-y-auto">
-          {/* Error Alert */}
           {submitError && (
             <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-start gap-3">
               <div className="text-red-500 text-sm font-medium">Error</div>
@@ -348,22 +344,22 @@ export function EventFormModal({
               <div className="space-y-2">
                 <Label>Time Before</Label>
                 <Select
-                  value={String(formData.remindBeforeMinutes)}
+                  value={formData.remindBeforeMinutes}
                   onValueChange={(value) =>
-                    handleFieldChange("remindBeforeMinutes", Number(value))
+                    handleFieldChange(
+                      "remindBeforeMinutes",
+                      value as ReminderTimeBefore,
+                    )
                   }
                   disabled={isSubmitting}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="30 minutes" />
+                    <SelectValue placeholder="Select time" />
                   </SelectTrigger>
                   <SelectContent>
                     {EVENT_REMINDER_MINUTES_OPTIONS.map((option) => (
-                      <SelectItem
-                        key={option.value}
-                        value={String(option.value)}
-                      >
-                        {option.label}
+                      <SelectItem key={option.value} value={option.value}>
+                        {REMINDER_TIME_LABEL_MAP[option.value]}
                       </SelectItem>
                     ))}
                   </SelectContent>
