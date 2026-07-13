@@ -18,7 +18,6 @@ import {
   Wallet,
 } from "lucide-react";
 
-import { CustomMessagesIcon } from "@/components/ui/custom-message-svg";
 import {
   ActivityRow,
   DepartmentRow,
@@ -299,12 +298,7 @@ export const SidebarData = {
       icon: Calendar1,
     },
     {
-      title: "Communication",
-      url: "/dashboard/communication",
-      icon: CustomMessagesIcon,
-    },
-    {
-      title: "Requests",
+      title: "Request",
       url: "/dashboard/requests",
       icon: CalendarPlusSvg,
     },

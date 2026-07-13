@@ -1,15 +1,37 @@
+"use client";
+
+import Image from "next/image";
+
+import { cn } from "@/lib/utils";
+
 type LoaderProps = {
+  logoUrl?: string;
+  size?: string;
   className?: string;
 };
 
-export function Loader({ className = "h-5 w-5" }: LoaderProps) {
+export function Loader({
+  logoUrl = "https://app.trickle.so/storage/public/images/usr_1ed625db90000001/9e9f3d8a-9b01-42e4-b293-cc4461d9c349.png",
+  size = "w-24 h-24",
+  className = "",
+}: LoaderProps) {
   return (
-    <span
-      className={`relative inline-flex items-center justify-center ${className}`}
+    <div
+      className={cn("flex flex-col items-center justify-center", className)}
+      data-name="bounce-loader"
     >
-      <span className="absolute inset-0 rounded-full border-2 border-current/25" />
-      <span className="absolute inset-0 rounded-full border-2 border-transparent border-t-current animate-spin" />
-      <span className="h-1.5 w-1.5 rounded-full bg-current animate-pulse" />
-    </span>
+      <div className="flex items-center justify-center relative">
+        <Image
+          src={logoUrl}
+          alt="Loading..."
+          width={96}
+          height={96}
+          unoptimized
+          className={cn(size, "object-contain relative z-10 animate-bounce")}
+        />
+
+        <div className="absolute -bottom-2 w-16 h-1.5 bg-black rounded-[50%] blur-[2px] animate-bounce-shadow" />
+      </div>
+    </div>
   );
 }
