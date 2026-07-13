@@ -1,7 +1,6 @@
-# Church Workflow 
+# Church Workflow
 
 > Church On Cloud is a modern Next.js application designed to bring all Church workflow processes into an administrative system.
-
 
 ---
 
@@ -23,7 +22,8 @@
 
 ## Project Overview
 
-This repository bootstraps a Next.js project with TypeScript, Shadcn UI with Tailwind CSS, and a fully customizable color system driven by CSS variables. It also integrates Husky and lint-staged to enforce commit-quality checks.
+This repository bootstraps a Next.js project with TypeScript, Shadcn UI with Tailwind CSS, and a fully customizable color system driven by CSS variables. It also
+integrates Husky and lint-staged to enforce commit-quality checks.
 
 ## Features
 
