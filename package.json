@@ -9,6 +9,9 @@
     "lint": "next lint",
     "prepare": "husky"
   },
+  "engines": {
+    "node": ">=20.9.0"
+  },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
       "eslint --fix",
