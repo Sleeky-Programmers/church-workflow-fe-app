@@ -104,17 +104,6 @@ export default function PaymentVerifyPage() {
     statusParam?.toLowerCase() === "cancelled" ||
     statusParam?.toLowerCase() === "canceled";
 
-  // Log for debugging
-  console.log("🔍 Payment Verification:", {
-    reference,
-    txRef,
-    transactionId,
-    statusParam,
-    actualReference,
-    provider,
-    isCancelled,
-  });
-
   const handleVerifyPayment = async () => {
     if (!actualReference) {
       setPaymentStatus("not_found");
@@ -161,7 +150,6 @@ export default function PaymentVerifyPage() {
         });
       }
     } catch (error: any) {
-      console.error("Payment verification error:", error);
       setPaymentStatus("failed");
       setErrorMessage(
         error?.message || "Failed to verify payment. Please contact support.",
