@@ -191,7 +191,7 @@ export default function ChurchOnboarding() {
     const uniqueServices = new Map<
       string,
       {
-        serviceName: string;
+        title: string;
         day: string;
         startTime: string;
         endTime: string;
@@ -205,14 +205,14 @@ export default function ChurchOnboarding() {
         const normalizedDay = day.trim().toUpperCase();
         const location = (service.location || "").trim();
         const key = [
-          service.serviceName.trim().toLowerCase(),
+          service.title.trim().toLowerCase(),
           normalizedDay,
           startTime.trim().toUpperCase(),
           location.toLowerCase(),
         ].join("|");
         if (!uniqueServices.has(key)) {
           uniqueServices.set(key, {
-            serviceName: service.serviceName,
+            title: service.title,
             day: normalizedDay,
             startTime,
             endTime,
@@ -224,7 +224,7 @@ export default function ChurchOnboarding() {
 
     for (const service of uniqueServices.values()) {
       await createWeeklyService({
-        title: service.serviceName,
+        title: service.title,
         type: "REGULAR",
         day: service.day,
         startTime: service.startTime,

@@ -99,7 +99,7 @@ export function CalendarDayCell({
                 <Star className="h-3 w-3 text-primary flex-shrink-0 mt-0.5" />
                 <div className="flex-1 min-w-0">
                   <Text className="font-semibold text-left truncate">
-                    {service.serviceName}
+                    {service.title}
                   </Text>
                   <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 mt-0.5">
                     {service.location && (

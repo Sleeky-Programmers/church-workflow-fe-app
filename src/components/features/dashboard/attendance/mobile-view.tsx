@@ -179,7 +179,7 @@ export function MobileAttendanceView({
       if (service.day && service.day.toUpperCase() === dayName.toUpperCase()) {
         items.push({
           id: service.id,
-          name: service.serviceName,
+          name: service.title,
           type: "REGULAR",
           startTime: service.startTime,
           endTime: service.endTime,
@@ -200,7 +200,7 @@ export function MobileAttendanceView({
       if (scheduleForDate) {
         items.push({
           id: service.id,
-          name: service.serviceName,
+          name: service.title,
           type: "SPECIAL",
           startTime: scheduleForDate.startTime,
           endTime: scheduleForDate.endTime,

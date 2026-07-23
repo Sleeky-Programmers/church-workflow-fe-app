@@ -314,8 +314,7 @@ export function AttendanceModal({
   }
 
   // Get service name safely
-  const serviceName =
-    "serviceName" in service ? service.serviceName : "Service";
+  const serviceName = "title" in service ? service.title : "Service";
   const serviceLocation = service.location || "";
   const serviceStartTime = service.startTime || "";
   const serviceEndTime = service.endTime || "";

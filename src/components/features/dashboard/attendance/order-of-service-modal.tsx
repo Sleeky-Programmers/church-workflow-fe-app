@@ -15,7 +15,7 @@ import { GripVertical, Plus } from "lucide-react";
 type OrderOfServiceModalProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  serviceName: string;
+  title: string;
   items: string[];
   editable?: boolean;
   onSave?: (items: string[]) => void;
@@ -24,7 +24,7 @@ type OrderOfServiceModalProps = {
 export function OrderOfServiceModal({
   open,
   onOpenChange,
-  serviceName,
+  title,
   items,
   editable = false,
   onSave,
@@ -74,7 +74,7 @@ export function OrderOfServiceModal({
       >
         <DialogHeader className="px-5 py-4 border-b">
           <DialogTitle className="text-lg">
-            {serviceName} Order of Service
+            {title} Order of Service
           </DialogTitle>
         </DialogHeader>
 

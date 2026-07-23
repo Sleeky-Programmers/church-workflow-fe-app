@@ -79,7 +79,7 @@ export function CreateSpecialServiceModal({
 }: CreateSpecialServiceModalProps) {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
-  const [serviceName, setServiceName] = useState("");
+  const [title, setTitle] = useState("");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [location, setLocation] = useState("");
@@ -158,7 +158,7 @@ export function CreateSpecialServiceModal({
   const handleClose = () => {
     if (isLoading) return;
     onOpenChange(false);
-    setServiceName("");
+    setTitle("");
     setStartDate("");
     setEndDate("");
     setLocation("");
@@ -170,7 +170,7 @@ export function CreateSpecialServiceModal({
   };
 
   const handleCreate = async () => {
-    if (!serviceName.trim()) {
+    if (!title.trim()) {
       toast({
         title: "Validation Error",
         description: "Service name is required",
@@ -207,7 +207,7 @@ export function CreateSpecialServiceModal({
     try {
       await onCreateService({
         id,
-        serviceName: serviceName.trim(),
+        title: title.trim(),
         startDate,
         endDate: endDate || startDate,
         location: location.trim() || undefined,
@@ -263,8 +263,8 @@ export function CreateSpecialServiceModal({
             </Label>
             <Input
               placeholder="e.g. Anointing Service"
-              value={serviceName}
-              onChange={(e) => setServiceName(e.target.value)}
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
               disabled={isLoading}
             />
           </div>
