@@ -75,7 +75,7 @@ export default function CheckoutPage() {
     const checkSubscription = async () => {
       try {
         const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_BASE_URL}/subscription`,
+          `${process.env.NEXT_PUBLIC_API_URL}/subscription/overview`,
           {
             headers: { Authorization: `Bearer ${token}` },
           },
@@ -120,7 +120,7 @@ export default function CheckoutPage() {
     try {
       const token = getAccessToken();
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/payment/initialize`,
+        `${process.env.NEXT_PUBLIC_API_URL}/payment/initialize`,
         {
           method: "POST",
           headers: {
