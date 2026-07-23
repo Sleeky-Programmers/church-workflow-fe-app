@@ -58,7 +58,7 @@ export function AttendanceCalendarPage() {
 
   const handleViewServiceDetails = (service: RegularService, _date: string) => {
     toast({
-      title: service.serviceName,
+      title: service.title,
       description:
         "Service details modal is available on the dashboard attendance page.",
     });

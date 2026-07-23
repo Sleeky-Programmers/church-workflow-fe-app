@@ -411,8 +411,7 @@ export async function sendInvitation(
 
 type ChurchServiceApi = {
   _id: string;
-  serviceName: string;
-  title?: string;
+  title: string;
   type: "REGULAR" | "SPECIAL";
   recurrence:
     | "WEEKLY_MONDAY"
@@ -533,7 +532,7 @@ function mapChurchServiceToRegular(service: ChurchServiceApi): RegularService {
     dayName && daysFromArray.length === 0 ? [dayName] : daysFromArray;
   return {
     id: service._id,
-    serviceName: service.serviceName,
+    title: service.title,
     startTime: service.startTime,
     day: service.day ? service.day : "",
     type: service.type,
@@ -549,7 +548,7 @@ export const mapToRegularService = (
 ): RegularService => {
   return {
     id: apiService._id,
-    serviceName: apiService.serviceName,
+    title: apiService.title,
     type: apiService.type,
     day: apiService.day ? apiService.day : "",
     startTime: apiService.startTime,
@@ -567,7 +566,7 @@ export const mapToSpecialService = (
 ): SpecialServiceEvent => {
   return {
     id: apiService._id,
-    serviceName: apiService.title ? apiService.title : "",
+    title: apiService.title ? apiService.title : "",
     startDate: apiService.startDate || "",
     endDate: apiService.endDate,
     startTime: apiService.startTime || "",

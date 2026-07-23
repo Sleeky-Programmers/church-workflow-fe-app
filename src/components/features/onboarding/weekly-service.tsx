@@ -46,13 +46,13 @@ export function WeeklyServicesStep({
 }: WeeklyServicesStepProps) {
   const [isContinuing, setIsContinuing] = useState(false);
   const [newService, setNewService] = useState<{
-    serviceName: string;
+    title: string;
     days: string[];
     startTime: string;
     endTime: string;
     location: string;
   }>({
-    serviceName: "",
+    title: "",
     days: [],
     startTime: "",
     endTime: "",
@@ -69,7 +69,7 @@ export function WeeklyServicesStep({
   };
 
   const handleAddService = () => {
-    if (!newService.serviceName.trim()) {
+    if (!newService.title.trim()) {
       alert("Please enter a service name");
       return;
     }
@@ -84,7 +84,7 @@ export function WeeklyServicesStep({
 
     onAddService(newService);
     setNewService({
-      serviceName: "",
+      title: "",
       days: [],
       startTime: "",
       endTime: "",
@@ -120,11 +120,11 @@ export function WeeklyServicesStep({
           </Label>
           <Input
             placeholder="e.g. Sunday Worship Service"
-            value={newService.serviceName}
+            value={newService.title}
             onChange={(e) =>
               setNewService((prev) => ({
                 ...prev,
-                serviceName: e.target.value,
+                title: e.target.value,
               }))
             }
           />
@@ -220,7 +220,7 @@ export function WeeklyServicesStep({
               <div className="flex flex-col sm:flex-row items-start justify-between gap-3">
                 <div className="flex-1">
                   <Heading level={3} className="mb-1">
-                    {service.serviceName || "Untitled Service"}
+                    {service.title || "Untitled Service"}
                   </Heading>
                   <div className="space-y-1">
                     <Text variant="muted" className="text-sm">

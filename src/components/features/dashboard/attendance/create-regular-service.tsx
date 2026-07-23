@@ -57,7 +57,7 @@ export function CreateRegularServiceModal({
 
   const [formData, setFormData] = useState<RegularService>({
     id: "",
-    serviceName: "",
+    title: "",
     type: "REGULAR",
     day: "",
     startTime: "",
@@ -74,7 +74,7 @@ export function CreateRegularServiceModal({
   };
 
   const handleAddService = () => {
-    if (!formData.serviceName.trim()) {
+    if (!formData.title.trim()) {
       alert("Please enter a service name");
       return;
     }
@@ -95,7 +95,7 @@ export function CreateRegularServiceModal({
 
     setFormData({
       id: "",
-      serviceName: "",
+      title: "",
       type: "REGULAR",
       day: "",
       startTime: "",
@@ -134,7 +134,7 @@ export function CreateRegularServiceModal({
           }
 
           const createdService: any = await createWeeklyService({
-            title: service.serviceName,
+            title: service.title,
             type: "REGULAR",
             day: dayEnum,
             startTime,
@@ -144,7 +144,7 @@ export function CreateRegularServiceModal({
 
           created.push({
             id: createdService._id,
-            serviceName: createdService.serviceName,
+            title: createdService.title,
             type: "REGULAR",
             day: day,
             startTime: createdService.startTime,
@@ -165,7 +165,7 @@ export function CreateRegularServiceModal({
       setServices([]);
       setFormData({
         id: "",
-        serviceName: "",
+        title: "",
         type: "REGULAR",
         day: "",
         startTime: "",
@@ -189,7 +189,7 @@ export function CreateRegularServiceModal({
     setServices([]);
     setFormData({
       id: "",
-      serviceName: "",
+      title: "",
       type: "REGULAR",
       day: "",
       startTime: "",
@@ -257,11 +257,11 @@ export function CreateRegularServiceModal({
             <Input
               id="service-name"
               placeholder="e.g. Sunday First Service, Sunday Second Service, Bible Study, e.t.c."
-              value={formData.serviceName}
+              value={formData.title}
               onChange={(e) =>
                 setFormData((prev) => ({
                   ...prev,
-                  serviceName: e.target.value,
+                  title: e.target.value,
                 }))
               }
             />
@@ -341,7 +341,7 @@ export function CreateRegularServiceModal({
                   className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border"
                 >
                   <div className="flex-1">
-                    <Text variant="default">{service.serviceName}</Text>
+                    <Text variant="default">{service.title}</Text>
                     <Text variant="muted">
                       {service.day} - {service.startTime}
                       {service.endTime && ` - ${service.endTime}`}

@@ -194,7 +194,7 @@ export type AttendanceRecord = {
 
 export type RegularService = {
   id: string;
-  serviceName: string;
+  title: string;
   type: "REGULAR" | "SPECIAL";
   day: string;
   startTime: string;
@@ -207,7 +207,7 @@ export type RegularService = {
 
 export type SpecialService = {
   id: string;
-  serviceName: string;
+  title: string;
   type: "REGULAR" | "SPECIAL";
   date: string;
   startTime: string;
@@ -341,7 +341,7 @@ export type ChurchEvent = {
 export interface ChurchService {
   id: string;
   churchId: string;
-  serviceName: string;
+  title: string;
   type: string; // "REGULAR" | "SPECIAL" etc.
   day: string; // "SUNDAY", "MONDAY", etc.
   startTime: string;
@@ -393,7 +393,7 @@ export type SpecialServiceDaySchedule = {
 
 export type SpecialServiceEvent = {
   id: string;
-  serviceName: string;
+  title: string;
   startDate: string;
   endDate?: string;
   startTime?: string;

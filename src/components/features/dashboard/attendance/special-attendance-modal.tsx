@@ -315,7 +315,7 @@ export function SpecialAttendanceModal({
   if (!service || !date) return null;
 
   const schedule = getScheduleForDate(service, date);
-  const serviceName = service.serviceName;
+  const serviceName = service.title;
   const serviceLocation = service.location || "";
   const serviceStartTime = schedule?.startTime || "";
   const serviceEndTime = schedule?.endTime || "";

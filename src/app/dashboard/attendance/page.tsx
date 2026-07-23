@@ -121,7 +121,7 @@ export default function AttendancePage() {
         const aDay = service.day as DAY;
         const day = aDay ? aDay : monday;
         await createChurchService({
-          title: service.serviceName,
+          title: service.title,
           type: "REGULAR",
           day,
           startTime: service.startTime,
@@ -237,7 +237,7 @@ export default function AttendancePage() {
   const handleCreateSpecialService = async (service: SpecialServiceEvent) => {
     try {
       await createChurchService({
-        title: service.serviceName,
+        title: service.title,
         type: "SPECIAL",
         startDate: service.startDate,
         endDate: service.endDate || service.startDate,

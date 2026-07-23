@@ -42,7 +42,7 @@ type Props = {
 };
 
 const getServiceLabel = (service: RegularService) => {
-  return service.serviceName;
+  return service.title;
 };
 
 export default function MarkTeamAttendanceDialog({

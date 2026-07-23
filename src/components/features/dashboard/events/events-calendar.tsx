@@ -125,7 +125,7 @@ function generateServiceOccurrences(
       if (date >= startDate && date <= endDate) {
         occurrences.push({
           id: `${service.id}-${format(date, "yyyy-MM-dd")}`,
-          title: service.serviceName,
+          title: service.title,
           type: EventType.WORSHIP_SERVICE,
           recurrence: EventRecurrence.NONE,
           date: format(date, "yyyy-MM-dd"),
@@ -172,7 +172,7 @@ function generateServiceOccurrences(
     while (currentDate <= endDate) {
       occurrences.push({
         id: `${service.id}-${format(currentDate, "yyyy-MM-dd")}`,
-        title: service.serviceName,
+        title: service.title,
         type: EventType.WORSHIP_SERVICE,
         recurrence: EventRecurrence.NONE,
         date: format(currentDate, "yyyy-MM-dd"),

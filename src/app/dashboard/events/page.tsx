@@ -80,7 +80,7 @@ const toFormData = (event: ChurchEvent): EventFormData => ({
 const transformChurchService = (apiService: any): ChurchService => ({
   id: apiService._id,
   churchId: apiService.churchId,
-  serviceName: apiService.title || apiService.serviceName,
+  title: apiService.title,
   type: apiService.type,
   day: apiService.day,
   startTime: apiService.startTime,
