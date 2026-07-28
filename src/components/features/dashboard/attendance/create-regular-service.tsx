@@ -133,6 +133,15 @@ export function CreateRegularServiceModal({
             continue;
           }
 
+          console.log({
+            title: service.title,
+            type: "REGULAR",
+            day: dayEnum,
+            startTime,
+            endTime,
+            location: service.location || "",
+          });
+
           const createdService: any = await createWeeklyService({
             title: service.title,
             type: "REGULAR",

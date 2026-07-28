@@ -118,8 +118,25 @@ export default function AttendancePage() {
       const monday = "MONDAY" as DAY;
       // Create each service in the array
       for (const service of newServices) {
-        const aDay = service.day as DAY;
+        const aDay = service.day
+          ? (service.day.toUpperCase() as DAY)
+          : undefined;
         const day = aDay ? aDay : monday;
+        console.log({
+          title: service.title,
+          type: "REGULAR",
+          day,
+          startTime: service.startTime,
+          endTime: service.endTime,
+          location: service.location,
+          description: service.description,
+          recurrence:
+            service.frequency === "weekly"
+              ? "WEEKLY_MONDAY"
+              : "MONTHLY_FIRST_MONDAY",
+          eventType: "WORSHIP_SERVICE",
+          reminderEnabled: false,
+        });
         await createChurchService({
           title: service.title,
           type: "REGULAR",
