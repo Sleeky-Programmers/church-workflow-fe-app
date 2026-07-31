@@ -8,17 +8,20 @@ type LoaderProps = {
   logoUrl?: string;
   size?: string;
   className?: string;
+  /** Hides the little ground shadow — turn off for tiny inline uses (buttons, table cells). */
+  showShadow?: boolean;
 };
 
 export function Loader({
   logoUrl = "https://app.trickle.so/storage/public/images/usr_1ed625db90000001/9e9f3d8a-9b01-42e4-b293-cc4461d9c349.png",
   size = "w-24 h-24",
   className = "",
+  showShadow = true,
 }: LoaderProps) {
   return (
     <div
       className={cn("flex flex-col items-center justify-center", className)}
-      data-name="bounce-loader"
+      data-name="loader"
     >
       <div className="flex items-center justify-center relative">
         <Image
@@ -30,7 +33,9 @@ export function Loader({
           className={cn(size, "object-contain relative z-10 animate-bounce")}
         />
 
-        <div className="absolute -bottom-2 w-16 h-1.5 bg-black rounded-[50%] blur-[2px] animate-bounce-shadow" />
+        {showShadow && (
+          <div className="absolute -bottom-2 w-1/2 h-1.5 bg-black/70 rounded-[50%] blur-[2px] animate-bounce-shadow" />
+        )}
       </div>
     </div>
   );

@@ -45,6 +45,7 @@ export function WeeklyServicesStep({
   totalSteps = 3,
 }: WeeklyServicesStepProps) {
   const [isContinuing, setIsContinuing] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [newService, setNewService] = useState<{
     title: string;
     days: string[];
@@ -59,6 +60,15 @@ export function WeeklyServicesStep({
     location: "",
   });
 
+  const clearError = (field: string) => {
+    setErrors((prev) => {
+      if (!prev[field]) return prev;
+      const next = { ...prev };
+      delete next[field];
+      return next;
+    });
+  };
+
   const handleDayToggle = (day: string) => {
     setNewService((prev) => ({
       ...prev,
@@ -66,22 +76,24 @@ export function WeeklyServicesStep({
         ? prev.days.filter((d) => d !== day)
         : [...prev.days, day],
     }));
+    clearError("days");
   };
 
   const handleAddService = () => {
-    if (!newService.title.trim()) {
-      alert("Please enter a service name");
-      return;
-    }
-    if (newService.days.length === 0) {
-      alert("Please select at least one day");
-      return;
-    }
-    if (!newService.startTime) {
-      alert("Please set a start time");
+    const nextErrors: Record<string, string> = {};
+
+    if (!newService.title.trim())
+      nextErrors.title = "Please enter a service name";
+    if (newService.days.length === 0)
+      nextErrors.days = "Please select at least one day";
+    if (!newService.startTime) nextErrors.startTime = "Please set a start time";
+
+    if (Object.keys(nextErrors).length > 0) {
+      setErrors(nextErrors);
       return;
     }
 
+    setErrors({});
     onAddService(newService);
     setNewService({
       title: "",
@@ -121,13 +133,16 @@ export function WeeklyServicesStep({
           <Input
             placeholder="e.g. Sunday Worship Service"
             value={newService.title}
-            onChange={(e) =>
+            onChange={(e) => {
               setNewService((prev) => ({
                 ...prev,
                 title: e.target.value,
-              }))
-            }
+              }));
+              clearError("title");
+            }}
+            className={errors.title ? "border-destructive-600" : ""}
           />
+          {errors.title ? <Text variant="error">{errors.title}</Text> : null}
         </div>
 
         <div className="space-y-2">
@@ -147,6 +162,7 @@ export function WeeklyServicesStep({
               </Button>
             ))}
           </div>
+          {errors.days ? <Text variant="error">{errors.days}</Text> : null}
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -159,16 +175,20 @@ export function WeeklyServicesStep({
                 type="time"
                 placeholder="--:-- --"
                 value={newService.startTime}
-                onChange={(e) =>
+                onChange={(e) => {
                   setNewService((prev) => ({
                     ...prev,
                     startTime: e.target.value,
-                  }))
-                }
+                  }));
+                  clearError("startTime");
+                }}
                 className="pr-10"
               />
               <Clock3 className="h-4 w-4 absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
             </div>
+            {errors.startTime ? (
+              <Text variant="error">{errors.startTime}</Text>
+            ) : null}
           </div>
 
           <div>

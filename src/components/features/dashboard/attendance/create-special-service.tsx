@@ -1,7 +1,7 @@
 "use client";
 
 import { addDays, format } from "date-fns";
-import { CalendarDays, Clock3, Loader2, X } from "lucide-react";
+import { CalendarDays, Clock3, X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Loader } from "@/components/ui/loader";
 import {
   Select,
   SelectContent,
@@ -424,10 +425,10 @@ export function CreateSpecialServiceModal({
           <div className="flex justify-end">
             <Button onClick={handleCreate} disabled={isLoading}>
               {isLoading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                <span className="flex items-center gap-2">
+                  <Loader size="w-4 h-4" showShadow={false} />
                   Creating...
-                </>
+                </span>
               ) : (
                 "Create event"
               )}

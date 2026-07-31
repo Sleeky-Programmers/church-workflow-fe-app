@@ -33,7 +33,13 @@ export default function MemberDetailsRoutePage() {
     load();
   }, [id]);
 
-  if (loading) return <Loader />;
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-16">
+        <Loader />
+      </div>
+    );
+  }
 
   if (!member) {
     return <div className="p-6">Member not found</div>;

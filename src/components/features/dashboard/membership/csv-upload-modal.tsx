@@ -36,6 +36,35 @@ import { uploadMembersCsv } from "@/services/memberService";
 import { CsvUploadModalProps, UploadFile } from "@/types";
 import { FileInputProps } from "@/types/index";
 
+// Human-readable labels for each field, keyed by the internal snake_case
+// name used for header matching. Used for the downloadable template and
+// for validation error messages shown to the user — the underlying
+// snake_case keys and the camelCase payload sent to the backend
+// (see `convertToCSV`) are unaffected.
+const FIELD_LABELS: Record<string, string> = {
+  title: "Title",
+  full_name: "Full Name",
+  gender: "Gender",
+  birthday: "Birthday",
+  marital_status: "Marital Status",
+  date_of_marriage: "Date of Marriage",
+  spouse_first_name: "Spouse First Name",
+  spouse_last_name: "Spouse Last Name",
+  phone_number: "Phone Number",
+  email: "Email",
+  occupation: "Occupation",
+  educational_background: "Educational Background",
+  membership_status: "Membership Status",
+  date_joined: "Date Joined",
+  previous_church_membership: "Previous Church Membership",
+  is_baptized: "Is Baptized",
+  ministries: "Ministries",
+  volunteer_preferences: "Volunteer Preferences",
+  cell_group_name: "Cell Group Name",
+};
+
+const CSV_TEMPLATE_COLUMNS = Object.keys(FIELD_LABELS);
+
 export function CsvUploadModal({
   open,
   onOpenChange,
@@ -74,8 +103,8 @@ export function CsvUploadModal({
     const getValue = (field: string) => {
       const key = Object.keys(row).find(
         (k) =>
-          k.toLowerCase().replace(/\s/g, "") ===
-          field.toLowerCase().replace(/\s/g, ""),
+          k.toLowerCase().replace(/[\s_]/g, "") ===
+          field.toLowerCase().replace(/[\s_]/g, ""),
       );
       return key ? row[key] : undefined;
     };
@@ -161,14 +190,14 @@ export function CsvUploadModal({
       (req) =>
         !headers.some(
           (h) =>
-            h.toLowerCase().replace(/\s/g, "") ===
-            req.toLowerCase().replace(/\s/g, ""),
+            h.toLowerCase().replace(/[\s_]/g, "") ===
+            req.toLowerCase().replace(/[\s_]/g, ""),
         ),
     );
 
     if (missingHeaders.length > 0) {
       errors.push(
-        `Missing required columns: ${missingHeaders.join(", ")}. Found columns: ${headers.join(", ")}`,
+        `Missing required columns: ${missingHeaders.map((h) => FIELD_LABELS[h] || h).join(", ")}. Found columns: ${headers.join(", ")}`,
       );
       return { isValid: false, errors };
     }
@@ -198,8 +227,8 @@ export function CsvUploadModal({
       const getValue = (field: string) => {
         const key = Object.keys(row).find(
           (k) =>
-            k.toLowerCase().replace(/\s/g, "") ===
-            field.toLowerCase().replace(/\s/g, ""),
+            k.toLowerCase().replace(/[\s_]/g, "") ===
+            field.toLowerCase().replace(/[\s_]/g, ""),
         );
         return key ? row[key] : undefined;
       };
@@ -219,13 +248,13 @@ export function CsvUploadModal({
 
       if (!hasFullName) {
         errors.push(
-          `Row ${index + 2}: Missing required field "full_name". Value: "${fullName}"`,
+          `Row ${index + 2}: Missing required field "${FIELD_LABELS.full_name}". Value: "${fullName}"`,
         );
       }
 
       if (!hasPhoneNumber) {
         errors.push(
-          `Row ${index + 2}: Missing required field "phone_number". Value: "${phoneNumber}"`,
+          `Row ${index + 2}: Missing required field "${FIELD_LABELS.phone_number}". Value: "${phoneNumber}"`,
         );
       }
 
@@ -267,7 +296,10 @@ export function CsvUploadModal({
   const convertToCSV = (data: any[]): string => {
     if (data.length === 0) return "";
 
-    // Define the headers in the order the backend expects (camelCase)
+    // Fixed camelCase headers the backend expects. This list is always
+    // used here regardless of how the uploaded file's own headers were
+    // labeled (human-readable, snake_case, etc.) — normalizeRow() already
+    // mapped every row to these exact keys before we get here.
     const headers = [
       "title",
       "fullName",
@@ -616,7 +648,7 @@ export function FileInput({
     }
   };
 
-  const csvContent = `title,full_name,gender,birthday,marital_status,date_of_marriage,spouse_first_name,spouse_last_name,phone_number,email,occupation,educational_background,membership_status,date_joined,previous_church_membership,is_baptized,ministries,volunteer_preferences,cell_group_name
+  const csvContent = `${CSV_TEMPLATE_COLUMNS.map((key) => FIELD_LABELS[key]).join(",")}
 MR.,Anthony Carter,MALE,1/12/1991,SINGLE,,,,14155667788,anthony.carter@example.com,Developer,Bachelor,MEMBER,7/15/2022,,TRUE,Music,Outreach,Iota Group
 MRS.,Rebecca Allen,FEMALE,4/25/1984,MARRIED,5/10/2009,,,14156778899,rebecca.allen@example.com,Teacher,Master,MEMBER,2/18/2021,Grace Church,FALSE,Hospitality,Teaching,Kappa Group`;
 

@@ -54,6 +54,7 @@ export function CreateRegularServiceModal({
   const [services, setServices] = useState<RegularService[]>([]);
   const [showTooltip, setShowTooltip] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   const [formData, setFormData] = useState<RegularService>({
     id: "",
@@ -66,31 +67,39 @@ export function CreateRegularServiceModal({
     frequency: "weekly",
   });
 
+  const clearError = (field: string) => {
+    setErrors((prev) => {
+      if (!prev[field]) return prev;
+      const next = { ...prev };
+      delete next[field];
+      return next;
+    });
+  };
+
   const handleDayToggle = (day: string) => {
     setFormData((prev) => ({
       ...prev,
       day,
     }));
+    clearError("day");
   };
 
   const handleAddService = () => {
-    if (!formData.title.trim()) {
-      alert("Please enter a service name");
-      return;
-    }
-    if (formData.day.length === 0) {
-      alert("Please select at least one day");
-      return;
-    }
-    if (!formData.startTime) {
-      alert("Please set a start time");
-      return;
-    }
-    if (!formData.endTime) {
-      alert("Please set an end time");
+    const nextErrors: Record<string, string> = {};
+
+    if (!formData.title.trim())
+      nextErrors.title = "Please enter a service name";
+    if (formData.day.length === 0)
+      nextErrors.day = "Please select at least one day";
+    if (!formData.startTime) nextErrors.startTime = "Please set a start time";
+    if (!formData.endTime) nextErrors.endTime = "Please set an end time";
+
+    if (Object.keys(nextErrors).length > 0) {
+      setErrors(nextErrors);
       return;
     }
 
+    setErrors({});
     setServices((prev) => [...prev, { ...formData }]);
 
     setFormData({
@@ -111,7 +120,6 @@ export function CreateRegularServiceModal({
 
   const handleCreateServices = async () => {
     if (services.length === 0) {
-      alert("Please add at least one service");
       return;
     }
     setIsCreating(true);
@@ -196,6 +204,7 @@ export function CreateRegularServiceModal({
   const handleClose = () => {
     onOpenChange(false);
     setServices([]);
+    setErrors({});
     setFormData({
       id: "",
       title: "",
@@ -267,13 +276,16 @@ export function CreateRegularServiceModal({
               id="service-name"
               placeholder="e.g. Sunday First Service, Sunday Second Service, Bible Study, e.t.c."
               value={formData.title}
-              onChange={(e) =>
+              onChange={(e) => {
                 setFormData((prev) => ({
                   ...prev,
                   title: e.target.value,
-                }))
-              }
+                }));
+                clearError("title");
+              }}
+              className={errors.title ? "border-destructive-600" : ""}
             />
+            {errors.title ? <Text variant="error">{errors.title}</Text> : null}
           </div>
 
           <div className="space-y-2">
@@ -293,6 +305,7 @@ export function CreateRegularServiceModal({
                 </Button>
               ))}
             </div>
+            {errors.day ? <Text variant="error">{errors.day}</Text> : null}
           </div>
 
           <div className="grid grid-cols-2 gap-4">
@@ -304,24 +317,39 @@ export function CreateRegularServiceModal({
                 id="start-time"
                 type="time"
                 value={formData.startTime}
-                onChange={(e) =>
+                onChange={(e) => {
                   setFormData((prev) => ({
                     ...prev,
                     startTime: e.target.value,
-                  }))
-                }
+                  }));
+                  clearError("startTime");
+                }}
+                className={errors.startTime ? "border-destructive-600" : ""}
               />
+              {errors.startTime ? (
+                <Text variant="error">{errors.startTime}</Text>
+              ) : null}
             </div>
             <div className="space-y-2">
-              <Label htmlFor="end-time">End Time</Label>
+              <Label htmlFor="end-time">
+                End Time <Span className="text-destructive-600">*</Span>
+              </Label>
               <Input
                 id="end-time"
                 type="time"
                 value={formData.endTime}
-                onChange={(e) =>
-                  setFormData((prev) => ({ ...prev, endTime: e.target.value }))
-                }
+                onChange={(e) => {
+                  setFormData((prev) => ({
+                    ...prev,
+                    endTime: e.target.value,
+                  }));
+                  clearError("endTime");
+                }}
+                className={errors.endTime ? "border-destructive-600" : ""}
               />
+              {errors.endTime ? (
+                <Text variant="error">{errors.endTime}</Text>
+              ) : null}
             </div>
           </div>
 

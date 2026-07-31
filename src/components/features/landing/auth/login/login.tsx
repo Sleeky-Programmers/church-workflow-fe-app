@@ -184,7 +184,7 @@ export default function LoginForm({ onForgotPassword }: LoginFormProps) {
           <Button type="submit" disabled={isLoading} className="w-full py-6">
             {isLoading ? (
               <Span className="flex items-center gap-2">
-                <Loader />
+                <Loader size="w-5 h-5" showShadow={false} />
                 Logging in...
               </Span>
             ) : (

@@ -14,6 +14,16 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -34,6 +44,7 @@ import {
 } from "@/services/departmentService";
 
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useToast } from "@/hooks/use-toast";
 
 export type MemberItem = {
   id: string;
@@ -89,6 +100,7 @@ function MobileMembersList({
 export default function DepartmentDetailPage() {
   const params = useParams();
   const isMobile = useIsMobile();
+  const { toast } = useToast();
 
   const id = Array.isArray(params?.id) ? params.id[0] : params?.id;
 
@@ -97,6 +109,10 @@ export default function DepartmentDetailPage() {
   const [error, setError] = useState<string | null>(null);
   const [tab, setTab] = useState<DepartmentTabs>(DepartmentTabs.MEMBERS);
   const [selectedRows, setSelectedRows] = useState<string[]>([]);
+  const [removeTarget, setRemoveTarget] = useState<{
+    ids: string[];
+    label: string;
+  } | null>(null);
 
   useEffect(() => {
     if (!id) {
@@ -152,48 +168,59 @@ export default function DepartmentDetailPage() {
     }
   };
 
-  const handleBulkRemove = async () => {
+  const handleBulkRemove = () => {
     if (!id || selectedRows.length === 0) {
       return;
     }
-    if (!confirm("Remove selected members?")) {
-      return;
-    }
-
-    await removeDepartmentMembers(id, selectedRows);
-
-    setDepartment((prev) => {
-      if (!prev) {
-        return prev;
-      }
-      return {
-        ...prev,
-        members: prev.members.filter((m) => !selectedRows.includes(m.id)),
-      };
+    setRemoveTarget({
+      ids: selectedRows,
+      label: `${selectedRows.length} selected member${selectedRows.length > 1 ? "s" : ""}`,
     });
-
-    setSelectedRows([]);
   };
 
-  const handleSingleRemove = async (memberId: string) => {
+  const handleSingleRemove = (memberId: string) => {
     if (!id) {
       return;
     }
-    if (!confirm("Remove this member?")) {
+    setRemoveTarget({ ids: [memberId], label: "this member" });
+  };
+
+  const handleConfirmRemove = async () => {
+    if (!id || !removeTarget) {
       return;
     }
+    const { ids } = removeTarget;
 
-    await removeDepartmentMembers(id, [memberId]);
+    try {
+      await removeDepartmentMembers(id, ids);
 
-    setDepartment((prev) => {
-      if (!prev) {
-        return prev;
-      }
-      return {
-        ...prev,
-        members: prev.members.filter((m) => m.id !== memberId),
-      };
-    });
+      setDepartment((prev) => {
+        if (!prev) {
+          return prev;
+        }
+        return {
+          ...prev,
+          members: prev.members.filter((m) => !ids.includes(m.id)),
+        };
+      });
+      setSelectedRows((prev) => prev.filter((rowId) => !ids.includes(rowId)));
+
+      toast({
+        title: "Removed",
+        description:
+          ids.length > 1
+            ? `${ids.length} members removed successfully`
+            : "Member removed successfully",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Remove failed",
+        description: error?.message || "Please try again",
+        variant: "destructive",
+      });
+    } finally {
+      setRemoveTarget(null);
+    }
   };
 
   const membersColumns = getMembersColumns({
@@ -208,7 +235,11 @@ export default function DepartmentDetailPage() {
     tab === DepartmentTabs.MEMBERS ? "Member's List" : "Requisitions";
 
   if (loading) {
-    return <Loader />;
+    return (
+      <div className="flex items-center justify-center py-16">
+        <Loader />
+      </div>
+    );
   }
   if (error) {
     return <div className="p-6 text-red-500">{error}</div>;
@@ -351,6 +382,28 @@ export default function DepartmentDetailPage() {
           </Card>
         </main>
       </div>
+
+      <AlertDialog
+        open={!!removeTarget}
+        onOpenChange={(open) => !open && setRemoveTarget(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remove {removeTarget?.label}?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will remove {removeTarget?.label} from this department. This
+              action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmRemove}>
+              Remove
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

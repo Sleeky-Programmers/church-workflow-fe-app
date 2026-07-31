@@ -1,6 +1,6 @@
 "use client";
-import Link from "next/link";
 import Image from "next/image";
+import Link from "next/link";
 
 interface AuthLogoProps {
   className?: string;
@@ -27,11 +27,7 @@ export default function AuthLogo({
   );
 
   if (href) {
-    return (
-      <Link href={href} className="inline-block">
-        {logoContent}
-      </Link>
-    );
+    return <>{logoContent}</>;
   }
 
   return logoContent;

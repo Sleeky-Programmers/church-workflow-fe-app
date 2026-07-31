@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Loader } from "@/components/ui/loader";
 import { FcGoogle } from "react-icons/fc";
 import { useToast } from "@/hooks/use-toast";
 
@@ -116,7 +117,7 @@ export default function GoogleSignupButton({
       disabled={disabled || isLoading}
       className="w-full py-6 flex items-center gap-2"
     >
-      <FcGoogle />
+      {isLoading ? <Loader size="w-5 h-5" showShadow={false} /> : <FcGoogle />}
       {isLoading ? "Connecting..." : label}
     </Button>
   );

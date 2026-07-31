@@ -399,9 +399,9 @@ export default function TeamsPage() {
 
       <div className="max-h-[65vh] overflow-auto">
         {isLoading ? (
-          <div className="rounded-xl border bg-white px-4 py-6 text-sm text-gray-500">
+          <div className="relative rounded-xl border bg-white px-4 py-16">
             <div className="absolute inset-0 flex items-center justify-center bg-white/60 z-10">
-              <Loader className="h-6 w-6" />
+              <Loader size="w-10 h-10" showShadow={false} />
             </div>
           </div>
         ) : (

@@ -23,7 +23,6 @@ import {
   VerifyOtpResponse,
 } from "@/types/payload";
 import { InviteFormData, PendingInvite, User, UserAction } from "@/types/user";
-import { useLoadingStore } from "@/stores/useLoadingStore";
 
 import { MOCK_ADMIN } from "../data";
 import { MOCK_USERS } from "../user-data";
@@ -34,164 +33,150 @@ export async function authenticatedFetch<T>(
   endpoint: string,
   options: RequestInit & { responseType?: "json" | "blob" | "text" } = {},
 ): Promise<T> {
-  useLoadingStore.getState().startRequest();
-
-  try {
-    const token = localStorage.getItem("accessToken");
-    if (!token) {
-      throw new Error("No authentication token");
-    }
-
-    const isFormData = options.body instanceof FormData;
-
-    const getHeaders = (authToken: string) => ({
-      Authorization: `Bearer ${authToken}`,
-      ...(isFormData || options.responseType === "blob"
-        ? {}
-        : { "Content-Type": "application/json" }),
-      ...options.headers,
-    });
-
-    const response = await fetch(`${BASE_URL}${endpoint}`, {
-      ...options,
-      headers: getHeaders(token),
-    });
-
-    if (response.status === 401) {
-      try {
-        const refreshData = await refreshAuthToken();
-
-        localStorage.setItem("accessToken", refreshData.accessToken);
-        localStorage.setItem("refreshToken", refreshData.refreshToken);
-
-        const retryResponse = await fetch(`${BASE_URL}${endpoint}`, {
-          ...options,
-          headers: getHeaders(refreshData.accessToken),
-        });
-
-        if (!retryResponse.ok) {
-          throw new Error("Retry failed");
-        }
-        if (options.responseType === "blob") {
-          return (await retryResponse.blob()) as T;
-        }
-
-        if (options.responseType === "text") {
-          return (await retryResponse.text()) as T;
-        }
-
-        return retryResponse.json();
-      } catch (err) {
-        localStorage.removeItem("accessToken");
-        localStorage.removeItem("refreshToken");
-
-        if (!window.location.pathname.includes("/auth/login")) {
-          window.location.href = "/auth/login";
-        }
-
-        throw err;
-      }
-    }
-
-    if (!response.ok) {
-      const text = await response.text();
-
-      let data: any;
-      try {
-        data = JSON.parse(text);
-      } catch {
-        data = text;
-      }
-
-      const message =
-        typeof data === "object" && data?.message
-          ? data.message
-          : "Request failed";
-
-      const error: any = new Error(message);
-      error.status = response.status;
-      error.response = { status: response.status, data };
-
-      throw error;
-    }
-
-    if (options.responseType === "blob") {
-      return (await response.blob()) as T;
-    }
-
-    if (options.responseType === "text") {
-      return (await response.text()) as T;
-    }
-
-    return response.json();
-  } finally {
-    useLoadingStore.getState().endRequest();
+  const token = localStorage.getItem("accessToken");
+  if (!token) {
+    throw new Error("No authentication token");
   }
+
+  const isFormData = options.body instanceof FormData;
+
+  const getHeaders = (authToken: string) => ({
+    Authorization: `Bearer ${authToken}`,
+    ...(isFormData || options.responseType === "blob"
+      ? {}
+      : { "Content-Type": "application/json" }),
+    ...options.headers,
+  });
+
+  const response = await fetch(`${BASE_URL}${endpoint}`, {
+    ...options,
+    headers: getHeaders(token),
+  });
+
+  if (response.status === 401) {
+    try {
+      const refreshData = await refreshAuthToken();
+
+      localStorage.setItem("accessToken", refreshData.accessToken);
+      localStorage.setItem("refreshToken", refreshData.refreshToken);
+
+      const retryResponse = await fetch(`${BASE_URL}${endpoint}`, {
+        ...options,
+        headers: getHeaders(refreshData.accessToken),
+      });
+
+      if (!retryResponse.ok) {
+        throw new Error("Retry failed");
+      }
+      if (options.responseType === "blob") {
+        return (await retryResponse.blob()) as T;
+      }
+
+      if (options.responseType === "text") {
+        return (await retryResponse.text()) as T;
+      }
+
+      return retryResponse.json();
+    } catch (err) {
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("refreshToken");
+
+      if (!window.location.pathname.includes("/auth/login")) {
+        window.location.href = "/auth/login";
+      }
+
+      throw err;
+    }
+  }
+
+  if (!response.ok) {
+    const text = await response.text();
+
+    let data: any;
+    try {
+      data = JSON.parse(text);
+    } catch {
+      data = text;
+    }
+
+    const message =
+      typeof data === "object" && data?.message
+        ? data.message
+        : "Request failed";
+
+    const error: any = new Error(message);
+    error.status = response.status;
+    error.response = { status: response.status, data };
+
+    throw error;
+  }
+
+  if (options.responseType === "blob") {
+    return (await response.blob()) as T;
+  }
+
+  if (options.responseType === "text") {
+    return (await response.text()) as T;
+  }
+
+  return response.json();
 }
 
 export async function apiFetch<T>(
   endpoint: string,
   options: RequestInit,
 ): Promise<T> {
-  useLoadingStore.getState().startRequest();
+  const token =
+    typeof window !== "undefined" ? localStorage.getItem("accessToken") : null;
 
-  try {
-    const token =
-      typeof window !== "undefined"
-        ? localStorage.getItem("accessToken")
-        : null;
+  const response = await fetch(`${BASE_URL}${endpoint}`, {
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...(token && { Authorization: `Bearer ${token}` }),
+      ...options.headers,
+    },
+  });
 
-    const response = await fetch(`${BASE_URL}${endpoint}`, {
-      ...options,
-      headers: {
-        "Content-Type": "application/json",
-        ...(token && { Authorization: `Bearer ${token}` }),
-        ...options.headers,
-      },
-    });
-
-    const text = await response.text();
-    let data: unknown = null;
-    if (text) {
-      try {
-        data = JSON.parse(text);
-      } catch {
-        data = text;
-      }
+  const text = await response.text();
+  let data: unknown = null;
+  if (text) {
+    try {
+      data = JSON.parse(text);
+    } catch {
+      data = text;
     }
-
-    if (response.status === 401) {
-      if (typeof window !== "undefined") {
-        localStorage.removeItem("accessToken");
-        if (!window.location.pathname.includes("/auth/login")) {
-          window.location.href = "/auth/login";
-        }
-      }
-      const message =
-        typeof data === "object" && data && "message" in data
-          ? String((data as { message?: unknown }).message || "Unauthorized")
-          : "Unauthorized";
-      const error: any = new Error(message);
-      error.response = { status: 401, data };
-      error.status = 401;
-      throw error;
-    }
-
-    if (!response.ok) {
-      const message =
-        typeof data === "object" && data && "message" in data
-          ? String((data as { message?: unknown }).message || "Request failed")
-          : text || "Request failed";
-      const error: any = new Error(message);
-      error.response = { status: response.status, data };
-      error.status = response.status;
-      throw error;
-    }
-
-    return (data ?? null) as T;
-  } finally {
-    useLoadingStore.getState().endRequest();
   }
+
+  if (response.status === 401) {
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("accessToken");
+      if (!window.location.pathname.includes("/auth/login")) {
+        window.location.href = "/auth/login";
+      }
+    }
+    const message =
+      typeof data === "object" && data && "message" in data
+        ? String((data as { message?: unknown }).message || "Unauthorized")
+        : "Unauthorized";
+    const error: any = new Error(message);
+    error.response = { status: 401, data };
+    error.status = 401;
+    throw error;
+  }
+
+  if (!response.ok) {
+    const message =
+      typeof data === "object" && data && "message" in data
+        ? String((data as { message?: unknown }).message || "Request failed")
+        : text || "Request failed";
+    const error: any = new Error(message);
+    error.response = { status: response.status, data };
+    error.status = response.status;
+    throw error;
+  }
+
+  return (data ?? null) as T;
 }
 
 export function signup(payload: SignupPayload) {

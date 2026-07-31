@@ -158,7 +158,7 @@ export default function VerifyOtpForm({ email, onVerify, onResend }: Props) {
       >
         {isVerifying ? (
           <Span className="flex items-center gap-2">
-            <Loader /> Verifying…
+            <Loader size="w-5 h-5" showShadow={false} /> Verifying…
           </Span>
         ) : (
           "Verify"

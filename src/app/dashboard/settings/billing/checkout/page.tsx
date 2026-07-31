@@ -46,7 +46,7 @@ export default function CheckoutPage() {
 
   if (loading) {
     return (
-      <div className="p-6">
+      <div className="p-6 flex items-center justify-center py-16">
         <Loader />
       </div>
     );
