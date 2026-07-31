@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Loader } from "@/components/ui/loader";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
@@ -156,7 +157,14 @@ export default function PersonalPreferencePage() {
             onClick={handleSaveChanges}
             disabled={!hasChanges || isLoading}
           >
-            {isLoading ? "Saving..." : "Save Changes"}
+            {isLoading ? (
+              <span className="flex items-center gap-2">
+                <Loader size="w-4 h-4" showShadow={false} />
+                Saving...
+              </span>
+            ) : (
+              "Save Changes"
+            )}
           </Button>
         </div>
       </div>

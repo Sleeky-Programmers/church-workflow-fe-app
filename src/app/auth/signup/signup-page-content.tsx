@@ -28,6 +28,14 @@ export function SignupPageContent() {
   const preFilledSignupEmail = searchParams?.get("email") || "";
   const { toast } = useToast();
 
+  const handleBack = () => {
+    if (currentStep === SignUpStep.VERIFY_OTP) {
+      setCurrentStep(SignUpStep.SIGNUP);
+      return;
+    }
+    router.push("/");
+  };
+
   useEffect(() => {
     if (typeof window === "undefined") {
       return;
@@ -69,7 +77,7 @@ export function SignupPageContent() {
 
   if (isLoading) {
     return (
-      <AuthLayout variant="signup">
+      <AuthLayout variant="signup" onBack={() => router.push("/")}>
         <div className="flex flex-col items-center justify-center gap-4">
           <Loader />
           <Text variant="muted">Loading your invite...</Text>
@@ -80,7 +88,7 @@ export function SignupPageContent() {
 
   if (error && isAdmin) {
     return (
-      <AuthLayout variant="signup">
+      <AuthLayout variant="signup" onBack={() => router.push("/")}>
         <div className="flex flex-col items-center justify-center gap-4">
           <Text variant="error" className="text-center">
             {error}
@@ -167,7 +175,7 @@ export function SignupPageContent() {
   const layoutVariant = isAdmin ? "admin-signup" : "signup";
 
   return (
-    <AuthLayout variant={layoutVariant}>
+    <AuthLayout variant={layoutVariant} onBack={handleBack}>
       <div className="relative">
         {currentStep === SignUpStep.SIGNUP && !isAdmin && (
           <SignupForm

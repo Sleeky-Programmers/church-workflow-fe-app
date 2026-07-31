@@ -13,6 +13,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ChartContainer, ChartTooltipContent } from "@/components/ui/chart";
+import { Loader } from "@/components/ui/loader";
 import { Span, Text } from "@/components/ui/typography/Text";
 import { cn } from "@/lib/utils";
 
@@ -21,9 +22,14 @@ type TrendType = "attendance" | "income";
 interface TrendChartProps {
   attendanceData: any[];
   incomeData: any[];
+  isLoading?: boolean;
 }
 
-export function TrendChart({ attendanceData, incomeData }: TrendChartProps) {
+export function TrendChart({
+  attendanceData,
+  incomeData,
+  isLoading = false,
+}: TrendChartProps) {
   const [trend, setTrend] = useState<TrendType>("attendance");
 
   const isAttendance = trend === "attendance";
@@ -63,7 +69,11 @@ export function TrendChart({ attendanceData, incomeData }: TrendChartProps) {
         </div>
 
         <div className="mt-4">
-          {hasData ? (
+          {isLoading ? (
+            <div className="h-[260px] sm:h-[300px] flex items-center justify-center">
+              <Loader size="w-12 h-12" />
+            </div>
+          ) : hasData ? (
             <ChartContainer
               className="w-full aspect-auto h-[260px] sm:h-[300px] overflow-hidden p-2 sm:p-4"
               config={{

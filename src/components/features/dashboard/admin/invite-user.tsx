@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Loader } from "@/components/ui/loader";
 import {
   Select,
   SelectContent,
@@ -301,7 +302,8 @@ export function InviteUserDialog({
                     </SelectTrigger>
                     <SelectContent>
                       {isLoadingRoles ? (
-                        <div className="px-2 py-4 text-center text-sm text-muted-foreground">
+                        <div className="px-2 py-4 flex items-center justify-center gap-2 text-sm text-muted-foreground">
+                          <Loader size="w-4 h-4" showShadow={false} />
                           Loading roles...
                         </div>
                       ) : (
@@ -372,7 +374,14 @@ export function InviteUserDialog({
                   }
                   className="w-full"
                 >
-                  {isLoading ? "Sending..." : "Send Invite"}
+                  {isLoading ? (
+                    <span className="flex items-center gap-2">
+                      <Loader size="w-4 h-4" showShadow={false} />
+                      Sending...
+                    </span>
+                  ) : (
+                    "Send Invite"
+                  )}
                 </Button>
 
                 {localInvites.length > 0 && (

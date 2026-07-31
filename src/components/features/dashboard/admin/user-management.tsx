@@ -239,15 +239,6 @@ export function UserManagementPage() {
     }
   };
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center py-16 gap-2">
-        <Loader />
-        <Text variant="default">Loading users...</Text>
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -256,7 +247,14 @@ export function UserManagementPage() {
       </div>
 
       <div className="bg-white rounded-lg border">
-        <UserTable users={users} onActionSelect={handleActionSelect} />
+        {isLoading ? (
+          <div className="flex items-center justify-center py-16 gap-2">
+            <Loader size="w-10 h-10" showShadow={false} />
+            <Text variant="default">Loading users...</Text>
+          </div>
+        ) : (
+          <UserTable users={users} onActionSelect={handleActionSelect} />
+        )}
       </div>
 
       <InviteUserDialog

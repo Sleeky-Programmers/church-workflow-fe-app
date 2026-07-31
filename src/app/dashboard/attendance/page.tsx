@@ -18,6 +18,7 @@ import { ServiceDetailModal } from "@/components/features/dashboard/attendance/s
 import { ServiceTypeModal } from "@/components/features/dashboard/attendance/service-type";
 import { SpecialAttendanceModal } from "@/components/features/dashboard/attendance/special-attendance-modal";
 import { Input } from "@/components/ui/input";
+import { Loader } from "@/components/ui/loader";
 import Heading from "@/components/ui/typography/Heading";
 import { Text } from "@/components/ui/typography/Text";
 import { useToast } from "@/hooks/use-toast";
@@ -555,13 +556,9 @@ export default function AttendancePage() {
 
       <div className="p-6">
         {isLoading ? (
-          <div className="flex items-center justify-center min-h-[320px]">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600 mx-auto" />
-              <Text variant="default" className="mt-3">
-                Loading services...
-              </Text>
-            </div>
+          <div className="flex items-center justify-center min-h-[320px] gap-3">
+            <Loader size="w-12 h-12" />
+            <Text variant="default">Loading services...</Text>
           </div>
         ) : !hasServices ? (
           <AttendanceEmptyState onCreateService={handleCreateServiceClick} />

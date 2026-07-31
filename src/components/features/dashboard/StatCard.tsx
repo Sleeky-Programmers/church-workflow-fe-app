@@ -2,6 +2,7 @@
 
 import { ChevronDown } from "lucide-react";
 
+import { Loader } from "@/components/ui/loader";
 import { cn } from "@/lib/utils";
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -17,6 +18,7 @@ interface StatCardProps {
   iconVariant?: "blue" | "orange";
   icon?: React.ReactNode;
   className?: string;
+  isLoading?: boolean;
 }
 
 interface TotalIncomeCardProps {
@@ -90,6 +92,7 @@ export const StatCard = ({
   iconVariant = "blue",
   icon,
   className,
+  isLoading = false,
 }: StatCardProps) => {
   const isPositive = growth ? !growth.startsWith("-") : true;
 
@@ -116,13 +119,17 @@ export const StatCard = ({
       </div>
 
       {/* Text */}
-      <div className="flex flex-col min-w-0">
+      <div className="flex flex-col min-w-0 items-center">
         <p className="text-[13px] font-bold text-black mb-1 truncate">
           {title}
         </p>
-        <span className="text-[30px] text-center font-bold text-black leading-none tracking-tight">
-          {count}
-        </span>
+        {isLoading ? (
+          <Loader size="w-6 h-6" showShadow={false} />
+        ) : (
+          <span className="text-[30px] text-center font-bold text-black leading-none tracking-tight">
+            {count}
+          </span>
+        )}
       </div>
     </div>
   );

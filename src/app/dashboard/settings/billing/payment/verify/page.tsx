@@ -5,7 +5,6 @@ import {
   CheckCircle2,
   CreditCard,
   Home,
-  Loader2,
   XCircle,
 } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -20,6 +19,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Loader } from "@/components/ui/loader";
 import { Text } from "@/components/ui/typography/Text";
 import { useToast } from "@/hooks/use-toast";
 import { manualVerifyPayment } from "@/services/paymentService";
@@ -303,7 +303,7 @@ export default function PaymentVerifyPage() {
         <Card className="max-w-md w-full shadow-xl border-0">
           <CardContent className="pt-8 pb-6 text-center">
             <div className="flex flex-col items-center">
-              <Loader2 className="h-16 w-16 text-primary animate-spin mb-4" />
+              <Loader size="w-16 h-16" className="mb-2" />
               <CardTitle className="text-xl font-semibold mb-2">
                 Verifying Payment
               </CardTitle>

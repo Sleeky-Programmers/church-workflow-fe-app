@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Loader } from "@/components/ui/loader";
 import {
   Select,
   SelectContent,
@@ -380,7 +381,14 @@ export default function AddDepartmentDialog({ onSave }: Props) {
 
           <div className="flex justify-end border-t px-6 py-4">
             <Button onClick={handleSave} disabled={loading}>
-              {loading ? "Saving..." : "Save"}
+              {loading ? (
+                <span className="flex items-center gap-2">
+                  <Loader size="w-4 h-4" showShadow={false} />
+                  Saving...
+                </span>
+              ) : (
+                "Save"
+              )}
             </Button>
           </div>
         </DialogContent>

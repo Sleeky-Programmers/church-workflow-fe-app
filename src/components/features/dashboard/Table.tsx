@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/table";
 import { Span } from "@/components/ui/typography/Text";
 import { Button } from "@/components/ui/button";
+import { Loader } from "@/components/ui/loader";
 import {
   Select,
   SelectContent,
@@ -210,7 +211,9 @@ export default function Table<T extends Record<string, any>>({
               {isLoading ? (
                 <TableRow>
                   <TableCell colSpan={visibleColumnCount}>
-                    <div className="py-6 text-center">Loading...</div>
+                    <div className="py-6 flex items-center justify-center">
+                      <Loader size="w-10 h-10" showShadow={false} />
+                    </div>
                   </TableCell>
                 </TableRow>
               ) : paginatedData.length === 0 ? (

@@ -11,6 +11,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
+import { Loader } from "@/components/ui/loader";
 import { ArrowLeft } from "lucide-react";
 
 import { useToast } from "@/hooks/use-toast";
@@ -264,7 +265,8 @@ export function UserDetailsPage({
         </div>
 
         {isLoadingRole ? (
-          <div className="bg-white rounded-lg border p-6 flex justify-center py-10">
+          <div className="bg-white rounded-lg border p-6 flex items-center justify-center gap-2 py-10">
+            <Loader size="w-8 h-8" showShadow={false} />
             <Text variant="default" className="text-muted-foreground">
               Loading permissions...
             </Text>

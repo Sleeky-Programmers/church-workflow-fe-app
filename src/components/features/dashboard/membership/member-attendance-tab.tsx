@@ -20,6 +20,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Calendar, Clock, User, X } from "lucide-react";
+import { Loader } from "@/components/ui/loader";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 type MemberAttendanceTabProps = {
@@ -126,7 +127,8 @@ export function MemberAttendanceTab({
     return (
       <div className="p-6">
         {isLoading && (
-          <div className="mb-3 text-sm text-gray-500">
+          <div className="mb-3 flex items-center gap-2 text-sm text-gray-500">
+            <Loader size="w-4 h-4" showShadow={false} />
             Loading attendance...
           </div>
         )}
@@ -214,7 +216,8 @@ export function MemberAttendanceTab({
     <>
       <div className="p-1 space-y-2">
         {isLoading && (
-          <div className="text-xs text-gray-500 px-1">
+          <div className="flex items-center gap-2 text-xs text-gray-500 px-1">
+            <Loader size="w-4 h-4" showShadow={false} />
             Loading attendance...
           </div>
         )}

@@ -1,10 +1,9 @@
 import type { Metadata } from "next";
-import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
-import { AppSidebar } from "@/components/layout/Sidebar";
+import { DashboardGuard } from "@/components/auth/dashboard-guard";
 import { Navbar } from "@/components/layout/Navbar";
 import { RecentTracker } from "@/components/layout/recent-tracker";
-import { DashboardGuard } from "@/components/auth/dashboard-guard";
-import { GlobalLoader } from "@/components/ui/GlobalLoader";
+import { AppSidebar } from "@/components/layout/Sidebar";
+import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 
 export const metadata: Metadata = {
   title: process.env.NEXT_PUBLIC_APP_NAME,
@@ -20,7 +19,6 @@ export default function DashboardLayout({
     <DashboardGuard>
       <SidebarProvider>
         <RecentTracker />
-        <GlobalLoader />
 
         <div className="relative flex min-h-screen w-full bg-gray-50">
           <AppSidebar />

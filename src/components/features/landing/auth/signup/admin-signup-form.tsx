@@ -253,7 +253,7 @@ export default function AdminSignupForm({
           >
             {isLoading ? (
               <Span variant="default" className="flex items-center gap-2">
-                <Loader />
+                <Loader size="w-5 h-5" showShadow={false} />
                 Creating account…
               </Span>
             ) : (
