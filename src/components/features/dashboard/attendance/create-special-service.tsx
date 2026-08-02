@@ -198,6 +198,21 @@ export function CreateSpecialServiceModal({
       return;
     }
 
+    const invalidSchedule = daySchedules.find(
+      (schedule) =>
+        schedule.startTime &&
+        schedule.endTime &&
+        schedule.endTime <= schedule.startTime,
+    );
+    if (invalidSchedule) {
+      toast({
+        title: "Validation Error",
+        description: `End time must be after start time for ${format(new Date(invalidSchedule.date), "MMM d")}`,
+        variant: "destructive",
+      });
+      return;
+    }
+
     const id =
       typeof crypto !== "undefined" && crypto.randomUUID
         ? crypto.randomUUID()

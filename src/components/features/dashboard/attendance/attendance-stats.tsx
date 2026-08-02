@@ -54,7 +54,7 @@ export function AttendanceStatsView({
             </Button>
           ) : (
             <Button
-              disabled
+              onClick={onLoadMembers}
               className="bg-gray-300 text-gray-700 hover:bg-gray-300 whitespace-nowrap"
             >
               Members loaded

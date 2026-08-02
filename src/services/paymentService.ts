@@ -1,4 +1,4 @@
-import { authenticatedFetch } from "@/lib/api";
+import { apiFetch, authenticatedFetch } from "@/lib/api";
 import { BillingCycle, PaymentProvider, PlanType } from "@/lib/enums";
 import { InitializePaymentResponse } from "@/types";
 
@@ -54,4 +54,26 @@ export async function manualVerifyPayment(
     },
   );
   return response;
+}
+
+// Used by the public post-payment landing page for visitors who return from
+// the gateway without an active session — no auth required.
+export async function publicVerifyPayment(
+  reference: string,
+  provider: "PAYSTACK" | "FLUTTERWAVE",
+  transactionId?: string,
+): Promise<ManualVerifyResponse> {
+  const body: any = {
+    reference,
+    provider: provider.toLowerCase(),
+  };
+
+  if (transactionId) {
+    body.transactionId = transactionId;
+  }
+
+  return await apiFetch<ManualVerifyResponse>("/payment/verify/public", {
+    method: "POST",
+    body: JSON.stringify(body),
+  });
 }

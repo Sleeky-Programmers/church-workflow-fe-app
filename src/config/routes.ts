@@ -27,6 +27,7 @@ export enum Routes {
   UserDetails = `/dashboard/settings/users/[id]`,
 
   Checkout = "/checkout",
+  PaymentVerify = "/payment/verify",
 }
 
 export const RouteConfig = {
@@ -63,6 +64,7 @@ export const RouteConfig = {
   onboarding: Routes.Onboarding,
   home: Routes.Home,
   checkout: Routes.Checkout,
+  paymentVerify: Routes.PaymentVerify,
 } as const;
 
 export const getRouteWithParams = (

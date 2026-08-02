@@ -102,6 +102,7 @@ export function EventFormModal({
     if (!formData.title.trim()) nextErrors.title = "Title is required";
     if (!formData.date) nextErrors.date = "Date is required";
     if (!formData.startTime) nextErrors.startTime = "Start time is required";
+    if (!formData.endTime) nextErrors.endTime = "End time is required";
 
     if (
       formData.endTime &&
@@ -278,7 +279,7 @@ export function EventFormModal({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="event-end">End Time</Label>
+              <Label htmlFor="event-end">End Time *</Label>
               <Input
                 id="event-end"
                 type="time"
