@@ -3,6 +3,7 @@ import { LucideIcon } from "lucide-react";
 import {
   BillingCycle,
   ChurchSubscriptionStatus,
+  DiscountType,
   EventCalendarView,
   EventCategory,
   EventRecurrence,
@@ -454,6 +455,45 @@ export type Plan = {
   yearlyPrice: number;
   features: string[];
   popular?: boolean;
+};
+
+export type CurrentPlanResponse = Plan & {
+  status: SubscriptionStatus;
+  billingCycle: BillingCycle;
+  startDate: string;
+  endDate: string;
+  gracePeriodEndDate?: string;
+  isAutoRenew: boolean;
+  memberLimit: number;
+  userLimit: number;
+  customRolesEnabled: boolean;
+};
+
+export type Coupon = {
+  _id: string;
+  code: string;
+  description?: string;
+  discountType: DiscountType;
+  discount: number;
+  minPlanTier?: PlanType;
+  excludedPlans?: PlanType[];
+  isActive: boolean;
+  status: string;
+  expiryDate?: string;
+  validFrom?: string;
+  maxUsage?: number;
+  usageCount?: number;
+};
+
+export type PlanChangePreview = {
+  currentPlan: PlanType;
+  targetPlan: PlanType;
+  isPlanChange: boolean;
+  isUpgrade: boolean | null;
+  remainingDays: number;
+  requiredBillingCycle: BillingCycle;
+  newEndDate: string;
+  amount: number;
 };
 
 export type SubscriptionOverviewResponse = {

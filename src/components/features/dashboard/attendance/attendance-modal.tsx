@@ -414,7 +414,7 @@ export function AttendanceModal({
         absentCount={absentCount}
         isMembersLoaded={hasMembersLoaded}
         isAttendanceMarked={hasExistingAttendance || state.hasChanges}
-        showLoadMembersButton={!hasMembersLoaded}
+        showLoadMembersButton={!hasExistingAttendance && !state.hasChanges}
         loadMembersMuted={isEditMode}
         onLoadMembers={loadAllMembers}
         onOpenPresentMembers={openPresentMembersView}

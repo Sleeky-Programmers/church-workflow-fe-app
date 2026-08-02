@@ -10,6 +10,7 @@ import { getTeamColumns } from "@/components/features/dashboard/teams/team-colum
 import TeamsDeleteDialog from "@/components/features/dashboard/teams/team-delete-dialog";
 import { TeamStatusFilter } from "@/components/features/dashboard/teams/teams-filter-dropdown";
 import TeamsSearchBar from "@/components/features/dashboard/teams/teams-search-bar";
+import { TeamsMobileView } from "@/components/features/dashboard/teams/teams-mobile-view";
 import { ViewTeamReportDialog } from "@/components/features/dashboard/teams/view-team-report-dialog";
 import { Loader } from "@/components/ui/loader";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -380,6 +381,35 @@ export default function TeamsPage() {
       />
     </>
   );
+
+  if (isMobile) {
+    return (
+      <>
+        <TeamsMobileView
+          teams={filtered}
+          members={members}
+          isLoading={isLoading}
+          query={query}
+          onQueryChange={setQuery}
+          statusFilter={statusFilter}
+          setStatusFilter={setStatusFilter}
+          selectedMemberId={selectedMemberId}
+          setSelectedMemberId={setSelectedMemberId}
+          minMembers={minMembers}
+          setMinMembers={setMinMembers}
+          onClearFilters={handleClearFilters}
+          onAddTeam={handleAddTeam}
+          onEdit={handleEdit}
+          onManageMembers={handleManageMembers}
+          onMarkAttendance={handleMarkAttendance}
+          onViewReport={handleViewReport}
+          onDeleteRequest={setDeleteTarget}
+        />
+
+        {sharedDialogs}
+      </>
+    );
+  }
 
   return (
     <div className="space-y-6">

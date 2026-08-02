@@ -1,23 +1,31 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import Heading from "@/components/ui/typography/Heading";
-import { Text, Span } from "@/components/ui/typography/Text";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { cn } from "@/lib/utils";
 import { Check } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Loader } from "@/components/ui/loader";
+import Heading from "@/components/ui/typography/Heading";
+import { Span, Text } from "@/components/ui/typography/Text";
+import { useToast } from "@/hooks/use-toast";
 import {
   BillingCycle,
+  ChurchSubscriptionStatus,
   PlanType,
   SubscriptionStatus,
-  ChurchSubscriptionStatus,
 } from "@/lib/enums";
-import { Plan } from "@/types";
-import { useToast } from "@/hooks/use-toast";
-
+import { cn } from "@/lib/utils";
 import { getSubscriptionOverview } from "@/services/billingService";
+import { Plan } from "@/types";
+
+const PLAN_ORDER = [
+  PlanType.STARTER,
+  PlanType.GROWTH,
+  PlanType.EXPANSION,
+  PlanType.ENTERPRISE,
+];
 
 export default function BillingPage() {
   const [billingCycle, setBillingCycle] = useState<BillingCycle>(
@@ -66,7 +74,12 @@ export default function BillingPage() {
   };
 
   if (loading) {
-    return <Text>Loading billing...</Text>;
+    return (
+      <div className="flex items-center justify-center py-16 gap-2">
+        <Loader />
+        <Text variant="default">Loading billing plans...</Text>
+      </div>
+    );
   }
 
   return (
@@ -79,11 +92,7 @@ export default function BillingPage() {
         <Button
           variant="ghost"
           onClick={() => setBillingCycle(BillingCycle.MONTHLY)}
-          className={`px-4 py-2 rounded-full ${
-            billingCycle === BillingCycle.MONTHLY
-              ? "bg-primary text-white"
-              : "text-muted-foreground"
-          }`}
+          className={`px-4 py-2 rounded-full ${billingCycle === BillingCycle.MONTHLY ? "bg-primary text-white-600" : "text-muted-foreground"}`}
         >
           Monthly
         </Button>
@@ -91,11 +100,7 @@ export default function BillingPage() {
         <Button
           variant="ghost"
           onClick={() => setBillingCycle(BillingCycle.YEARLY)}
-          className={`px-4 py-2 rounded-full ${
-            billingCycle === BillingCycle.YEARLY
-              ? "bg-primary text-white"
-              : "text-muted-foreground"
-          }`}
+          className={`px-4 py-2 rounded-full ${billingCycle === BillingCycle.YEARLY ? "bg-primary text-white-600" : "text-muted-foreground"}`}
         >
           Yearly
         </Button>
@@ -110,6 +115,17 @@ export default function BillingPage() {
           const isCurrent =
             plan.type === currentPlan &&
             subscriptionStatus === SubscriptionStatus.ACTIVE;
+
+          const isActivePaidPlan =
+            !!currentPlan &&
+            currentPlan !== PlanType.STARTER &&
+            subscriptionStatus === SubscriptionStatus.ACTIVE;
+
+          const actionLabel = isActivePaidPlan
+            ? PLAN_ORDER.indexOf(plan.type) > PLAN_ORDER.indexOf(currentPlan)
+              ? "Upgrade"
+              : "Downgrade"
+            : "Get Started";
 
           return (
             <div
@@ -165,7 +181,7 @@ export default function BillingPage() {
                     variant={plan.popular ? "default" : "outline"}
                     className="w-full"
                   >
-                    Upgrade
+                    {actionLabel}
                   </Button>
                 )}
               </div>

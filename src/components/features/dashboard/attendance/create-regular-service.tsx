@@ -14,15 +14,22 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Span, Text } from "@/components/ui/typography/Text";
-import { useToast } from "@/hooks/use-toast";
-import { createWeeklyService } from "@/lib/api";
 import { convertTo12Hour } from "@/lib/utils";
 import { RegularService } from "@/types";
+
+export type PendingRegularService = {
+  title: string;
+  day: string;
+  startTime: string;
+  endTime: string;
+  location?: string;
+  frequency: "weekly" | "monthly";
+};
 
 type CreateRegularServiceModalProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onCreateServices: (services: RegularService[]) => void;
+  onCreateServices: (services: PendingRegularService[]) => Promise<void>;
 };
 
 const daysOfWeek = [
@@ -50,7 +57,6 @@ export function CreateRegularServiceModal({
   onOpenChange,
   onCreateServices,
 }: CreateRegularServiceModalProps) {
-  const { toast } = useToast();
   const [services, setServices] = useState<RegularService[]>([]);
   const [showTooltip, setShowTooltip] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
@@ -93,6 +99,13 @@ export function CreateRegularServiceModal({
       nextErrors.day = "Please select at least one day";
     if (!formData.startTime) nextErrors.startTime = "Please set a start time";
     if (!formData.endTime) nextErrors.endTime = "Please set an end time";
+    if (
+      formData.startTime &&
+      formData.endTime &&
+      formData.endTime <= formData.startTime
+    ) {
+      nextErrors.endTime = "End time must be after start time";
+    }
 
     if (Object.keys(nextErrors).length > 0) {
       setErrors(nextErrors);
@@ -124,7 +137,7 @@ export function CreateRegularServiceModal({
     }
     setIsCreating(true);
     try {
-      const created: RegularService[] = [];
+      const pending: PendingRegularService[] = [];
 
       for (const service of services) {
         const startTime = convertTo12Hour(service.startTime);
@@ -141,43 +154,21 @@ export function CreateRegularServiceModal({
             continue;
           }
 
-          console.log({
+          pending.push({
             title: service.title,
-            type: "REGULAR",
             day: dayEnum,
             startTime,
             endTime,
             location: service.location || "",
-          });
-
-          const createdService: any = await createWeeklyService({
-            title: service.title,
-            type: "REGULAR",
-            day: dayEnum,
-            startTime,
-            endTime,
-            location: service.location || "",
-          });
-
-          created.push({
-            id: createdService._id,
-            title: createdService.title,
-            type: "REGULAR",
-            day: day,
-            startTime: createdService.startTime,
-            endTime: createdService.endTime,
-            location: createdService.location,
             frequency: "weekly",
-            attendanceRecords: [],
           });
         }
       }
 
-      onCreateServices(created);
-      toast({
-        title: "Success",
-        description: `${created.length} service(s) created successfully`,
-      });
+      // Parent owns the actual API call(s) and the resulting toast/refetch,
+      // matching the special-service and event creation flows.
+      await onCreateServices(pending);
+
       onOpenChange(false);
       setServices([]);
       setFormData({
@@ -190,12 +181,8 @@ export function CreateRegularServiceModal({
         location: "",
         frequency: "weekly",
       });
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to create services",
-        variant: "destructive",
-      });
+    } catch (error) {
+      // Parent already surfaces an error toast; keep the modal open to retry.
     } finally {
       setIsCreating(false);
     }

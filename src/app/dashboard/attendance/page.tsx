@@ -7,7 +7,10 @@ import { useEffect, useMemo, useState } from "react";
 import { AttendanceEmptyState } from "@/components/features/dashboard/attendance/attendance-empty-state";
 import { AttendanceModal } from "@/components/features/dashboard/attendance/attendance-modal";
 import { CalendarGrid } from "@/components/features/dashboard/attendance/calendar-grid";
-import { CreateRegularServiceModal } from "@/components/features/dashboard/attendance/create-regular-service";
+import {
+  CreateRegularServiceModal,
+  PendingRegularService,
+} from "@/components/features/dashboard/attendance/create-regular-service";
 import { CreateSpecialServiceModal } from "@/components/features/dashboard/attendance/create-special-service";
 import {
   GivingRecordModal,
@@ -114,38 +117,16 @@ export default function AttendancePage() {
     loadServices();
   }, []);
 
-  const handleCreateServices = async (newServices: RegularService[]) => {
+  const handleCreateServices = async (newServices: PendingRegularService[]) => {
     try {
-      const monday = "MONDAY" as DAY;
-      // Create each service in the array
       for (const service of newServices) {
-        const aDay = service.day
-          ? (service.day.toUpperCase() as DAY)
-          : undefined;
-        const day = aDay ? aDay : monday;
-        console.log({
-          title: service.title,
-          type: "REGULAR",
-          day,
-          startTime: service.startTime,
-          endTime: service.endTime,
-          location: service.location,
-          description: service.description,
-          recurrence:
-            service.frequency === "weekly"
-              ? "WEEKLY_MONDAY"
-              : "MONTHLY_FIRST_MONDAY",
-          eventType: "WORSHIP_SERVICE",
-          reminderEnabled: false,
-        });
         await createChurchService({
           title: service.title,
           type: "REGULAR",
-          day,
+          day: service.day as DAY,
           startTime: service.startTime,
           endTime: service.endTime,
           location: service.location,
-          description: service.description,
           recurrence:
             service.frequency === "weekly"
               ? "WEEKLY_MONDAY"
@@ -161,8 +142,6 @@ export default function AttendancePage() {
         title: "Success",
         description: `${newServices.length} service(s) created successfully`,
       });
-
-      setIsRegularModalOpen(false);
     } catch (error: any) {
       toast({
         title: "Error",

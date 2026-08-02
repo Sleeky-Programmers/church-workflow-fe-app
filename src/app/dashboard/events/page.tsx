@@ -123,16 +123,7 @@ const mapFormDataToApiDto = (
         baseDto.recurrence = "SUNDAY";
         break;
       case EventRecurrence.WEEKLY:
-        if (payload.date) {
-          const dateObj = new Date(payload.date);
-          const dayName = dateObj
-            .toLocaleDateString("en-US", {
-              weekday: "long",
-            })
-            .toUpperCase() as DAY;
-          baseDto.day = dayName;
-          baseDto.recurrence = "WEEKLY_MONDAY";
-        }
+        baseDto.recurrence = "WEEKLY_MONDAY";
         break;
       case EventRecurrence.NONE:
         baseDto.recurrence = "NO_REPEAT";
@@ -152,6 +143,16 @@ const mapFormDataToApiDto = (
       default:
         baseDto.recurrence = "NO_REPEAT";
         break;
+    }
+
+    // The backend requires `day` for every REGULAR service. Default it to
+    // the selected date's weekday whenever the recurrence choice doesn't
+    // already imply one (e.g. "Weekly on Sunday" always means SUNDAY).
+    if (!baseDto.day && payload.date) {
+      const dateObj = new Date(payload.date);
+      baseDto.day = dateObj
+        .toLocaleDateString("en-US", { weekday: "long" })
+        .toUpperCase() as DAY;
     }
   }
 
@@ -274,16 +275,7 @@ export default function EventsPage() {
             updateData.recurrence = "SUNDAY";
             break;
           case EventRecurrence.WEEKLY:
-            if (payload.date) {
-              const dateObj = new Date(payload.date);
-              const dayName = dateObj
-                .toLocaleDateString("en-US", {
-                  weekday: "long",
-                })
-                .toUpperCase() as DAY;
-              updateData.day = dayName;
-              updateData.recurrence = "WEEKLY_MONDAY";
-            }
+            updateData.recurrence = "WEEKLY_MONDAY";
             break;
           case EventRecurrence.NONE:
             updateData.recurrence = "NO_REPEAT";
@@ -303,6 +295,15 @@ export default function EventsPage() {
           default:
             updateData.recurrence = "NO_REPEAT";
             break;
+        }
+
+        // Same as create: `day` is required for REGULAR services, so default
+        // it to the selected date's weekday when the recurrence doesn't imply one.
+        if (!updateData.day && payload.date) {
+          const dateObj = new Date(payload.date);
+          updateData.day = dateObj
+            .toLocaleDateString("en-US", { weekday: "long" })
+            .toUpperCase() as DAY;
         }
 
         await updateChurchService(editingEvent.id, updateData);
