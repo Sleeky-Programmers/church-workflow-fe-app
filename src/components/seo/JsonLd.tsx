@@ -1,4 +1,5 @@
 import { BASE_URL, SITE_NAME } from "@/lib/seo";
+import { FAQ_ITEMS } from "@/lib/faq-data";
 
 export function OrganizationJsonLd() {
   const schema = {
@@ -50,40 +51,14 @@ export function FaqJsonLd() {
   const schema = {
     "@context": "https://schema.org",
     "@type": "FAQPage",
-    mainEntity: [
-      {
-        "@type": "Question",
-        name: "What is Church Workflow?",
-        acceptedAnswer: {
-          "@type": "Answer",
-          text: "Church Workflow is an all-in-one church management software designed to help churches manage members, attendance, finance, tasks, and communication from a single platform.",
-        },
+    mainEntity: FAQ_ITEMS.map((item) => ({
+      "@type": "Question",
+      name: item.question,
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: item.answer,
       },
-      {
-        "@type": "Question",
-        name: "Is Church Workflow available in Nigeria?",
-        acceptedAnswer: {
-          "@type": "Answer",
-          text: "Yes. Church Workflow is built specifically for the Nigerian church context, with Naira pricing and local support.",
-        },
-      },
-      {
-        "@type": "Question",
-        name: "Does Church Workflow have a free plan?",
-        acceptedAnswer: {
-          "@type": "Answer",
-          text: "Yes. The Starter plan is free and supports up to 3 users and 100 members with core features like member management and attendance tracking.",
-        },
-      },
-      {
-        "@type": "Question",
-        name: "Can Church Workflow handle multiple branches?",
-        acceptedAnswer: {
-          "@type": "Answer",
-          text: "Yes. Church Workflow is multi-branch ready, allowing large churches to manage multiple locations under one unified system.",
-        },
-      },
-    ],
+    })),
   };
 
   return (

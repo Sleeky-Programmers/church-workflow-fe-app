@@ -110,6 +110,8 @@ export default function PricingSection() {
   return (
     <section id="pricing" className="relative w-full">
       <img
+        loading="lazy"
+        decoding="async"
         src="/landing-page/light-blue.png"
         alt=""
         aria-hidden="true"
@@ -118,6 +120,8 @@ export default function PricingSection() {
 
       <div className="relative z-10 py-20 px-6">
         <img
+          loading="lazy"
+          decoding="async"
           src="/assets/icons/star.svg"
           alt=""
           aria-hidden="true"
@@ -134,6 +138,8 @@ export default function PricingSection() {
             <span className="relative inline-block text-[#0C5FB3]">
               Flexible Plans
               <img
+                loading="lazy"
+                decoding="async"
                 src="/assets/icons/wave.svg"
                 alt=""
                 aria-hidden="true"

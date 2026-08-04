@@ -52,6 +52,8 @@ export default function HowItWorksSection() {
       className="relative bg-white py-20 px-6 overflow-hidden"
     >
       <img
+        loading="lazy"
+        decoding="async"
         src="/assets/icons/star.svg"
         alt=""
         aria-hidden="true"
@@ -68,6 +70,8 @@ export default function HowItWorksSection() {
           <span className="relative inline-block text-[#0C5FB3]">
             How Church Workflow Works
             <img
+              loading="lazy"
+              decoding="async"
               src="/assets/icons/wave.svg"
               alt=""
               aria-hidden="true"
@@ -110,6 +114,8 @@ export default function HowItWorksSection() {
 
             <div className="flex-1 relative">
               <img
+                loading="lazy"
+                decoding="async"
                 src="/assets/icons/star.svg"
                 alt=""
                 aria-hidden="true"
