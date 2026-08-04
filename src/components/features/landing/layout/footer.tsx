@@ -8,6 +8,18 @@ const productLinks = [
   { label: "Sign Up", href: "/auth/signup" },
 ];
 
+const solutionLinks = [
+  { label: "Church Management Software", href: "/church-management-software" },
+  {
+    label: "Church Administration Software",
+    href: "/church-administration-software",
+  },
+  {
+    label: "Church Management Software Nigeria",
+    href: "/church-management-software-nigeria",
+  },
+];
+
 const resourceLinks = [
   { label: "Help Center", href: "/#help" },
   { label: "Documentation", href: "/#docs" },
@@ -34,7 +46,7 @@ export default function Footer() {
       />
 
       <div className="relative z-10 max-w-6xl mx-auto px-6 pt-16 pb-8">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-12 mb-12">
           <div className="flex flex-col gap-4">
             <div className="flex items-center gap-3">
               <img
@@ -56,6 +68,21 @@ export default function Footer() {
             <p className="text-[#ffff] font-bold text-sm">Product</p>
             <div className="flex flex-col gap-3">
               {productLinks.map((link) => (
+                <Link
+                  key={link.label}
+                  href={link.href}
+                  className="text-[#ffff]/70 text-sm hover:text-[#ffff] transition-colors"
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-4">
+            <p className="text-[#ffff] font-bold text-sm">Solutions</p>
+            <div className="flex flex-col gap-3">
+              {solutionLinks.map((link) => (
                 <Link
                   key={link.label}
                   href={link.href}
