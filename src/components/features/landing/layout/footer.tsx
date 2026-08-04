@@ -2,22 +2,22 @@ import Link from "next/link";
 import { Text } from "@/components/ui/typography/Text";
 
 const productLinks = [
-  { label: "Features", href: "#features" },
-  { label: "How It Works", href: "#how-it-works" },
-  { label: "Pricing", href: "#pricing" },
+  { label: "Features", href: "/features" },
+  { label: "How It Works", href: "/#how-it-works" },
+  { label: "Pricing", href: "/pricing" },
   { label: "Sign Up", href: "/auth/signup" },
 ];
 
 const resourceLinks = [
-  { label: "Help Center", href: "#help" },
-  { label: "Documentation", href: "#docs" },
-  { label: "Privacy Policy", href: "#privacy" },
-  { label: "Terms of Service", href: "#terms" },
+  { label: "Help Center", href: "/#help" },
+  { label: "Documentation", href: "/#docs" },
+  { label: "Privacy Policy", href: "/#privacy" },
+  { label: "Terms of Service", href: "/#terms" },
 ];
 
 const contactLinks = [
-  { label: "Contact Us", href: "#contact" },
-  { label: "Support", href: "#support" },
+  { label: "Contact Us", href: "/#contact" },
+  { label: "Support", href: "/#support" },
   { label: "Login", href: "/auth/login" },
 ];
 
@@ -25,6 +25,8 @@ export default function Footer() {
   return (
     <footer id="contact" className="relative w-full overflow-hidden">
       <img
+        loading="lazy"
+        decoding="async"
         src="/landing-page/darkblue.png"
         alt=""
         aria-hidden="true"
@@ -36,6 +38,8 @@ export default function Footer() {
           <div className="flex flex-col gap-4">
             <div className="flex items-center gap-3">
               <img
+                loading="lazy"
+                decoding="async"
                 src="/assets/logo/horizontal/white.png"
                 alt="Church Workflow logo"
                 width={148}

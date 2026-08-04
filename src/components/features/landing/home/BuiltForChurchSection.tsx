@@ -56,6 +56,8 @@ export default function BuiltForChurchSection() {
       className="relative bg-white py-20 px-6 overflow-hidden"
     >
       <img
+        loading="lazy"
+        decoding="async"
         src="/assets/icons/star.svg"
         alt=""
         aria-hidden="true"
@@ -64,6 +66,8 @@ export default function BuiltForChurchSection() {
         className="absolute top-10 right-10 select-none pointer-events-none"
       />
       <img
+        loading="lazy"
+        decoding="async"
         src="/assets/icons/star.svg"
         alt=""
         aria-hidden="true"
@@ -83,6 +87,8 @@ export default function BuiltForChurchSection() {
             <span className="relative inline-block text-blue-600">
               Church Administration
               <img
+                loading="lazy"
+                decoding="async"
                 src="/assets/icons/wave.svg"
                 alt=""
                 aria-hidden="true"
@@ -115,6 +121,8 @@ export default function BuiltForChurchSection() {
 
         <div className="flex-1 relative flex items-center justify-center">
           <img
+            loading="lazy"
+            decoding="async"
             src="/assets/icons/star.svg"
             alt=""
             aria-hidden="true"

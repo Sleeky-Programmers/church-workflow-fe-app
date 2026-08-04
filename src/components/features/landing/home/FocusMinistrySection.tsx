@@ -45,6 +45,8 @@ export default function FocusMinistrySection() {
   return (
     <section id="features" className="relative w-full">
       <img
+        loading="lazy"
+        decoding="async"
         src="/landing-page/darkblue.png"
         alt=""
         aria-hidden="true"
@@ -53,6 +55,8 @@ export default function FocusMinistrySection() {
 
       <div className="relative z-10 py-20 px-6">
         <img
+          loading="lazy"
+          decoding="async"
           src="/assets/icons/star.svg"
           alt=""
           aria-hidden="true"
@@ -67,6 +71,8 @@ export default function FocusMinistrySection() {
             <span className="relative inline-block">
               Focus More on Ministry.
               <img
+                loading="lazy"
+                decoding="async"
                 src="/assets/icons/wave.svg"
                 alt=""
                 aria-hidden="true"

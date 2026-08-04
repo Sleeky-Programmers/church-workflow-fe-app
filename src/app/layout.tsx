@@ -3,13 +3,15 @@ import "./globals.css";
 
 import { Inter } from "next/font/google";
 
+import { Suspense } from "react";
+import { AnalyticsPageView } from "@/components/analytics/AnalyticsPageView";
 import { GoogleAnalytics } from "@/components/analytics/GoogleAnalytics";
 import {
   OrganizationJsonLd,
   SoftwareApplicationJsonLd,
 } from "@/components/seo/JsonLd";
 import { Toaster } from "@/components/ui/toaster";
-import { BASE_URL, SITE_NAME } from "@/lib/seo";
+import { BASE_URL, IS_PRODUCTION, SITE_NAME } from "@/lib/seo";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -27,11 +29,11 @@ export const metadata: Metadata = {
   },
   description: "Your Church workflow processes all in one place.",
   robots: {
-    index: true,
-    follow: true,
+    index: IS_PRODUCTION,
+    follow: IS_PRODUCTION,
     googleBot: {
-      index: true,
-      follow: true,
+      index: IS_PRODUCTION,
+      follow: IS_PRODUCTION,
     },
   },
   ...(process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION
@@ -65,6 +67,9 @@ export default function RootLayout({
         <GoogleAnalytics />
       </head>
       <body>
+        <Suspense fallback={null}>
+          <AnalyticsPageView />
+        </Suspense>
         {children}
         <Toaster />
       </body>

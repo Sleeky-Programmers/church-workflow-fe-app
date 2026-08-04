@@ -15,6 +15,7 @@ import { resendOtp, verifyOtp } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
 import { initializeAuthSession } from "@/lib/auth/session";
 import { getSelectedPlan } from "@/lib/plan-selection";
+import { trackEvent } from "@/lib/analytics";
 
 export function SignupPageContent() {
   const router = useRouter();
@@ -113,6 +114,7 @@ export function SignupPageContent() {
     }
 
     if (isAdmin) {
+      trackEvent("sign_up", { method: "admin_invite" });
       router.push(RouteConfig.dashboard.home);
       return;
     }
@@ -140,6 +142,7 @@ export function SignupPageContent() {
       }
 
       sessionStorage.setItem("signupData", JSON.stringify(signupData));
+      trackEvent("sign_up", { method: "email" });
 
       const pendingPlan = getSelectedPlan();
       if (pendingPlan) {

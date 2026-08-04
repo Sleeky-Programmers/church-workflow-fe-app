@@ -32,6 +32,8 @@ export default function CtaSection() {
   return (
     <section className="relative min-h-[600px] flex items-stretch overflow-hidden">
       <img
+        loading="lazy"
+        decoding="async"
         src="/landing-page/light-blue.png"
         alt=""
         aria-hidden="true"
@@ -46,6 +48,8 @@ export default function CtaSection() {
         >
           <div className="absolute top-12 left-6 select-none pointer-events-none opacity-30">
             <img
+              loading="lazy"
+              decoding="async"
               src="/assets/icons/star.svg"
               alt=""
               aria-hidden="true"
@@ -63,6 +67,8 @@ export default function CtaSection() {
             <span className="relative inline-block text-[#0C5FB3]">
               Church Operations?
               <img
+                loading="lazy"
+                decoding="async"
                 src="/assets/icons/wave.svg"
                 alt=""
                 aria-hidden="true"

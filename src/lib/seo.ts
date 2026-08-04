@@ -3,6 +3,12 @@ import type { Metadata } from "next";
 export const BASE_URL = "https://churchworkflow.com";
 export const SITE_NAME = "Church Workflow";
 
+// Vercel sets VERCEL_ENV to "production" | "preview" | "development".
+// Falls back to NODE_ENV for non-Vercel builds so staging/local never gets indexed.
+export const IS_PRODUCTION = process.env.VERCEL_ENV
+  ? process.env.VERCEL_ENV === "production"
+  : process.env.NODE_ENV === "production";
+
 const DEFAULT_KEYWORDS = [
   "church management software",
   "church management software Nigeria",
