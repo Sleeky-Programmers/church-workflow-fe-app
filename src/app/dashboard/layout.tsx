@@ -6,8 +6,12 @@ import { AppSidebar } from "@/components/layout/Sidebar";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 
 export const metadata: Metadata = {
-  title: process.env.NEXT_PUBLIC_APP_NAME,
+  title: process.env.NEXT_PUBLIC_APP_NAME || "Dashboard",
   description: "Your Church workflow processes all in one place.",
+  robots: {
+    index: false,
+    follow: false,
+  },
 };
 
 export default function DashboardLayout({

@@ -1,6 +1,5 @@
 import type { MetadataRoute } from "next";
-
-const BASE_URL = "https://churchworkflow.com";
+import { BASE_URL } from "@/lib/seo";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   return [
@@ -10,19 +9,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "weekly",
       priority: 1,
     },
-    {
-      url: `${BASE_URL}/pricing`,
-      lastModified: new Date(),
-      changeFrequency: "monthly",
-      priority: 0.8,
-    },
-    {
-      url: `${BASE_URL}/features`,
-      lastModified: new Date(),
-      changeFrequency: "monthly",
-      priority: 0.8,
-    },
-    // Add more public pages here as they are created
-    // { url: `${BASE_URL}/church-management-software-nigeria`, ... }
+    // Add more public, indexable pages here as they are created
+    // (do not list /auth, /dashboard, /checkout, /payment, /onboarding — these are noindexed)
   ];
 }
