@@ -4,6 +4,7 @@ import "./globals.css";
 import { Inter } from "next/font/google";
 
 import { Suspense } from "react";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import { AnalyticsPageView } from "@/components/analytics/AnalyticsPageView";
 import { GoogleAnalytics } from "@/components/analytics/GoogleAnalytics";
 import {
@@ -72,6 +73,7 @@ export default function RootLayout({
         </Suspense>
         {children}
         <Toaster />
+        <SpeedInsights />
       </body>
     </html>
   );

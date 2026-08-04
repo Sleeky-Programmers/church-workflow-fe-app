@@ -2,7 +2,8 @@
   "permissions": {
     "allow": [
       "Bash(curl -s -o /dev/null -w \"landing: %{http_code}\\\\n\" http://localhost:3000/)",
-      "Bash(node -e ' *)"
+      "Bash(node -e ' *)",
+      "Bash(npx next *)"
     ]
   }
 }
