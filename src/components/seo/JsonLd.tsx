@@ -1,10 +1,12 @@
+import { BASE_URL, SITE_NAME } from "@/lib/seo";
+
 export function OrganizationJsonLd() {
   const schema = {
     "@context": "https://schema.org",
     "@type": "Organization",
-    name: "Church Workflow",
-    url: "https://churchworkflow.com",
-    logo: "https://churchworkflow.com/assets/logo/horizontal/main.png",
+    name: SITE_NAME,
+    url: BASE_URL,
+    logo: `${BASE_URL}/assets/logo/horizontal/main.png`,
     description:
       "Church Workflow is a church administration software for managing members, communication, finance, and operations efficiently.",
     sameAs: [],
@@ -22,10 +24,10 @@ export function SoftwareApplicationJsonLd() {
   const schema = {
     "@context": "https://schema.org",
     "@type": "SoftwareApplication",
-    name: "Church Workflow",
+    name: SITE_NAME,
     applicationCategory: "BusinessApplication",
     operatingSystem: "Web",
-    url: "https://churchworkflow.com",
+    url: BASE_URL,
     description:
       "All-in-one church management software for member tracking, attendance, finance, and ministry operations.",
     offers: {
@@ -33,11 +35,6 @@ export function SoftwareApplicationJsonLd() {
       price: "0",
       priceCurrency: "NGN",
       description: "Free starter plan available",
-    },
-    aggregateRating: {
-      "@type": "AggregateRating",
-      ratingValue: "4.8",
-      reviewCount: "120",
     },
   };
 
