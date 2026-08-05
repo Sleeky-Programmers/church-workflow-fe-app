@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 
-export const BASE_URL = "https://churchworkflow.com";
+export const BASE_URL =
+  process.env.NEXT_PUBLIC_BASE_URL || "https://app.churchworkflow.com";
 export const SITE_NAME = "Church Workflow";
 
 // Vercel sets VERCEL_ENV to "production" | "preview" | "development".
