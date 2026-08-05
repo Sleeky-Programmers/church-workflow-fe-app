@@ -35,7 +35,6 @@ export function getEventRecurrenceOptions(date?: string) {
   return [
     { value: EventRecurrence.NONE, label: "Does not repeat" },
     { value: EventRecurrence.DAILY, label: "Daily" },
-    { value: EventRecurrence.WEEKLY, label: `Weekly on ${weekday}` },
     { value: EventRecurrence.SUNDAY, label: "Weekly on Sunday only" },
     {
       value: EventRecurrence.MONTHLY,

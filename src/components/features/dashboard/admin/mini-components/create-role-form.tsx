@@ -6,6 +6,7 @@ import { PermissionModuleSelector } from "@/components/features/dashboard/admin/
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Loader } from "@/components/ui/loader";
 import { Textarea } from "@/components/ui/textarea";
 import Heading from "@/components/ui/typography/Heading";
 import { Span, Text } from "@/components/ui/typography/Text";
@@ -200,7 +201,14 @@ export function CreateRoleForm({
           </Button>
         )}
         <Button type="submit" disabled={isLoading || !name.trim()}>
-          {isLoading ? loadingText : submitButtonText || defaultSubmitText}
+          {isLoading ? (
+            <span className="flex items-center gap-2">
+              <Loader size="w-4 h-4" showShadow={false} />
+              {loadingText}
+            </span>
+          ) : (
+            submitButtonText || defaultSubmitText
+          )}
         </Button>
       </div>
     </form>

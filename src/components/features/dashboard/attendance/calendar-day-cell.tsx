@@ -53,7 +53,7 @@ export function CalendarDayCell({
         <div
           className={`
             text-sm font-medium
-            ${day.isToday ? "flex items-center justify-center w-6 h-6 bg-primary-600 text-white rounded-full" : day.isCurrentMonth ? "text-gray-500" : "text-gray-400"}
+            ${day.isToday ? "flex items-center justify-center w-6 h-6 bg-primary-600 text-white-600 rounded-full" : day.isCurrentMonth ? "text-gray-500" : "text-gray-600"}
           `}
         >
           {format(day.date, "d")}
@@ -61,8 +61,9 @@ export function CalendarDayCell({
 
         {hasMultipleRegularServices && (
           <ServicePopover services={day.services} date={day.dateString}>
-            <Button className="text-xs text-primary-600 hover:text-primary-700">
-              {day.services.length} services
+            <Button className="text-xs text-white-600 hover:text-primary-50">
+              {day.services.length} service
+              {day.services.length !== 1 ? "s" : ""}
             </Button>
           </ServicePopover>
         )}
@@ -99,7 +100,7 @@ export function CalendarDayCell({
                 <Star className="h-3 w-3 text-primary flex-shrink-0 mt-0.5" />
                 <div className="flex-1 min-w-0">
                   <Text className="font-semibold text-left truncate">
-                    {service.serviceName}
+                    {service.title}
                   </Text>
                   <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 mt-0.5">
                     {service.location && (

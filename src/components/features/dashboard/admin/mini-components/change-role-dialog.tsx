@@ -9,6 +9,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { Loader } from "@/components/ui/loader";
 import {
   Select,
   SelectContent,
@@ -91,7 +92,14 @@ export function ChangeRoleDialog({
               type="submit"
               disabled={isLoading || selectedRole === currentRoleId}
             >
-              {isLoading ? "Saving..." : "Save Changes"}
+              {isLoading ? (
+                <span className="flex items-center gap-2">
+                  <Loader size="w-4 h-4" showShadow={false} />
+                  Saving...
+                </span>
+              ) : (
+                "Save Changes"
+              )}
             </Button>
           </DialogFooter>
         </form>

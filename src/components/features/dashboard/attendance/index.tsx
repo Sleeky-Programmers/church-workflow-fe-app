@@ -9,7 +9,10 @@ import { fetchServices } from "@/lib/api";
 import { RegularService } from "@/types";
 import { AttendanceModal } from "./attendance-modal";
 import { CalendarGrid } from "./calendar-grid";
-import { CreateRegularServiceModal } from "./create-regular-service";
+import {
+  CreateRegularServiceModal,
+  PendingRegularService,
+} from "./create-regular-service";
 import { ServiceTypeModal } from "./service-type";
 import { Text } from "@/components/ui/typography/Text";
 import Heading from "@/components/ui/typography/Heading";
@@ -58,7 +61,7 @@ export function AttendanceCalendarPage() {
 
   const handleViewServiceDetails = (service: RegularService, _date: string) => {
     toast({
-      title: service.serviceName,
+      title: service.title,
       description:
         "Service details modal is available on the dashboard attendance page.",
     });
@@ -86,8 +89,21 @@ export function AttendanceCalendarPage() {
     }
   };
 
-  const handleCreateServices = (newServices: RegularService[]) => {
-    setServices((prev) => [...prev, ...newServices]);
+  const handleCreateServices = async (newServices: PendingRegularService[]) => {
+    setServices((prev) => [
+      ...prev,
+      ...newServices.map((service) => ({
+        id: `${Date.now()}-${service.day}`,
+        title: service.title,
+        type: "REGULAR" as const,
+        day: service.day,
+        startTime: service.startTime,
+        endTime: service.endTime,
+        location: service.location,
+        frequency: service.frequency,
+        attendanceRecords: [],
+      })),
+    ]);
   };
 
   const handleAttendanceSaved = (_payload: {

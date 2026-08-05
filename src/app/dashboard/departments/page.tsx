@@ -170,8 +170,8 @@ export default function DepartmentPage() {
 
         <div className="divide-y">
           {loading ? (
-            <div className="px-4 py-6 text-sm text-gray-500">
-              Loading departments...
+            <div className="px-4 py-10 flex items-center justify-center">
+              <Loader size="w-10 h-10" showShadow={false} />
             </div>
           ) : (
             data.map((dept) => (
@@ -283,6 +283,7 @@ export default function DepartmentPage() {
           data={data}
           rowKey={(row) => row.id}
           showCheckbox
+          isLoading={loading}
           onRowClick={(row) =>
             router.push(RouteConfig.dashboard.departmentDetails(row.id))
           }

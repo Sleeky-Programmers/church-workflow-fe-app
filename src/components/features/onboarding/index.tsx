@@ -34,10 +34,6 @@ export default function ChurchOnboarding() {
   const [services, setServices] = useState<WeeklyServicesValues>([]);
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [isSubmittingIdentity, setIsSubmittingIdentity] = useState(false);
-  const [uploadErrorSummary, setUploadErrorSummary] = useState<string | null>(
-    null,
-  );
-  const [uploadErrorMessages, setUploadErrorMessages] = useState<string[]>([]);
   const [servicesSynced, setServicesSynced] = useState(false);
 
   const { toast } = useToast();
@@ -191,7 +187,7 @@ export default function ChurchOnboarding() {
     const uniqueServices = new Map<
       string,
       {
-        serviceName: string;
+        title: string;
         day: string;
         startTime: string;
         endTime: string;
@@ -205,14 +201,14 @@ export default function ChurchOnboarding() {
         const normalizedDay = day.trim().toUpperCase();
         const location = (service.location || "").trim();
         const key = [
-          service.serviceName.trim().toLowerCase(),
+          service.title.trim().toLowerCase(),
           normalizedDay,
           startTime.trim().toUpperCase(),
           location.toLowerCase(),
         ].join("|");
         if (!uniqueServices.has(key)) {
           uniqueServices.set(key, {
-            serviceName: service.serviceName,
+            title: service.title,
             day: normalizedDay,
             startTime,
             endTime,
@@ -224,7 +220,7 @@ export default function ChurchOnboarding() {
 
     for (const service of uniqueServices.values()) {
       await createWeeklyService({
-        title: service.serviceName,
+        title: service.title,
         type: "REGULAR",
         day: service.day,
         startTime: service.startTime,
@@ -245,40 +241,6 @@ export default function ChurchOnboarding() {
       toast({
         title: "Error",
         description: error.message || "Failed to create weekly services",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const onUploadSubmit = async (data: UploadMembersValues) => {
-    if (!data.csvFile) {
-      alert("Please select a CSV file");
-      return;
-    }
-
-    try {
-      setUploadErrorSummary(null);
-      setUploadErrorMessages([]);
-      await persistWeeklyServices();
-      markMembersUploaded();
-      router.push(RouteConfig.dashboard.home);
-    } catch (error: any) {
-      const summary =
-        error?.response?.data?.message ||
-        error?.message ||
-        "Members upload failed";
-      const details = Array.isArray(error?.response?.data?.errors)
-        ? error.response.data.errors.map(
-            (entry: { row?: number; column?: string; reason?: string }) =>
-              `Row ${entry.row ?? "?"}, ${entry.column ?? "field"}: ${entry.reason ?? "Invalid value"}`,
-          )
-        : [];
-
-      setUploadErrorSummary(summary);
-      setUploadErrorMessages(details);
-      toast({
-        title: "Error",
-        description: summary,
         variant: "destructive",
       });
     }

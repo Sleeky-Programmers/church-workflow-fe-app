@@ -15,6 +15,7 @@ import { resendOtp, verifyOtp } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
 import { initializeAuthSession } from "@/lib/auth/session";
 import { getSelectedPlan } from "@/lib/plan-selection";
+import { trackEvent } from "@/lib/analytics";
 
 export function SignupPageContent() {
   const router = useRouter();
@@ -27,6 +28,14 @@ export function SignupPageContent() {
 
   const preFilledSignupEmail = searchParams?.get("email") || "";
   const { toast } = useToast();
+
+  const handleBack = () => {
+    if (currentStep === SignUpStep.VERIFY_OTP) {
+      setCurrentStep(SignUpStep.SIGNUP);
+      return;
+    }
+    router.push("/");
+  };
 
   useEffect(() => {
     if (typeof window === "undefined") {
@@ -69,7 +78,7 @@ export function SignupPageContent() {
 
   if (isLoading) {
     return (
-      <AuthLayout variant="signup">
+      <AuthLayout variant="signup" onBack={() => router.push("/")}>
         <div className="flex flex-col items-center justify-center gap-4">
           <Loader />
           <Text variant="muted">Loading your invite...</Text>
@@ -80,7 +89,7 @@ export function SignupPageContent() {
 
   if (error && isAdmin) {
     return (
-      <AuthLayout variant="signup">
+      <AuthLayout variant="signup" onBack={() => router.push("/")}>
         <div className="flex flex-col items-center justify-center gap-4">
           <Text variant="error" className="text-center">
             {error}
@@ -105,6 +114,7 @@ export function SignupPageContent() {
     }
 
     if (isAdmin) {
+      trackEvent("sign_up", { method: "admin_invite" });
       router.push(RouteConfig.dashboard.home);
       return;
     }
@@ -132,6 +142,7 @@ export function SignupPageContent() {
       }
 
       sessionStorage.setItem("signupData", JSON.stringify(signupData));
+      trackEvent("sign_up", { method: "email" });
 
       const pendingPlan = getSelectedPlan();
       if (pendingPlan) {
@@ -167,7 +178,7 @@ export function SignupPageContent() {
   const layoutVariant = isAdmin ? "admin-signup" : "signup";
 
   return (
-    <AuthLayout variant={layoutVariant}>
+    <AuthLayout variant={layoutVariant} onBack={handleBack}>
       <div className="relative">
         {currentStep === SignUpStep.SIGNUP && !isAdmin && (
           <SignupForm

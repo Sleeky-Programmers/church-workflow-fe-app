@@ -22,7 +22,7 @@ type Props = {
 const convertChurchServiceToEvent = (service: ChurchService): ChurchEvent => {
   return {
     id: service.id,
-    title: service.serviceName,
+    title: service.title,
     type: EventType.WORSHIP_SERVICE,
     recurrence: EventRecurrence.WEEKLY,
     date: new Date().toISOString().split("T")[0],

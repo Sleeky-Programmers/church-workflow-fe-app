@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { HelpCircle, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Loader } from "@/components/ui/loader";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
@@ -260,7 +261,14 @@ export default function AccountSettingsPage() {
                 disabled={isLoading}
                 className="border-destructive-300 text-destructive-600 hover:bg-red-50"
               >
-                {isLoading ? "Processing..." : "Unschedule Account Deletion"}
+                {isLoading ? (
+                  <span className="flex items-center gap-2">
+                    <Loader size="w-4 h-4" showShadow={false} />
+                    Processing...
+                  </span>
+                ) : (
+                  "Unschedule Account Deletion"
+                )}
               </Button>
             </div>
             <div className="flex items-start gap-2 text-sm text-gray-600 mt-2">

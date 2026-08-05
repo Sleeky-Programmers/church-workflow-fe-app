@@ -2,22 +2,34 @@ import Link from "next/link";
 import { Text } from "@/components/ui/typography/Text";
 
 const productLinks = [
-  { label: "Features", href: "#features" },
-  { label: "How It Works", href: "#how-it-works" },
-  { label: "Pricing", href: "#pricing" },
+  { label: "Features", href: "/features" },
+  { label: "How It Works", href: "/#how-it-works" },
+  { label: "Pricing", href: "/pricing" },
   { label: "Sign Up", href: "/auth/signup" },
 ];
 
+const solutionLinks = [
+  { label: "Church Management Software", href: "/church-management-software" },
+  {
+    label: "Church Administration Software",
+    href: "/church-administration-software",
+  },
+  {
+    label: "Church Management Software Nigeria",
+    href: "/church-management-software-nigeria",
+  },
+];
+
 const resourceLinks = [
-  { label: "Help Center", href: "#help" },
-  { label: "Documentation", href: "#docs" },
-  { label: "Privacy Policy", href: "#privacy" },
-  { label: "Terms of Service", href: "#terms" },
+  { label: "Help Center", href: "/#help" },
+  { label: "Documentation", href: "/#docs" },
+  { label: "Privacy Policy", href: "/#privacy" },
+  { label: "Terms of Service", href: "/#terms" },
 ];
 
 const contactLinks = [
-  { label: "Contact Us", href: "#contact" },
-  { label: "Support", href: "#support" },
+  { label: "Contact Us", href: "/#contact" },
+  { label: "Support", href: "/#support" },
   { label: "Login", href: "/auth/login" },
 ];
 
@@ -25,6 +37,8 @@ export default function Footer() {
   return (
     <footer id="contact" className="relative w-full overflow-hidden">
       <img
+        loading="lazy"
+        decoding="async"
         src="/landing-page/darkblue.png"
         alt=""
         aria-hidden="true"
@@ -32,10 +46,12 @@ export default function Footer() {
       />
 
       <div className="relative z-10 max-w-6xl mx-auto px-6 pt-16 pb-8">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-12 mb-12">
           <div className="flex flex-col gap-4">
             <div className="flex items-center gap-3">
               <img
+                loading="lazy"
+                decoding="async"
                 src="/assets/logo/horizontal/white.png"
                 alt="Church Workflow logo"
                 width={148}
@@ -52,6 +68,21 @@ export default function Footer() {
             <p className="text-[#ffff] font-bold text-sm">Product</p>
             <div className="flex flex-col gap-3">
               {productLinks.map((link) => (
+                <Link
+                  key={link.label}
+                  href={link.href}
+                  className="text-[#ffff]/70 text-sm hover:text-[#ffff] transition-colors"
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-4">
+            <p className="text-[#ffff] font-bold text-sm">Solutions</p>
+            <div className="flex flex-col gap-3">
+              {solutionLinks.map((link) => (
                 <Link
                   key={link.label}
                   href={link.href}

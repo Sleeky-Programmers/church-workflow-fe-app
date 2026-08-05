@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import LoginForm from "@/components/features/landing/auth/login/login";
 import ForgotPasswordForm from "@/components/features/landing/auth/login/forgot-password";
 import VerifyCodeForm from "@/components/features/landing/auth/login/verify-code";
@@ -16,8 +17,26 @@ type AuthStep = "login" | "forgot-password" | "verify-code" | "reset-password";
 export default function LoginPage() {
   const [step, setStep] = useState<AuthStep>("login");
   const [email, setEmail] = useState("");
+  const router = useRouter();
 
   const { toast } = useToast();
+
+  const handleBack = () => {
+    switch (step) {
+      case "forgot-password":
+        setStep("login");
+        break;
+      case "verify-code":
+        setStep("forgot-password");
+        break;
+      case "reset-password":
+        setStep("verify-code");
+        break;
+      default:
+        router.push("/");
+        break;
+    }
+  };
 
   const getVariant = (): AuthVariant => {
     switch (step) {
@@ -62,7 +81,7 @@ export default function LoginPage() {
   };
 
   return (
-    <AuthLayout variant={getVariant()}>
+    <AuthLayout variant={getVariant()} onBack={handleBack}>
       <AnimatePresence mode="wait">
         <motion.div
           key={step}
@@ -76,10 +95,7 @@ export default function LoginPage() {
           )}
 
           {step === "forgot-password" && (
-            <ForgotPasswordForm
-              onSubmit={handleForgotPassword}
-              onBackToLogin={() => setStep("login")}
-            />
+            <ForgotPasswordForm onSubmit={handleForgotPassword} />
           )}
 
           {step === "verify-code" && (

@@ -59,11 +59,11 @@ export function ServiceDetailModal({
   const femaleCount = Math.max(attendanceCount - maleCount, 0);
 
   const sections = useMemo(() => {
-    if (service?.serviceName.toLowerCase() === "sunday service") {
+    if (service?.title.toLowerCase() === "sunday service") {
       return ["First Service Attendance", "Second Service Attendance"];
     }
     return ["Service Attendance"];
-  }, [service?.serviceName]);
+  }, [service?.title]);
 
   if (!service || !parsedDate) return null;
 
@@ -76,9 +76,7 @@ export function ServiceDetailModal({
           className="max-w-md p-0 overflow-hidden max-sm:max-h-[88vh]"
         >
           <DialogHeader className="px-5 py-4 border-b">
-            <DialogTitle className="text-2xl">
-              {service.serviceName}
-            </DialogTitle>
+            <DialogTitle className="text-2xl">{service.title}</DialogTitle>
           </DialogHeader>
 
           <div className="px-5 py-4 space-y-4 overflow-y-auto">
@@ -144,7 +142,7 @@ export function ServiceDetailModal({
       <OrderOfServiceModal
         open={isOrderModalOpen}
         onOpenChange={setIsOrderModalOpen}
-        serviceName={service.serviceName}
+        title={service.title}
         items={orderItems}
         editable={canEditOrder}
         onSave={onSaveOrder}

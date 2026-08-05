@@ -388,7 +388,7 @@ export default function MembershipPage() {
       <div className="py-4 sm:py-6 px-3 sm:px-4 relative">
         {isLoading && (
           <div className="absolute inset-0 flex items-center justify-center bg-white/60 z-10">
-            <Loader className="h-6 w-6" />
+            <Loader size="w-10 h-10" showShadow={false} />
           </div>
         )}
         <MembersTable

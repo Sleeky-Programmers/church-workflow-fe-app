@@ -17,7 +17,6 @@ import React from "react";
 
 interface ForgotPasswordFormProps {
   onSubmit: (email: string) => void;
-  onBackToLogin: () => void;
 }
 
 type ForgotPasswordFormValues = {
@@ -26,7 +25,6 @@ type ForgotPasswordFormValues = {
 
 export default function ForgotPasswordForm({
   onSubmit,
-  onBackToLogin,
 }: ForgotPasswordFormProps) {
   const [isLoading, setIsLoading] = React.useState(false);
   const form = useForm<ForgotPasswordFormValues>({
@@ -75,23 +73,13 @@ export default function ForgotPasswordForm({
           <Button type="submit" disabled={isLoading} className="w-full">
             {isLoading ? (
               <Span className="flex items-center gap-2">
-                <Loader />
+                <Loader size="w-5 h-5" showShadow={false} />
                 Sending…
               </Span>
             ) : (
               "Continue"
             )}
           </Button>
-          <div className="text-center">
-            <Button
-              type="button"
-              variant="link"
-              onClick={onBackToLogin}
-              className="h-auto p-0"
-            >
-              ← Back to login
-            </Button>
-          </div>
         </form>
       </Form>
     </div>

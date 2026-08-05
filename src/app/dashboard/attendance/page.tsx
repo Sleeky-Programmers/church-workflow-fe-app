@@ -7,7 +7,10 @@ import { useEffect, useMemo, useState } from "react";
 import { AttendanceEmptyState } from "@/components/features/dashboard/attendance/attendance-empty-state";
 import { AttendanceModal } from "@/components/features/dashboard/attendance/attendance-modal";
 import { CalendarGrid } from "@/components/features/dashboard/attendance/calendar-grid";
-import { CreateRegularServiceModal } from "@/components/features/dashboard/attendance/create-regular-service";
+import {
+  CreateRegularServiceModal,
+  PendingRegularService,
+} from "@/components/features/dashboard/attendance/create-regular-service";
 import { CreateSpecialServiceModal } from "@/components/features/dashboard/attendance/create-special-service";
 import {
   GivingRecordModal,
@@ -18,6 +21,7 @@ import { ServiceDetailModal } from "@/components/features/dashboard/attendance/s
 import { ServiceTypeModal } from "@/components/features/dashboard/attendance/service-type";
 import { SpecialAttendanceModal } from "@/components/features/dashboard/attendance/special-attendance-modal";
 import { Input } from "@/components/ui/input";
+import { Loader } from "@/components/ui/loader";
 import Heading from "@/components/ui/typography/Heading";
 import { Text } from "@/components/ui/typography/Text";
 import { useToast } from "@/hooks/use-toast";
@@ -113,21 +117,16 @@ export default function AttendancePage() {
     loadServices();
   }, []);
 
-  const handleCreateServices = async (newServices: RegularService[]) => {
+  const handleCreateServices = async (newServices: PendingRegularService[]) => {
     try {
-      const monday = "MONDAY" as DAY;
-      // Create each service in the array
       for (const service of newServices) {
-        const aDay = service.day as DAY;
-        const day = aDay ? aDay : monday;
         await createChurchService({
-          title: service.serviceName,
+          title: service.title,
           type: "REGULAR",
-          day,
+          day: service.day as DAY,
           startTime: service.startTime,
           endTime: service.endTime,
           location: service.location,
-          description: service.description,
           recurrence:
             service.frequency === "weekly"
               ? "WEEKLY_MONDAY"
@@ -143,8 +142,6 @@ export default function AttendancePage() {
         title: "Success",
         description: `${newServices.length} service(s) created successfully`,
       });
-
-      setIsRegularModalOpen(false);
     } catch (error: any) {
       toast({
         title: "Error",
@@ -237,7 +234,7 @@ export default function AttendancePage() {
   const handleCreateSpecialService = async (service: SpecialServiceEvent) => {
     try {
       await createChurchService({
-        title: service.serviceName,
+        title: service.title,
         type: "SPECIAL",
         startDate: service.startDate,
         endDate: service.endDate || service.startDate,
@@ -538,13 +535,9 @@ export default function AttendancePage() {
 
       <div className="p-6">
         {isLoading ? (
-          <div className="flex items-center justify-center min-h-[320px]">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600 mx-auto" />
-              <Text variant="default" className="mt-3">
-                Loading services...
-              </Text>
-            </div>
+          <div className="flex items-center justify-center min-h-[320px] gap-3">
+            <Loader size="w-12 h-12" />
+            <Text variant="default">Loading services...</Text>
           </div>
         ) : !hasServices ? (
           <AttendanceEmptyState onCreateService={handleCreateServiceClick} />

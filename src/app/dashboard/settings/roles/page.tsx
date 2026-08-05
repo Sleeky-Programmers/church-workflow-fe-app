@@ -133,15 +133,6 @@ export default function RolesPermissionsPage() {
     router.push(RouteConfig.dashboard.admin.createRole);
   };
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center py-16 gap-2">
-        <Loader />
-        <Text variant="default">Loading roles...</Text>
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -150,7 +141,14 @@ export default function RolesPermissionsPage() {
       </div>
 
       <div className="bg-white rounded-lg border">
-        <RolesTable roles={roles} onActionSelect={handleActionSelect} />
+        {isLoading ? (
+          <div className="flex items-center justify-center py-16 gap-2">
+            <Loader size="w-10 h-10" showShadow={false} />
+            <Text variant="default">Loading roles...</Text>
+          </div>
+        ) : (
+          <RolesTable roles={roles} onActionSelect={handleActionSelect} />
+        )}
       </div>
 
       <DeactivateRoleDialog

@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { Loader } from "@/components/ui/loader";
 import {
   Select,
   SelectContent,
@@ -98,7 +99,14 @@ export function ScheduleDeletionDialog({
               disabled={isLoading}
               className="bg-destructive-600 hover:bg-destructive-700"
             >
-              {isLoading ? "Scheduling..." : "Schedule deletion"}
+              {isLoading ? (
+                <span className="flex items-center gap-2">
+                  <Loader size="w-4 h-4" showShadow={false} />
+                  Scheduling...
+                </span>
+              ) : (
+                "Schedule deletion"
+              )}
             </Button>
           </div>
         </div>

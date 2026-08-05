@@ -165,7 +165,7 @@ export default function VerifyCodeForm({
           >
             {isLoading ? (
               <Span className="flex items-center gap-2">
-                <Loader />
+                <Loader size="w-5 h-5" showShadow={false} />
                 Verifying...
               </Span>
             ) : (

@@ -315,7 +315,7 @@ export function SpecialAttendanceModal({
   if (!service || !date) return null;
 
   const schedule = getScheduleForDate(service, date);
-  const serviceName = service.serviceName;
+  const serviceName = service.title;
   const serviceLocation = service.location || "";
   const serviceStartTime = schedule?.startTime || "";
   const serviceEndTime = schedule?.endTime || "";
@@ -420,7 +420,7 @@ export function SpecialAttendanceModal({
         absentCount={absentCount}
         isMembersLoaded={hasMembersLoaded}
         isAttendanceMarked={hasExistingAttendance || state.hasChanges}
-        showLoadMembersButton={!hasMembersLoaded}
+        showLoadMembersButton={!hasExistingAttendance && !state.hasChanges}
         loadMembersMuted={isEditMode}
         onLoadMembers={loadAllMembers}
         onOpenPresentMembers={openPresentMembersView}

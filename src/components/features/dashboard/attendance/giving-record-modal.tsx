@@ -97,7 +97,7 @@ export function GivingRecordModal({
       >
         <DialogHeader className="px-6 py-4 border-b">
           <DialogTitle className="text-2xl">
-            {service.serviceName} Giving Record
+            {service.title} Giving Record
           </DialogTitle>
         </DialogHeader>
 

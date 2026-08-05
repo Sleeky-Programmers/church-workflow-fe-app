@@ -31,6 +31,8 @@ export default function SmarterWaySection() {
   return (
     <section className="relative w-full">
       <img
+        loading="lazy"
+        decoding="async"
         src="/landing-page/light-blue.png"
         alt=""
         aria-hidden="true"
@@ -47,6 +49,8 @@ export default function SmarterWaySection() {
             <span className="relative inline-block text-[#0C5FB3]">
               Manage Your Church
               <img
+                loading="lazy"
+                decoding="async"
                 src="/assets/icons/wave.svg"
                 alt=""
                 aria-hidden="true"

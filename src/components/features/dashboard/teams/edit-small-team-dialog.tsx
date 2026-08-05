@@ -373,10 +373,10 @@ export function EditSmallTeamDialog({
               size="sm"
             >
               {isSaving ? (
-                <>
-                  <Loader className="h-4 w-4 mr-2 animate-spin" />
+                <span className="flex items-center gap-2">
+                  <Loader size="w-4 h-4" showShadow={false} />
                   Saving...
-                </>
+                </span>
               ) : (
                 "Save Changes"
               )}

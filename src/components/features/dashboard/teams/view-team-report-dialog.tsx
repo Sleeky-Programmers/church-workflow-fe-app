@@ -115,7 +115,7 @@ export function ViewTeamReportDialog({
             </div>
             <div className="flex-1 relative">
               <div className="absolute inset-0 flex items-center justify-center bg-white/60 z-10">
-                <Loader className="h-8 w-8 animate-spin text-primary-600" />
+                <Loader size="w-10 h-10" showShadow={false} />
               </div>
             </div>
           </div>

@@ -75,7 +75,7 @@ export default function CheckoutPage() {
     const checkSubscription = async () => {
       try {
         const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_BASE_URL}/subscription`,
+          `${process.env.NEXT_PUBLIC_API_URL}/subscription/overview`,
           {
             headers: { Authorization: `Bearer ${token}` },
           },
@@ -83,10 +83,13 @@ export default function CheckoutPage() {
 
         if (response.ok) {
           const data = await response.json();
-          const isActivePaidPlan =
-            data?.plan !== "STARTER" && data?.status === "ACTIVE";
+          // Only block a no-op re-purchase of the plan already active — a
+          // genuine plan change (upgrade/downgrade) still proceeds to checkout.
+          const isSamePlanActive =
+            data?.currentPlan === selected.plan &&
+            data?.subscriptionStatus === "ACTIVE";
 
-          if (isActivePaidPlan) {
+          if (isSamePlanActive) {
             clearSelectedPlan();
             router.replace(RouteConfig.dashboard.home);
             return;
@@ -120,7 +123,7 @@ export default function CheckoutPage() {
     try {
       const token = getAccessToken();
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/payment/initialize`,
+        `${process.env.NEXT_PUBLIC_API_URL}/payment/initialize`,
         {
           method: "POST",
           headers: {
@@ -255,7 +258,7 @@ export default function CheckoutPage() {
         >
           {isLoading ? (
             <span className="flex items-center gap-2">
-              <Loader />
+              <Loader size="w-5 h-5" showShadow={false} />
               Redirecting to payment...
             </span>
           ) : (

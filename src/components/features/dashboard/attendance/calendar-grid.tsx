@@ -171,7 +171,7 @@ export function CalendarGrid({
       const query = searchQuery.toLowerCase();
       next = next.filter(
         (service) =>
-          service.serviceName.toLowerCase().includes(query) ||
+          service.title.toLowerCase().includes(query) ||
           (service.location || "").toLowerCase().includes(query),
       );
     }
@@ -200,7 +200,7 @@ export function CalendarGrid({
       const query = searchQuery.toLowerCase();
       next = next.filter(
         (service) =>
-          service.serviceName.toLowerCase().includes(query) ||
+          service.title.toLowerCase().includes(query) ||
           (service.location || "").toLowerCase().includes(query),
       );
     }
@@ -377,7 +377,7 @@ export function CalendarGrid({
                     key={service.id}
                     className="text-xs bg-secondary/10 text-secondary rounded px-1 py-0.5 my-0.5 truncate"
                   >
-                    {service.serviceName}
+                    {service.title}
                   </div>
                 ))}
                 {specialAtTime.map((service) => (
@@ -385,7 +385,7 @@ export function CalendarGrid({
                     key={service.id}
                     className="text-xs bg-primary/10 text-primary rounded px-1 py-0.5 my-0.5 truncate"
                   >
-                    {service.serviceName} (Special)
+                    {service.title} (Special)
                   </div>
                 ))}
               </button>
@@ -549,7 +549,7 @@ export function CalendarGrid({
                   setIsInfoModalOpen(false);
                 }}
               >
-                <Text className="font-medium">{service.serviceName}</Text>
+                <Text className="font-medium">{service.title}</Text>
                 <Text variant="muted">
                   {service.startTime}
                   {service.endTime ? ` - ${service.endTime}` : ""}
@@ -561,9 +561,7 @@ export function CalendarGrid({
                 key={service.id}
                 className="w-full rounded-md border p-2 bg-primary/5"
               >
-                <Text className="font-medium">
-                  {service.serviceName} (Special)
-                </Text>
+                <Text className="font-medium">{service.title} (Special)</Text>
                 <Text variant="muted">{service.location || "No location"}</Text>
               </div>
             ))}

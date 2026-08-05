@@ -45,19 +45,29 @@ export function WeeklyServicesStep({
   totalSteps = 3,
 }: WeeklyServicesStepProps) {
   const [isContinuing, setIsContinuing] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [newService, setNewService] = useState<{
-    serviceName: string;
+    title: string;
     days: string[];
     startTime: string;
     endTime: string;
     location: string;
   }>({
-    serviceName: "",
+    title: "",
     days: [],
     startTime: "",
     endTime: "",
     location: "",
   });
+
+  const clearError = (field: string) => {
+    setErrors((prev) => {
+      if (!prev[field]) return prev;
+      const next = { ...prev };
+      delete next[field];
+      return next;
+    });
+  };
 
   const handleDayToggle = (day: string) => {
     setNewService((prev) => ({
@@ -66,25 +76,27 @@ export function WeeklyServicesStep({
         ? prev.days.filter((d) => d !== day)
         : [...prev.days, day],
     }));
+    clearError("days");
   };
 
   const handleAddService = () => {
-    if (!newService.serviceName.trim()) {
-      alert("Please enter a service name");
-      return;
-    }
-    if (newService.days.length === 0) {
-      alert("Please select at least one day");
-      return;
-    }
-    if (!newService.startTime) {
-      alert("Please set a start time");
+    const nextErrors: Record<string, string> = {};
+
+    if (!newService.title.trim())
+      nextErrors.title = "Please enter a service name";
+    if (newService.days.length === 0)
+      nextErrors.days = "Please select at least one day";
+    if (!newService.startTime) nextErrors.startTime = "Please set a start time";
+
+    if (Object.keys(nextErrors).length > 0) {
+      setErrors(nextErrors);
       return;
     }
 
+    setErrors({});
     onAddService(newService);
     setNewService({
-      serviceName: "",
+      title: "",
       days: [],
       startTime: "",
       endTime: "",
@@ -120,14 +132,17 @@ export function WeeklyServicesStep({
           </Label>
           <Input
             placeholder="e.g. Sunday Worship Service"
-            value={newService.serviceName}
-            onChange={(e) =>
+            value={newService.title}
+            onChange={(e) => {
               setNewService((prev) => ({
                 ...prev,
-                serviceName: e.target.value,
-              }))
-            }
+                title: e.target.value,
+              }));
+              clearError("title");
+            }}
+            className={errors.title ? "border-destructive-600" : ""}
           />
+          {errors.title ? <Text variant="error">{errors.title}</Text> : null}
         </div>
 
         <div className="space-y-2">
@@ -147,6 +162,7 @@ export function WeeklyServicesStep({
               </Button>
             ))}
           </div>
+          {errors.days ? <Text variant="error">{errors.days}</Text> : null}
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -159,16 +175,20 @@ export function WeeklyServicesStep({
                 type="time"
                 placeholder="--:-- --"
                 value={newService.startTime}
-                onChange={(e) =>
+                onChange={(e) => {
                   setNewService((prev) => ({
                     ...prev,
                     startTime: e.target.value,
-                  }))
-                }
+                  }));
+                  clearError("startTime");
+                }}
                 className="pr-10"
               />
               <Clock3 className="h-4 w-4 absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
             </div>
+            {errors.startTime ? (
+              <Text variant="error">{errors.startTime}</Text>
+            ) : null}
           </div>
 
           <div>
@@ -220,7 +240,7 @@ export function WeeklyServicesStep({
               <div className="flex flex-col sm:flex-row items-start justify-between gap-3">
                 <div className="flex-1">
                   <Heading level={3} className="mb-1">
-                    {service.serviceName || "Untitled Service"}
+                    {service.title || "Untitled Service"}
                   </Heading>
                   <div className="space-y-1">
                     <Text variant="muted" className="text-sm">

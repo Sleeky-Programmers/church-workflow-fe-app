@@ -40,6 +40,8 @@ type EventFormModalProps = {
   onSubmit: (payload: EventFormData) => Promise<void>;
   initialData?: EventFormData | null;
   isSubmitting?: boolean;
+  /** True when editing an existing event, false/omitted when creating a new one. */
+  isEditMode?: boolean;
 };
 
 const DEFAULT_FORM_DATA: EventFormData = {
@@ -62,12 +64,12 @@ export function EventFormModal({
   onSubmit,
   initialData,
   isSubmitting = false,
+  isEditMode = false,
 }: EventFormModalProps) {
   const [formData, setFormData] = useState<EventFormData>(DEFAULT_FORM_DATA);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitError, setSubmitError] = useState<string | null>(null);
 
-  const isEditMode = useMemo(() => Boolean(initialData), [initialData]);
   const recurrenceOptions = useMemo(
     () => getEventRecurrenceOptions(formData.date),
     [formData.date],
@@ -100,6 +102,7 @@ export function EventFormModal({
     if (!formData.title.trim()) nextErrors.title = "Title is required";
     if (!formData.date) nextErrors.date = "Date is required";
     if (!formData.startTime) nextErrors.startTime = "Start time is required";
+    if (!formData.endTime) nextErrors.endTime = "End time is required";
 
     if (
       formData.endTime &&
@@ -155,7 +158,7 @@ export function EventFormModal({
         <DialogHeader className="px-6 py-4 border-b">
           <div className="flex items-center justify-between">
             <DialogTitle>
-              {isEditMode ? "Update Event Form" : "Add/Edit Event Form"}
+              {isEditMode ? "Update Event" : "Create Event"}
             </DialogTitle>
             <DialogClose asChild>
               <Button
@@ -276,7 +279,7 @@ export function EventFormModal({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="event-end">End Time</Label>
+              <Label htmlFor="event-end">End Time *</Label>
               <Input
                 id="event-end"
                 type="time"

@@ -34,7 +34,7 @@ export function ServiceItem({
           onClick={onViewServiceDetails}
           className="font-semibold text-gray-900 hover:underline"
         >
-          {service.serviceName}
+          {service.title}
         </button>
       </div>
 

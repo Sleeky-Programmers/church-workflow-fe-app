@@ -1,7 +1,7 @@
 "use client";
 
 import { addDays, format } from "date-fns";
-import { CalendarDays, Clock3, Loader2, X } from "lucide-react";
+import { CalendarDays, Clock3, X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Loader } from "@/components/ui/loader";
 import {
   Select,
   SelectContent,
@@ -79,7 +80,7 @@ export function CreateSpecialServiceModal({
 }: CreateSpecialServiceModalProps) {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
-  const [serviceName, setServiceName] = useState("");
+  const [title, setTitle] = useState("");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [location, setLocation] = useState("");
@@ -158,7 +159,7 @@ export function CreateSpecialServiceModal({
   const handleClose = () => {
     if (isLoading) return;
     onOpenChange(false);
-    setServiceName("");
+    setTitle("");
     setStartDate("");
     setEndDate("");
     setLocation("");
@@ -170,7 +171,7 @@ export function CreateSpecialServiceModal({
   };
 
   const handleCreate = async () => {
-    if (!serviceName.trim()) {
+    if (!title.trim()) {
       toast({
         title: "Validation Error",
         description: "Service name is required",
@@ -197,6 +198,21 @@ export function CreateSpecialServiceModal({
       return;
     }
 
+    const invalidSchedule = daySchedules.find(
+      (schedule) =>
+        schedule.startTime &&
+        schedule.endTime &&
+        schedule.endTime <= schedule.startTime,
+    );
+    if (invalidSchedule) {
+      toast({
+        title: "Validation Error",
+        description: `End time must be after start time for ${format(new Date(invalidSchedule.date), "MMM d")}`,
+        variant: "destructive",
+      });
+      return;
+    }
+
     const id =
       typeof crypto !== "undefined" && crypto.randomUUID
         ? crypto.randomUUID()
@@ -207,7 +223,7 @@ export function CreateSpecialServiceModal({
     try {
       await onCreateService({
         id,
-        serviceName: serviceName.trim(),
+        title: title.trim(),
         startDate,
         endDate: endDate || startDate,
         location: location.trim() || undefined,
@@ -263,8 +279,8 @@ export function CreateSpecialServiceModal({
             </Label>
             <Input
               placeholder="e.g. Anointing Service"
-              value={serviceName}
-              onChange={(e) => setServiceName(e.target.value)}
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
               disabled={isLoading}
             />
           </div>
@@ -424,10 +440,10 @@ export function CreateSpecialServiceModal({
           <div className="flex justify-end">
             <Button onClick={handleCreate} disabled={isLoading}>
               {isLoading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                <span className="flex items-center gap-2">
+                  <Loader size="w-4 h-4" showShadow={false} />
                   Creating...
-                </>
+                </span>
               ) : (
                 "Create event"
               )}

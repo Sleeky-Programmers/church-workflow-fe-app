@@ -1,6 +1,13 @@
 import type { Metadata } from "next";
 
-const BASE_URL = "https://churchworkflow.com";
+export const BASE_URL = "https://churchworkflow.com";
+export const SITE_NAME = "Church Workflow";
+
+// Vercel sets VERCEL_ENV to "production" | "preview" | "development".
+// Falls back to NODE_ENV for non-Vercel builds so staging/local never gets indexed.
+export const IS_PRODUCTION = process.env.VERCEL_ENV
+  ? process.env.VERCEL_ENV === "production"
+  : process.env.NODE_ENV === "production";
 
 const DEFAULT_KEYWORDS = [
   "church management software",
@@ -22,6 +29,8 @@ interface SeoProps {
   keywords?: string[];
   path?: string;
   ogImage?: string;
+  /** Set true for pages that should not be indexed (auth, checkout, dashboard, etc). */
+  noIndex?: boolean;
 }
 
 export function generateSeoMetadata({
@@ -29,7 +38,8 @@ export function generateSeoMetadata({
   description,
   keywords = DEFAULT_KEYWORDS,
   path = "",
-  ogImage = "/og-image.png",
+  ogImage = "/opengraph-image.png",
+  noIndex = false,
 }: SeoProps): Metadata {
   const url = `${BASE_URL}${path}`;
 
@@ -40,11 +50,14 @@ export function generateSeoMetadata({
     alternates: {
       canonical: url,
     },
+    robots: noIndex
+      ? { index: false, follow: false }
+      : { index: true, follow: true },
     openGraph: {
       title,
       description,
       url,
-      siteName: "Church Workflow",
+      siteName: SITE_NAME,
       type: "website",
       images: [
         {

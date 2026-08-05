@@ -29,6 +29,8 @@ export default function ChallengesSection() {
   return (
     <section className="relative bg-white py-24 px-6 overflow-hidden">
       <img
+        loading="lazy"
+        decoding="async"
         src="/assets/icons/star.svg"
         alt=""
         aria-hidden="true"
@@ -37,6 +39,8 @@ export default function ChallengesSection() {
         className="absolute top-12 right-[10%] select-none pointer-events-none"
       />
       <img
+        loading="lazy"
+        decoding="async"
         src="/assets/icons/star.svg"
         alt=""
         aria-hidden="true"
@@ -53,6 +57,8 @@ export default function ChallengesSection() {
           <span className="relative inline-block text-[#0C5FB3]">
             The Challenges
             <img
+              loading="lazy"
+              decoding="async"
               src="/assets/icons/wave.svg"
               alt=""
               aria-hidden="true"

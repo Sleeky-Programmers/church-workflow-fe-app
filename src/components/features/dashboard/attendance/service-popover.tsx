@@ -30,9 +30,7 @@ export function ServicePopover({
               key={service.id}
               className="p-2 rounded hover:bg-gray-100 cursor-pointer text-sm"
             >
-              <div className="font-medium text-gray-900">
-                {service.serviceName}
-              </div>
+              <div className="font-medium text-gray-900">{service.title}</div>
               <div className="text-xs text-gray-600">
                 {formatTimeRange(service.startTime, service.endTime)}
                 {service.location && ` · ${service.location}`}

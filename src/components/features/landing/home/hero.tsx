@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Text } from "@/components/ui/typography/Text";
 import Heading from "@/components/ui/typography/Heading";
 import { FloatingBadge } from "@/components/ui/landing-page/FloatingBadge";
+import { trackEvent } from "@/lib/analytics";
 
 const IconFolderCheckFill = dynamic(
   () => import("obra-icons-react").then((mod) => mod.IconFolderCheckFill),
@@ -44,6 +45,8 @@ export default function HeroSection() {
             <span className="relative inline-block text-[#0C5FB3]">
               Simplify
               <img
+                loading="lazy"
+                decoding="async"
                 src="/assets/icons/wave.svg"
                 alt=""
                 aria-hidden="true"
@@ -57,6 +60,8 @@ export default function HeroSection() {
 
           <div className="relative">
             <img
+              loading="lazy"
+              decoding="async"
               src="/assets/icons/star.svg"
               alt=""
               width={36}
@@ -85,12 +90,20 @@ export default function HeroSection() {
               variant="outline"
               size="lg"
               className="rounded-[8px] px-7 border-[#0C5FB3] text-[#0C5FB3] hover:bg-gray-50 hover:text-[#0C5FB3]"
+              onClick={() => {
+                trackEvent("demo_click", { location: "hero" });
+                document
+                  .getElementById("how-it-works")
+                  ?.scrollIntoView({ behavior: "smooth" });
+              }}
             >
               See How It Works
             </Button>
           </div>
 
           <img
+            loading="lazy"
+            decoding="async"
             src="/assets/icons/star.svg"
             alt=""
             width={36}

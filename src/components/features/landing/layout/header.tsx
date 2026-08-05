@@ -10,10 +10,10 @@ import { StickyHeader } from "./sticky-header";
 
 const navLinks = [
   { label: "HOME", href: "/" },
-  { label: "FEATURES", href: "#features" },
-  { label: "HOW IT WORKS", href: "#how-it-works" },
-  { label: "PRICING", href: "#pricing" },
-  { label: "CONTACT", href: "#contact" },
+  { label: "FEATURES", href: "/#features" },
+  { label: "HOW IT WORKS", href: "/#how-it-works" },
+  { label: "PRICING", href: "/#pricing" },
+  { label: "CONTACT", href: "/#contact" },
 ];
 
 export default function Header() {

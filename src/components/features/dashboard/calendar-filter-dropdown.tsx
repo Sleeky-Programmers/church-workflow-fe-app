@@ -78,13 +78,13 @@ export const CalendarFilterDropdown = ({
               const safeValue = service.id || `service-option-${index}`;
               return (
                 <SelectItem key={`${safeValue}-${index}`} value={safeValue}>
-                  {service.serviceName}
+                  {service.title}
                 </SelectItem>
               );
             })}
             {specialServices.map((service) => (
               <SelectItem key={service.id} value={service.id}>
-                {service.serviceName} (Special)
+                {service.title} (Special)
               </SelectItem>
             ))}
           </SelectContent>
