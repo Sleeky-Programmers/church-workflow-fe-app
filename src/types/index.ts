@@ -438,7 +438,7 @@ export type FileInputProps = {
 export type CsvUploadModalProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSuccess: () => void;
+  onSuccess: (insertedCount?: number) => void;
   onClose: () => void;
 };
 
@@ -528,4 +528,27 @@ export interface MemberLimitStatus {
   needsAction: boolean;
   isNearLimit: boolean;
   daysRemaining: number | null;
+}
+
+export interface UserLimitStatus {
+  currentUsers: number;
+  limit: number;
+  percentage: number;
+  isOverLimit: boolean;
+  isNearLimit: boolean;
+  planName: string | null;
+}
+
+// Generic shape consumed by the reusable plan-limit banner (LimitBanner),
+// so a single component can render member limits, user-seat limits, etc.
+export interface PlanLimitStatus {
+  current: number;
+  limit: number;
+  percentage: number;
+  isOverLimit: boolean;
+  isNearLimit: boolean;
+  planName: string | null;
+  isWithinGracePeriod?: boolean;
+  gracePeriodEnds?: string | null;
+  daysRemaining?: number | null;
 }

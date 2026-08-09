@@ -104,6 +104,7 @@ export default function LoginForm({ onForgotPassword }: LoginFormProps) {
       const data = await googleAuth(idToken);
       const profile = initializeAuthSession({
         accessToken: data.accessToken,
+        refreshToken: data.refreshToken,
         emailHint: data.user?.email,
         user: data.user,
       });

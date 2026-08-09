@@ -10,6 +10,7 @@ type FavoritesStore = {
   favorites: FavoritePage[];
   toggleFavorite: (page: FavoritePage) => void;
   isFavorite: (path: string) => boolean;
+  clearFavorites: () => void;
 };
 
 export const useFavoritesStore = create<FavoritesStore>()(
@@ -28,6 +29,8 @@ export const useFavoritesStore = create<FavoritesStore>()(
       },
 
       isFavorite: (path) => get().favorites.some((fav) => fav.path === path),
+
+      clearFavorites: () => set({ favorites: [] }),
     }),
     {
       name: "favorites-pages",

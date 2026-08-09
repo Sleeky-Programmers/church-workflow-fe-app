@@ -1,6 +1,12 @@
 import { authenticatedFetch } from "@/lib/api";
+import { getMemberLimitTestOverride } from "@/lib/dev/member-limit-test";
 import { mapMember } from "@/mappers/member.mapper";
-import { MemberLimitStatus, MemberProfile, NewMemberData } from "@/types";
+import {
+  MemberLimitStatus,
+  MemberProfile,
+  NewMemberData,
+  PlanLimitStatus,
+} from "@/types";
 
 export interface FetchMembersResponse {
   data: MemberProfile[];
@@ -182,4 +188,23 @@ export async function getMemberLimitStatus(): Promise<MemberLimitStatus> {
     data: MemberLimitStatus;
   }>("/members/member-limit-status", { method: "GET" });
   return response.data;
+}
+
+export async function getMemberPlanLimitStatus(): Promise<PlanLimitStatus> {
+  const override = getMemberLimitTestOverride();
+  if (override) return override;
+
+  const status = await getMemberLimitStatus();
+
+  return {
+    current: status.currentMembers,
+    limit: status.limit,
+    percentage: status.percentage,
+    isOverLimit: status.isOverLimit,
+    isNearLimit: status.isNearLimit,
+    planName: status.planName,
+    isWithinGracePeriod: status.isWithinGracePeriod,
+    gracePeriodEnds: status.gracePeriodEnds,
+    daysRemaining: status.daysRemaining,
+  };
 }

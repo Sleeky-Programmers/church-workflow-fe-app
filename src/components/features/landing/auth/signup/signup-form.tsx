@@ -102,6 +102,7 @@ export default function SignupForm({
       const data = await googleAuth(idToken);
       initializeAuthSession({
         accessToken: data.accessToken,
+        refreshToken: data.refreshToken,
         emailHint: data.user?.email,
         user: data.user,
       });

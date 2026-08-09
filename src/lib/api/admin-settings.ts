@@ -1,3 +1,5 @@
+import { PlanLimitStatus, UserLimitStatus } from "@/types";
+
 import { AdminOption } from "../enums";
 import { apiFetch } from "./index";
 
@@ -133,6 +135,27 @@ export async function resendAdminInvite(inviteId: string) {
   return apiFetch<{ message: string }>(`/admin-invite/resend/${inviteId}`, {
     method: "PUT",
   });
+}
+
+export async function getUserLimitStatus(): Promise<UserLimitStatus> {
+  const response = await apiFetch<{ success: boolean; data: UserLimitStatus }>(
+    "/admin-invite/user-limit-status",
+    { method: "GET" },
+  );
+  return response.data;
+}
+
+export async function getUserPlanLimitStatus(): Promise<PlanLimitStatus> {
+  const status = await getUserLimitStatus();
+
+  return {
+    current: status.currentUsers,
+    limit: status.limit,
+    percentage: status.percentage,
+    isOverLimit: status.isOverLimit,
+    isNearLimit: status.isNearLimit,
+    planName: status.planName,
+  };
 }
 
 export async function fetchAccountSettings() {
