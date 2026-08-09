@@ -1,11 +1,12 @@
 "use client";
 
-import { CircleAlert, MoreVertical, Plus, Search, X } from "lucide-react";
+import { MoreVertical, Plus, Search, X } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
-import router from "next/router";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { MdCheckCircle, MdError, MdInfo, MdWarning } from "react-icons/md";
 
+import { LimitBanner } from "@/components/features/dashboard/subscription/limit-banner";
+import { PlanLimitReachedModal } from "@/components/features/dashboard/subscription/plan-limit-reached-modal";
+import { MemberLimitSuccessModal } from "@/components/features/dashboard/subscription/member-limit-success-modal";
 import { AddMemberModal } from "@/components/features/dashboard/membership/add-member-modal";
 import { CsvUploadModal } from "@/components/features/dashboard/membership/csv-upload-modal";
 import { DeleteMembersModal } from "@/components/features/dashboard/membership/delete-member-modal";
@@ -21,148 +22,26 @@ import { useDebounce } from "@/hooks/use-debounce";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useToast } from "@/hooks/use-toast";
 import {
+  applyMemberLimitTestParam,
+  getMemberLimitTestOverride,
+  isDevLimitTestingEnabled,
+} from "@/lib/dev/member-limit-test";
+import {
   Gender,
   MaritalStatus,
   MemberFormType,
   MembershipStatus,
 } from "@/lib/enums";
-import { toSentenceCase } from "@/lib/utils";
 import { mapFiltersToBackend } from "@/mappers/filter.mapper";
-import { fetchMembers, getMemberLimitStatus } from "@/services/memberService";
+import { getNextPlan, getUpgradeFeatures } from "@/lib/plan-utils";
+import {
+  fetchMembers,
+  getMemberLimitStatus,
+  getMemberPlanLimitStatus,
+} from "@/services/memberService";
+import { getPlans } from "@/services/billingService";
 import { useSearchStore } from "@/stores/useSearchStore";
-import { MemberLimitStatus, MemberProfile } from "@/types";
-
-type BannerColor = "blue" | "red" | "amber";
-
-const bannerStyles: Record<BannerColor, string> = {
-  blue: "border-blue-200 bg-blue-50",
-  red: "border-red-200 bg-red-50",
-  amber: "border-amber-200 bg-amber-50",
-};
-
-const iconColors: Record<BannerColor, string> = {
-  blue: "text-primary-500",
-  red: "text-red-500",
-  amber: "text-amber-500",
-};
-
-export function ActionRequiredBanner() {
-  const router = useRouter();
-  const [isVisible, setIsVisible] = useState(true);
-  const [status, setStatus] = useState<MemberLimitStatus | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const fetchStatus = async () => {
-      setLoading(true);
-      setError(null);
-
-      try {
-        const data = await getMemberLimitStatus();
-        setStatus(data);
-      } catch (err) {
-        console.error("Failed to fetch member limit status:", err);
-        setError("Failed to load member limit status");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchStatus();
-  }, []);
-
-  // Check if banner was dismissed in this session
-  useEffect(() => {
-    const dismissedBanner = sessionStorage.getItem(
-      "memberLimitBannerDismissed",
-    );
-    if (dismissedBanner) {
-      setIsVisible(false);
-    }
-  }, []);
-
-  const handleDismiss = () => {
-    setIsVisible(false);
-    sessionStorage.setItem("memberLimitBannerDismissed", "true");
-  };
-
-  if (loading) return null;
-  if (error) {
-    console.warn("Banner error:", error);
-    return null;
-  }
-  if (!status || !isVisible) return null;
-
-  const {
-    currentMembers,
-    limit,
-    percentage,
-    isOverLimit,
-    isWithinGracePeriod,
-    isNearLimit,
-    daysRemaining,
-    planName,
-  } = status;
-
-  // No banner if not near limit and not over limit
-  if (!isNearLimit && !isOverLimit) return null;
-
-  // Determine banner styling
-  let bannerColor: BannerColor = "blue";
-  let title = "";
-  let message = "";
-
-  if (isOverLimit && isWithinGracePeriod) {
-    bannerColor = "blue";
-    title = "Action Required:";
-    const formattedDate = status.gracePeriodEnds
-      ? new Date(status.gracePeriodEnds).toLocaleDateString("en-US", {
-          month: "long",
-          day: "numeric",
-          year: "numeric",
-        })
-      : "soon";
-    message = `Your ${daysRemaining || 7}-day grace period to manage over-limit members ends on ${formattedDate}. Upgrade to prevent dashboard restrictions.`;
-  } else if (isOverLimit && !isWithinGracePeriod) {
-    bannerColor = "red";
-    title = "Over Limit:";
-    message = `Your ${toSentenceCase(planName || "")} plan has ${currentMembers} members, which exceeds the ${limit} member limit. Please upgrade now to continue.`;
-  } else if (isNearLimit) {
-    bannerColor = "amber";
-    title = "Approaching Limit:";
-    message = `You have ${currentMembers} out of ${limit} members (${Math.round(percentage)}%). Consider upgrading to avoid reaching the limit.`;
-  }
-
-  const Icon = isOverLimit ? MdError : isNearLimit ? MdWarning : MdInfo;
-
-  return (
-    <div
-      className={`mx-4 sm:mx-6 mt-3 mb-1 flex items-center gap-3 rounded-lg border ${bannerStyles[bannerColor]} px-4 py-3`}
-    >
-      <Icon className={iconColors[bannerColor]} size={25} />
-
-      <p className="flex-1 text-sm text-gray-700">
-        <span className="font-semibold">{title}</span> {message}
-      </p>
-
-      <Button
-        onClick={() => router.push("/dashboard/settings/billing")}
-        variant={bannerColor === "red" ? "destructive" : "default"}
-      >
-        Upgrade Now
-      </Button>
-
-      <button
-        onClick={handleDismiss}
-        className="shrink-0 text-gray-400 hover:text-gray-600"
-        aria-label="Dismiss"
-      >
-        <X className="h-4 w-4" />
-      </button>
-    </div>
-  );
-}
+import { MemberProfile, Plan, PlanLimitStatus } from "@/types";
 
 export default function MembershipPage() {
   const { toast } = useToast();
@@ -202,6 +81,23 @@ export default function MembershipPage() {
   const [pagination, setPagination] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
 
+  const [limitStatus, setLimitStatus] = useState<PlanLimitStatus | null>(null);
+  const [plans, setPlans] = useState<Plan[]>([]);
+  const [plansLoaded, setPlansLoaded] = useState(false);
+  const [isLimitReachedModalOpen, setIsLimitReachedModalOpen] = useState(false);
+  const [successModal, setSuccessModal] = useState<{
+    context: "add" | "import";
+    addedCount?: number;
+  } | null>(null);
+
+  // DEV-ONLY: true once any ?testLimit=... override has been resolved (or
+  // immediately if there's none to resolve). Nothing that fetches plan-limit
+  // status — LimitBanner included — mounts/fires until this is true, so the
+  // override is always in place before anyone reads it. See member-limit-test.ts.
+  const [testOverrideReady, setTestOverrideReady] = useState(
+    () => !isDevLimitTestingEnabled() || !searchParams.get("testLimit"),
+  );
+
   const debouncedSearch = useDebounce(searchQuery, 500);
   const backendFilter = mapFiltersToBackend(filters);
 
@@ -223,6 +119,100 @@ export default function MembershipPage() {
     },
     [toast],
   );
+
+  const refreshLimitStatus = useCallback(async () => {
+    try {
+      const status = await getMemberPlanLimitStatus();
+      setLimitStatus(status);
+      return status;
+    } catch (error) {
+      console.error("Failed to load member limit status:", error);
+      return null;
+    }
+  }, []);
+
+  // Load the plan catalogue once so the "Upgrade to Growth" modal can show
+  // the next tier's name/features without hardcoding them.
+  useEffect(() => {
+    getPlans()
+      .then(setPlans)
+      .catch((error) => console.error("Failed to load plans:", error))
+      .finally(() => setPlansLoaded(true));
+  }, []);
+
+  // DEV-ONLY: resolves any ?testLimit=... override before anything else is
+  // allowed to fetch plan-limit status. It first reads the account's REAL
+  // plan/limit (un-overridden) so the simulated scenario keeps the real plan
+  // and only fakes the member count — otherwise "Upgrade to Growth" could
+  // show the wrong tier for an account that isn't actually on Starter.
+  useEffect(() => {
+    if (testOverrideReady) return;
+
+    const scenario = searchParams.get("testLimit");
+    if (!scenario) {
+      setTestOverrideReady(true);
+      return;
+    }
+
+    if (scenario === "clear") {
+      applyMemberLimitTestParam(searchParams, { planName: null, limit: 0 });
+      setTestOverrideReady(true);
+      return;
+    }
+
+    (async () => {
+      try {
+        const real = await getMemberLimitStatus();
+        applyMemberLimitTestParam(searchParams, {
+          planName: real.planName,
+          limit: real.limit,
+        });
+      } catch (error) {
+        console.error("Failed to resolve real plan for test override:", error);
+      } finally {
+        setTestOverrideReady(true);
+      }
+    })();
+  }, [searchParams, testOverrideReady]);
+
+  useEffect(() => {
+    if (!testOverrideReady) return;
+    refreshLimitStatus();
+  }, [testOverrideReady, refreshLimitStatus]);
+
+  // DEV-ONLY: the "reached" and "grace" scenarios also auto-open their
+  // modal (mirroring the real trigger) so they can be previewed with one URL.
+  useEffect(() => {
+    if (!testOverrideReady || !isDevLimitTestingEnabled()) return;
+    const scenario = searchParams.get("testLimit");
+    if (!scenario || scenario === "clear") return;
+
+    const override = getMemberLimitTestOverride();
+    if (!override) return;
+
+    if (scenario === "reached") {
+      setIsLimitReachedModalOpen(true);
+    } else if (scenario === "grace") {
+      setSuccessModal({ context: "import", addedCount: override.current });
+    }
+  }, [testOverrideReady, searchParams]);
+
+  const nextPlan = getNextPlan(limitStatus?.planName ?? null, plans);
+  const nextPlanFeatures = getUpgradeFeatures(nextPlan);
+
+  const handleAddMemberClick = async () => {
+    const status = limitStatus ?? (await refreshLimitStatus());
+    if (status && status.limit > 0 && status.current >= status.limit) {
+      setIsLimitReachedModalOpen(true);
+      return;
+    }
+    setIsFormatModalOpen(true);
+  };
+
+  const handleViewUpgradePlans = () => {
+    setSuccessModal(null);
+    setIsLimitReachedModalOpen(true);
+  };
 
   // Sync URL params with Zustand store on mount and URL changes
   useEffect(() => {
@@ -292,6 +282,11 @@ export default function MembershipPage() {
     setPage(1);
     setIsAddModalOpen(false);
     setSelectedFormat(null);
+
+    const status = await refreshLimitStatus();
+    if (status?.isOverLimit && status.isWithinGracePeriod) {
+      setSuccessModal({ context: "add" });
+    }
   };
 
   const handleFormatSelect = (
@@ -318,7 +313,15 @@ export default function MembershipPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <ActionRequiredBanner />
+      {testOverrideReady && (
+        <LimitBanner
+          fetchStatus={getMemberPlanLimitStatus}
+          dismissKey="memberLimitBannerDismissed"
+          resourceLabel="members"
+          resourceLimitLabel="member limit"
+          className="mx-4 mt-3 mb-1 sm:mx-6"
+        />
+      )}
 
       <div className="bg-white">
         <div className="px-4 sm:px-6 py-4 flex items-center justify-between gap-2">
@@ -367,10 +370,7 @@ export default function MembershipPage() {
                 Remove Members ({selectedMemberIds.length})
               </Button>
             ) : (
-              <Button
-                onClick={() => setIsFormatModalOpen(true)}
-                disabled={isCsvUploading}
-              >
+              <Button onClick={handleAddMemberClick} disabled={isCsvUploading}>
                 <Plus className="h-4 w-4 mr-2" />
                 {isCsvUploading ? "Uploading..." : "Add a member"}
               </Button>
@@ -398,7 +398,7 @@ export default function MembershipPage() {
           onRowClick={(memberId) =>
             router.push(`/dashboard/membership/${memberId}`)
           }
-          onAddMember={() => setIsFormatModalOpen(true)}
+          onAddMember={handleAddMemberClick}
           selectedMemberIds={selectedMemberIds}
           onSelectMember={(id, checked) =>
             setSelectedMemberIds((prev) =>
@@ -429,11 +429,16 @@ export default function MembershipPage() {
       <CsvUploadModal
         open={isCsvModalOpen}
         onClose={() => setIsCsvModalOpen(false)}
-        onSuccess={async () => {
+        onSuccess={async (insertedCount) => {
           const response = await fetchMembers(1, 10);
           setMembers(response.data);
           setPagination(response.pagination);
           setPage(1);
+
+          const status = await refreshLimitStatus();
+          if (status?.isOverLimit && status.isWithinGracePeriod) {
+            setSuccessModal({ context: "import", addedCount: insertedCount });
+          }
         }}
         onOpenChange={setIsCsvModalOpen}
       />
@@ -446,6 +451,34 @@ export default function MembershipPage() {
           setMembers((prev) => prev.filter((m) => !deletedIds.includes(m.id)));
           setSelectedMemberIds([]);
         }}
+      />
+
+      {successModal && limitStatus && (
+        <MemberLimitSuccessModal
+          open
+          onOpenChange={(open) => {
+            if (!open) setSuccessModal(null);
+          }}
+          context={successModal.context}
+          addedCount={successModal.addedCount}
+          current={limitStatus.current}
+          limit={limitStatus.limit}
+          planName={limitStatus.planName}
+          daysRemaining={limitStatus.daysRemaining}
+          onViewUpgradePlans={handleViewUpgradePlans}
+        />
+      )}
+
+      <PlanLimitReachedModal
+        open={isLimitReachedModalOpen}
+        onOpenChange={setIsLimitReachedModalOpen}
+        limit={limitStatus?.limit ?? 0}
+        planName={limitStatus?.planName ?? null}
+        resourceLabel="member"
+        resourceLabelPlural="members"
+        nextPlanName={nextPlan?.name}
+        isNextPlanLoading={!plansLoaded}
+        features={nextPlanFeatures}
       />
     </div>
   );

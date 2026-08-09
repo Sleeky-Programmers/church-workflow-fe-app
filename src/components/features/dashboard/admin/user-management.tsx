@@ -1,10 +1,12 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import { InviteUserDialog } from "@/components/features/dashboard/admin/invite-user";
 import { ChangeRoleDialog } from "@/components/features/dashboard/admin/mini-components/change-role-dialog";
 import { RemoveUserDialog } from "@/components/features/dashboard/admin/mini-components/remove-user-dialog";
 import { UserTable } from "@/components/features/dashboard/admin/users-table";
+import { LimitBanner } from "@/components/features/dashboard/subscription/limit-banner";
+import { PlanLimitReachedModal } from "@/components/features/dashboard/subscription/plan-limit-reached-modal";
 import { Button } from "@/components/ui/button";
 import { Loader } from "@/components/ui/loader";
 import Heading from "@/components/ui/typography/Heading";
@@ -16,11 +18,15 @@ import {
   deleteAdminInvite,
   fetchAdminInvites,
   fetchRoles,
+  getUserPlanLimitStatus,
   removeAdminUser,
   resendAdminInvite,
   updateAdminStatus,
 } from "@/lib/api/admin-settings";
 import { AdminOption } from "@/lib/enums";
+import { getNextPlan, getUpgradeFeatures } from "@/lib/plan-utils";
+import { getPlans } from "@/services/billingService";
+import { Plan, PlanLimitStatus } from "@/types";
 import { User, UserAction } from "@/types/user";
 
 export function UserManagementPage() {
@@ -33,6 +39,45 @@ export function UserManagementPage() {
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [isActionLoading, setIsActionLoading] = useState(false);
   const { toast } = useToast();
+
+  const [limitStatus, setLimitStatus] = useState<PlanLimitStatus | null>(null);
+  const [plans, setPlans] = useState<Plan[]>([]);
+  const [plansLoaded, setPlansLoaded] = useState(false);
+  const [isLimitReachedModalOpen, setIsLimitReachedModalOpen] = useState(false);
+
+  const refreshLimitStatus = useCallback(async () => {
+    try {
+      const status = await getUserPlanLimitStatus();
+      setLimitStatus(status);
+      return status;
+    } catch (error) {
+      console.error("Failed to load user limit status:", error);
+      return null;
+    }
+  }, []);
+
+  useEffect(() => {
+    refreshLimitStatus();
+  }, [refreshLimitStatus]);
+
+  useEffect(() => {
+    getPlans()
+      .then(setPlans)
+      .catch((error) => console.error("Failed to load plans:", error))
+      .finally(() => setPlansLoaded(true));
+  }, []);
+
+  const nextPlan = getNextPlan(limitStatus?.planName ?? null, plans);
+  const nextPlanFeatures = getUpgradeFeatures(nextPlan);
+
+  const handleInviteClick = async () => {
+    const status = limitStatus ?? (await refreshLimitStatus());
+    if (status && status.limit > 0 && status.current >= status.limit) {
+      setIsLimitReachedModalOpen(true);
+      return;
+    }
+    setIsInviteDialogOpen(true);
+  };
 
   useEffect(() => {
     loadUsers();
@@ -108,6 +153,7 @@ export function UserManagementPage() {
           description: "Invitation sent successfully",
         });
         loadUsers();
+        refreshLimitStatus();
         return result;
       }
     } catch (error: any) {
@@ -241,9 +287,16 @@ export function UserManagementPage() {
 
   return (
     <div className="space-y-6">
+      <LimitBanner
+        fetchStatus={getUserPlanLimitStatus}
+        dismissKey="userLimitBannerDismissed"
+        resourceLabel="user seats"
+        resourceLimitLabel="user seat limit"
+      />
+
       <div className="flex items-center justify-between">
         <Heading level={2}>User Management</Heading>
-        <Button onClick={() => setIsInviteDialogOpen(true)}>Invite User</Button>
+        <Button onClick={handleInviteClick}>Invite User</Button>
       </div>
 
       <div className="bg-white rounded-lg border">
@@ -280,6 +333,18 @@ export function UserManagementPage() {
         roles={roles}
         onConfirm={handleConfirmChangeRole}
         isLoading={isActionLoading}
+      />
+
+      <PlanLimitReachedModal
+        open={isLimitReachedModalOpen}
+        onOpenChange={setIsLimitReachedModalOpen}
+        limit={limitStatus?.limit ?? 0}
+        planName={limitStatus?.planName ?? null}
+        resourceLabel="user"
+        resourceLabelPlural="users"
+        nextPlanName={nextPlan?.name}
+        isNextPlanLoading={!plansLoaded}
+        features={nextPlanFeatures}
       />
     </div>
   );

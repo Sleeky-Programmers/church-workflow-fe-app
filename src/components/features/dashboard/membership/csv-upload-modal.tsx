@@ -488,12 +488,15 @@ export function CsvUploadModal({
             : f,
         ),
       );
+      const insertedCount =
+        result?.inserted || result?.count || normalizedData.length;
+
       toast({
         title: "Upload successful",
-        description: `${result?.inserted || result?.count || normalizedData.length} members imported successfully`,
+        description: `${insertedCount} members imported successfully`,
         variant: "default",
       });
-      onSuccess();
+      onSuccess(insertedCount);
 
       // Close modal after successful upload
       setTimeout(() => {

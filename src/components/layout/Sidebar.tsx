@@ -18,7 +18,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { logout } from "@/lib/auth/session";
+import { logout } from "@/lib/auth/logout";
 import { SidebarData } from "@/lib/data";
 import { ActiveTab } from "@/lib/enums";
 import { cn } from "@/lib/utils";

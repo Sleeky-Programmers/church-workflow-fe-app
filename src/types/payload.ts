@@ -14,6 +14,7 @@ export interface AdminRegisterPayload {
 export interface AdminRegisterResponse {
   message: string;
   accessToken: string;
+  refreshToken: string;
 }
 
 export interface VerifyOtpPayload {
@@ -24,6 +25,7 @@ export interface VerifyOtpPayload {
 export interface VerifyOtpResponse {
   message: string;
   accessToken: string;
+  refreshToken: string;
 }
 
 export interface AttendanceStatsResponse {
