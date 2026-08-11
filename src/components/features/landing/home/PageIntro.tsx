@@ -1,7 +1,6 @@
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
 import { Text } from "@/components/ui/typography/Text";
 import Heading from "@/components/ui/typography/Heading";
+import { AuthAwareCta } from "@/components/features/landing/shared/AuthAwareCta";
 
 interface PageIntroProps {
   title: string;
@@ -22,11 +21,7 @@ export default function PageIntro({ title, description }: PageIntroProps) {
           {description}
         </Text>
         <div className="flex flex-wrap justify-center gap-3 pt-2">
-          <Link href="/auth/signup">
-            <Button variant="default" size="lg" className="rounded-[8px] px-7">
-              Sign Up
-            </Button>
-          </Link>
+          <AuthAwareCta className="px-7" />
         </div>
       </div>
     </section>
