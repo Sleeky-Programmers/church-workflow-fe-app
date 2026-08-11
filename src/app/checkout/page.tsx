@@ -14,47 +14,15 @@ import { Text } from "@/components/ui/typography/Text";
 import Heading from "@/components/ui/typography/Heading";
 import { Button } from "@/components/ui/button";
 import { Check } from "lucide-react";
+import { getPlans } from "@/services/billingService";
+import { Plan } from "@/types";
 
-type PlanDisplay = {
-  label: string;
-  monthlyPrice: string;
-  yearlyPrice: string;
-  features: string[];
-};
-
-const PLAN_DISPLAY: Record<string, PlanDisplay> = {
-  GROWTH: {
-    label: "Growth",
-    monthlyPrice: "₦20,000",
-    yearlyPrice: "₦16,600",
-    features: [
-      "Up to 10 users",
-      "Up to 500 members",
-      "Custom roles & permissions",
-    ],
-  },
-  EXPANSION: {
-    label: "Expansion",
-    monthlyPrice: "₦45,000",
-    yearlyPrice: "₦37,350",
-    features: ["Up to 25 users", "Up to 1,500 members", "Everything in Growth"],
-  },
-  ENTERPRISE: {
-    label: "Enterprise",
-    monthlyPrice: "₦100,000",
-    yearlyPrice: "₦83,000",
-    features: [
-      "Unlimited users",
-      "Unlimited members",
-      "Priority support",
-      "Advanced controls",
-    ],
-  },
-};
+const formatPrice = (price: number) => `₦${price.toLocaleString()}`;
 
 export default function CheckoutPage() {
   const router = useRouter();
   const [plan, setPlan] = useState<SelectedPlan | null>(null);
+  const [planDetails, setPlanDetails] = useState<Plan | null>(null);
   const [promoCode, setPromoCode] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -105,12 +73,23 @@ export default function CheckoutPage() {
     checkSubscription();
   }, [router]);
 
-  const planDisplay = plan ? PLAN_DISPLAY[plan.plan] : null;
-  const price = plan
-    ? plan.billingCycle === "MONTHLY"
-      ? planDisplay?.monthlyPrice
-      : planDisplay?.yearlyPrice
-    : null;
+  useEffect(() => {
+    getPlans()
+      .then((plans) => {
+        const match = plans.find((p) => p.type === plan?.plan);
+        if (match) setPlanDetails(match);
+      })
+      .catch(() => setPlanDetails(null));
+  }, [plan]);
+
+  // The actual amount charged today — always the real total for the chosen
+  // cycle, never a monthly-equivalent, since this is the payment confirmation.
+  const price =
+    plan && planDetails
+      ? plan.billingCycle === "MONTHLY"
+        ? planDetails.monthlyPrice
+        : planDetails.yearlyPrice
+      : null;
 
   const handleCheckout = async () => {
     if (!plan) {
@@ -179,7 +158,7 @@ export default function CheckoutPage() {
     router.push(`${RouteConfig.home}#pricing`);
   };
 
-  if (!plan || !planDisplay) {
+  if (!plan || !planDetails) {
     return (
       <div className="min-h-screen flex items-center justify-center gap-3">
         <Loader />
@@ -203,22 +182,25 @@ export default function CheckoutPage() {
         <div className="rounded-xl border border-[#0C5FB3] bg-[#0C5FB3]/5 p-5 flex flex-col gap-3">
           <div className="flex items-center justify-between">
             <span className="font-bold text-gray-900 text-base">
-              {planDisplay.label} Plan
+              {planDetails.name} Plan
             </span>
             <span className="text-[#0C5FB3] font-black text-lg">
-              {price}
-              <span className="text-xs text-gray-400 font-normal"> / mo</span>
+              {formatPrice(price ?? 0)}
+              <span className="text-xs text-gray-400 font-normal">
+                {" "}
+                / {plan.billingCycle === "MONTHLY" ? "mo" : "yr"}
+              </span>
             </span>
           </div>
 
           <div className="text-xs text-gray-500 font-medium uppercase tracking-wide">
             {plan.billingCycle === "YEARLY"
-              ? "Billed yearly · Save 17%"
+              ? "Billed yearly · Save up to 17%"
               : "Billed monthly"}
           </div>
 
           <div className="flex flex-col gap-2 pt-1">
-            {planDisplay.features.map((feature) => (
+            {planDetails.features.map((feature) => (
               <div key={feature} className="flex items-center gap-2">
                 <Check size={13} className="text-green-600 shrink-0" />
                 <Text variant="muted" className="text-xs">

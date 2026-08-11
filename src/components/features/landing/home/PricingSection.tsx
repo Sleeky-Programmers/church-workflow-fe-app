@@ -104,8 +104,13 @@ export default function PricingSection() {
     }
   };
 
+  // Yearly billing is shown as its monthly-equivalent (yearly total / 12) so
+  // the two toggle states are visually comparable at a glance — the actual
+  // yearly total is still what gets charged, just not the headline number.
   const getDisplayPrice = (plan: Plan) =>
-    billing === "monthly" ? plan.monthlyPrice : plan.yearlyPrice;
+    billing === "monthly"
+      ? plan.monthlyPrice
+      : Math.round(plan.yearlyPrice / 12);
 
   return (
     <section id="pricing" className="relative w-full">
@@ -224,10 +229,13 @@ export default function PricingSection() {
                     <span className="text-2xl font-black text-gray-900">
                       {formatPrice(getDisplayPrice(plan))}
                     </span>
-                    <span className="text-xs text-gray-400">
-                      / {billing === "monthly" ? "month" : "year"}
-                    </span>
+                    <span className="text-xs text-gray-400">/ month</span>
                   </div>
+                  {billing === "yearly" && (
+                    <span className="text-[11px] text-gray-400">
+                      billed annually
+                    </span>
+                  )}
                 </div>
 
                 <div className="flex flex-col gap-2.5 flex-1">
