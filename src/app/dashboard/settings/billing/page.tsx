@@ -29,7 +29,7 @@ const PLAN_ORDER = [
 
 export default function BillingPage() {
   const [billingCycle, setBillingCycle] = useState<BillingCycle>(
-    BillingCycle.MONTHLY,
+    BillingCycle.YEARLY,
   );
   const router = useRouter();
   const { toast } = useToast();
@@ -67,10 +67,13 @@ export default function BillingPage() {
 
   const formatPrice = (price: number) => `₦${price.toLocaleString()}`;
 
+  // Yearly billing is shown as its monthly-equivalent (yearly total / 12)
+  // for an apples-to-apples comparison with the monthly toggle — the actual
+  // yearly total is what gets charged, surfaced at checkout instead.
   const getPrice = (plan: Plan) => {
     return billingCycle === BillingCycle.MONTHLY
       ? plan.monthlyPrice
-      : plan.yearlyPrice;
+      : Math.round(plan.yearlyPrice / 12);
   };
 
   if (loading) {
@@ -151,10 +154,13 @@ export default function BillingPage() {
                   <Span className="text-2xl font-bold">
                     {formatPrice(getPrice(plan))}
                   </Span>
-                  <Span variant="muted">
-                    /{billingCycle === BillingCycle.MONTHLY ? "month" : "year"}
-                  </Span>
+                  <Span variant="muted">/month</Span>
                 </div>
+                {billingCycle === BillingCycle.YEARLY && (
+                  <Text variant="muted" className="text-xs">
+                    billed annually
+                  </Text>
+                )}
 
                 <div className="space-y-2 pt-2">
                   {plan.features.map((feature) => (

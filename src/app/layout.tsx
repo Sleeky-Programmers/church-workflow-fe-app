@@ -7,6 +7,7 @@ import { Suspense } from "react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { AnalyticsPageView } from "@/components/analytics/AnalyticsPageView";
 import { GoogleAnalytics } from "@/components/analytics/GoogleAnalytics";
+import { Mixpanel } from "@/components/analytics/Mixpanel";
 import {
   OrganizationJsonLd,
   SoftwareApplicationJsonLd,
@@ -68,6 +69,7 @@ export default function RootLayout({
         <GoogleAnalytics />
       </head>
       <body>
+        <Mixpanel />
         <Suspense fallback={null}>
           <AnalyticsPageView />
         </Suspense>
