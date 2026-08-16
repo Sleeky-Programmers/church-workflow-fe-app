@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { Text } from "@/components/ui/typography/Text";
 
@@ -49,9 +50,8 @@ export default function Footer() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-12 mb-12">
           <div className="flex flex-col gap-4">
             <div className="flex items-center gap-3">
-              <img
+              <Image
                 loading="lazy"
-                decoding="async"
                 src="/assets/logo/horizontal/white.png"
                 alt="Church Workflow logo"
                 width={148}

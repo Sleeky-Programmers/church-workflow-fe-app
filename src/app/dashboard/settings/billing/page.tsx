@@ -51,7 +51,6 @@ export default function BillingPage() {
         setCurrentPlan(data.currentPlan);
         setSubscriptionStatus(data.subscriptionStatus);
         setChurchStatus(data.churchStatus);
-        setBillingCycle(data.billingCycle);
       } catch (err) {
         toast({
           title: "Error",
@@ -150,7 +149,12 @@ export default function BillingPage() {
               <div className="space-y-4">
                 <Heading level={4}>{plan.name}</Heading>
 
-                <div className="flex items-end gap-1">
+                <div className="flex items-end gap-1.5 flex-wrap">
+                  {billingCycle === BillingCycle.YEARLY && (
+                    <Span variant="muted" className="text-sm line-through">
+                      {formatPrice(plan.monthlyPrice)}
+                    </Span>
+                  )}
                   <Span className="text-2xl font-bold">
                     {formatPrice(getPrice(plan))}
                   </Span>

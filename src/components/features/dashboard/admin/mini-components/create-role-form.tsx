@@ -138,7 +138,14 @@ export function CreateRoleForm({
   const loadingText = mode === "create" ? "Creating..." : "Saving...";
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-8">
+    <form onSubmit={handleSubmit} className="relative space-y-8">
+      {isLoading && (
+        <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-2 rounded-lg bg-white/80 backdrop-blur-[1px]">
+          <Loader size="w-12 h-12" showShadow={false} />
+          <Text variant="muted">{loadingText}</Text>
+        </div>
+      )}
+
       <div className="bg-white rounded-lg border p-6 space-y-4">
         <Heading level={4}>Role Details</Heading>
 
@@ -149,6 +156,7 @@ export function CreateRoleForm({
             placeholder="E.g. Media Lead"
             value={name}
             onChange={(e) => setName(e.target.value)}
+            disabled={isLoading}
             required
           />
         </div>
@@ -162,6 +170,7 @@ export function CreateRoleForm({
             placeholder="Type your message here."
             value={description}
             onChange={(e) => setDescription(e.target.value)}
+            disabled={isLoading}
             rows={3}
           />
         </div>
@@ -182,6 +191,7 @@ export function CreateRoleForm({
               module={module}
               value={permissions[module.module] || "no_access"}
               onChange={handlePermissionChange}
+              disabled={isLoading}
             />
           ))}
         </div>

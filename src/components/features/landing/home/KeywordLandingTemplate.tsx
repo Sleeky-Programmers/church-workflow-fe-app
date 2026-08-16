@@ -8,6 +8,7 @@ import BuiltForChurchSection from "@/components/features/landing/home/BuiltForCh
 import PricingSection from "@/components/features/landing/home/PricingSection";
 import CtaSection from "@/components/features/landing/home/CtaSection";
 import FaqSection from "@/components/features/landing/home/FaqSection";
+import { FaqJsonLd } from "@/components/seo/JsonLd";
 
 interface KeywordLandingTemplateProps {
   title: string;
@@ -20,6 +21,7 @@ export default function KeywordLandingTemplate({
 }: KeywordLandingTemplateProps) {
   return (
     <main className="bg-white overflow-x-hidden">
+      <FaqJsonLd />
       <Header />
       <PageIntro title={title} description={description} />
       <ChallengesSection />
