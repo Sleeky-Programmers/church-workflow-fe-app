@@ -9,6 +9,7 @@ import { Role, RoleAction } from "@/types";
 import { fetchRoles, updateRoleStatus } from "@/lib/api/admin-settings";
 import { RolesTable } from "@/components/features/dashboard/admin/role-table";
 import { DeactivateRoleDialog } from "@/components/features/dashboard/admin/mini-components/deactivate-role-dialog";
+import { EditRoleSlider } from "@/components/features/dashboard/admin/mini-components/edit-role-slider";
 import { ViewRolePermissionsDialog } from "@/components/features/dashboard/admin/mini-components/view-role-permissions-dialog";
 import { CustomRolesLockedModal } from "@/components/features/dashboard/subscription/custom-roles-locked-modal";
 import Heading from "@/components/ui/typography/Heading";
@@ -27,6 +28,7 @@ export default function RolesPermissionsPage() {
   const [isDeactivateDialogOpen, setIsDeactivateDialogOpen] = useState(false);
   const [isViewPermissionsDialogOpen, setIsViewPermissionsDialogOpen] =
     useState(false);
+  const [isEditSliderOpen, setIsEditSliderOpen] = useState(false);
   const [selectedRole, setSelectedRole] = useState<Role | null>(null);
   const { toast } = useToast();
 
@@ -105,7 +107,8 @@ export default function RolesPermissionsPage() {
         break;
 
       case "edit":
-        router.push(`/dashboard/settings/roles/edit/${roleId}`);
+        setSelectedRole(role);
+        setIsEditSliderOpen(true);
         break;
 
       case "disable":
@@ -211,6 +214,13 @@ export default function RolesPermissionsPage() {
         onOpenChange={setIsViewPermissionsDialogOpen}
         roleId={selectedRole?.id || null}
         roleName={selectedRole?.name || ""}
+      />
+
+      <EditRoleSlider
+        open={isEditSliderOpen}
+        onOpenChange={setIsEditSliderOpen}
+        role={selectedRole}
+        onRoleUpdated={loadRoles}
       />
 
       <CustomRolesLockedModal

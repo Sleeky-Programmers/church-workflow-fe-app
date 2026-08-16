@@ -225,7 +225,12 @@ export default function PricingSection() {
                   <Text variant="label" className="text-gray-800">
                     {plan.name}
                   </Text>
-                  <div className="flex items-baseline gap-1">
+                  <div className="flex items-baseline gap-1.5 flex-wrap">
+                    {billing === "yearly" && (
+                      <span className="text-sm text-gray-400 line-through">
+                        {formatPrice(plan.monthlyPrice)}
+                      </span>
+                    )}
                     <span className="text-2xl font-black text-gray-900">
                       {formatPrice(getDisplayPrice(plan))}
                     </span>

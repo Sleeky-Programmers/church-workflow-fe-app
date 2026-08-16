@@ -10,6 +10,7 @@ import CtaSection from "@/components/features/landing/home/CtaSection";
 import FaqSection from "@/components/features/landing/home/FaqSection";
 import Footer from "@/components/features/landing/layout/footer";
 import Header from "@/components/features/landing/layout/header";
+import { FaqJsonLd } from "@/components/seo/JsonLd";
 
 export const metadata = generateSeoMetadata({
   title: "Church Management Software in Nigeria | Church Workflow",
@@ -21,6 +22,7 @@ export const metadata = generateSeoMetadata({
 export default function Home() {
   return (
     <main className="bg-white overflow-x-hidden">
+      <FaqJsonLd />
       <Header />
       <HeroSection />
       <ChallengesSection />

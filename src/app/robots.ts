@@ -21,6 +21,8 @@ export default function robots(): MetadataRoute.Robots {
         "/checkout",
         "/payment",
         "/onboarding",
+        "/auth",
+        "/auth/",
       ],
     },
     sitemap: `${BASE_URL}/sitemap.xml`,
