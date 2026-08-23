@@ -65,6 +65,18 @@ const FIELD_LABELS: Record<string, string> = {
 
 const CSV_TEMPLATE_COLUMNS = Object.keys(FIELD_LABELS);
 
+// Android's native file pickers (Google Files, Samsung My Files, Downloads
+// app, etc.) filter by the MIME type the OS indexed for a file, not by the
+// ".csv" extension itself — and CSVs downloaded on Android are inconsistently
+// tagged across devices/apps (rarely the canonical "text/csv"). Listing only
+// ".csv" greys the file out or hides it entirely on many Android pickers,
+// even though the same file selects fine on iOS/desktop. Widening this to
+// every MIME type Android commonly (mis)assigns to CSVs fixes that — content
+// is still fully validated after selection (see validateCsvData below), so
+// a broader filter can't let anything genuinely invalid through unnoticed.
+const CSV_ACCEPT =
+  ".csv,text/csv,text/comma-separated-values,text/x-csv,text/x-comma-separated-values,application/vnd.ms-excel,application/csv,application/x-csv,text/plain,application/octet-stream";
+
 export function CsvUploadModal({
   open,
   onOpenChange,
@@ -576,7 +588,7 @@ export function CsvUploadModal({
 
         <div className="flex-1 min-h-0 overflow-y-auto mt-4">
           <FileInput
-            accept=".csv"
+            accept={CSV_ACCEPT}
             multiple
             files={files}
             onUpload={handleUpload}
