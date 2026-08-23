@@ -3,6 +3,7 @@
 import { usePathname, useSearchParams } from "next/navigation";
 import { useEffect } from "react";
 import { trackEvent } from "@/lib/analytics";
+import { syncSessionRecording } from "@/lib/mixpanel";
 
 /**
  * The gtag config call in GoogleAnalytics only fires a page_view on the initial
@@ -18,6 +19,7 @@ export function AnalyticsPageView() {
     trackEvent("page_view", {
       page_path: query ? `${pathname}?${query}` : pathname,
     });
+    syncSessionRecording(pathname);
   }, [pathname, searchParams]);
 
   return null;

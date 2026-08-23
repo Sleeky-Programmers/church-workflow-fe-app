@@ -5,6 +5,7 @@ import { persist } from "zustand/middleware";
 import { getMyChurch } from "@/lib/api";
 import { getCurrentUserProfile } from "@/lib/auth/session";
 import { getProfile } from "@/services/userServices";
+import { identifyMixpanelUser } from "@/lib/mixpanel";
 
 export type User = {
   _id: string;
@@ -102,6 +103,24 @@ export const useUserStore = create<UserStore>()(
             lastFetched: now,
             error: null,
           });
+
+          // Enrich the Mixpanel profile beyond the basic name/email set at
+          // login, so recordings in the dashboard are easy to identify by
+          // full name, role, and church — not just an anonymous session id.
+          if (userData) {
+            const fullName =
+              [userData.firstName, userData.lastName]
+                .filter(Boolean)
+                .join(" ") || undefined;
+
+            identifyMixpanelUser(userData._id, {
+              name: fullName,
+              email: userData.email,
+              avatarUrl: userData.profileImage || undefined,
+              role: userData.churchRole?.roleName,
+              church: churchData?.name,
+            });
+          }
         } catch (error: any) {
           set({
             error: error.message || "Failed to load profile",
