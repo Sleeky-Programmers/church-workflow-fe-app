@@ -3,11 +3,11 @@
 import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import Image from "next/image";
-import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Text } from "@/components/ui/typography/Text";
 import Heading from "@/components/ui/typography/Heading";
 import { FloatingBadge } from "@/components/ui/landing-page/FloatingBadge";
+import { AuthAwareCta } from "@/components/features/landing/shared/AuthAwareCta";
 
 const IconFolderCheckFill = dynamic(
   () => import("obra-icons-react").then((mod) => mod.IconFolderCheckFill),
@@ -83,15 +83,7 @@ export default function CtaSection() {
           </Text>
 
           <div className="flex flex-wrap gap-3 pt-2">
-            <Link href="/auth/signup">
-              <Button
-                variant="default"
-                size="lg"
-                className="rounded-[8px] px-7"
-              >
-                Sign Up
-              </Button>
-            </Link>
+            <AuthAwareCta className="rounded-[8px] px-7" />
             <Button
               variant="outline"
               size="lg"

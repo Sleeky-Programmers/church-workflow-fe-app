@@ -26,6 +26,14 @@ import { InviteFormData, PendingInvite, User, UserAction } from "@/types/user";
 
 import { MOCK_ADMIN } from "../data";
 import { MOCK_USERS } from "../user-data";
+import { SESSION_SCOPED_STORAGE_KEYS } from "../auth/storage-keys";
+
+function clearSessionScopedStorage() {
+  if (typeof window === "undefined") return;
+  SESSION_SCOPED_STORAGE_KEYS.forEach((key) =>
+    window.localStorage.removeItem(key),
+  );
+}
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -80,6 +88,7 @@ export async function authenticatedFetch<T>(
     } catch (err) {
       localStorage.removeItem("accessToken");
       localStorage.removeItem("refreshToken");
+      clearSessionScopedStorage();
 
       if (!window.location.pathname.includes("/auth/login")) {
         window.location.href = "/auth/login";
@@ -151,6 +160,8 @@ export async function apiFetch<T>(
   if (response.status === 401) {
     if (typeof window !== "undefined") {
       localStorage.removeItem("accessToken");
+      localStorage.removeItem("refreshToken");
+      clearSessionScopedStorage();
       if (!window.location.pathname.includes("/auth/login")) {
         window.location.href = "/auth/login";
       }

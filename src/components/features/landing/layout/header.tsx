@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Link } from "@/components/ui/link";
+import { useAuthStore } from "@/stores/useAuthStore";
 
 import { StickyHeader } from "./sticky-header";
 
@@ -19,6 +20,7 @@ const navLinks = [
 export default function Header() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -69,16 +71,26 @@ export default function Header() {
 
           {/* Desktop Auth Buttons */}
           <div className="hidden md:flex items-center gap-3">
-            <Link href="/auth/login">
-              <Button variant="outline" className="rounded-[8px] px-6">
-                Sign In
-              </Button>
-            </Link>
-            <Link href="/auth/signup">
-              <Button variant="default" className="rounded-[8px] px-6">
-                Sign Up
-              </Button>
-            </Link>
+            {isAuthenticated ? (
+              <Link href="/dashboard">
+                <Button variant="default" className="rounded-[8px] px-6">
+                  Go to Dashboard
+                </Button>
+              </Link>
+            ) : (
+              <>
+                <Link href="/auth/login">
+                  <Button variant="outline" className="rounded-[8px] px-6">
+                    Sign In
+                  </Button>
+                </Link>
+                <Link href="/auth/signup">
+                  <Button variant="default" className="rounded-[8px] px-6">
+                    Sign Up
+                  </Button>
+                </Link>
+              </>
+            )}
           </div>
 
           {/* Mobile Menu Button - Only shows when NOT logged in */}
@@ -148,36 +160,54 @@ export default function Header() {
 
                 {/* Heading */}
                 <h3 className="text-xl font-semibold text-center text-gray-900 mb-2">
-                  Welcome Back
+                  {isAuthenticated ? "Welcome Back" : "Welcome"}
                 </h3>
                 <p className="text-sm text-center text-gray-500 mb-8">
-                  Sign in to your account or create a new one
+                  {isAuthenticated
+                    ? "Continue to your dashboard"
+                    : "Sign in to your account or create a new one"}
                 </p>
 
                 {/* Auth Buttons - Large and prominent */}
                 <div className="flex flex-col gap-4">
-                  <Link
-                    href="/auth/login"
-                    onClick={() => setMobileMenuOpen(false)}
-                  >
-                    <Button
-                      variant="outline"
-                      className="w-full rounded-[12px] py-6 text-base font-semibold"
+                  {isAuthenticated ? (
+                    <Link
+                      href="/dashboard"
+                      onClick={() => setMobileMenuOpen(false)}
                     >
-                      Sign In
-                    </Button>
-                  </Link>
-                  <Link
-                    href="/auth/signup"
-                    onClick={() => setMobileMenuOpen(false)}
-                  >
-                    <Button
-                      variant="default"
-                      className="w-full rounded-[12px] py-6 text-base font-semibold"
-                    >
-                      Sign Up
-                    </Button>
-                  </Link>
+                      <Button
+                        variant="default"
+                        className="w-full rounded-[12px] py-6 text-base font-semibold"
+                      >
+                        Go to Dashboard
+                      </Button>
+                    </Link>
+                  ) : (
+                    <>
+                      <Link
+                        href="/auth/login"
+                        onClick={() => setMobileMenuOpen(false)}
+                      >
+                        <Button
+                          variant="outline"
+                          className="w-full rounded-[12px] py-6 text-base font-semibold"
+                        >
+                          Sign In
+                        </Button>
+                      </Link>
+                      <Link
+                        href="/auth/signup"
+                        onClick={() => setMobileMenuOpen(false)}
+                      >
+                        <Button
+                          variant="default"
+                          className="w-full rounded-[12px] py-6 text-base font-semibold"
+                        >
+                          Sign Up
+                        </Button>
+                      </Link>
+                    </>
+                  )}
                 </div>
               </div>
             </div>

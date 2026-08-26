@@ -132,6 +132,7 @@ export function SignupPageContent() {
       if (response.accessToken) {
         initializeAuthSession({
           accessToken: response.accessToken,
+          refreshToken: response.refreshToken,
           emailHint: email,
           user: {
             email,

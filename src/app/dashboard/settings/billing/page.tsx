@@ -29,7 +29,7 @@ const PLAN_ORDER = [
 
 export default function BillingPage() {
   const [billingCycle, setBillingCycle] = useState<BillingCycle>(
-    BillingCycle.MONTHLY,
+    BillingCycle.YEARLY,
   );
   const router = useRouter();
   const { toast } = useToast();
@@ -51,7 +51,6 @@ export default function BillingPage() {
         setCurrentPlan(data.currentPlan);
         setSubscriptionStatus(data.subscriptionStatus);
         setChurchStatus(data.churchStatus);
-        setBillingCycle(data.billingCycle);
       } catch (err) {
         toast({
           title: "Error",
@@ -67,10 +66,13 @@ export default function BillingPage() {
 
   const formatPrice = (price: number) => `₦${price.toLocaleString()}`;
 
+  // Yearly billing is shown as its monthly-equivalent (yearly total / 12)
+  // for an apples-to-apples comparison with the monthly toggle — the actual
+  // yearly total is what gets charged, surfaced at checkout instead.
   const getPrice = (plan: Plan) => {
     return billingCycle === BillingCycle.MONTHLY
       ? plan.monthlyPrice
-      : plan.yearlyPrice;
+      : Math.round(plan.yearlyPrice / 12);
   };
 
   if (loading) {
@@ -110,7 +112,7 @@ export default function BillingPage() {
         </Text>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
         {plans.map((plan) => {
           const isCurrent =
             plan.type === currentPlan &&
@@ -147,14 +149,22 @@ export default function BillingPage() {
               <div className="space-y-4">
                 <Heading level={4}>{plan.name}</Heading>
 
-                <div className="flex items-end gap-1">
+                <div className="flex items-end gap-1.5 flex-wrap">
+                  {billingCycle === BillingCycle.YEARLY && (
+                    <Span variant="muted" className="text-sm line-through">
+                      {formatPrice(plan.monthlyPrice)}
+                    </Span>
+                  )}
                   <Span className="text-2xl font-bold">
                     {formatPrice(getPrice(plan))}
                   </Span>
-                  <Span variant="muted">
-                    /{billingCycle === BillingCycle.MONTHLY ? "month" : "year"}
-                  </Span>
+                  <Span variant="muted">/month</Span>
                 </div>
+                {billingCycle === BillingCycle.YEARLY && (
+                  <Text variant="muted" className="text-xs">
+                    billed annually
+                  </Text>
+                )}
 
                 <div className="space-y-2 pt-2">
                   {plan.features.map((feature) => (

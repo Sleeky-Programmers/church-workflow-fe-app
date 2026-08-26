@@ -3,6 +3,7 @@ const REFRESH_TOKEN_KEY = "refreshToken";
 const CURRENT_USER_KEY = "auth:current-user";
 const USER_PROFILE_PREFIX = "auth:user-profile:";
 const ONBOARDING_PREFIX = "onboarding:state:";
+const ONBOARDING_DRAFT_PREFIX = "onboarding:church-identity-draft:";
 
 type UnknownRecord = Record<string, unknown>;
 
@@ -223,18 +224,14 @@ export function clearAuthSession(): void {
     const key = window.localStorage.key(i);
     if (
       key &&
-      (key.startsWith(USER_PROFILE_PREFIX) || key.startsWith(ONBOARDING_PREFIX))
+      (key.startsWith(USER_PROFILE_PREFIX) ||
+        key.startsWith(ONBOARDING_PREFIX) ||
+        key.startsWith(ONBOARDING_DRAFT_PREFIX))
     ) {
       keysToRemove.push(key);
     }
   }
   keysToRemove.forEach((key) => window.localStorage.removeItem(key));
-}
-
-export async function logout(): Promise<void> {
-  getAccessToken();
-
-  clearAuthSession();
 }
 
 export function getCurrentUserProfile(): UserProfile | null {

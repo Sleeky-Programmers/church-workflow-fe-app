@@ -76,6 +76,7 @@ export default function AdminSignupForm({
 
       initializeAuthSession({
         accessToken: response.accessToken,
+        refreshToken: response.refreshToken,
         emailHint: data.email,
         user: {
           email: data.email,
@@ -115,6 +116,7 @@ export default function AdminSignupForm({
       const data = await googleAuth(idToken, inviteToken);
       initializeAuthSession({
         accessToken: data.accessToken,
+        refreshToken: data.refreshToken,
         emailHint: data.user?.email || preFilledEmail,
         user: data.user,
       });

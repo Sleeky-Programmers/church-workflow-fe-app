@@ -11,7 +11,7 @@ import CtaSection from "@/components/features/landing/home/CtaSection";
 export const metadata = generateSeoMetadata({
   title: "Features | Church Management Software",
   description:
-    "Explore Church Workflow's church management software features: member management, attendance tracking, communication, finance, and volunteer management tools built for ministry operations.",
+    "Explore Church Workflow's church management software features: member management, attendance tracking, church communication software, finance, and volunteer management tools built for ministry operations.",
   path: "/features",
 });
 
@@ -21,7 +21,7 @@ export default function FeaturesPage() {
       <Header />
       <PageIntro
         title="Everything Your Church Management Software Needs"
-        description="Church Workflow brings church member management, communication, attendance, and ministry operations together in one church administration platform — so your team spends less time on admin and more time on ministry."
+        description="Church Workflow brings church member management, church communication software, attendance, and ministry operations together in one church administration platform — so your team spends less time on admin and more time on ministry."
       />
       <FocusMinistrySection />
       <BuiltForChurchSection />
