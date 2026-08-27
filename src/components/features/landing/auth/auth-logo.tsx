@@ -9,7 +9,7 @@ interface AuthLogoProps {
 
 export default function AuthLogo({
   className = "",
-  href = "#",
+  href = "/",
 }: AuthLogoProps) {
   const logoContent = (
     <div
@@ -27,7 +27,7 @@ export default function AuthLogo({
   );
 
   if (href) {
-    return <>{logoContent}</>;
+    return <Link href={href}>{logoContent}</Link>;
   }
 
   return logoContent;
