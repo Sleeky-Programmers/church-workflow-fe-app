@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { useMemo, useState } from "react";
 
+import { InviteUserDialog } from "@/components/features/dashboard/admin/invite-user";
 import {
   MemberMultiSelect,
   MemberSingleSelect,
@@ -35,10 +36,13 @@ import { Textarea } from "@/components/ui/textarea";
 import Heading from "@/components/ui/typography/Heading";
 import { Span, Text } from "@/components/ui/typography/Text";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useToast } from "@/hooks/use-toast";
+import { createAdminInvite } from "@/lib/api/admin-settings";
 import { cn } from "@/lib/utils";
 import { fetchMembers } from "@/services/memberService";
 import { fetchAdmins } from "@/services/userServices";
 import { MemberProfile } from "@/types";
+import { InviteFormData } from "@/types/user";
 
 const PANEL_PAGE_SIZE = 8;
 
@@ -66,6 +70,7 @@ export default function AddSmallTeamDialog({
   triggerLabel = "Add a Team",
 }: Props) {
   const isMobile = useIsMobile();
+  const { toast } = useToast();
   const [open, setOpen] = useState(false);
   const [teamName, setTeamName] = useState("");
   const [leaderId, setLeaderId] = useState("");
@@ -76,6 +81,40 @@ export default function AddSmallTeamDialog({
   const [showSelectedPanel, setShowSelectedPanel] = useState(false);
   const [panelQuery, setPanelQuery] = useState("");
   const [panelPage, setPanelPage] = useState(1);
+  const [inviteOpen, setInviteOpen] = useState(false);
+  const [isInviteLoading, setIsInviteLoading] = useState(false);
+
+  const handleInviteSubmit = async (data: InviteFormData) => {
+    setIsInviteLoading(true);
+    try {
+      const payload: {
+        email: string;
+        title?: string;
+        firstName?: string;
+        lastName?: string;
+      } = { email: data.email };
+      if (data.title) payload.title = data.title;
+      if (data.firstName) payload.firstName = data.firstName;
+      if (data.lastName) payload.lastName = data.lastName;
+
+      const result = await createAdminInvite(data.role, payload);
+      toast({
+        title: "Success",
+        description: "Invitation sent successfully",
+      });
+      return result;
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description:
+          error.message || "Failed to send invitation. Please try again.",
+        variant: "destructive",
+      });
+      throw error;
+    } finally {
+      setIsInviteLoading(false);
+    }
+  };
 
   const selectedMembers = useMemo(() => {
     if (!memberIds.length) {
@@ -353,9 +392,11 @@ export default function AddSmallTeamDialog({
                     </Button>
                   </div>
                   <a
-                    href="/dashboard/members/invite"
-                    target="_blank"
-                    rel="noopener noreferrer"
+                    href="#"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setInviteOpen(true);
+                    }}
                     className="mt-0.5 inline-flex items-center gap-1 text-xs text-primary hover:underline"
                   >
                     Add New Team Lead
@@ -490,6 +531,14 @@ export default function AddSmallTeamDialog({
           </DialogContent>
         </Dialog>
       )}
+
+      <InviteUserDialog
+        open={inviteOpen}
+        onOpenChange={setInviteOpen}
+        onSubmit={handleInviteSubmit}
+        isLoading={isInviteLoading}
+        title="Invite New Team Lead"
+      />
     </>
   );
 }
