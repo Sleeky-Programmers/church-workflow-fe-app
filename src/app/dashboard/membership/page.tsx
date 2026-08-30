@@ -22,11 +22,6 @@ import { useDebounce } from "@/hooks/use-debounce";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useToast } from "@/hooks/use-toast";
 import {
-  applyMemberLimitTestParam,
-  getMemberLimitTestOverride,
-  isDevLimitTestingEnabled,
-} from "@/lib/dev/member-limit-test";
-import {
   Gender,
   MaritalStatus,
   MemberFormType,
@@ -36,7 +31,6 @@ import { mapFiltersToBackend } from "@/mappers/filter.mapper";
 import { getNextPlan, getUpgradeFeatures } from "@/lib/plan-utils";
 import {
   fetchMembers,
-  getMemberLimitStatus,
   getMemberPlanLimitStatus,
 } from "@/services/memberService";
 import { getPlans } from "@/services/billingService";
@@ -90,14 +84,6 @@ export default function MembershipPage() {
     addedCount?: number;
   } | null>(null);
 
-  // DEV-ONLY: true once any ?testLimit=... override has been resolved (or
-  // immediately if there's none to resolve). Nothing that fetches plan-limit
-  // status — LimitBanner included — mounts/fires until this is true, so the
-  // override is always in place before anyone reads it. See member-limit-test.ts.
-  const [testOverrideReady, setTestOverrideReady] = useState(
-    () => !isDevLimitTestingEnabled() || !searchParams.get("testLimit"),
-  );
-
   const debouncedSearch = useDebounce(searchQuery, 500);
   const backendFilter = mapFiltersToBackend(filters);
 
@@ -140,62 +126,9 @@ export default function MembershipPage() {
       .finally(() => setPlansLoaded(true));
   }, []);
 
-  // DEV-ONLY: resolves any ?testLimit=... override before anything else is
-  // allowed to fetch plan-limit status. It first reads the account's REAL
-  // plan/limit (un-overridden) so the simulated scenario keeps the real plan
-  // and only fakes the member count — otherwise "Upgrade to Growth" could
-  // show the wrong tier for an account that isn't actually on Starter.
   useEffect(() => {
-    if (testOverrideReady) return;
-
-    const scenario = searchParams.get("testLimit");
-    if (!scenario) {
-      setTestOverrideReady(true);
-      return;
-    }
-
-    if (scenario === "clear") {
-      applyMemberLimitTestParam(searchParams, { planName: null, limit: 0 });
-      setTestOverrideReady(true);
-      return;
-    }
-
-    (async () => {
-      try {
-        const real = await getMemberLimitStatus();
-        applyMemberLimitTestParam(searchParams, {
-          planName: real.planName,
-          limit: real.limit,
-        });
-      } catch (error) {
-        console.error("Failed to resolve real plan for test override:", error);
-      } finally {
-        setTestOverrideReady(true);
-      }
-    })();
-  }, [searchParams, testOverrideReady]);
-
-  useEffect(() => {
-    if (!testOverrideReady) return;
     refreshLimitStatus();
-  }, [testOverrideReady, refreshLimitStatus]);
-
-  // DEV-ONLY: the "reached" and "grace" scenarios also auto-open their
-  // modal (mirroring the real trigger) so they can be previewed with one URL.
-  useEffect(() => {
-    if (!testOverrideReady || !isDevLimitTestingEnabled()) return;
-    const scenario = searchParams.get("testLimit");
-    if (!scenario || scenario === "clear") return;
-
-    const override = getMemberLimitTestOverride();
-    if (!override) return;
-
-    if (scenario === "reached") {
-      setIsLimitReachedModalOpen(true);
-    } else if (scenario === "grace") {
-      setSuccessModal({ context: "import", addedCount: override.current });
-    }
-  }, [testOverrideReady, searchParams]);
+  }, [refreshLimitStatus]);
 
   const nextPlan = getNextPlan(limitStatus?.planName ?? null, plans);
   const nextPlanFeatures = getUpgradeFeatures(nextPlan);
@@ -313,15 +246,13 @@ export default function MembershipPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {testOverrideReady && (
-        <LimitBanner
-          fetchStatus={getMemberPlanLimitStatus}
-          dismissKey="memberLimitBannerDismissed"
-          resourceLabel="members"
-          resourceLimitLabel="member limit"
-          className="mx-4 mt-3 mb-1 sm:mx-6"
-        />
-      )}
+      <LimitBanner
+        fetchStatus={getMemberPlanLimitStatus}
+        dismissKey="memberLimitBannerDismissed"
+        resourceLabel="members"
+        resourceLimitLabel="member limit"
+        className="mx-4 mt-3 mb-1 sm:mx-6"
+      />
 
       <div className="bg-white">
         <div className="px-4 sm:px-6 py-4 flex items-center justify-between gap-2">

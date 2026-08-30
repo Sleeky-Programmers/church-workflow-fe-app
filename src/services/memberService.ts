@@ -1,5 +1,4 @@
 import { authenticatedFetch } from "@/lib/api";
-import { getMemberLimitTestOverride } from "@/lib/dev/member-limit-test";
 import { mapMember } from "@/mappers/member.mapper";
 import {
   MemberLimitStatus,
@@ -191,9 +190,6 @@ export async function getMemberLimitStatus(): Promise<MemberLimitStatus> {
 }
 
 export async function getMemberPlanLimitStatus(): Promise<PlanLimitStatus> {
-  const override = getMemberLimitTestOverride();
-  if (override) return override;
-
   const status = await getMemberLimitStatus();
 
   return {

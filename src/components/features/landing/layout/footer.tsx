@@ -7,6 +7,8 @@ const productLinks = [
   { label: "How It Works", href: "/#how-it-works" },
   { label: "Pricing", href: "/pricing" },
   { label: "Sign Up", href: "/auth/signup" },
+  { label: "Login", href: "/auth/login" },
+  { label: "Contact", href: "/contact" },
 ];
 
 const solutionLinks = [
@@ -21,17 +23,12 @@ const solutionLinks = [
   },
 ];
 
-const resourceLinks = [
-  { label: "Help Center", href: "/#help" },
-  { label: "Documentation", href: "/#docs" },
-  { label: "Privacy Policy", href: "/#privacy" },
-  { label: "Terms of Service", href: "/#terms" },
-];
-
-const contactLinks = [
-  { label: "Contact Us", href: "/#contact" },
-  { label: "Support", href: "/#support" },
-  { label: "Login", href: "/auth/login" },
+// Help Center, Documentation, and Support were removed rather than pointed
+// at real pages — no content exists yet for any of them, and a dead link is
+// worse than no link. Add them back once there's something to link to.
+const legalLinks = [
+  { label: "Privacy Policy", href: "/privacy" },
+  { label: "Terms of Service", href: "/terms" },
 ];
 
 export default function Footer() {
@@ -47,7 +44,7 @@ export default function Footer() {
       />
 
       <div className="relative z-10 max-w-6xl mx-auto px-6 pt-16 pb-8">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-12 mb-12">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
           <div className="flex flex-col gap-4">
             <div className="flex items-center gap-3">
               <Image
@@ -95,24 +92,9 @@ export default function Footer() {
           </div>
 
           <div className="flex flex-col gap-4">
-            <p className="text-[#ffff] font-bold text-sm">Resources</p>
+            <p className="text-[#ffff] font-bold text-sm">Legal</p>
             <div className="flex flex-col gap-3">
-              {resourceLinks.map((link) => (
-                <Link
-                  key={link.label}
-                  href={link.href}
-                  className="text-[#ffff]/70 text-sm hover:text-[#ffff] transition-colors"
-                >
-                  {link.label}
-                </Link>
-              ))}
-            </div>
-          </div>
-
-          <div className="flex flex-col gap-4">
-            <p className="text-[#ffff] font-bold text-sm">Contact</p>
-            <div className="flex flex-col gap-3">
-              {contactLinks.map((link) => (
+              {legalLinks.map((link) => (
                 <Link
                   key={link.label}
                   href={link.href}

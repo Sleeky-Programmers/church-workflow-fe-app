@@ -41,6 +41,18 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "monthly",
       priority: 0.7,
     },
+    {
+      url: `${BASE_URL}/free-church-management-software`,
+      lastModified,
+      changeFrequency: "monthly",
+      priority: 0.7,
+    },
+    {
+      url: `${BASE_URL}/contact`,
+      lastModified,
+      changeFrequency: "yearly",
+      priority: 0.5,
+    },
     // Add more public, indexable pages here as they are created
     // (do not list /auth, /dashboard, /checkout, /payment, /onboarding — these are noindexed)
   ];

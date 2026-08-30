@@ -42,6 +42,9 @@ export default function HeroSection() {
             level={1}
             className="text-4xl md:text-5xl font-black leading-tight text-gray-900"
           >
+            Church Management Software
+            <br />
+            to{" "}
             <span className="relative inline-block text-[#0C5FB3]">
               Simplify
               <img
@@ -53,9 +56,7 @@ export default function HeroSection() {
                 className="absolute -bottom-1 left-0 w-full h-auto"
               />
             </span>{" "}
-            Church
-            <br />
-            Operations
+            Church Operations
           </Heading>
 
           <div className="relative">
@@ -149,7 +150,7 @@ export default function HeroSection() {
 
           <div className="relative w-full max-w-[460px] mx-auto">
             <Image
-              src="/landing-page/f7231d12c7971edd138487e47e3a828f4441f808(1).png"
+              src="/landing-page/f7231d12c7971edd138487e47e3a828f4441f808(1).webp"
               alt="Church Workflow dashboard on Mac Studio"
               width={460}
               height={380}
