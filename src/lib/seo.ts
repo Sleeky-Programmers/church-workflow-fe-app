@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 export const BASE_URL =
-  process.env.NEXT_PUBLIC_BASE_URL || "https://app.churchworkflow.com";
+  process.env.NEXT_PUBLIC_BASE_URL || "https://churchworkflow.com";
 export const SITE_NAME = "Church Workflow";
 
 // Vercel sets VERCEL_ENV to "production" | "preview" | "development".
@@ -22,6 +22,30 @@ const DEFAULT_KEYWORDS = [
   "church communication software",
   "church volunteer management software",
   "ministry management software",
+  // Free / small-church tier — honest, low-competition, high-intent terms
+  // the Starter plan genuinely satisfies (100 members, 3 users, membership +
+  // attendance + small teams).
+  "free church management software",
+  "small church management software",
+  "church management software for small churches",
+  "cell group management app",
+  "house church software",
+  "free church attendance tracker",
+  "church planting software",
+  // Industry terms
+  "ChMS",
+  "church management system",
+  // Feature-specific long-tail
+  "church attendance tracking app",
+  "church database software",
+  "church department management",
+  "church service scheduling software",
+  "church check-in software",
+  // Local
+  "church management software Lagos",
+  "church software for Nigerian pastors",
+  "church management app Nigeria",
+  "church management software Africa",
 ];
 
 interface SeoProps {

@@ -185,7 +185,7 @@ function PublicPaymentVerifyContent() {
   };
 
   const handleContactSupport = () => {
-    window.location.href = "mailto:support@yourdomain.com";
+    window.location.href = "mailto:support@churchworkflow.com";
   };
 
   // Still checking for a session, or already navigating to the dashboard page.

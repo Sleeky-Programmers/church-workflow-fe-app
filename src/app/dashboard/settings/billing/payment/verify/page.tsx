@@ -180,7 +180,7 @@ export default function PaymentVerifyPage() {
   };
 
   const handleContactSupport = () => {
-    window.location.href = "mailto:support@yourdomain.com";
+    window.location.href = "mailto:support@churchworkflow.com";
   };
 
   // If payment was cancelled, show cancelled state

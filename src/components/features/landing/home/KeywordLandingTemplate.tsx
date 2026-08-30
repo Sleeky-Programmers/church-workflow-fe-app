@@ -13,17 +13,23 @@ import { FaqJsonLd } from "@/components/seo/JsonLd";
 interface KeywordLandingTemplateProps {
   title: string;
   description: string;
+  /** Page-specific body copy rendered between the intro and the shared
+   * sections below — this is what keeps each keyword page's content
+   * genuinely distinct instead of just swapping the H1. */
+  children?: React.ReactNode;
 }
 
 export default function KeywordLandingTemplate({
   title,
   description,
+  children,
 }: KeywordLandingTemplateProps) {
   return (
     <main className="bg-white overflow-x-hidden">
       <FaqJsonLd />
       <Header />
       <PageIntro title={title} description={description} />
+      {children}
       <ChallengesSection />
       <HowItWorksSection />
       <FocusMinistrySection />

@@ -19,6 +19,12 @@ export const metadata = generateSeoMetadata({
   path: "/",
 });
 
+// Revalidate hourly so PricingSection's server-fetched plan data can't stay
+// stale until the next deploy — a price change in the backend without a
+// frontend redeploy would otherwise leave this page showing an outdated
+// price indefinitely.
+export const revalidate = 3600;
+
 export default function Home() {
   return (
     <main className="bg-white overflow-x-hidden">

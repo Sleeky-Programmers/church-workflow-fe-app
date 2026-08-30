@@ -14,7 +14,7 @@ const steps = [
     ),
     description:
       "Create your church profile, configure roles, and onboard administrators in minutes. Define permissions, assign responsibilities, and prepare your system for smooth operations from day one.",
-    image: "/landing-page/f05c6872cdd4d046d8216b2f1e6f66196e7cc1cc.png",
+    image: "/landing-page/f05c6872cdd4d046d8216b2f1e6f66196e7cc1cc.webp",
     imageLeft: false,
   },
   {
@@ -28,7 +28,7 @@ const steps = [
     ),
     description:
       "Upload or manually add members, church workers, branches, and departments. Organize records, track roles, and centralize information in one structured platform.",
-    image: "/landing-page/e4d7323ca9e4d50245fae7b72dbe81ff35d6c04b.png",
+    image: "/landing-page/e4d7323ca9e4d50245fae7b72dbe81ff35d6c04b.webp",
     imageLeft: true,
   },
   {
@@ -40,7 +40,7 @@ const steps = [
     ),
     description:
       "Track attendance, offerings, tasks, and departmental activities from a single dashboard. Generate reports, monitor progress, and make informed decisions that support church growth.",
-    image: "/landing-page/1bad8e22a88e5220a802eb2bb5e59b2f9f709a1c.png",
+    image: "/landing-page/1bad8e22a88e5220a802eb2bb5e59b2f9f709a1c.webp",
     imageLeft: false,
   },
 ];

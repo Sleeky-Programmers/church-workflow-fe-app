@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Text } from "@/components/ui/typography/Text";
@@ -15,14 +15,12 @@ import { CustomRolesLockedModal } from "@/components/features/dashboard/subscrip
 import Heading from "@/components/ui/typography/Heading";
 import { RouteConfig } from "@/config/routes";
 import { Loader } from "@/components/ui/loader";
-import { isDevLimitTestingEnabled } from "@/lib/dev/dev-flags";
 import { getNextPlan } from "@/lib/plan-utils";
 import { getCurrentPlan, getPlans } from "@/services/billingService";
 import { CurrentPlanResponse, Plan } from "@/types";
 
 export default function RolesPermissionsPage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const [roles, setRoles] = useState<Role[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isDeactivateDialogOpen, setIsDeactivateDialogOpen] = useState(false);
@@ -39,18 +37,7 @@ export default function RolesPermissionsPage() {
   const [plansLoaded, setPlansLoaded] = useState(false);
   const [isCustomRolesLockedOpen, setIsCustomRolesLockedOpen] = useState(false);
 
-  // DEV-ONLY: ?testLimit=locked|unlocked previews the Unlock Custom Roles
-  // modal without needing a real Starter-plan account. See member-limit-test.ts
-  // for the equivalent mechanism on the membership page.
-  const testScenario = isDevLimitTestingEnabled()
-    ? searchParams.get("testLimit")
-    : null;
-  const customRolesEnabled =
-    testScenario === "locked"
-      ? false
-      : testScenario === "unlocked"
-        ? true
-        : (currentPlan?.customRolesEnabled ?? false);
+  const customRolesEnabled = currentPlan?.customRolesEnabled ?? false;
 
   useEffect(() => {
     loadRoles();
@@ -65,12 +52,6 @@ export default function RolesPermissionsPage() {
       .catch((error) => console.error("Failed to load plan info:", error))
       .finally(() => setPlansLoaded(true));
   }, []);
-
-  useEffect(() => {
-    if (testScenario === "locked") {
-      setIsCustomRolesLockedOpen(true);
-    }
-  }, [testScenario]);
 
   const loadRoles = async () => {
     setIsLoading(true);

@@ -122,7 +122,7 @@ export default function CtaSection() {
 
           <div className="relative w-[460px]">
             <Image
-              src="/landing-page/f7231d12c7971edd138487e47e3a828f4441f808(1).png"
+              src="/landing-page/f7231d12c7971edd138487e47e3a828f4441f808(1).webp"
               alt="Church Workflow dashboard on Mac Studio"
               width={460}
               height={380}

@@ -6,10 +6,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 
 import DashboardMobile from "@/components/features/dashboard/dashboard-mobile";
-import {
-  StatCard,
-  TotalIncomeCard,
-} from "@/components/features/dashboard/StatCard";
+import { StatCard } from "@/components/features/dashboard/StatCard";
 import { TrendChart } from "@/components/features/dashboard/trend-chart";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -81,8 +78,6 @@ export default function Dashboard() {
   const [serviceAttendance, setServiceAttendance] = useState("0");
   const [serviceAttendanceGrowth, setServiceAttendanceGrowth] = useState("0%");
   const [attendanceLoading, setAttendanceLoading] = useState(true);
-  const [income, setIncome] = useState(0);
-  const [incomeGrowth, setIncomeGrowth] = useState(0);
   const [attendanceTrendData, setAttendanceTrendData] = useState<any[]>([]);
   const [incomeTrendData, setIncomeTrendData] = useState<any[]>([]);
   const [upcomingBirthdays, setUpcomingBirthdays] = useState<
@@ -92,10 +87,6 @@ export default function Dashboard() {
   const [upcomingEvents, setUpcomingEvents] = useState(
     DashboardData.upcomingEvents,
   );
-  const [incomeMonth, setIncomeMonth] = useState<"This Month" | "Last Month">(
-    "This Month",
-  );
-
   // ── Profile ──
   useEffect(() => {
     if (user?.firstName) {

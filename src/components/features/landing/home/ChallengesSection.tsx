@@ -6,19 +6,19 @@ import { ChallengeCard } from "@/components/ui/landing-page/ChallengeCard";
 
 const challenges = [
   {
-    image: "/landing-page/69c8bde9f582d633a2546f4c077c73a84c064ba8.png",
+    image: "/landing-page/69c8bde9f582d633a2546f4c077c73a84c064ba8.webp",
     title: "Scattered Records",
     description:
       "Information spread across books, spreadsheets, and different tools.",
   },
   {
-    image: "/landing-page/5f8c0a008191a45888ee7f67f299732d717392ea.png",
+    image: "/landing-page/5f8c0a008191a45888ee7f67f299732d717392ea.webp",
     title: "Sensitive Data Risks",
     description:
       "Approvals and records handled without proper structure or security.",
   },
   {
-    image: "/landing-page/e122a66e1f91674101d2804aca9eaa258387f350.png",
+    image: "/landing-page/e122a66e1f91674101d2804aca9eaa258387f350.webp",
     title: "Delays & Confusion",
     description:
       "Tasks, requests, and notifications often get missed or delayed.",
