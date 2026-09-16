@@ -1,5 +1,6 @@
 "use client";
 import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import Heading from "@/components/ui/typography/Heading";
 import {
@@ -12,7 +13,7 @@ import {
 } from "@/components/ui/form";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { LoginFormValues } from "@/types/type";
+import { loginSchema, LoginFormValues } from "@/types/schema";
 import GoogleSignupButton from "../oauth/google-signup-button";
 import { Text, Span } from "@/components/ui/typography/Text";
 import { Loader } from "@/components/ui/loader";
@@ -33,6 +34,7 @@ export default function LoginForm({ onForgotPassword }: LoginFormProps) {
   const router = useRouter();
   const setUser = useAuthStore((state) => state.setUser);
   const form = useForm<LoginFormValues>({
+    resolver: zodResolver(loginSchema),
     defaultValues: {
       email: "",
       password: "",
@@ -146,7 +148,6 @@ export default function LoginForm({ onForgotPassword }: LoginFormProps) {
           <FormField
             control={form.control}
             name="email"
-            rules={{ required: "Email is required" }}
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Email</FormLabel>
@@ -165,7 +166,6 @@ export default function LoginForm({ onForgotPassword }: LoginFormProps) {
           <FormField
             control={form.control}
             name="password"
-            rules={{ required: "Password is required" }}
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Password</FormLabel>

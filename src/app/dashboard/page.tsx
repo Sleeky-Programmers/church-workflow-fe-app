@@ -1,11 +1,14 @@
 "use client";
 
 import { CalendarDays, User } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
 import DashboardMobile from "@/components/features/dashboard/dashboard-mobile";
+import { IncomeBreakdown } from "@/components/features/dashboard/income-breakdown";
+import { IncomeVsExpenses } from "@/components/features/dashboard/income-expense";
+import { PendingRequestsWidget } from "@/components/features/dashboard/pending-requests-widget";
+import { RecentActivityWidget } from "@/components/features/dashboard/recent-activity-widget";
 import { StatCard } from "@/components/features/dashboard/StatCard";
 import { TrendChart } from "@/components/features/dashboard/trend-chart";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -14,6 +17,7 @@ import { Loader } from "@/components/ui/loader";
 import { Text } from "@/components/ui/typography/Text";
 import { EVENT_CATEGORY_CONFIG } from "@/config/event-category";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useHasAccess } from "@/lib/access-control";
 import {
   fetchAttendanceStats,
   fetchAttendanceTrend,
@@ -31,6 +35,7 @@ import {
   isInFuture,
   sortBirthdaysByNearest,
 } from "@/lib/utils";
+import { fetchGivingMonthlyTrend } from "@/services/givingRecordService";
 import { fetchMembers as fetchMemberProfiles } from "@/services/memberService";
 import { useUserStore } from "@/stores/useUserStore";
 import { ChurchEvent } from "@/types";
@@ -71,6 +76,8 @@ export default function Dashboard() {
 
   const [displayName, setDisplayName] = useState("Super Admin");
   const isMobile = useIsMobile();
+  const canViewGiving = useHasAccess("GIVING", "VIEW");
+  const canViewRequests = useHasAccess("REQUESTS", "VIEW");
 
   const [totalMembers, setTotalMembers] = useState("0");
   const [totalMembersGrowth, setTotalMembersGrowth] = useState("0%");
@@ -124,9 +131,6 @@ export default function Dashboard() {
         setServiceAttendanceGrowth(attendanceGrowth || "0%");
         const trends = monthlyAttendanceTrends || [];
         setAttendanceTrendData(trends);
-        setIncomeTrendData(
-          trends.map((t) => ({ month: t.month, thisMonth: 0, lastMonth: 0 })),
-        );
 
         // Fetch attendance trend (regular and special services)
         const trend = await fetchAttendanceTrend();
@@ -142,16 +146,6 @@ export default function Dashboard() {
 
         // Update attendance trend data with the combined data
         setAttendanceTrendData(combinedTrendData);
-
-        // Keep income trend data separate (or update if needed)
-        // You can keep the existing income trend data or map it similarly
-        setIncomeTrendData(
-          combinedTrendData.map((item) => ({
-            month: item.month,
-            thisMonth: 0, // Replace with actual income data when available
-            lastMonth: 0,
-          })),
-        );
       } catch (error) {
         console.error("Failed to load attendance data:", error);
         // Keep existing data or set empty arrays
@@ -161,6 +155,22 @@ export default function Dashboard() {
     }
 
     loadAttendanceData();
+  }, []);
+
+  // ── Income (Giving) ── independent of attendance, since a role without
+  // GIVING access shouldn't stop the attendance trend from loading.
+  useEffect(() => {
+    fetchGivingMonthlyTrend()
+      .then((trend) => {
+        setIncomeTrendData(
+          trend.map((point) => ({
+            month: point.month,
+            thisMonth: point.totalAmount,
+            lastMonth: 0,
+          })),
+        );
+      })
+      .catch(() => {});
   }, []);
 
   // ── Birthdays ──
@@ -255,6 +265,8 @@ export default function Dashboard() {
         incomeTrendData={incomeTrendData}
         upcomingEvents={upcomingEvents}
         upcomingBirthdays={upcomingBirthdays}
+        canViewGiving={canViewGiving}
+        canViewRequests={canViewRequests}
       />
     );
   }
@@ -448,29 +460,21 @@ export default function Dashboard() {
         </aside>
       </div>
 
-      <div
-        className="bg-white rounded-2xl border border-gray-300
-                shadow-[0_1px_4px_rgba(0,0,0,0.06)]
-                flex flex-col items-center justify-center gap-3 py-10 px-6 text-center
-                col-span-full w-full"
-      >
-        <div className="mb-1 select-none">
-          <Image
-            src="/assets/coming-soon.png"
-            alt="Coming Soon"
-            width={160}
-            height={160}
-            className="object-contain"
-            priority
-          />
+      {canViewGiving && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <IncomeVsExpenses />
+          <IncomeBreakdown />
         </div>
-        <p className="text-[16px] font-extrabold text-gray-900">
-          More Features Coming Soon!
-        </p>
-        <p className="text-[13px] text-gray-600 max-w-md leading-relaxed">
-          We're working hard to bring you attendance analytics, financial
-          reports, communications, requests and more.
-        </p>
+      )}
+
+      <div
+        className={cn(
+          "grid grid-cols-1 gap-6",
+          canViewRequests && "lg:grid-cols-2",
+        )}
+      >
+        {canViewRequests && <PendingRequestsWidget />}
+        <RecentActivityWidget />
       </div>
     </div>
   );

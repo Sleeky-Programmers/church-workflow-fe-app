@@ -45,7 +45,7 @@ import {
   EventReminderType,
   EventType,
 } from "@/lib/enums";
-import { cn } from "@/lib/utils";
+import { birthdayInYear, cn } from "@/lib/utils";
 import { ChurchEvent, ChurchService } from "@/types";
 
 import {
@@ -55,9 +55,16 @@ import {
   EVENT_VIEW_OPTIONS,
 } from "./constants";
 
+type BirthdayMember = {
+  id: string;
+  fullName: string;
+  birthday?: string;
+};
+
 type EventsCalendarProps = {
   events: ChurchEvent[];
   churchServices?: ChurchService[];
+  members?: BirthdayMember[];
   onCreateEvent: (date?: string) => void;
   onSelectEvent: (event: ChurchEvent) => void;
 };
@@ -193,9 +200,66 @@ function generateServiceOccurrences(
   return occurrences;
 }
 
+// Mirrors the dashboard's upcoming-birthdays widget logic (member.birthday,
+// month/day only, no year comparison) instead of the old approach of
+// filtering saved Event records - no "birthday" event was ever saved there,
+// so that filter always returned nothing.
+function generateBirthdayOccurrences(
+  members: BirthdayMember[],
+  startDate: Date,
+  endDate: Date,
+): ChurchEvent[] {
+  const occurrences: ChurchEvent[] = [];
+
+  for (const member of members) {
+    if (!member.birthday) {
+      continue;
+    }
+    const parsed = new Date(member.birthday);
+    if (isNaN(parsed.getTime())) {
+      continue;
+    }
+
+    const month = parsed.getUTCMonth();
+    const day = parsed.getUTCDate();
+
+    // A date range here never spans more than one calendar year (Month,
+    // Week, or Year view), so at most the start and end year need checking.
+    const candidateYears = new Set([
+      startDate.getFullYear(),
+      endDate.getFullYear(),
+    ]);
+
+    for (const year of candidateYears) {
+      const occurrence = birthdayInYear(year, month, day);
+      if (occurrence < startDate || occurrence > endDate) {
+        continue;
+      }
+
+      occurrences.push({
+        id: `birthday-${member.id}-${year}`,
+        title: `${member.fullName}'s Birthday`,
+        type: EventType.BIRTHDAY,
+        recurrence: EventRecurrence.YEARLY,
+        date: format(occurrence, "yyyy-MM-dd"),
+        startTime: "12:00 AM",
+        endTime: "",
+        location: "",
+        sendReminder: false,
+        reminderType: EventReminderType.IN_APP,
+        remindBeforeMinutes: 30,
+        colorClass: "bg-green-600",
+      });
+    }
+  }
+
+  return occurrences;
+}
+
 export function EventsCalendar({
   events,
   churchServices = [],
+  members = [],
   onCreateEvent,
   onSelectEvent,
 }: EventsCalendarProps) {
@@ -233,23 +297,23 @@ export function EventsCalendar({
     return { start, end };
   }, [currentDate, viewMode]);
 
-  // Combine events with generated church service occurrences
+  // Combine saved events with generated church service occurrences and
+  // birthday occurrences for the visible date range.
   const allEvents = useMemo(() => {
-    if (!showChurchServices) return events;
+    const serviceEvents: ChurchEvent[] = showChurchServices
+      ? churchServices.flatMap((service) =>
+          generateServiceOccurrences(service, dateRange.start, dateRange.end),
+        )
+      : [];
 
-    // Generate all occurrences for all church services within the date range
-    const serviceEvents: ChurchEvent[] = [];
-    churchServices.forEach((service) => {
-      const occurrences = generateServiceOccurrences(
-        service,
-        dateRange.start,
-        dateRange.end,
-      );
-      serviceEvents.push(...occurrences);
-    });
+    const birthdayEvents = generateBirthdayOccurrences(
+      members,
+      dateRange.start,
+      dateRange.end,
+    );
 
-    return [...events, ...serviceEvents];
-  }, [events, churchServices, showChurchServices, dateRange]);
+    return [...events, ...serviceEvents, ...birthdayEvents];
+  }, [events, churchServices, members, showChurchServices, dateRange]);
 
   const filteredEvents = useMemo(() => {
     const next = [...allEvents];

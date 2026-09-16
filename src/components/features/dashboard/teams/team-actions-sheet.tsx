@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { TeamRow } from "@/types";
 import Heading from "@/components/ui/typography/Heading";
 import { Text } from "@/components/ui/typography/Text";
+import { useHasAccess } from "@/lib/access-control";
 import { Users, CalendarCheck, BarChart3, Trash2, X, User } from "lucide-react";
 
 interface Props {
@@ -27,6 +28,8 @@ export default function TeamActionsSheet({
   onViewReport,
   onDelete,
 }: Props) {
+  const canDelete = useHasAccess("SMALL_TEAMS", "FULL_ACCESS");
+
   useEffect(() => {
     if (open) {
       document.body.style.overflow = "hidden";
@@ -123,14 +126,16 @@ export default function TeamActionsSheet({
               View Reports
             </Button>
 
-            <Button
-              variant="destructive"
-              className="w-full justify-center gap-2"
-              onClick={onDelete}
-            >
-              <Trash2 className="h-4 w-4" />
-              Delete Team
-            </Button>
+            {canDelete && (
+              <Button
+                variant="destructive"
+                className="w-full justify-center gap-2"
+                onClick={onDelete}
+              >
+                <Trash2 className="h-4 w-4" />
+                Delete Team
+              </Button>
+            )}
           </div>
         </div>
       </div>

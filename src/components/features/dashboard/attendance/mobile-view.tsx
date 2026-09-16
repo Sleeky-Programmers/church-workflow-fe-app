@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import Heading from "@/components/ui/typography/Heading";
 import { Span, Text } from "@/components/ui/typography/Text";
+import { useHasAccess } from "@/lib/access-control";
 import { getAttendanceCount } from "@/lib/utils";
 import { RegularService, SpecialService, SpecialServiceEvent } from "@/types";
 
@@ -103,6 +104,7 @@ export function MobileAttendanceView({
 }: MobileAttendanceViewProps) {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const canRecordGiving = useHasAccess("GIVING", "MANAGE");
 
   const generateCalendarDays = () => {
     const year = currentMonth.getFullYear();
@@ -407,19 +409,21 @@ export function MobileAttendanceView({
                         >
                           {hasAttendance ? "View Attendance" : "Add Attendance"}
                         </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() =>
-                            onAddGivingRecord(
-                              service.originalService as RegularService,
-                              selectedDateString,
-                            )
-                          }
-                          className="flex-1"
-                        >
-                          Add Giving Record
-                        </Button>
+                        {canRecordGiving && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() =>
+                              onAddGivingRecord(
+                                service.originalService as RegularService,
+                                selectedDateString,
+                              )
+                            }
+                            className="flex-1"
+                          >
+                            Add Giving Record
+                          </Button>
+                        )}
                       </>
                     ) : (
                       // Special Service - just attendance

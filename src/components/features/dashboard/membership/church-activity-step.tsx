@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -12,10 +12,22 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import Heading from "@/components/ui/typography/Heading";
 import { Span, Text } from "@/components/ui/typography/Text";
 import { MembershipStatus } from "@/lib/enums";
 import { AddMemberStep3Data } from "@/types";
+import {
+  memberChurchActivityStepSchema,
+  MemberChurchActivityStepValues,
+} from "@/types/schema";
 
 type ChurchActivityStepProps = {
   onNext: (data: AddMemberStep3Data) => void;
@@ -28,27 +40,20 @@ export function ChurchActivityStep({
   onBack,
   initialData = {},
 }: ChurchActivityStepProps) {
-  const [formData, setFormData] = useState<Partial<AddMemberStep3Data>>({
-    membershipStatus: MembershipStatus.MEMBER,
-    ...initialData,
+  const form = useForm<MemberChurchActivityStepValues>({
+    resolver: zodResolver(memberChurchActivityStepSchema),
+    defaultValues: {
+      membershipStatus: initialData.membershipStatus || MembershipStatus.MEMBER,
+      dateJoined: initialData.dateJoined || "",
+      previousChurchMembership: initialData.previousChurchMembership || "",
+      baptized: initialData.baptized,
+      ministriesInvolved: initialData.ministriesInvolved || "",
+      volunteersPreference: initialData.volunteersPreference || "",
+    },
   });
-  const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const validateForm = () => {
-    const newErrors: Record<string, string> = {};
-
-    if (!formData.membershipStatus) {
-      newErrors.membershipStatus = "Membership status is required";
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleNext = () => {
-    if (validateForm()) {
-      onNext(formData as AddMemberStep3Data);
-    }
+  const handleNext = (data: MemberChurchActivityStepValues) => {
+    onNext(data as AddMemberStep3Data);
   };
 
   return (
@@ -62,128 +67,152 @@ export function ChurchActivityStep({
         </Text>
       </div>
 
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-        <div>
-          <Label className="mb-2">
-            Membership Status <Span variant="error">*</Span>
-          </Label>
-          <Select
-            value={formData.membershipStatus || ""}
-            onValueChange={(value) =>
-              setFormData({
-                ...formData,
-                membershipStatus: value as MembershipStatus,
-              })
-            }
-          >
-            <SelectTrigger
-              className={
-                errors.membershipStatus ? "border-destructive-600" : ""
-              }
-            >
-              <SelectValue placeholder="Select" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value={MembershipStatus.MEMBER}>Member</SelectItem>
-              <SelectItem value={MembershipStatus.VISITOR}>Visitor</SelectItem>
-              <SelectItem value={MembershipStatus.VOLUNTEER}>
-                Volunteer
-              </SelectItem>
-              <SelectItem value={MembershipStatus.LEADER}>Leader</SelectItem>
-              <SelectItem value={MembershipStatus.CONVERT}>
-                New Convert
-              </SelectItem>
-            </SelectContent>
-          </Select>
-          {errors.membershipStatus && (
-            <Text variant="error" className="mt-1">
-              {errors.membershipStatus}
-            </Text>
-          )}
-        </div>
+      <Form {...form}>
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+          <FormField
+            control={form.control}
+            name="membershipStatus"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="mb-2">
+                  Membership Status <Span variant="error">*</Span>
+                </FormLabel>
+                <Select value={field.value} onValueChange={field.onChange}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value={MembershipStatus.MEMBER}>
+                      Member
+                    </SelectItem>
+                    <SelectItem value={MembershipStatus.VISITOR}>
+                      Visitor
+                    </SelectItem>
+                    <SelectItem value={MembershipStatus.VOLUNTEER}>
+                      Volunteer
+                    </SelectItem>
+                    <SelectItem value={MembershipStatus.LEADER}>
+                      Leader
+                    </SelectItem>
+                    <SelectItem value={MembershipStatus.CONVERT}>
+                      New Convert
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-        <div>
-          <Label className="mb-2">Date Joined the Church</Label>
-          <Input
-            type="date"
-            value={formData.dateJoined || ""}
-            onChange={(e) =>
-              setFormData({ ...formData, dateJoined: e.target.value })
-            }
+          <FormField
+            control={form.control}
+            name="dateJoined"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="mb-2">Date Joined the Church</FormLabel>
+                <FormControl>
+                  <Input type="date" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="previousChurchMembership"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="mb-2">
+                  Previous Church Membership
+                </FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="Enter the previous church name"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="baptized"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="mb-2">
+                  Are you baptized? (Optional)
+                </FormLabel>
+                <Select
+                  value={field.value !== undefined ? String(field.value) : ""}
+                  onValueChange={(value) => field.onChange(value === "true")}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="true">Yes</SelectItem>
+                    <SelectItem value="false">No</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="ministriesInvolved"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="mb-2">Ministries Involved in</FormLabel>
+                <FormControl>
+                  <Input placeholder="e.g. Choir, Usher or none" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="volunteersPreference"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="mb-2">Volunteer Preferences</FormLabel>
+                <Select value={field.value} onValueChange={field.onChange}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="Interested">Interested</SelectItem>
+                    <SelectItem value="Not Interested">
+                      Not Interested
+                    </SelectItem>
+                    <SelectItem value="Maybe Later">Maybe Later</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
           />
         </div>
 
-        <div>
-          <Label className="mb-2">Previous Church Membership</Label>
-          <Input
-            placeholder="Enter the previous church name"
-            value={formData.previousChurchMembership || ""}
-            onChange={(e) =>
-              setFormData({
-                ...formData,
-                previousChurchMembership: e.target.value,
-              })
-            }
-          />
+        <div className="flex justify-between">
+          <Button variant="outline" onClick={onBack}>
+            Back
+          </Button>
+          <Button onClick={form.handleSubmit(handleNext)}>Continue</Button>
         </div>
-
-        <div>
-          <Label className="mb-2">Are you baptized? (Optional)</Label>
-          <Select
-            value={
-              formData.baptized !== undefined ? String(formData.baptized) : ""
-            }
-            onValueChange={(value) =>
-              setFormData({ ...formData, baptized: value === "true" })
-            }
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Select" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="true">Yes</SelectItem>
-              <SelectItem value="false">No</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div>
-          <Label className="mb-2">Ministries Involved in</Label>
-          <Input
-            placeholder="e.g. Choir, Usher or none"
-            value={formData.ministriesInvolved || ""}
-            onChange={(e) =>
-              setFormData({ ...formData, ministriesInvolved: e.target.value })
-            }
-          />
-        </div>
-
-        <div>
-          <Label className="mb-2">Volunteer Preferences</Label>
-          <Select
-            value={formData.volunteersPreference || ""}
-            onValueChange={(value) =>
-              setFormData({ ...formData, volunteersPreference: value })
-            }
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Select" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="Interested">Interested</SelectItem>
-              <SelectItem value="Not Interested">Not Interested</SelectItem>
-              <SelectItem value="Maybe Later">Maybe Later</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
-
-      <div className="flex justify-between">
-        <Button variant="outline" onClick={onBack}>
-          Back
-        </Button>
-        <Button onClick={handleNext}>Continue</Button>
-      </div>
+      </Form>
     </div>
   );
 }

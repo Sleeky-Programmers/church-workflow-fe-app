@@ -4,6 +4,9 @@ export interface CreateDepartmentPayload {
   name: string;
   description?: string;
   hod?: string;
+  pendingHodEmail?: string;
+  assistantHod?: string;
+  pendingAssistantHodEmail?: string;
   memberIds?: string[];
 }
 
@@ -11,6 +14,9 @@ export interface UpdateDepartmentPayload {
   name?: string;
   description?: string;
   hod?: string | null;
+  pendingHodEmail?: string | null;
+  assistantHod?: string | null;
+  pendingAssistantHodEmail?: string | null;
 }
 
 export interface DepartmentQueryParams {
@@ -22,15 +28,22 @@ export interface DepartmentQueryParams {
   status?: string;
 }
 
+export interface DepartmentAdminRef {
+  id: string;
+  name: string;
+  email: string;
+}
+
 export interface DepartmentResponse {
   id: string;
   name: string;
+  description?: string;
+  status?: string;
 
-  hod?: {
-    id: string;
-    name: string;
-    email: string;
-  } | null;
+  hod?: DepartmentAdminRef | null;
+  pendingHodEmail?: string | null;
+  assistantHod?: DepartmentAdminRef | null;
+  pendingAssistantHodEmail?: string | null;
 
   members: {
     id: string;
@@ -39,6 +52,7 @@ export interface DepartmentResponse {
     phoneNumber?: string;
     dateJoined: string;
   }[];
+  membersCount?: number;
 }
 
 export async function createDepartment(payload: CreateDepartmentPayload) {
@@ -77,6 +91,16 @@ export async function updateDepartment(
   return authenticatedFetch<DepartmentResponse>(`/department/${id}`, {
     method: "PUT",
     body: JSON.stringify(payload),
+  });
+}
+
+export async function updateDepartmentStatus(
+  id: string,
+  status: "ACTIVE" | "INACTIVE",
+) {
+  return authenticatedFetch<DepartmentResponse>(`/department/${id}/status`, {
+    method: "PUT",
+    body: JSON.stringify({ status }),
   });
 }
 

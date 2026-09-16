@@ -12,6 +12,7 @@ import { useSearchStore } from "@/stores/useSearchStore";
 import { useUserStore } from "@/stores/useUserStore";
 
 import { Avatar, AvatarFallback } from "../ui/avatar";
+import { BranchSwitcher } from "./BranchSwitcher";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -148,6 +149,8 @@ export function Navbar() {
             </Button>
           )}
         </div>
+
+        <BranchSwitcher />
 
         <Link href={RouteConfig.dashboard.notifications}>
           <Button size="icon" variant="ghost" aria-label="Notifications">

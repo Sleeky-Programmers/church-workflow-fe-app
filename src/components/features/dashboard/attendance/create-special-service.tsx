@@ -25,6 +25,7 @@ import {
 import { Span, Text } from "@/components/ui/typography/Text";
 import { useToast } from "@/hooks/use-toast";
 import { SpecialServiceDaySchedule, SpecialServiceEvent } from "@/types";
+import { createSpecialServiceSchema } from "@/types/schema";
 
 type CreateSpecialServiceModalProps = {
   open: boolean;
@@ -171,43 +172,21 @@ export function CreateSpecialServiceModal({
   };
 
   const handleCreate = async () => {
-    if (!title.trim()) {
-      toast({
-        title: "Validation Error",
-        description: "Service name is required",
-        variant: "destructive",
-      });
-      return;
-    }
+    const result = createSpecialServiceSchema.safeParse({
+      title,
+      startDate,
+      endDate,
+      location,
+      description,
+      recurrence,
+      eventType,
+      daySchedules,
+    });
 
-    if (!startDate) {
+    if (!result.success) {
       toast({
         title: "Validation Error",
-        description: "Start date is required",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (!daySchedules[0]?.startTime) {
-      toast({
-        title: "Validation Error",
-        description: "Start time is required",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    const invalidSchedule = daySchedules.find(
-      (schedule) =>
-        schedule.startTime &&
-        schedule.endTime &&
-        schedule.endTime <= schedule.startTime,
-    );
-    if (invalidSchedule) {
-      toast({
-        title: "Validation Error",
-        description: `End time must be after start time for ${format(new Date(invalidSchedule.date), "MMM d")}`,
+        description: result.error.issues[0].message,
         variant: "destructive",
       });
       return;

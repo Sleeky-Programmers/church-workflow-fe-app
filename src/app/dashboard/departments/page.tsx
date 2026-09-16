@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import AddDepartmentDialog from "@/components/features/dashboard/departments/AddDepartmentDialog";
+import { EditDepartmentDialog } from "@/components/features/dashboard/departments/EditDepartmentDialog";
 import { getDepartmentColumns } from "@/components/features/dashboard/departments/department-columns";
 import Table from "@/components/features/dashboard/Table";
 import {
@@ -45,6 +46,7 @@ export default function DepartmentPage() {
   const [deleteTarget, setDeleteTarget] = useState<DepartmentRow | null>(null);
   const [exporting, setExporting] = useState(false);
   const [isAddOpen, setIsAddOpen] = useState(false);
+  const [editTargetId, setEditTargetId] = useState<string | null>(null);
 
   const loadDepartments = async (searchValue?: string) => {
     setLoading(true);
@@ -94,7 +96,7 @@ export default function DepartmentPage() {
   }, []);
 
   const handleEdit = (row: DepartmentRow) => {
-    router.push(RouteConfig.dashboard.departmentEdit(row.id));
+    setEditTargetId(row.id);
   };
 
   const handleView = (row: DepartmentRow) => {
@@ -201,7 +203,9 @@ export default function DepartmentPage() {
             <AlertDialogHeader>
               <AlertDialogTitle>Delete department?</AlertDialogTitle>
               <AlertDialogDescription>
-                This action cannot be undone.
+                {deleteTarget && deleteTarget.members > 0
+                  ? `This department still has ${deleteTarget.members} member${deleteTarget.members > 1 ? "s" : ""}. Deleting it removes them from the department. This action cannot be undone.`
+                  : "This action cannot be undone."}
               </AlertDialogDescription>
             </AlertDialogHeader>
 
@@ -213,6 +217,13 @@ export default function DepartmentPage() {
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
+
+        <EditDepartmentDialog
+          open={!!editTargetId}
+          onOpenChange={(open) => !open && setEditTargetId(null)}
+          departmentId={editTargetId}
+          onSaved={() => loadDepartments(searchTerm)}
+        />
       </div>
     );
   }
@@ -298,7 +309,9 @@ export default function DepartmentPage() {
           <AlertDialogHeader>
             <AlertDialogTitle>Delete department?</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete this department?
+              {deleteTarget && deleteTarget.members > 0
+                ? `This department still has ${deleteTarget.members} member${deleteTarget.members > 1 ? "s" : ""}. Deleting it removes them from the department. This action cannot be undone.`
+                : "Are you sure you want to delete this department?"}
             </AlertDialogDescription>
           </AlertDialogHeader>
 
@@ -313,6 +326,13 @@ export default function DepartmentPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <EditDepartmentDialog
+        open={!!editTargetId}
+        onOpenChange={(open) => !open && setEditTargetId(null)}
+        departmentId={editTargetId}
+        onSaved={() => loadDepartments(searchTerm)}
+      />
     </div>
   );
 }

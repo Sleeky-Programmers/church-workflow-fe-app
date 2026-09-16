@@ -21,6 +21,8 @@ type ViewRolePermissionsDialogProps = {
   onOpenChange: (open: boolean) => void;
   roleId: string | null;
   roleName: string;
+  roleType?: "system" | "custom";
+  onEdit?: () => void;
 };
 
 export function ViewRolePermissionsDialog({
@@ -28,6 +30,8 @@ export function ViewRolePermissionsDialog({
   onOpenChange,
   roleId,
   roleName,
+  roleType,
+  onEdit,
 }: ViewRolePermissionsDialogProps) {
   const [rolePermissions, setRolePermissions] =
     useState<RolePermissionsType | null>(null);
@@ -90,7 +94,18 @@ export function ViewRolePermissionsDialog({
               <Text variant="muted">Loading permissions...</Text>
             </div>
           ) : rolePermissions ? (
-            <UserDetailsPermissionsView rolePermissions={rolePermissions} />
+            <UserDetailsPermissionsView
+              rolePermissions={rolePermissions}
+              roleType={roleType}
+              onEditRole={
+                onEdit
+                  ? () => {
+                      onOpenChange(false);
+                      onEdit();
+                    }
+                  : undefined
+              }
+            />
           ) : (
             <div className="flex justify-center py-10">
               <Text variant="muted">No permissions found for this role.</Text>

@@ -36,6 +36,7 @@ type TeamsMobileViewProps = {
   onAddTeam: (payload: {
     name: string;
     leaderId: string;
+    pendingLeaderEmail: string | null;
     memberIds: string[];
     status: string;
     description: string;

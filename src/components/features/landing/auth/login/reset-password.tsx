@@ -1,6 +1,7 @@
 "use client";
 import * as React from "react";
 import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -16,28 +17,24 @@ import { Loader } from "@/components/ui/loader";
 import { PasswordInput } from "@/components/ui/passport-input";
 import { Text, Span } from "@/components/ui/typography/Text";
 import { resetPassword } from "@/lib/api";
+import { resetPasswordSchema, ResetPasswordFormValues } from "@/types/schema";
 
 interface ResetPasswordFormProps {
   onSuccess: () => void;
 }
-
-type ResetPasswordFormValues = {
-  newPassword: string;
-  confirmPassword: string;
-};
 
 export default function ResetPasswordForm({
   onSuccess,
 }: ResetPasswordFormProps) {
   const [isLoading, setIsLoading] = React.useState(false);
   const form = useForm<ResetPasswordFormValues>({
+    resolver: zodResolver(resetPasswordSchema),
     defaultValues: {
       newPassword: "",
       confirmPassword: "",
     },
   });
   const onSubmit = async (data: ResetPasswordFormValues) => {
-    if (data.newPassword !== data.confirmPassword) return;
     setIsLoading(true);
     try {
       resetPassword({
@@ -69,13 +66,6 @@ export default function ResetPasswordForm({
           <FormField
             control={form.control}
             name="newPassword"
-            rules={{
-              required: "New password is required",
-              minLength: {
-                value: 8,
-                message: "Password must be at least 8 characters",
-              },
-            }}
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Enter New Password</FormLabel>
@@ -92,12 +82,6 @@ export default function ResetPasswordForm({
           <FormField
             control={form.control}
             name="confirmPassword"
-            rules={{
-              required: "Please confirm your password",
-              validate: (value) =>
-                value === form.getValues("newPassword") ||
-                "Passwords must match",
-            }}
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Confirm New Password</FormLabel>

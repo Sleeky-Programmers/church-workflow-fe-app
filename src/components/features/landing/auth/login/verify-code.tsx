@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -20,16 +21,13 @@ import {
 import { Loader } from "@/components/ui/loader";
 import Heading from "@/components/ui/typography/Heading";
 import { Span, Text } from "@/components/ui/typography/Text";
+import { verifyCodeSchema, VerifyCodeFormValues } from "@/types/schema";
 
 interface VerifyCodeFormProps {
   email: string;
   onVerify: (code: string) => Promise<boolean>;
   onResend: () => Promise<any>;
 }
-
-type VerifyCodeFormValues = {
-  code: string;
-};
 
 export default function VerifyCodeForm({
   email,
@@ -39,6 +37,7 @@ export default function VerifyCodeForm({
   const [isLoading, setIsLoading] = useState(false);
   const [countdown, setCountdown] = useState(0);
   const form = useForm<VerifyCodeFormValues>({
+    resolver: zodResolver(verifyCodeSchema),
     defaultValues: {
       code: "",
     },
@@ -65,8 +64,6 @@ export default function VerifyCodeForm({
   };
 
   const handleSubmit = async ({ code }: VerifyCodeFormValues) => {
-    if (code.length !== 6) return;
-
     setIsLoading(true);
 
     try {
@@ -103,13 +100,6 @@ export default function VerifyCodeForm({
           <FormField
             control={form.control}
             name="code"
-            rules={{
-              required: "Verification code is required",
-              minLength: {
-                value: 6,
-                message: "Enter the 6-digit code",
-              },
-            }}
             render={({ field }) => (
               <FormItem className="flex flex-col items-center">
                 <FormControl>

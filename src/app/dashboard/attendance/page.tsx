@@ -1,6 +1,6 @@
 "use client";
 
-import { format } from "date-fns";
+import { endOfMonth, format, startOfMonth } from "date-fns";
 import { Search } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
@@ -35,6 +35,10 @@ import { getCurrentUserProfile } from "@/lib/auth/session";
 import { DEFAULT_ORDER } from "@/lib/data";
 import { ServiceFrequency, ServiceType } from "@/lib/enums";
 import { createChurchService, DAY } from "@/services/churchService";
+import {
+  fetchGivingRecords,
+  saveGivingRecord,
+} from "@/services/givingRecordService";
 import { RegularService, SpecialServiceEvent } from "@/types";
 
 function useIsMobile() {
@@ -113,8 +117,37 @@ export default function AttendancePage() {
     }
   };
 
+  // Bulk-prefetch the current month's giving records so calendar entries
+  // show real totals immediately instead of only after each one is opened.
+  const loadGivingRecordsForMonth = async () => {
+    try {
+      const now = new Date();
+      const { data } = await fetchGivingRecords({
+        startDate: format(startOfMonth(now), "yyyy-MM-dd"),
+        endDate: format(endOfMonth(now), "yyyy-MM-dd"),
+        limit: 100,
+      });
+
+      setGivingRecords((prev) => {
+        const next = { ...prev };
+        for (const record of data) {
+          next[getServiceDateKey(record.churchServiceId, record.date)] = {
+            tithe: String(record.tithe || ""),
+            offering: String(record.offering || ""),
+            specialOffering: String(record.specialOffering || ""),
+            thanksgivingOffering: String(record.thanksgivingOffering || ""),
+          };
+        }
+        return next;
+      });
+    } catch {
+      // Non-fatal - calendar just shows "Add giving record" until opened.
+    }
+  };
+
   useEffect(() => {
     loadServices();
+    loadGivingRecordsForMonth();
   }, []);
 
   const handleCreateServices = async (newServices: PendingRegularService[]) => {
@@ -352,9 +385,72 @@ export default function AttendancePage() {
     });
   };
 
-  const handleAddGivingRecord = (service: RegularService, date: string) => {
+  const handleAddGivingRecord = async (
+    service: RegularService,
+    date: string,
+  ) => {
     setServiceContext(service, date);
     setIsGivingRecordModalOpen(true);
+
+    const key = getServiceDateKey(service.id, date);
+    if (givingRecords[key]) {
+      return;
+    }
+
+    try {
+      const { data } = await fetchGivingRecords({
+        churchServiceId: service.id,
+        startDate: date,
+        endDate: date,
+        limit: 1,
+      });
+      const existing = data[0];
+      if (existing) {
+        setGivingRecords((prev) => ({
+          ...prev,
+          [key]: {
+            tithe: String(existing.tithe || ""),
+            offering: String(existing.offering || ""),
+            specialOffering: String(existing.specialOffering || ""),
+            thanksgivingOffering: String(existing.thanksgivingOffering || ""),
+          },
+        }));
+      }
+    } catch {
+      // No existing record yet, or fetch failed - modal just opens blank.
+    }
+  };
+
+  const handleSaveGivingRecord = async (values: GivingValues) => {
+    if (!selectedService || !selectedDate) {
+      return;
+    }
+    try {
+      await saveGivingRecord({
+        churchServiceId: selectedService.id,
+        date: selectedDate,
+        tithe: parseAmount(values.tithe),
+        offering: parseAmount(values.offering),
+        specialOffering: parseAmount(values.specialOffering),
+        thanksgivingOffering: parseAmount(values.thanksgivingOffering),
+      });
+
+      setGivingRecords((prev) => ({
+        ...prev,
+        [getServiceDateKey(selectedService.id, selectedDate)]: values,
+      }));
+
+      toast({
+        title: "Success",
+        description: "Giving record saved successfully",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to save giving record",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleViewServiceDetails = (service: RegularService, date: string) => {
@@ -457,18 +553,7 @@ export default function AttendancePage() {
           service={selectedService}
           date={selectedDate}
           initialValues={selectedKey ? givingRecords[selectedKey] : undefined}
-          onSave={(values) => {
-            if (selectedService && selectedDate) {
-              setGivingRecords((prev) => ({
-                ...prev,
-                [getServiceDateKey(selectedService.id, selectedDate)]: values,
-              }));
-            }
-            toast({
-              title: "Success",
-              description: "Giving record saved successfully",
-            });
-          }}
+          onSave={handleSaveGivingRecord}
         />
 
         <ServiceDetailModal
@@ -590,18 +675,7 @@ export default function AttendancePage() {
         service={selectedService}
         date={selectedDate}
         initialValues={selectedKey ? givingRecords[selectedKey] : undefined}
-        onSave={(values) => {
-          if (selectedService && selectedDate) {
-            setGivingRecords((prev) => ({
-              ...prev,
-              [getServiceDateKey(selectedService.id, selectedDate)]: values,
-            }));
-          }
-          toast({
-            title: "Success",
-            description: "Giving record saved successfully",
-          });
-        }}
+        onSave={handleSaveGivingRecord}
       />
 
       <ServiceDetailModal

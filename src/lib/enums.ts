@@ -6,6 +6,7 @@ export enum DepartmentTabs {
 export enum RequisitionStatus {
   PENDING = "PENDING",
   APPROVED = "APPROVED",
+  REJECTED = "REJECTED",
 }
 
 export enum NotificationType {

@@ -1,13 +1,14 @@
 "use client";
 
 import { X } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogClose, DialogContent } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Loader } from "@/components/ui/loader";
 import {
   Select,
@@ -17,11 +18,23 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import Heading from "@/components/ui/typography/Heading";
 import { Text } from "@/components/ui/typography/Text";
+import { useHasAccess } from "@/lib/access-control";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 import { MemberProfile, TeamRow } from "@/types";
+import { editSmallTeamSchema, EditSmallTeamFormValues } from "@/types/schema";
+
+import { TeamLeaderPicker } from "./team-leader-picker";
 
 interface EditSmallTeamDialogProps {
   open: boolean;
@@ -32,6 +45,7 @@ interface EditSmallTeamDialogProps {
   onSave: (data: {
     name: string;
     leaderId: string | null;
+    pendingLeaderEmail: string | null;
     memberIds: string[];
     status: "ACTIVE" | "INACTIVE";
     description: string;
@@ -56,70 +70,57 @@ export function EditSmallTeamDialog({
   isSaving = false,
 }: EditSmallTeamDialogProps) {
   const isMobile = useIsMobile();
+  const canChangeLeader = useHasAccess("SMALL_TEAMS", "FULL_ACCESS");
 
-  const [name, setName] = useState("");
-  const [leaderId, setLeaderId] = useState<string | null>(null);
-  const [selectedMemberIds, setSelectedMemberIds] = useState<string[]>([]);
-  const [status, setStatus] = useState<"ACTIVE" | "INACTIVE">("ACTIVE");
-  const [description, setDescription] = useState("");
-  const [errors, setErrors] = useState<Record<string, string>>({});
+  const form = useForm<EditSmallTeamFormValues>({
+    resolver: zodResolver(editSmallTeamSchema),
+    defaultValues: {
+      name: "",
+      leaderId: null,
+      pendingLeaderEmail: null,
+      memberIds: [],
+      status: "ACTIVE",
+      description: "",
+    },
+  });
 
   useEffect(() => {
     if (open && team) {
-      setName(team.name);
-      setStatus(team.status.toUpperCase() as "ACTIVE" | "INACTIVE");
-      setSelectedMemberIds(currentMemberIds);
-      setDescription(team.description || "");
-      if (team.leader) {
-        const leaderMember = members.find(
-          (m) => m.fullName === team.leader?.name,
-        );
-        setLeaderId(leaderMember?.id || null);
-      } else {
-        setLeaderId(null);
-      }
-      setErrors({});
+      form.reset({
+        name: team.name,
+        status: team.status.toUpperCase() as "ACTIVE" | "INACTIVE",
+        memberIds: currentMemberIds,
+        description: team.description || "",
+        leaderId: team.leader?.id || null,
+        pendingLeaderEmail: team.pendingLeaderEmail || null,
+      });
     }
-  }, [open, team, members, currentMemberIds]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, team, currentMemberIds]);
 
-  const validate = (): boolean => {
-    const newErrors: Record<string, string> = {};
+  const selectedMemberIds = form.watch("memberIds");
+  const leaderId = form.watch("leaderId");
+  const pendingLeaderEmail = form.watch("pendingLeaderEmail");
 
-    if (!name.trim()) {
-      newErrors.name = "Team name is required";
-    } else if (name.trim().length > 120) {
-      newErrors.name = "Team name must be less than 120 characters";
-    }
-
-    if (selectedMemberIds.length === 0) {
-      newErrors.members = "At least one member is required";
-    }
-
-    if (description && description.length > 2000) {
-      newErrors.description = "Description must be less than 2000 characters";
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleSubmit = async () => {
-    if (!validate()) return;
-
+  const handleSubmit = async (values: EditSmallTeamFormValues) => {
     await onSave({
-      name: name.trim(),
-      leaderId: leaderId || null,
-      memberIds: selectedMemberIds,
-      status,
-      description: description.trim(),
+      name: values.name.trim(),
+      leaderId: values.leaderId || null,
+      pendingLeaderEmail: values.pendingLeaderEmail || null,
+      memberIds: values.memberIds,
+      status: values.status,
+      description: (values.description || "").trim(),
     });
   };
 
   const toggleMember = (memberId: string) => {
-    setSelectedMemberIds((prev) =>
-      prev.includes(memberId)
-        ? prev.filter((id) => id !== memberId)
-        : [...prev, memberId],
+    const current = form.getValues("memberIds");
+    form.setValue(
+      "memberIds",
+      current.includes(memberId)
+        ? current.filter((id) => id !== memberId)
+        : [...current, memberId],
+      { shouldValidate: true },
     );
   };
 
@@ -161,200 +162,201 @@ export function EditSmallTeamDialog({
           </div>
 
           {/* Content - Scrollable */}
-          <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-3 sm:py-4 space-y-3 sm:space-y-4 bg-white">
-            {/* Team Name */}
-            <div className="space-y-1 w-full">
-              <Label htmlFor="team-name" className="text-sm font-medium">
-                Team Name <span className="text-red-500">*</span>
-              </Label>
-              <Input
-                id="team-name"
-                placeholder="Enter team name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className={cn("w-full", errors.name && "border-red-500")}
-                disabled={isSaving}
-              />
-              {errors.name && (
-                <Text variant="muted" className="text-xs text-red-500">
-                  {errors.name}
-                </Text>
-              )}
-            </div>
-
-            {/* Status */}
-            <div className="space-y-1 w-full">
-              <Label htmlFor="team-status" className="text-sm font-medium">
-                Status
-              </Label>
-              <Select
-                value={status}
-                onValueChange={(value) =>
-                  setStatus(value as "ACTIVE" | "INACTIVE")
-                }
-                disabled={isSaving}
-              >
-                <SelectTrigger id="team-status" className="w-full">
-                  <SelectValue placeholder="Select status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="ACTIVE">Active</SelectItem>
-                  <SelectItem value="INACTIVE">Inactive</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Description */}
-            <div className="space-y-1 w-full">
-              <Label htmlFor="team-description" className="text-sm font-medium">
-                Description
-              </Label>
-              <Textarea
-                id="team-description"
-                placeholder="Enter team description (optional)"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                className={cn(
-                  "resize-y w-full min-h-[60px]",
-                  errors.description && "border-red-500",
+          <Form {...form}>
+            <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-3 sm:py-4 space-y-3 sm:space-y-4 bg-white">
+              {/* Team Name */}
+              <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem className="space-y-1 w-full">
+                    <FormLabel className="text-sm font-medium">
+                      Team Name <span className="text-red-500">*</span>
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="Enter team name"
+                        className="w-full"
+                        disabled={isSaving}
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
                 )}
-                rows={2}
-                disabled={isSaving}
               />
-              <div className="flex justify-between">
-                {errors.description && (
-                  <Text variant="muted" className="text-xs text-red-500">
-                    {errors.description}
-                  </Text>
-                )}
-                <Text
-                  variant="muted"
-                  className={cn(
-                    "text-xs ml-auto",
-                    description.length > 2000 ? "text-red-500" : "",
-                  )}
-                >
-                  {description.length}/2000
-                </Text>
-              </div>
-            </div>
 
-            {/* Leader */}
-            <div className="space-y-1 w-full">
-              <Label htmlFor="team-leader" className="text-sm font-medium">
-                Team Leader
-              </Label>
-              <Select
-                value={leaderId || "none"}
-                onValueChange={(value) =>
-                  setLeaderId(value === "none" ? null : value)
-                }
-                disabled={isSaving}
-              >
-                <SelectTrigger id="team-leader" className="w-full">
-                  <SelectValue placeholder="Select team leader" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">None</SelectItem>
-                  {members.map((member) => (
-                    <SelectItem key={member.id} value={member.id}>
-                      <div className="flex items-center gap-2">
-                        <Avatar className="h-6 w-6">
-                          <AvatarFallback className="bg-blue-100 text-blue-700 text-xs">
-                            {getInitials(member.fullName)}
-                          </AvatarFallback>
-                        </Avatar>
-                        <span>{member.fullName}</span>
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <Text variant="muted" className="text-xs">
-                Only members of this team can be assigned as leader
-              </Text>
-            </div>
-
-            {/* Members */}
-            <div className="space-y-1 w-full">
-              <div className="flex items-center justify-between">
-                <Label className="text-sm font-medium">
-                  Team Members <span className="text-red-500">*</span>
-                </Label>
-                <Text variant="muted" className="text-xs">
-                  {selectedMemberIds.length} selected
-                </Text>
-              </div>
-              {errors.members && (
-                <Text variant="muted" className="text-xs text-red-500">
-                  {errors.members}
-                </Text>
-              )}
-              <div className="border rounded-lg max-h-[150px] overflow-y-auto divide-y">
-                {members.map((member) => {
-                  const isSelected = selectedMemberIds.includes(member.id);
-                  const isLeader = leaderId === member.id;
-
-                  return (
-                    <div
-                      key={member.id}
-                      className={cn(
-                        "flex items-center justify-between px-3 py-2 cursor-pointer hover:bg-gray-50 transition-colors",
-                        isSelected && "bg-blue-50/50",
-                      )}
-                      onClick={() => toggleMember(member.id)}
+              {/* Status */}
+              <FormField
+                control={form.control}
+                name="status"
+                render={({ field }) => (
+                  <FormItem className="space-y-1 w-full">
+                    <FormLabel className="text-sm font-medium">
+                      Status
+                    </FormLabel>
+                    <Select
+                      value={field.value}
+                      onValueChange={field.onChange}
+                      disabled={isSaving}
                     >
-                      <div className="flex items-center gap-3 min-w-0">
-                        <Avatar className="h-8 w-8">
-                          <AvatarFallback className="bg-gray-200 text-gray-700 text-xs">
-                            {getInitials(member.fullName)}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div className="min-w-0">
-                          <Text className="text-sm truncate">
-                            {member.fullName}
-                            {isLeader && (
-                              <span className="ml-2 text-xs text-blue-600 font-medium">
-                                (Leader)
-                              </span>
-                            )}
-                          </Text>
-                          <Text variant="muted" className="text-xs truncate">
-                            {member.email}
-                          </Text>
-                        </div>
-                      </div>
-                      <div
+                      <FormControl>
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Select status" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="ACTIVE">Active</SelectItem>
+                        <SelectItem value="INACTIVE">Inactive</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </FormItem>
+                )}
+              />
+
+              {/* Description */}
+              <FormField
+                control={form.control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem className="space-y-1 w-full">
+                    <FormLabel className="text-sm font-medium">
+                      Description
+                    </FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder="Enter team description (optional)"
+                        className="resize-y w-full min-h-[60px]"
+                        rows={2}
+                        disabled={isSaving}
+                        {...field}
+                      />
+                    </FormControl>
+                    <div className="flex justify-between">
+                      <FormMessage />
+                      <Text
+                        variant="muted"
                         className={cn(
-                          "w-4 h-4 rounded border flex items-center justify-center flex-shrink-0",
-                          isSelected
-                            ? "bg-blue-600 border-blue-600"
-                            : "border-gray-300",
+                          "text-xs ml-auto",
+                          (field.value?.length || 0) > 2000
+                            ? "text-red-500"
+                            : "",
                         )}
                       >
-                        {isSelected && (
-                          <svg
-                            className="w-3 h-3 text-white"
-                            fill="none"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth="2"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                          >
-                            <path d="M5 13l4 4L19 7" />
-                          </svg>
-                        )}
-                      </div>
+                        {field.value?.length || 0}/2000
+                      </Text>
                     </div>
-                  );
-                })}
-              </div>
-              <Text variant="muted" className="text-xs">
-                Click a member to toggle selection
-              </Text>
+                  </FormItem>
+                )}
+              />
+
+              {/* Leader */}
+              <TeamLeaderPicker
+                leaderId={leaderId || ""}
+                leaderName={team.leader?.name}
+                readOnly={!canChangeLeader}
+                onLeaderIdChange={(id) =>
+                  form.setValue("leaderId", id || null, {
+                    shouldValidate: true,
+                  })
+                }
+                pendingLeaderEmail={pendingLeaderEmail || null}
+                onPendingLeaderEmailChange={(email) =>
+                  form.setValue("pendingLeaderEmail", email, {
+                    shouldValidate: true,
+                  })
+                }
+                disabled={isSaving}
+              />
+
+              {/* Members */}
+              <FormField
+                control={form.control}
+                name="memberIds"
+                render={() => (
+                  <FormItem className="space-y-1 w-full">
+                    <div className="flex items-center justify-between">
+                      <FormLabel className="text-sm font-medium">
+                        Team Members <span className="text-red-500">*</span>
+                      </FormLabel>
+                      <Text variant="muted" className="text-xs">
+                        {selectedMemberIds.length} selected
+                      </Text>
+                    </div>
+                    <FormMessage />
+                    <div className="border rounded-lg max-h-[150px] overflow-y-auto divide-y">
+                      {members.map((member) => {
+                        const isSelected = selectedMemberIds.includes(
+                          member.id,
+                        );
+                        const isLeader = leaderId === member.id;
+
+                        return (
+                          <div
+                            key={member.id}
+                            className={cn(
+                              "flex items-center justify-between px-3 py-2 cursor-pointer hover:bg-gray-50 transition-colors",
+                              isSelected && "bg-blue-50/50",
+                            )}
+                            onClick={() => toggleMember(member.id)}
+                          >
+                            <div className="flex items-center gap-3 min-w-0">
+                              <Avatar className="h-8 w-8">
+                                <AvatarFallback className="bg-gray-200 text-gray-700 text-xs">
+                                  {getInitials(member.fullName)}
+                                </AvatarFallback>
+                              </Avatar>
+                              <div className="min-w-0">
+                                <Text className="text-sm truncate">
+                                  {member.fullName}
+                                  {isLeader && (
+                                    <span className="ml-2 text-xs text-blue-600 font-medium">
+                                      (Leader)
+                                    </span>
+                                  )}
+                                </Text>
+                                <Text
+                                  variant="muted"
+                                  className="text-xs truncate"
+                                >
+                                  {member.email}
+                                </Text>
+                              </div>
+                            </div>
+                            <div
+                              className={cn(
+                                "w-4 h-4 rounded border flex items-center justify-center flex-shrink-0",
+                                isSelected
+                                  ? "bg-blue-600 border-blue-600"
+                                  : "border-gray-300",
+                              )}
+                            >
+                              {isSelected && (
+                                <svg
+                                  className="w-3 h-3 text-white"
+                                  fill="none"
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth="2"
+                                  viewBox="0 0 24 24"
+                                  stroke="currentColor"
+                                >
+                                  <path d="M5 13l4 4L19 7" />
+                                </svg>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                    <Text variant="muted" className="text-xs">
+                      Click a member to toggle selection
+                    </Text>
+                  </FormItem>
+                )}
+              />
             </div>
-          </div>
+          </Form>
 
           {/* Footer - Fixed */}
           <div className="flex justify-end gap-3 border-t border-gray-200 px-4 sm:px-6 py-3 sm:py-4 bg-gray-50 shrink-0 rounded-b-xl">
@@ -367,7 +369,7 @@ export function EditSmallTeamDialog({
               Cancel
             </Button>
             <Button
-              onClick={handleSubmit}
+              onClick={form.handleSubmit(handleSubmit)}
               disabled={isSaving}
               className="px-4 sm:px-6"
               size="sm"

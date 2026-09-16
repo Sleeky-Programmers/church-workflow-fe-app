@@ -1,0 +1,457 @@
+"use client";
+
+import { format, startOfMonth } from "date-fns";
+import { Trash2 } from "lucide-react";
+import { useEffect, useState } from "react";
+
+import { AddExpenseDialog } from "@/components/features/dashboard/finance/add-expense-dialog";
+import Table, { Column } from "@/components/features/dashboard/Table";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { SidebarTrigger } from "@/components/ui/sidebar";
+import Heading from "@/components/ui/typography/Heading";
+import { Text } from "@/components/ui/typography/Text";
+import { useToast } from "@/hooks/use-toast";
+import { useHasAccess } from "@/lib/access-control";
+import { getMyChurch } from "@/lib/api";
+import { cn } from "@/lib/utils";
+import {
+  deleteExpense,
+  ExpenseResponse,
+  ExpenseSummaryResponse,
+  fetchExpenses,
+  fetchExpenseSummary,
+} from "@/services/expenseService";
+import {
+  fetchGivingRecords,
+  fetchGivingSummary,
+  GivingRecordResponse,
+  GivingSummaryResponse,
+} from "@/services/givingRecordService";
+import { formatCurrency } from "@/utils/currency";
+
+type FinanceTab = "giving" | "expenses";
+
+const GIVING_SUMMARY_CARDS: {
+  key: keyof GivingSummaryResponse;
+  label: string;
+}[] = [
+  { key: "tithe", label: "Tithe" },
+  { key: "offering", label: "Offering" },
+  { key: "specialOffering", label: "Special Offering" },
+  { key: "thanksgivingOffering", label: "Thanksgiving Offering" },
+  { key: "totalAmount", label: "Total Giving" },
+];
+
+export default function FinancePage() {
+  const { toast } = useToast();
+  const canManageGiving = useHasAccess("GIVING", "MANAGE");
+  const canManageExpenses = useHasAccess("GIVING_AND_EXPENSES", "MANAGE");
+  const canDeleteExpenses = useHasAccess("GIVING_AND_EXPENSES", "FULL_ACCESS");
+
+  const [activeTab, setActiveTab] = useState<FinanceTab>("giving");
+  const [currency, setCurrency] = useState("NGN");
+
+  const [startDate, setStartDate] = useState(
+    format(startOfMonth(new Date()), "yyyy-MM-dd"),
+  );
+  const [endDate, setEndDate] = useState(format(new Date(), "yyyy-MM-dd"));
+
+  const [givingSummary, setGivingSummary] =
+    useState<GivingSummaryResponse | null>(null);
+  const [givingSummaryLoading, setGivingSummaryLoading] = useState(false);
+  const [givingRecords, setGivingRecords] = useState<GivingRecordResponse[]>(
+    [],
+  );
+  const [givingRecordsLoading, setGivingRecordsLoading] = useState(false);
+
+  const [expenseSummary, setExpenseSummary] =
+    useState<ExpenseSummaryResponse | null>(null);
+  const [expenseSummaryLoading, setExpenseSummaryLoading] = useState(false);
+  const [expenses, setExpenses] = useState<ExpenseResponse[]>([]);
+  const [expensesLoading, setExpensesLoading] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<ExpenseResponse | null>(
+    null,
+  );
+
+  useEffect(() => {
+    getMyChurch()
+      .then((church) => {
+        if (church?.defaultCurrency) {
+          setCurrency(church.defaultCurrency);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  const loadGivingData = async () => {
+    setGivingSummaryLoading(true);
+    setGivingRecordsLoading(true);
+
+    try {
+      const [summaryData, recordsData] = await Promise.all([
+        fetchGivingSummary({ startDate, endDate }),
+        fetchGivingRecords({ startDate, endDate, limit: 50 }),
+      ]);
+      setGivingSummary(summaryData);
+      setGivingRecords(recordsData.data);
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to load giving data",
+        variant: "destructive",
+      });
+    } finally {
+      setGivingSummaryLoading(false);
+      setGivingRecordsLoading(false);
+    }
+  };
+
+  const loadExpenseData = async () => {
+    setExpenseSummaryLoading(true);
+    setExpensesLoading(true);
+
+    try {
+      const [summaryData, expensesData] = await Promise.all([
+        fetchExpenseSummary({ startDate, endDate }),
+        fetchExpenses({ startDate, endDate, limit: 50 }),
+      ]);
+      setExpenseSummary(summaryData);
+      setExpenses(expensesData.data);
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to load expense data",
+        variant: "destructive",
+      });
+    } finally {
+      setExpenseSummaryLoading(false);
+      setExpensesLoading(false);
+    }
+  };
+
+  const loadActiveTab = () => {
+    if (activeTab === "giving") {
+      loadGivingData();
+    } else {
+      loadExpenseData();
+    }
+  };
+
+  useEffect(() => {
+    loadActiveTab();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTab]);
+
+  const handleConfirmDeleteExpense = async () => {
+    if (!deleteTarget) return;
+
+    try {
+      await deleteExpense(deleteTarget.id);
+      await loadExpenseData();
+      toast({ title: "Deleted", description: "Expense deleted" });
+    } catch (error: any) {
+      toast({
+        title: "Delete failed",
+        description: error.message || "Please try again",
+        variant: "destructive",
+      });
+    } finally {
+      setDeleteTarget(null);
+    }
+  };
+
+  const givingColumns: Column<GivingRecordResponse>[] = [
+    {
+      key: "date",
+      header: "Date",
+      render: (row) => format(new Date(row.date), "MMM d, yyyy"),
+      width: "w-32",
+    },
+    {
+      key: "service",
+      header: "Service",
+      render: (row) => row.serviceTitle || "-",
+    },
+    {
+      key: "tithe",
+      header: "Tithe",
+      render: (row) => formatCurrency(row.tithe, row.currency || currency),
+      align: "right",
+    },
+    {
+      key: "offering",
+      header: "Offering",
+      render: (row) => formatCurrency(row.offering, row.currency || currency),
+      align: "right",
+    },
+    {
+      key: "specialOffering",
+      header: "Special Offering",
+      render: (row) =>
+        formatCurrency(row.specialOffering, row.currency || currency),
+      align: "right",
+    },
+    {
+      key: "thanksgivingOffering",
+      header: "Thanksgiving",
+      render: (row) =>
+        formatCurrency(row.thanksgivingOffering, row.currency || currency),
+      align: "right",
+    },
+    {
+      key: "totalAmount",
+      header: "Total",
+      render: (row) => (
+        <span className="font-semibold">
+          {formatCurrency(row.totalAmount, row.currency || currency)}
+        </span>
+      ),
+      align: "right",
+    },
+  ];
+
+  const expenseColumns: Column<ExpenseResponse>[] = [
+    {
+      key: "date",
+      header: "Date",
+      render: (row) => format(new Date(row.date), "MMM d, yyyy"),
+      width: "w-32",
+    },
+    {
+      key: "category",
+      header: "Category",
+      accessor: "category",
+    },
+    {
+      key: "description",
+      header: "Description",
+      render: (row) => <span className="line-clamp-1">{row.description}</span>,
+    },
+    {
+      key: "department",
+      header: "Department",
+      render: (row) => row.departmentName || "-",
+    },
+    {
+      key: "amount",
+      header: "Amount",
+      render: (row) => (
+        <span className="font-semibold">
+          {formatCurrency(row.amount, row.currency || currency)}
+        </span>
+      ),
+      align: "right",
+    },
+    ...(canDeleteExpenses
+      ? [
+          {
+            key: "actions",
+            header: "",
+            render: (row: ExpenseResponse) => (
+              <div className="flex justify-end w-full">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setDeleteTarget(row)}
+                >
+                  <Trash2 className="w-4 h-4 text-red-500" />
+                </Button>
+              </div>
+            ),
+            align: "right" as const,
+          },
+        ]
+      : []),
+  ];
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <SidebarTrigger className="sm:hidden" />
+          <Heading level={2} text="Finance" />
+        </div>
+
+        {activeTab === "expenses" && canManageExpenses && (
+          <AddExpenseDialog onSaved={loadExpenseData} />
+        )}
+      </div>
+
+      <div className="flex items-center gap-2 border-b border-gray-200">
+        {(["giving", "expenses"] as FinanceTab[]).map((tab) => (
+          <button
+            key={tab}
+            onClick={() => setActiveTab(tab)}
+            className={cn(
+              "px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors",
+              activeTab === tab
+                ? "border-primary-500 text-primary-600"
+                : "border-transparent text-gray-500 hover:text-gray-700",
+            )}
+          >
+            {tab === "giving" ? "Giving" : "Expenses"}
+          </button>
+        ))}
+      </div>
+
+      <div className="flex flex-wrap items-end gap-3">
+        <div className="space-y-1.5">
+          <Label>From</Label>
+          <Input
+            type="date"
+            value={startDate}
+            onChange={(e) => setStartDate(e.target.value)}
+            className="w-40"
+          />
+        </div>
+        <div className="space-y-1.5">
+          <Label>To</Label>
+          <Input
+            type="date"
+            value={endDate}
+            onChange={(e) => setEndDate(e.target.value)}
+            className="w-40"
+          />
+        </div>
+        <Button
+          onClick={loadActiveTab}
+          disabled={givingSummaryLoading || expenseSummaryLoading}
+        >
+          Apply
+        </Button>
+      </div>
+
+      {activeTab === "giving" ? (
+        <div className="space-y-6">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+            {GIVING_SUMMARY_CARDS.map((card) => (
+              <div
+                key={card.key}
+                className="bg-white rounded-2xl border border-gray-300 p-4
+                           shadow-[0_1px_4px_rgba(0,0,0,0.06)]"
+              >
+                <p className="text-[13px] font-bold text-black mb-1">
+                  {card.label}
+                </p>
+                <span className="text-xl font-bold text-black">
+                  {givingSummaryLoading || !givingSummary
+                    ? "—"
+                    : formatCurrency(
+                        givingSummary[card.key] as number,
+                        currency,
+                      )}
+                </span>
+              </div>
+            ))}
+          </div>
+
+          <div className="max-h-[55vh] overflow-auto">
+            <Table
+              columns={givingColumns}
+              data={givingRecords}
+              rowKey={(row) => row.id}
+              isLoading={givingRecordsLoading}
+              emptyState={
+                <div className="py-10 text-center">
+                  <Text variant="muted">
+                    No giving records for this date range yet
+                    {canManageGiving
+                      ? " - record one from the Attendance page when marking a service."
+                      : "."}
+                  </Text>
+                </div>
+              }
+            />
+          </div>
+        </div>
+      ) : (
+        <div className="space-y-6">
+          <div className="grid grid-cols-4 gap-4">
+            <div
+              className="col-span-2 sm:col-span-1 bg-white rounded-2xl border border-gray-300 p-4
+                         shadow-[0_1px_4px_rgba(0,0,0,0.06)]"
+            >
+              <p className="text-[13px] font-bold text-black mb-1">
+                Total Expenses
+              </p>
+              <span className="text-xl font-bold text-black">
+                {expenseSummaryLoading || !expenseSummary
+                  ? "—"
+                  : formatCurrency(expenseSummary.totalAmount, currency)}
+              </span>
+            </div>
+
+            <div
+              className="col-span-2 sm:col-span-1 bg-white rounded-2xl border border-gray-300 p-4
+                         shadow-[0_1px_4px_rgba(0,0,0,0.06)]"
+            >
+              <p className="text-[13px] font-bold text-black mb-1">
+                Top Category
+              </p>
+              <span className="text-xl font-bold text-black">
+                {expenseSummaryLoading || !expenseSummary?.byCategory.length
+                  ? "—"
+                  : [...expenseSummary.byCategory].sort(
+                      (a, b) => b.amount - a.amount,
+                    )[0]?.category}
+              </span>
+            </div>
+          </div>
+
+          <div className="max-h-[55vh] overflow-auto">
+            <Table
+              columns={expenseColumns}
+              data={expenses}
+              rowKey={(row) => row.id}
+              isLoading={expensesLoading}
+              emptyState={
+                <div className="py-10 text-center">
+                  <Text variant="muted">
+                    No expenses for this date range yet
+                    {canManageExpenses
+                      ? " - use Add Expense to record one."
+                      : "."}
+                  </Text>
+                </div>
+              }
+            />
+          </div>
+        </div>
+      )}
+
+      <AlertDialog
+        open={!!deleteTarget}
+        onOpenChange={(open) => !open && setDeleteTarget(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete expense?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setDeleteTarget(null)}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmDeleteExpense}>
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </div>
+  );
+}

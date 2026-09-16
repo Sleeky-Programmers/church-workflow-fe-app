@@ -105,15 +105,4 @@ export const MOCK_PENDING_INVITES: PendingInvite[] = [
   },
 ];
 
-export const TITLE_OPTIONS = [
-  "Mr",
-  "Mrs",
-  "Miss",
-  "Ms",
-  "Dr",
-  "Prof",
-  "Rev",
-  "Pastor",
-];
-
 export const ROLE_OPTIONS = ["Admin", "Finance", "Pastor", "Member"];

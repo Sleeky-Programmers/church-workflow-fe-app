@@ -114,6 +114,21 @@ export function formatDateSafely(dateString: string): string {
   return format(date, "EEEE, MMMM do, yyyy");
 }
 
+function isLeapYear(year: number) {
+  return (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0;
+}
+
+// Builds a birthday occurrence for a given year, folding 29 Feb back to
+// 28 Feb in years that aren't leap years instead of letting it roll over
+// into March (JS Date's default behavior for Date(year, 1, 29)).
+export function birthdayInYear(year: number, month: number, day: number) {
+  const isFeb29 = month === 1 && day === 29;
+  const resolvedDay = isFeb29 && !isLeapYear(year) ? 28 : day;
+  const date = new Date(year, month, resolvedDay);
+  date.setHours(0, 0, 0, 0);
+  return date;
+}
+
 export function getNextBirthdayDate(dateStr: string) {
   const today = new Date();
   const parsed = new Date(dateStr);
@@ -125,14 +140,13 @@ export function getNextBirthdayDate(dateStr: string) {
   const month = parsed.getUTCMonth();
   const day = parsed.getUTCDate();
 
-  const birthday = new Date(today.getFullYear(), month, day);
-  birthday.setHours(0, 0, 0, 0);
+  const birthday = birthdayInYear(today.getFullYear(), month, day);
 
   const startOfToday = new Date(today);
   startOfToday.setHours(0, 0, 0, 0);
 
   if (birthday < startOfToday) {
-    birthday.setFullYear(today.getFullYear() + 1);
+    return birthdayInYear(today.getFullYear() + 1, month, day);
   }
 
   return birthday;

@@ -1,6 +1,7 @@
 "use client";
 
 import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useIsMobile } from "@/hooks/use-mobile";
 import {
   Dialog,
@@ -15,12 +16,9 @@ import { Label } from "@/components/ui/label";
 import { EyeOff } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { updatePassword } from "@/services/authService";
+import { updatePasswordSchema, UpdatePasswordFormValues } from "@/types/schema";
 
-type FormValues = {
-  currentPassword: string;
-  newPassword: string;
-  confirmPassword: string;
-};
+type FormValues = UpdatePasswordFormValues;
 
 export function UpdatePasswordModal({ open, onOpenChange }: any) {
   const { toast } = useToast();
@@ -29,10 +27,9 @@ export function UpdatePasswordModal({ open, onOpenChange }: any) {
   const {
     register,
     handleSubmit,
-    watch,
     reset,
     formState: { errors, isSubmitting },
-  } = useForm<FormValues>();
+  } = useForm<FormValues>({ resolver: zodResolver(updatePasswordSchema) });
 
   const onSubmit = async (data: FormValues) => {
     try {
@@ -70,9 +67,7 @@ export function UpdatePasswordModal({ open, onOpenChange }: any) {
             <Label>Current Password</Label>
             <Input
               type="password"
-              {...register("currentPassword", {
-                required: "Current password is required",
-              })}
+              {...register("currentPassword")}
               className="bg-gray-100"
             />
             {errors.currentPassword && (
@@ -87,13 +82,7 @@ export function UpdatePasswordModal({ open, onOpenChange }: any) {
             <div className="relative">
               <Input
                 type="password"
-                {...register("newPassword", {
-                  required: "Password is required",
-                  minLength: {
-                    value: 6,
-                    message: "Minimum 6 characters",
-                  },
-                })}
+                {...register("newPassword")}
                 className="bg-gray-100 pr-10"
               />
               <EyeOff className="absolute right-3 top-3 w-4 h-4 text-gray-500" />
@@ -109,11 +98,7 @@ export function UpdatePasswordModal({ open, onOpenChange }: any) {
             <Label>Confirm Password</Label>
             <Input
               type="password"
-              {...register("confirmPassword", {
-                required: "Confirm password is required",
-                validate: (val) =>
-                  val === watch("newPassword") || "Passwords do not match",
-              })}
+              {...register("confirmPassword")}
               className="bg-gray-100"
             />
             {errors.confirmPassword && (

@@ -1,20 +1,10 @@
 "use client";
 
-import {
-  ChevronRight,
-  ExternalLink,
-  Plus,
-  RefreshCw,
-  Search,
-  X,
-} from "lucide-react";
+import { ChevronRight, Plus, Search, X } from "lucide-react";
 import { useMemo, useState } from "react";
 
-import { InviteUserDialog } from "@/components/features/dashboard/admin/invite-user";
-import {
-  MemberMultiSelect,
-  MemberSingleSelect,
-} from "@/components/features/dashboard/departments/member-selectors";
+import { MemberMultiSelect } from "@/components/features/dashboard/departments/member-selectors";
+import { TeamLeaderPicker } from "@/components/features/dashboard/teams/team-leader-picker";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -35,14 +25,11 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import Heading from "@/components/ui/typography/Heading";
 import { Span, Text } from "@/components/ui/typography/Text";
+import { useHasAccess } from "@/lib/access-control";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { useToast } from "@/hooks/use-toast";
-import { createAdminInvite } from "@/lib/api/admin-settings";
 import { cn } from "@/lib/utils";
 import { fetchMembers } from "@/services/memberService";
-import { fetchAdmins } from "@/services/userServices";
 import { MemberProfile } from "@/types";
-import { InviteFormData } from "@/types/user";
 
 const PANEL_PAGE_SIZE = 8;
 
@@ -51,6 +38,7 @@ interface Props {
   onSave?: (payload: {
     name: string;
     leaderId: string;
+    pendingLeaderEmail: string | null;
     memberIds: string[];
     status: string;
     description: string;
@@ -70,10 +58,13 @@ export default function AddSmallTeamDialog({
   triggerLabel = "Add a Team",
 }: Props) {
   const isMobile = useIsMobile();
-  const { toast } = useToast();
+  const canCreate = useHasAccess("SMALL_TEAMS", "FULL_ACCESS");
   const [open, setOpen] = useState(false);
   const [teamName, setTeamName] = useState("");
   const [leaderId, setLeaderId] = useState("");
+  const [pendingLeaderEmail, setPendingLeaderEmail] = useState<string | null>(
+    null,
+  );
   const [memberIds, setMemberIds] = useState<string[]>([]);
   const [status, setStatus] = useState("active");
   const [description, setDescription] = useState("");
@@ -81,40 +72,6 @@ export default function AddSmallTeamDialog({
   const [showSelectedPanel, setShowSelectedPanel] = useState(false);
   const [panelQuery, setPanelQuery] = useState("");
   const [panelPage, setPanelPage] = useState(1);
-  const [inviteOpen, setInviteOpen] = useState(false);
-  const [isInviteLoading, setIsInviteLoading] = useState(false);
-
-  const handleInviteSubmit = async (data: InviteFormData) => {
-    setIsInviteLoading(true);
-    try {
-      const payload: {
-        email: string;
-        title?: string;
-        firstName?: string;
-        lastName?: string;
-      } = { email: data.email };
-      if (data.title) payload.title = data.title;
-      if (data.firstName) payload.firstName = data.firstName;
-      if (data.lastName) payload.lastName = data.lastName;
-
-      const result = await createAdminInvite(data.role, payload);
-      toast({
-        title: "Success",
-        description: "Invitation sent successfully",
-      });
-      return result;
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description:
-          error.message || "Failed to send invitation. Please try again.",
-        variant: "destructive",
-      });
-      throw error;
-    } finally {
-      setIsInviteLoading(false);
-    }
-  };
 
   const selectedMembers = useMemo(() => {
     if (!memberIds.length) {
@@ -147,6 +104,13 @@ export default function AddSmallTeamDialog({
     return filteredPanelMembers.slice(start, start + PANEL_PAGE_SIZE);
   }, [filteredPanelMembers, safePage]);
 
+  // Creating a team is an org-wide administrative action (matches the
+  // backend's FULL_ACCESS requirement on POST /small-teams) - team leaders
+  // scoped to their own team(s) never see the entry point for it.
+  if (!canCreate) {
+    return null;
+  }
+
   function handlePageChange(p: number) {
     setPanelPage(Math.max(1, Math.min(p, totalPanelPages)));
   }
@@ -163,6 +127,7 @@ export default function AddSmallTeamDialog({
         await onSave({
           name: teamName,
           leaderId,
+          pendingLeaderEmail,
           memberIds,
           status,
           description,
@@ -170,6 +135,7 @@ export default function AddSmallTeamDialog({
       }
       setTeamName("");
       setLeaderId("");
+      setPendingLeaderEmail(null);
       setMemberIds([]);
       setStatus("active");
       setDescription("");
@@ -180,10 +146,6 @@ export default function AddSmallTeamDialog({
     } finally {
       setIsSaving(false);
     }
-  }
-
-  function handleResetLeader() {
-    setLeaderId("");
   }
 
   function removeSelectedMember(id: string) {
@@ -368,41 +330,14 @@ export default function AddSmallTeamDialog({
                   />
                 </div>
 
-                {/* Assign Leader - Full width with flexible button */}
-                <div className="space-y-1.5 w-full">
-                  <Label className="text-sm sm:text-base">Assign Leader</Label>
-                  <div className="flex items-center gap-2 w-full">
-                    <div className="flex-1 min-w-0">
-                      <MemberSingleSelect
-                        fetchOptions={fetchAdmins}
-                        value={leaderId}
-                        onChange={setLeaderId}
-                        placeholder="Select or search"
-                      />
-                    </div>
-                    <Button
-                      type="button"
-                      size="icon"
-                      title="Reset leader"
-                      variant="outline"
-                      onClick={handleResetLeader}
-                      className="shrink-0"
-                    >
-                      <RefreshCw className="h-4 w-4 text-gray-500" />
-                    </Button>
-                  </div>
-                  <a
-                    href="#"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      setInviteOpen(true);
-                    }}
-                    className="mt-0.5 inline-flex items-center gap-1 text-xs text-primary hover:underline"
-                  >
-                    Add New Team Lead
-                    <ExternalLink className="h-3 w-3" />
-                  </a>
-                </div>
+                {/* Assign Leader - Full width */}
+                <TeamLeaderPicker
+                  leaderId={leaderId}
+                  onLeaderIdChange={setLeaderId}
+                  pendingLeaderEmail={pendingLeaderEmail}
+                  onPendingLeaderEmailChange={setPendingLeaderEmail}
+                  disabled={isSaving}
+                />
 
                 {/* Members Section - Full width */}
                 <div className="space-y-2 w-full">
@@ -531,14 +466,6 @@ export default function AddSmallTeamDialog({
           </DialogContent>
         </Dialog>
       )}
-
-      <InviteUserDialog
-        open={inviteOpen}
-        onOpenChange={setInviteOpen}
-        onSubmit={handleInviteSubmit}
-        isLoading={isInviteLoading}
-        title="Invite New Team Lead"
-      />
     </>
   );
 }

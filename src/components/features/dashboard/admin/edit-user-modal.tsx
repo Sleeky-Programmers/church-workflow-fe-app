@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -14,15 +15,16 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Text } from "@/components/ui/typography/Text";
+import { TitleCombobox } from "@/components/ui/title-combobox";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useToast } from "@/hooks/use-toast";
 import { updateProfile } from "@/services/userServices";
+import {
+  editPersonalInfoSchema,
+  EditPersonalInfoFormValues,
+} from "@/types/schema";
 
-type FormValues = {
-  firstName: string;
-  lastName: string;
-  email: string;
-};
+type FormValues = EditPersonalInfoFormValues;
 
 export function EditPersonalInfoModal({
   open,
@@ -34,14 +36,16 @@ export function EditPersonalInfoModal({
 
   const {
     register,
+    control,
     handleSubmit,
     reset,
     formState: { errors, isSubmitting },
-  } = useForm<FormValues>();
+  } = useForm<FormValues>({ resolver: zodResolver(editPersonalInfoSchema) });
 
   useEffect(() => {
     if (open) {
       reset({
+        title: user?.title || "",
         firstName: user?.firstName || "",
         lastName: user?.lastName || "",
         email: user?.email || "",
@@ -77,15 +81,24 @@ export function EditPersonalInfoModal({
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="px-6 pb-5 space-y-4">
+          <div>
+            <Label>Title</Label>
+            <Controller
+              control={control}
+              name="title"
+              render={({ field }) => (
+                <TitleCombobox value={field.value} onChange={field.onChange} />
+              )}
+            />
+            {errors.title && (
+              <Text variant="error">{errors.title.message}</Text>
+            )}
+          </div>
+
           <div className="grid grid-cols-2 gap-4">
             <div>
               <Label>First Name</Label>
-              <Input
-                {...register("firstName", {
-                  required: "First name is required",
-                })}
-                className="bg-gray-100"
-              />
+              <Input {...register("firstName")} className="bg-gray-100" />
               {errors.firstName && (
                 <Text variant="error">{errors.firstName.message}</Text>
               )}
@@ -93,12 +106,7 @@ export function EditPersonalInfoModal({
 
             <div>
               <Label>Last Name</Label>
-              <Input
-                {...register("lastName", {
-                  required: "Last name is required",
-                })}
-                className="bg-gray-100"
-              />
+              <Input {...register("lastName")} className="bg-gray-100" />
               {errors.lastName && (
                 <Text variant="error">{errors.lastName.message}</Text>
               )}
@@ -107,16 +115,7 @@ export function EditPersonalInfoModal({
 
           <div>
             <Label>Email</Label>
-            <Input
-              {...register("email", {
-                required: "Email is required",
-                pattern: {
-                  value: /^\S+@\S+$/i,
-                  message: "Invalid email",
-                },
-              })}
-              className="bg-gray-100"
-            />
+            <Input {...register("email")} className="bg-gray-100" />
             {errors.email && (
               <p className="text-red-500 text-sm">{errors.email.message}</p>
             )}

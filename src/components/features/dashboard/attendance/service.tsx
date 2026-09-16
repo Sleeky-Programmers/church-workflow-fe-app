@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Span } from "@/components/ui/typography/Text";
+import { useHasAccess } from "@/lib/access-control";
 import { getAttendanceCount } from "@/lib/utils";
 import { RegularService } from "@/types";
 import { ChevronRight } from "lucide-react";
@@ -25,6 +26,7 @@ export function ServiceItem({
 }: ServiceItemProps) {
   const attendanceCount = getAttendanceCount(service, date);
   const hasAttendance = attendanceCount !== null;
+  const canRecordGiving = useHasAccess("GIVING", "MANAGE");
 
   return (
     <div className="text-xs mb-2 p-2 bg-gray-50 rounded hover:bg-gray-100 transition-colors">
@@ -60,19 +62,21 @@ export function ServiceItem({
         </Button>
       )}
 
-      <Button
-        variant="ghost"
-        onClick={onAddGivingRecord}
-        className="flex items-center gap-1 text-success-600 hover:text-success-700 w-full"
-      >
-        <Span className="h-1.5 w-1.5 bg-success-600 rounded-full flex-shrink-0" />
-        <Span className="truncate">
-          {typeof givingTotal === "number"
-            ? `$${givingTotal.toLocaleString()}`
-            : "Add giving record"}
-        </Span>
-        <ChevronRight className="h-3 w-3 ml-auto flex-shrink-0" />
-      </Button>
+      {canRecordGiving && (
+        <Button
+          variant="ghost"
+          onClick={onAddGivingRecord}
+          className="flex items-center gap-1 text-success-600 hover:text-success-700 w-full"
+        >
+          <Span className="h-1.5 w-1.5 bg-success-600 rounded-full flex-shrink-0" />
+          <Span className="truncate">
+            {typeof givingTotal === "number"
+              ? `$${givingTotal.toLocaleString()}`
+              : "Add giving record"}
+          </Span>
+          <ChevronRight className="h-3 w-3 ml-auto flex-shrink-0" />
+        </Button>
+      )}
     </div>
   );
 }
