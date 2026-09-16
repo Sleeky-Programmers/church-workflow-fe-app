@@ -18,14 +18,19 @@ type UserActionsMenuProps = {
   userId: string;
   userStatus: UserStatus;
   onActionSelect: (action: UserAction) => void;
+  canManageBranchAccess?: boolean;
 };
 
 export function UserActionsMenu({
   userId,
   userStatus,
   onActionSelect,
+  canManageBranchAccess = false,
 }: UserActionsMenuProps) {
-  const availableActions = getAvailableActions(userStatus);
+  const availableActions = getAvailableActions(userStatus).filter(
+    (action) =>
+      action.value !== "manage_branch_access" || canManageBranchAccess,
+  );
 
   return (
     <DropdownMenu>
