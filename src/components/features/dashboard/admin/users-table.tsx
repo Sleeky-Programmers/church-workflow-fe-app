@@ -17,9 +17,14 @@ import { Text } from "@/components/ui/typography/Text";
 type UserTableProps = {
   users: User[];
   onActionSelect: (userId: string, action: UserAction) => void;
+  canManageBranchAccess?: boolean;
 };
 
-export function UserTable({ users, onActionSelect }: UserTableProps) {
+export function UserTable({
+  users,
+  onActionSelect,
+  canManageBranchAccess,
+}: UserTableProps) {
   if (users.length === 0) {
     return (
       <div className="flex items-center justify-center py-16 text-gray-500">
@@ -58,6 +63,7 @@ export function UserTable({ users, onActionSelect }: UserTableProps) {
                 userId={user.id}
                 userStatus={user.status}
                 onActionSelect={(action) => onActionSelect(user.id, action)}
+                canManageBranchAccess={canManageBranchAccess}
               />
             </TableCell>
           </TableRow>

@@ -408,6 +408,7 @@ export async function performUserAction(
         suspend: "User suspended successfully",
         restore: "User restored successfully",
         remove: "User removed successfully",
+        manage_branch_access: "Branch access updated successfully",
       };
 
       resolve({

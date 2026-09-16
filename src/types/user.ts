@@ -28,7 +28,8 @@ export type UserAction =
   | "delete_invitation"
   | "suspend"
   | "restore"
-  | "remove";
+  | "remove"
+  | "manage_branch_access";
 
 export type ActionItem = {
   label: string;

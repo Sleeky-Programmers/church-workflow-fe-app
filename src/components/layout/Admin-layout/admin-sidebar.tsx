@@ -7,6 +7,7 @@ import {
   Settings as SettingsIcon,
   Lock,
   ParkingMeterIcon,
+  Building2,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -37,6 +38,12 @@ const NAV_ITEMS: NavItem[] = [
     label: "Roles & Permissions",
     icon: Shield,
     href: "/dashboard/settings/roles",
+  },
+  {
+    id: "branches",
+    label: "Branches",
+    icon: Building2,
+    href: "/dashboard/settings/branches",
   },
   {
     id: "preference",

@@ -39,6 +39,12 @@ export const USER_ACTION_ITEMS: ActionItem[] = [
     showFor: ["suspended"],
   },
   {
+    label: "Manage branch access",
+    value: "manage_branch_access",
+    variant: "default",
+    showFor: ["active"],
+  },
+  {
     label: "Remove",
     value: "remove",
     variant: "danger",

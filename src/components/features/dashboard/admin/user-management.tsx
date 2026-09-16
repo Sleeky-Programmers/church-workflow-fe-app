@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState } from "react";
 
 import { InviteUserDialog } from "@/components/features/dashboard/admin/invite-user";
 import { ChangeRoleDialog } from "@/components/features/dashboard/admin/mini-components/change-role-dialog";
+import { ManageBranchAccessDialog } from "@/components/features/dashboard/admin/mini-components/manage-branch-access-dialog";
 import { RemoveUserDialog } from "@/components/features/dashboard/admin/mini-components/remove-user-dialog";
 import { UserTable } from "@/components/features/dashboard/admin/users-table";
 import { LimitBanner } from "@/components/features/dashboard/subscription/limit-banner";
@@ -26,16 +27,22 @@ import {
 import { AdminOption } from "@/lib/enums";
 import { getNextPlan, getUpgradeFeatures } from "@/lib/plan-utils";
 import { getPlans } from "@/services/billingService";
+import { useUserStore } from "@/stores/useUserStore";
 import { Plan, PlanLimitStatus } from "@/types";
 import { User, UserAction } from "@/types/user";
 
 export function UserManagementPage() {
+  const accessScope = useUserStore((state) => state.accessScope);
+  const canManageBranchAccess = accessScope === "ORG_WIDE";
+
   const [users, setUsers] = useState<User[]>([]);
   const [roles, setRoles] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isInviteDialogOpen, setIsInviteDialogOpen] = useState(false);
   const [isRemoveDialogOpen, setIsRemoveDialogOpen] = useState(false);
   const [isChangeRoleDialogOpen, setIsChangeRoleDialogOpen] = useState(false);
+  const [isBranchAccessDialogOpen, setIsBranchAccessDialogOpen] =
+    useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [isActionLoading, setIsActionLoading] = useState(false);
   const { toast } = useToast();
@@ -187,6 +194,12 @@ export function UserManagementPage() {
       return;
     }
 
+    if (action === "manage_branch_access") {
+      setSelectedUser(user);
+      setIsBranchAccessDialogOpen(true);
+      return;
+    }
+
     setIsActionLoading(true);
     try {
       let result;
@@ -306,7 +319,11 @@ export function UserManagementPage() {
             <Text variant="default">Loading users...</Text>
           </div>
         ) : (
-          <UserTable users={users} onActionSelect={handleActionSelect} />
+          <UserTable
+            users={users}
+            onActionSelect={handleActionSelect}
+            canManageBranchAccess={canManageBranchAccess}
+          />
         )}
       </div>
 
@@ -333,6 +350,14 @@ export function UserManagementPage() {
         roles={roles}
         onConfirm={handleConfirmChangeRole}
         isLoading={isActionLoading}
+      />
+
+      <ManageBranchAccessDialog
+        open={isBranchAccessDialogOpen}
+        onOpenChange={setIsBranchAccessDialogOpen}
+        userId={selectedUser?.id || null}
+        userName={selectedUser?.name || ""}
+        onSaved={loadUsers}
       />
 
       <PlanLimitReachedModal
