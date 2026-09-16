@@ -16,6 +16,7 @@ interface Props {
   onSave: (payload: {
     name: string;
     leaderId: string;
+    pendingLeaderEmail: string | null;
     memberIds: string[];
     status: string;
     description: string;

@@ -20,10 +20,12 @@ import {
   updateChurchService,
   UpdateChurchServiceDto,
 } from "@/services/churchService";
+import { fetchMembers } from "@/services/memberService";
 import {
   ChurchEvent,
   ChurchService,
   EventFormData,
+  MemberProfile,
   ReminderTimeBefore,
 } from "@/types";
 import { convertTo12HourFormat } from "@/utils/helpers";
@@ -163,6 +165,7 @@ export default function EventsPage() {
   const { toast } = useToast();
   const [events, setEvents] = useState<ChurchEvent[]>([]);
   const [churchServices, setChurchServices] = useState<ChurchService[]>([]);
+  const [members, setMembers] = useState<MemberProfile[]>([]);
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<ChurchEvent | null>(null);
@@ -225,6 +228,35 @@ export default function EventsPage() {
   // Fetch church services on component mount
   useEffect(() => {
     fetchChurchServices();
+  }, []);
+
+  // Fetch all members once, for the Birthday filter's date-of-birth data -
+  // same underlying data the dashboard's upcoming-birthdays widget uses.
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadAllMembers() {
+      try {
+        const pageSize = 100;
+        const firstPage = await fetchMembers(1, pageSize);
+        const allMembers = [...(firstPage.data || [])];
+        const totalPages = firstPage.pagination?.totalPages || 1;
+        for (let page = 2; page <= totalPages; page++) {
+          const nextPage = await fetchMembers(page, pageSize);
+          allMembers.push(...(nextPage.data || []));
+        }
+        if (!cancelled) {
+          setMembers(allMembers);
+        }
+      } catch (error) {
+        console.error("Failed to fetch members for birthdays:", error);
+      }
+    }
+
+    loadAllMembers();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   // Save events to localStorage
@@ -461,6 +493,7 @@ export default function EventsPage() {
           <EventsCalendar
             events={events}
             churchServices={churchServices}
+            members={members}
             onCreateEvent={handleCreateEvent}
             onSelectEvent={handleSelectEvent}
           />

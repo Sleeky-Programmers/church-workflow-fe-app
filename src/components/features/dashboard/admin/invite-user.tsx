@@ -3,6 +3,8 @@
 import { ExternalLink, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -13,8 +15,15 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Loader } from "@/components/ui/loader";
 import {
   Select,
@@ -24,10 +33,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { ROLE_PERMISSIONS, TITLE_OPTIONS } from "@/lib/permissions";
+import { ROLE_PERMISSIONS } from "@/lib/permissions";
 import { backendToFrontendModule } from "@/lib/role-constants";
+import { TitleCombobox } from "@/components/ui/title-combobox";
 import { fetchRoles } from "@/services/rolesService";
 import { InviteFormData, PendingInvite } from "@/types/user";
+import { inviteUserSchema } from "@/types/schema";
 
 import { CreateRoleDialog } from "./mini-components/create-role-dialog";
 import { PendingInvitesList } from "./mini-components/pending-invite";
@@ -62,13 +73,17 @@ export function InviteUserDialog({
   const [isLoadingRoles, setIsLoadingRoles] = useState(false);
   const router = useRouter();
 
-  const [formData, setFormData] = useState<InviteFormData>({
-    title: "",
-    firstName: "",
-    lastName: "",
-    email: "",
-    role: "",
+  const form = useForm<InviteFormData>({
+    resolver: zodResolver(inviteUserSchema),
+    defaultValues: {
+      title: "",
+      firstName: "",
+      lastName: "",
+      email: "",
+      role: "",
+    },
   });
+  const formData = form.watch();
 
   const { toast } = useToast();
 
@@ -95,37 +110,34 @@ export function InviteUserDialog({
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (formData.email && formData.role) {
-      try {
-        const result = await Promise.resolve(onSubmit(formData));
-        const roleObj = roles.find((r) => r._id === formData.role);
-        setLocalInvites((prev) => [
-          ...prev,
-          {
-            id: result?._id || Date.now().toString(),
-            name: formData.firstName
-              ? `${formData.firstName} ${formData.lastName || ""}`.trim()
-              : formData.email.split("@")[0],
-            email: formData.email,
-            role: roleObj ? roleObj.roleName : formData.role,
-            status: "pending",
-          },
-        ]);
-        resetForm();
-      } catch (error: any) {
-        toast({
-          title: "Error",
-          description: error.message || "Failed to invite user",
-          variant: "destructive",
-        });
-      }
+  const handleSubmit = async (data: InviteFormData) => {
+    try {
+      const result = await Promise.resolve(onSubmit(data));
+      const roleObj = roles.find((r) => r._id === data.role);
+      setLocalInvites((prev) => [
+        ...prev,
+        {
+          id: result?._id || Date.now().toString(),
+          name: data.firstName
+            ? `${data.firstName} ${data.lastName || ""}`.trim()
+            : data.email.split("@")[0],
+          email: data.email,
+          role: roleObj ? roleObj.roleName : data.role,
+          status: "pending",
+        },
+      ]);
+      resetForm();
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to invite user",
+        variant: "destructive",
+      });
     }
   };
 
   const resetForm = () => {
-    setFormData({
+    form.reset({
       title: "",
       firstName: "",
       lastName: "",
@@ -177,7 +189,7 @@ export function InviteUserDialog({
     }
     // Refresh roles list
     await loadRoles();
-    setFormData({ ...formData, role: newRole._id });
+    form.setValue("role", newRole._id, { shouldValidate: true });
   };
 
   return (
@@ -208,206 +220,225 @@ export function InviteUserDialog({
                 </div>
               </DialogHeader>
 
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="grid grid-cols-3 gap-3">
-                  <div className="space-y-2">
-                    <Label htmlFor="title" className="text-xs">
-                      Title (Optional)
-                    </Label>
-                    <Select
-                      value={formData.title}
-                      onValueChange={(value) =>
-                        setFormData({ ...formData, title: value })
-                      }
-                    >
-                      <SelectTrigger id="title" className="h-9">
-                        <SelectValue placeholder="Title" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {TITLE_OPTIONS.map((t) => (
-                          <SelectItem key={t} value={t}>
-                            {t}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="firstName" className="text-xs">
-                      First name (Optional)
-                    </Label>
-                    <Input
-                      id="firstName"
-                      placeholder="e.g. John"
-                      value={formData.firstName}
-                      onChange={(e) =>
-                        setFormData({ ...formData, firstName: e.target.value })
-                      }
-                      className="h-9"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="lastName" className="text-xs">
-                      Last name (Optional)
-                    </Label>
-                    <Input
-                      id="lastName"
-                      placeholder="e.g. Doe"
-                      value={formData.lastName}
-                      onChange={(e) =>
-                        setFormData({ ...formData, lastName: e.target.value })
-                      }
-                      className="h-9"
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="email" className="text-xs">
-                    Email Address
-                  </Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="john@example.com"
-                    value={formData.email}
-                    onChange={(e) =>
-                      setFormData({ ...formData, email: e.target.value })
-                    }
-                    required
-                    className="h-9"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="role" className="text-xs">
-                    Role
-                  </Label>
-                  <Select
-                    value={formData.role}
-                    onValueChange={(value) => {
-                      if (value === CREATE_ROLE_VALUE) return;
-                      setFormData({ ...formData, role: value });
-                    }}
-                    required
-                  >
-                    <SelectTrigger id="role" className="h-9">
-                      <SelectValue
-                        placeholder={
-                          isLoadingRoles ? "Loading roles..." : "Select a role"
-                        }
-                      />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {isLoadingRoles ? (
-                        <div className="px-2 py-4 flex items-center justify-center gap-2 text-sm text-muted-foreground">
-                          <Loader size="w-4 h-4" showShadow={false} />
-                          Loading roles...
-                        </div>
-                      ) : (
-                        <>
-                          {roles.map((role: any) => (
-                            <SelectItem key={role._id} value={role._id}>
-                              {role.type === "CUSTOM" ? (
-                                <>
-                                  {role.roleName}
-                                  <span className="text-muted-foreground ml-1">
-                                    - Custom Role
-                                  </span>
-                                </>
-                              ) : (
-                                role.roleName
-                              )}
-                            </SelectItem>
-                          ))}
-
-                          <div className="border-t pt-2 mt-1">
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="sm"
-                              className="w-full justify-start text-primary text-xs"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                const selectTrigger = document.querySelector(
-                                  "[data-radix-select-trigger]",
-                                );
-                                if (selectTrigger) {
-                                  (selectTrigger as HTMLElement).click();
-                                }
-                                setTimeout(() => {
-                                  setIsCreateRoleDialogOpen(true);
-                                }, 50);
-                              }}
-                            >
-                              <ExternalLink className="h-3 w-3 mr-2" />
-                              Add new role
-                            </Button>
-                          </div>
-                        </>
-                      )}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {formData.role && (
-                  <Button
-                    type="button"
-                    variant="link"
-                    onClick={handleViewPermissions}
-                    className="flex items-center gap-1.5 hover:underline"
-                  >
-                    View Role Permissions
-                    <ExternalLink className="h-3.5 w-3.5" />
-                  </Button>
-                )}
-
-                <Button
-                  type="submit"
-                  disabled={
-                    isLoading ||
-                    !formData.email ||
-                    !formData.role ||
-                    isLoadingRoles
-                  }
-                  className="w-full"
+              <Form {...form}>
+                <form
+                  onSubmit={form.handleSubmit(handleSubmit)}
+                  className="space-y-4"
                 >
-                  {isLoading ? (
-                    <span className="flex items-center gap-2">
-                      <Loader size="w-4 h-4" showShadow={false} />
-                      Sending...
-                    </span>
-                  ) : (
-                    "Send Invite"
-                  )}
-                </Button>
+                  <div className="grid grid-cols-3 gap-3">
+                    <FormField
+                      control={form.control}
+                      name="title"
+                      render={({ field }) => (
+                        <FormItem className="space-y-2">
+                          <FormLabel className="text-xs">
+                            Title (Optional)
+                          </FormLabel>
+                          <FormControl>
+                            <TitleCombobox
+                              value={field.value}
+                              onChange={field.onChange}
+                              placeholder="Title"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
 
-                {localInvites.length > 0 && (
-                  <div className="pt-4 border-t mt-4">
-                    <PendingInvitesList invites={localInvites} />
+                    <FormField
+                      control={form.control}
+                      name="firstName"
+                      render={({ field }) => (
+                        <FormItem className="space-y-2">
+                          <FormLabel className="text-xs">
+                            First name (Optional)
+                          </FormLabel>
+                          <FormControl>
+                            <Input
+                              placeholder="e.g. John"
+                              className="h-9"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="lastName"
+                      render={({ field }) => (
+                        <FormItem className="space-y-2">
+                          <FormLabel className="text-xs">
+                            Last name (Optional)
+                          </FormLabel>
+                          <FormControl>
+                            <Input
+                              placeholder="e.g. Doe"
+                              className="h-9"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
                   </div>
-                )}
 
-                {localInvites.length > 0 && (
-                  <div className="flex justify-end pt-2">
+                  <FormField
+                    control={form.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem className="space-y-2">
+                        <FormLabel className="text-xs">Email Address</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="email"
+                            placeholder="john@example.com"
+                            className="h-9"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="role"
+                    render={({ field }) => (
+                      <FormItem className="space-y-2">
+                        <FormLabel className="text-xs">Role</FormLabel>
+                        <Select
+                          value={field.value}
+                          onValueChange={(value) => {
+                            if (value === CREATE_ROLE_VALUE) return;
+                            field.onChange(value);
+                          }}
+                        >
+                          <FormControl>
+                            <SelectTrigger className="h-9">
+                              <SelectValue
+                                placeholder={
+                                  isLoadingRoles
+                                    ? "Loading roles..."
+                                    : "Select a role"
+                                }
+                              />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {isLoadingRoles ? (
+                              <div className="px-2 py-4 flex items-center justify-center gap-2 text-sm text-muted-foreground">
+                                <Loader size="w-4 h-4" showShadow={false} />
+                                Loading roles...
+                              </div>
+                            ) : (
+                              <>
+                                {roles.map((role: any) => (
+                                  <SelectItem key={role._id} value={role._id}>
+                                    {role.type === "CUSTOM" ? (
+                                      <>
+                                        {role.roleName}
+                                        <span className="text-muted-foreground ml-1">
+                                          - Custom Role
+                                        </span>
+                                      </>
+                                    ) : (
+                                      role.roleName
+                                    )}
+                                  </SelectItem>
+                                ))}
+
+                                <div className="border-t pt-2 mt-1">
+                                  <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="sm"
+                                    className="w-full justify-start text-primary text-xs"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      const selectTrigger =
+                                        document.querySelector(
+                                          "[data-radix-select-trigger]",
+                                        );
+                                      if (selectTrigger) {
+                                        (selectTrigger as HTMLElement).click();
+                                      }
+                                      setTimeout(() => {
+                                        setIsCreateRoleDialogOpen(true);
+                                      }, 50);
+                                    }}
+                                  >
+                                    <ExternalLink className="h-3 w-3 mr-2" />
+                                    Add new role
+                                  </Button>
+                                </div>
+                              </>
+                            )}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  {formData.role && (
                     <Button
                       type="button"
-                      onClick={handleCancel}
-                      disabled={isLoading}
+                      variant="link"
+                      onClick={handleViewPermissions}
+                      className="flex items-center gap-1.5 hover:underline"
                     >
-                      Done
+                      View Role Permissions
+                      <ExternalLink className="h-3.5 w-3.5" />
                     </Button>
-                  </div>
-                )}
-              </form>
+                  )}
+
+                  <Button
+                    type="submit"
+                    disabled={isLoading || isLoadingRoles}
+                    className="w-full"
+                  >
+                    {isLoading ? (
+                      <span className="flex items-center gap-2">
+                        <Loader size="w-4 h-4" showShadow={false} />
+                        Sending...
+                      </span>
+                    ) : (
+                      "Send Invite"
+                    )}
+                  </Button>
+
+                  {localInvites.length > 0 && (
+                    <div className="pt-4 border-t mt-4">
+                      <PendingInvitesList invites={localInvites} />
+                    </div>
+                  )}
+
+                  {localInvites.length > 0 && (
+                    <div className="flex justify-end pt-2">
+                      <Button
+                        type="button"
+                        onClick={handleCancel}
+                        disabled={isLoading}
+                      >
+                        Done
+                      </Button>
+                    </div>
+                  )}
+                </form>
+              </Form>
             </>
           ) : (
             rolePermissions && (
               <RolePermissionsView
                 rolePermissions={rolePermissions}
                 onBack={handleBackFromPermissions}
+                headerNote="Preview of what this role will be able to access."
               />
             )
           )}

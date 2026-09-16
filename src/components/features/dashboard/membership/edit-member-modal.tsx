@@ -2,12 +2,14 @@
 
 import { useState } from "react";
 import { createPortal } from "react-dom";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { MemberProfile } from "@/types";
 import { Gender, MembershipStatus } from "@/lib/enums";
+import { editMemberSchema, EditMemberFormValues } from "@/types/schema";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -15,10 +17,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 
 import { Text, Span } from "@/components/ui/typography/Text";
 import Heading from "@/components/ui/typography/Heading";
 import { Card } from "@/components/ui/card";
+import { TitleCombobox } from "@/components/ui/title-combobox";
 
 type Props = {
   member: MemberProfile;
@@ -26,51 +37,38 @@ type Props = {
   onSave: (data: Partial<MemberProfile>) => Promise<void>;
 };
 
+const normalizeDate = (dateStr?: string) => {
+  if (!dateStr) {
+    return "";
+  }
+  const date = new Date(dateStr);
+  return !isNaN(date.getTime()) ? date.toISOString().split("T")[0] : "";
+};
+
 export function EditMemberModal({ member, onClose, onSave }: Props) {
-  const normalizeDate = (dateStr?: string) => {
-    if (!dateStr) {
-      return "";
-    }
-    const date = new Date(dateStr);
-    return !isNaN(date.getTime()) ? date.toISOString().split("T")[0] : "";
-  };
-
-  const [formData, setFormData] = useState<MemberProfile>({
-    ...member,
-    birthday: normalizeDate(member.birthday),
-    dateJoined: normalizeDate(member.dateJoined),
-  });
-
-  const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSaving, setIsSaving] = useState(false);
 
-  const validateForm = () => {
-    const newErrors: Record<string, string> = {};
+  const form = useForm<EditMemberFormValues>({
+    resolver: zodResolver(editMemberSchema),
+    defaultValues: {
+      title: member.title || "",
+      fullName: member.fullName || "",
+      gender: member.gender,
+      birthday: normalizeDate(member.birthday),
+      email: member.email || "",
+      phone: member.phone || "",
+      address: member.address || "",
+      membershipStatus: member.membershipStatus,
+      dateJoined: normalizeDate(member.dateJoined),
+      baptized: member.baptized,
+      volunteersPreference: member.volunteersPreference || "",
+    },
+  });
 
-    if (!formData.fullName?.trim()) {
-      newErrors.fullName = "Full name is required";
-    }
-
-    if (!formData.gender) {
-      newErrors.gender = "Gender is required";
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleChange = (key: keyof MemberProfile, value: any) => {
-    setFormData((prev) => ({ ...prev, [key]: value }));
-  };
-
-  const handleSubmit = async () => {
-    if (!validateForm()) {
-      return;
-    }
-
+  const handleSubmit = async (values: EditMemberFormValues) => {
     try {
       setIsSaving(true);
-      await onSave(formData);
+      await onSave({ ...member, ...values });
       onClose();
     } finally {
       setIsSaving(false);
@@ -89,177 +87,249 @@ export function EditMemberModal({ member, onClose, onSave }: Props) {
             <Text className="mt-1">Update member information</Text>
           </div>
 
-          <div className="space-y-6">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label>
-                  Full Name <Span variant="error">*</Span>
-                </Label>
-                <Input
-                  value={formData.fullName || ""}
-                  onChange={(e) => handleChange("fullName", e.target.value)}
-                  className={errors.fullName ? "border-destructive-600" : ""}
+          <Form {...form}>
+            <div className="space-y-6">
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="title"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Title</FormLabel>
+                      <FormControl>
+                        <TitleCombobox
+                          value={field.value}
+                          onChange={field.onChange}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
-                {errors.fullName && (
-                  <Text variant="error" className="mt-1">
-                    {errors.fullName}
-                  </Text>
-                )}
-              </div>
 
-              <div>
-                <Label>
-                  Gender <Span variant="error">*</Span>
-                </Label>
-                <Select
-                  value={formData.gender || ""}
-                  onValueChange={(val) => handleChange("gender", val)}
-                >
-                  <SelectTrigger
-                    className={errors.gender ? "border-destructive-600" : ""}
-                  >
-                    <SelectValue placeholder="Select" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value={Gender.MALE}>Male</SelectItem>
-                    <SelectItem value={Gender.FEMALE}>Female</SelectItem>
-                  </SelectContent>
-                </Select>
-                {errors.gender && (
-                  <Text variant="error" className="mt-1">
-                    {errors.gender}
-                  </Text>
-                )}
-              </div>
+                <FormField
+                  control={form.control}
+                  name="fullName"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>
+                        Full Name <Span variant="error">*</Span>
+                      </FormLabel>
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-              <div>
-                <Label>Birthday</Label>
-                <Input
-                  type="date"
-                  value={formData.birthday || ""}
-                  onChange={(e) => handleChange("birthday", e.target.value)}
+                <FormField
+                  control={form.control}
+                  name="gender"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>
+                        Gender <Span variant="error">*</Span>
+                      </FormLabel>
+                      <Select
+                        value={field.value}
+                        onValueChange={field.onChange}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value={Gender.MALE}>Male</SelectItem>
+                          <SelectItem value={Gender.FEMALE}>Female</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="birthday"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Birthday</FormLabel>
+                      <FormControl>
+                        <Input type="date" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
               </div>
-            </div>
 
-            <div>
-              <Heading level={4}>Contact</Heading>
-              <div className="grid grid-cols-2 gap-4 mt-2">
-                <div>
-                  <Label>Email</Label>
-                  <Input
-                    value={formData.email || ""}
-                    onChange={(e) => handleChange("email", e.target.value)}
+              <div>
+                <Heading level={4}>Contact</Heading>
+                <div className="grid grid-cols-2 gap-4 mt-2">
+                  <FormField
+                    control={form.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Email</FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="phone"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Phone</FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="address"
+                    render={({ field }) => (
+                      <FormItem className="col-span-2">
+                        <FormLabel>Address</FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
                   />
                 </div>
+              </div>
 
-                <div>
-                  <Label>Phone</Label>
-                  <Input
-                    value={formData.phone || ""}
-                    onChange={(e) => handleChange("phone", e.target.value)}
+              <div>
+                <Heading level={4}>Church Info</Heading>
+
+                <div className="grid grid-cols-2 gap-4 mt-2">
+                  <FormField
+                    control={form.control}
+                    name="membershipStatus"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Membership Status</FormLabel>
+                        <Select
+                          value={field.value}
+                          onValueChange={field.onChange}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value={MembershipStatus.MEMBER}>
+                              Member
+                            </SelectItem>
+                            <SelectItem value={MembershipStatus.VISITOR}>
+                              Visitor
+                            </SelectItem>
+                            <SelectItem value={MembershipStatus.WORKER}>
+                              Worker
+                            </SelectItem>
+                            <SelectItem value={MembershipStatus.LEADER}>
+                              Leader
+                            </SelectItem>
+                            <SelectItem value={MembershipStatus.CONVERT}>
+                              New Convert
+                            </SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
                   />
-                </div>
 
-                <div className="col-span-2">
-                  <Label>Address</Label>
-                  <Input
-                    value={formData.address || ""}
-                    onChange={(e) => handleChange("address", e.target.value)}
+                  <FormField
+                    control={form.control}
+                    name="dateJoined"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Date Joined</FormLabel>
+                        <FormControl>
+                          <Input type="date" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="baptized"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Baptized</FormLabel>
+                        <Select
+                          value={
+                            field.value === true
+                              ? "true"
+                              : field.value === false
+                                ? "false"
+                                : ""
+                          }
+                          onValueChange={(val) =>
+                            field.onChange(val === "true")
+                          }
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="true">Yes</SelectItem>
+                            <SelectItem value="false">No</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="volunteersPreference"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Volunteer Preference</FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
                   />
                 </div>
               </div>
             </div>
 
-            <div>
-              <Heading level={4}>Church Info</Heading>
-
-              <div className="grid grid-cols-2 gap-4 mt-2">
-                <div>
-                  <Label>Membership Status</Label>
-                  <Select
-                    value={formData.membershipStatus || ""}
-                    onValueChange={(val) =>
-                      handleChange("membershipStatus", val)
-                    }
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value={MembershipStatus.MEMBER}>
-                        Member
-                      </SelectItem>
-                      <SelectItem value={MembershipStatus.VISITOR}>
-                        Visitor
-                      </SelectItem>
-                      <SelectItem value={MembershipStatus.WORKER}>
-                        Worker
-                      </SelectItem>
-                      <SelectItem value={MembershipStatus.LEADER}>
-                        Leader
-                      </SelectItem>
-                      <SelectItem value={MembershipStatus.CONVERT}>
-                        New Convert
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div>
-                  <Label>Date Joined</Label>
-                  <Input
-                    type="date"
-                    value={formData.dateJoined || ""}
-                    onChange={(e) => handleChange("dateJoined", e.target.value)}
-                  />
-                </div>
-
-                <div>
-                  <Label>Baptized</Label>
-                  <Select
-                    value={
-                      formData.baptized === true
-                        ? "true"
-                        : formData.baptized === false
-                          ? "false"
-                          : ""
-                    }
-                    onValueChange={(val) =>
-                      handleChange("baptized", val === "true")
-                    }
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="true">Yes</SelectItem>
-                      <SelectItem value="false">No</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div>
-                  <Label>Volunteer Preference</Label>
-                  <Input
-                    value={formData.volunteersPreference || ""}
-                    onChange={(e) =>
-                      handleChange("volunteersPreference", e.target.value)
-                    }
-                  />
-                </div>
-              </div>
+            <div className="flex justify-end gap-2 mt-6">
+              <Button variant="outline" onClick={onClose}>
+                Cancel
+              </Button>
+              <Button
+                onClick={form.handleSubmit(handleSubmit)}
+                disabled={isSaving}
+              >
+                {isSaving ? "Saving..." : "Save Changes"}
+              </Button>
             </div>
-          </div>
-
-          <div className="flex justify-end gap-2">
-            <Button variant="outline" onClick={onClose}>
-              Cancel
-            </Button>
-            <Button onClick={handleSubmit} disabled={isSaving}>
-              {isSaving ? "Saving..." : "Save Changes"}
-            </Button>
-          </div>
+          </Form>
         </Card>
       </div>
     </div>

@@ -287,6 +287,32 @@ export async function getMyChurch() {
   });
 }
 
+export async function getMyBranches() {
+  return await authenticatedFetch<{
+    branches: {
+      _id: string;
+      name: string;
+      alias: string | null;
+      isHQ: boolean;
+      isActive: boolean;
+    }[];
+    accessScope: "BRANCH" | "ORG_WIDE";
+    activeBranchId: string | null;
+  }>("/branches/me", {
+    method: "GET",
+  });
+}
+
+export async function switchBranch(branchId: string) {
+  return await authenticatedFetch<{
+    accessToken: string;
+    refreshToken: string;
+  }>("/auth/switch-branch", {
+    method: "POST",
+    body: JSON.stringify({ branchId }),
+  });
+}
+
 export async function createWeeklyService(payload: CreateWeeklyServicePayload) {
   return authenticatedFetch("/church-services", {
     method: "POST",
@@ -809,6 +835,7 @@ type SmallTeamApi = {
     id: string;
     fullName: string;
   } | null;
+  pendingLeaderEmail?: string | null;
   members: SmallTeamMemberApi[];
   membersCount: number;
   createdAt: string;
@@ -847,6 +874,7 @@ export async function fetchSmallTeams(
 export async function createSmallTeam(payload: {
   name: string;
   leaderId?: string;
+  pendingLeaderEmail?: string;
   memberIds: string[];
   status: "ACTIVE" | "INACTIVE";
   description?: string;
@@ -860,7 +888,8 @@ export async function createSmallTeam(payload: {
 export async function updateSmallTeam(payload: {
   teamId: string;
   name?: string;
-  leaderId?: string;
+  leaderId?: string | null;
+  pendingLeaderEmail?: string | null;
   memberIds?: string[];
   status?: "ACTIVE" | "INACTIVE";
   description?: string;

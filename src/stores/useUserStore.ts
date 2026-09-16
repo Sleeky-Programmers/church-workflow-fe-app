@@ -2,10 +2,22 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
-import { getMyChurch } from "@/lib/api";
+import { getMyBranches, getMyChurch, switchBranch } from "@/lib/api";
 import { getCurrentUserProfile } from "@/lib/auth/session";
 import { getProfile } from "@/services/userServices";
 import { identifyMixpanelUser } from "@/lib/mixpanel";
+
+export type SectionPermission = {
+  moduleSection: string;
+  accessLevel: "NO_ACCESS" | "VIEW" | "MANAGE" | "FULL_ACCESS";
+};
+
+export type UserChurchRole = {
+  _id: string;
+  roleName: string;
+  type: string;
+  permissions: SectionPermission[];
+};
 
 export type User = {
   _id: string;
@@ -16,12 +28,7 @@ export type User = {
   title: string | null;
   profileImage: string | null;
   isVerified: boolean;
-  churchRole: {
-    _id: string;
-    roleName: string;
-    type: string;
-    permissions: string[];
-  };
+  churchRole: UserChurchRole;
   createdAt: string;
   updatedAt: string;
 };
@@ -38,10 +45,21 @@ export type Church = {
   location?: string;
 };
 
+export type Branch = {
+  _id: string;
+  name: string;
+  alias: string | null;
+  isHQ: boolean;
+  isActive: boolean;
+};
+
 type UserStore = {
   // State
   user: User | null;
   church: Church | null;
+  branches: Branch[];
+  activeBranchId: string | null;
+  accessScope: "BRANCH" | "ORG_WIDE" | null;
   isLoading: boolean;
   error: string | null;
   lastFetched: number | null;
@@ -52,6 +70,7 @@ type UserStore = {
   updateChurch: (updatedChurch: Partial<Church>) => void;
   setUser: (user: User | null) => void;
   setChurch: (church: Church | null) => void;
+  switchActiveBranch: (branchId: string) => Promise<void>;
   clearUserData: () => void;
   getUserFullName: () => string;
   getUserChurchRole: () => string;
@@ -66,6 +85,9 @@ export const useUserStore = create<UserStore>()(
       // Initial state
       user: null,
       church: null,
+      branches: [],
+      activeBranchId: null,
+      accessScope: null,
       isLoading: false,
       error: null,
       lastFetched: null,
@@ -91,14 +113,18 @@ export const useUserStore = create<UserStore>()(
         set({ isLoading: true, error: null });
 
         try {
-          const [userData, churchData] = await Promise.all([
+          const [userData, churchData, branchData] = await Promise.all([
             getProfile() as any,
             getMyChurch(),
+            getMyBranches().catch(() => null),
           ]);
 
           set({
             user: userData,
             church: churchData,
+            branches: branchData?.branches || [],
+            activeBranchId: branchData?.activeBranchId || null,
+            accessScope: branchData?.accessScope || null,
             isLoading: false,
             lastFetched: now,
             error: null,
@@ -149,11 +175,25 @@ export const useUserStore = create<UserStore>()(
       // Set church directly
       setChurch: (church) => set({ church }),
 
+      // Switch the active branch: reissues tokens scoped to the new branch,
+      // then refetches branch-scoped profile state so every view reflects it.
+      switchActiveBranch: async (branchId: string) => {
+        const tokens = await switchBranch(branchId);
+        localStorage.setItem("accessToken", tokens.accessToken);
+        localStorage.setItem("refreshToken", tokens.refreshToken);
+
+        set({ activeBranchId: branchId });
+        await get().fetchUserData(true);
+      },
+
       // Clear all user data (e.g., on logout)
       clearUserData: () => {
         set({
           user: null,
           church: null,
+          branches: [],
+          activeBranchId: null,
+          accessScope: null,
           error: null,
           lastFetched: null,
         });
@@ -182,6 +222,9 @@ export const useUserStore = create<UserStore>()(
       partialize: (state) => ({
         user: state.user,
         church: state.church,
+        branches: state.branches,
+        activeBranchId: state.activeBranchId,
+        accessScope: state.accessScope,
         lastFetched: state.lastFetched,
       }),
     },

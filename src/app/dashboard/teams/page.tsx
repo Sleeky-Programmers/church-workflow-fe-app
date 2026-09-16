@@ -42,6 +42,7 @@ type TeamApiEntity = {
   description?: string;
   status: "ACTIVE" | "INACTIVE";
   leader: { id: string; fullName: string } | null;
+  pendingLeaderEmail?: string | null;
   members: { id: string; fullName: string; email: string }[];
   membersCount: number;
 };
@@ -78,10 +79,12 @@ export default function TeamsPage() {
     description: team.description || "", // ✅ Add description field
     leader: team.leader
       ? {
+          id: team.leader.id,
           name: team.leader.fullName,
           initials: getInitials(team.leader.fullName),
         }
       : null,
+    pendingLeaderEmail: team.pendingLeaderEmail || null,
     members: team.membersCount,
     status: team.status === "ACTIVE" ? TeamStatus.ACTIVE : TeamStatus.INACTIVE,
   });
@@ -194,6 +197,7 @@ export default function TeamsPage() {
   const handleSaveEdit = async (data: {
     name: string;
     leaderId: string | null;
+    pendingLeaderEmail: string | null;
     memberIds: string[];
     status: "ACTIVE" | "INACTIVE";
     description: string;
@@ -205,7 +209,8 @@ export default function TeamsPage() {
       await updateSmallTeam({
         teamId: editTarget.id,
         name: data.name,
-        leaderId: data.leaderId || undefined,
+        leaderId: data.leaderId,
+        pendingLeaderEmail: data.pendingLeaderEmail,
         memberIds: data.memberIds,
         status: data.status,
         description: data.description,
@@ -270,6 +275,7 @@ export default function TeamsPage() {
   const handleAddTeam = async (payload: {
     name: string;
     leaderId: string;
+    pendingLeaderEmail: string | null;
     memberIds: string[];
     status: string;
     description: string;
@@ -277,6 +283,7 @@ export default function TeamsPage() {
     await createSmallTeam({
       name: payload.name.trim(),
       leaderId: payload.leaderId || undefined,
+      pendingLeaderEmail: payload.pendingLeaderEmail || undefined,
       memberIds: payload.memberIds,
       status: payload.status.toLowerCase() === "active" ? "ACTIVE" : "INACTIVE",
       description: payload.description,

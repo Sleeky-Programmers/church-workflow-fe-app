@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -16,14 +17,9 @@ import { Label } from "@/components/ui/label";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useToast } from "@/hooks/use-toast";
 import { updateChurch } from "@/services/churchService";
+import { editChurchSchema, EditChurchFormValues } from "@/types/schema";
 
-type FormValues = {
-  name: string;
-  alias: string;
-  address: string;
-  state: string;
-  country: string;
-};
+type FormValues = EditChurchFormValues;
 
 export function EditChurchModal({
   open,
@@ -39,7 +35,7 @@ export function EditChurchModal({
     handleSubmit,
     reset,
     formState: { errors, isSubmitting },
-  } = useForm<FormValues>();
+  } = useForm<FormValues>({ resolver: zodResolver(editChurchSchema) });
 
   useEffect(() => {
     if (open) {
@@ -83,10 +79,7 @@ export function EditChurchModal({
         <form onSubmit={handleSubmit(onSubmit)} className="px-6 pb-5 space-y-4">
           <div>
             <Label>Church Name</Label>
-            <Input
-              {...register("name", { required: "Church name is required" })}
-              className="bg-gray-100"
-            />
+            <Input {...register("name")} className="bg-gray-100" />
             {errors.name && (
               <p className="text-red-500 text-sm">{errors.name.message}</p>
             )}
@@ -95,11 +88,19 @@ export function EditChurchModal({
           <div>
             <Label>Church Address</Label>
             <Input {...register("address")} className="bg-gray-100" />
+            {errors.address && (
+              <p className="text-red-500 text-sm">{errors.address.message}</p>
+            )}
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <Input placeholder="State" {...register("state")} />
-            <Input placeholder="Country" {...register("country")} />
+            <div>
+              <Input placeholder="Country" {...register("country")} />
+              {errors.country && (
+                <p className="text-red-500 text-sm">{errors.country.message}</p>
+              )}
+            </div>
           </div>
 
           <div>

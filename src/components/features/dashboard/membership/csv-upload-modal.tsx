@@ -31,10 +31,11 @@ import {
   MEMBERSHIP_MAP,
   TITLE_MAP,
 } from "@/lib/constant";
-import { MembershipStatus, MemberTitle } from "@/lib/enums";
+import { MembershipStatus } from "@/lib/enums";
 import { uploadMembersCsv } from "@/services/memberService";
 import { CsvUploadModalProps, UploadFile } from "@/types";
 import { FileInputProps } from "@/types/index";
+import { csvMemberRowSchema } from "@/types/schema";
 
 // Human-readable labels for each field, keyed by the internal snake_case
 // name used for header matching. Used for the downloadable template and
@@ -142,9 +143,13 @@ export function CsvUploadModal({
     const volunteerPreferences = getValue("volunteer_preferences");
     const cellGroupName = getValue("cell_group_name");
 
-    // Return object with camelCase keys that backend expects
+    // Return object with camelCase keys that backend expects.
+    // Title accepts free text now (see CreateMemberDto) - a cell that
+    // doesn't match a known abbreviation is passed through as-is instead of
+    // silently defaulting to "Mr.".
+    const rawTitle = title?.toString().trim();
     return {
-      title: TITLE_MAP[title?.toString().toLowerCase()] || MemberTitle.MR,
+      title: (rawTitle && TITLE_MAP[rawTitle.toLowerCase()]) || rawTitle || "",
       fullName: fullName?.toString().trim() || "",
       gender: GENDER_MAP[gender?.toString().toLowerCase()] || null,
       phoneNumber: phoneNumber?.toString().trim() || "",
@@ -250,7 +255,6 @@ export function CsvUploadModal({
       const email = getValue("email");
       const birthday = getValue("birthday");
 
-      // Check required fields
       const hasFullName =
         fullName && typeof fullName === "string" && fullName.trim() !== "";
       const hasPhoneNumber =
@@ -258,43 +262,21 @@ export function CsvUploadModal({
         typeof phoneNumber === "string" &&
         phoneNumber.trim() !== "";
 
-      if (!hasFullName) {
-        errors.push(
-          `Row ${index + 2}: Missing required field "${FIELD_LABELS.full_name}". Value: "${fullName}"`,
-        );
+      const result = csvMemberRowSchema.safeParse({
+        full_name: typeof fullName === "string" ? fullName : undefined,
+        phone_number: typeof phoneNumber === "string" ? phoneNumber : undefined,
+        email: typeof email === "string" ? email : undefined,
+        birthday: typeof birthday === "string" ? birthday : undefined,
+      });
+
+      if (!result.success) {
+        result.error.issues.forEach((issue) => {
+          errors.push(`Row ${index + 2}: ${issue.message}`);
+        });
       }
 
-      if (!hasPhoneNumber) {
-        errors.push(
-          `Row ${index + 2}: Missing required field "${FIELD_LABELS.phone_number}". Value: "${phoneNumber}"`,
-        );
-      }
-
-      // Only validate email and birthday if the row has required fields
       if (hasFullName || hasPhoneNumber) {
         validRowCount++;
-
-        // Validate email format if provided
-        if (email && typeof email === "string" && email.trim() !== "") {
-          const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-          if (!emailRegex.test(email.trim())) {
-            errors.push(`Row ${index + 2}: Invalid email format: ${email}`);
-          }
-        }
-
-        // Validate birthday format if provided
-        if (
-          birthday &&
-          typeof birthday === "string" &&
-          birthday.trim() !== ""
-        ) {
-          const date = new Date(birthday);
-          if (isNaN(date.getTime())) {
-            errors.push(
-              `Row ${index + 2}: Invalid birthday format: ${birthday}. Please use format like YYYY-MM-DD or MM/DD/YYYY`,
-            );
-          }
-        }
       }
     }
 

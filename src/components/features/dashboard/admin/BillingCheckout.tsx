@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import Heading from "@/components/ui/typography/Heading";
 import { Text } from "@/components/ui/typography/Text";
 import { Button } from "@/components/ui/button";
@@ -15,6 +17,11 @@ import { Coupon, Plan, PlanChangePreview } from "@/types";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { useUserStore } from "@/stores/useUserStore";
+import {
+  billingAgreementSchema,
+  BillingAgreementFormValues,
+  promoCodeSchema,
+} from "@/types/schema";
 
 export default function BillingCheckout({
   plan,
@@ -38,7 +45,13 @@ export default function BillingCheckout({
   const [isApplyingCoupon, setIsApplyingCoupon] = useState(false);
   const [couponError, setCouponError] = useState<string | null>(null);
   const [appliedCoupon, setAppliedCoupon] = useState<Coupon | null>(null);
-  const [agreed, setAgreed] = useState(false);
+
+  const form = useForm<BillingAgreementFormValues>({
+    resolver: zodResolver(billingAgreementSchema),
+    defaultValues: { agreed: false },
+    mode: "onChange",
+  });
+  const agreed = form.watch("agreed");
 
   const price =
     billingCycle === BillingCycle.MONTHLY
@@ -62,11 +75,12 @@ export default function BillingCheckout({
   };
 
   const handleApplyCoupon = async () => {
-    const code = promoCode.trim();
-    if (!code) {
-      setCouponError("Enter a coupon code");
+    const result = promoCodeSchema.safeParse(promoCode);
+    if (!result.success) {
+      setCouponError(result.error.issues[0].message);
       return;
     }
+    const code = result.data;
 
     setIsApplyingCoupon(true);
     setCouponError(null);
@@ -307,7 +321,9 @@ export default function BillingCheckout({
           <div className="flex items-start gap-2">
             <Checkbox
               checked={agreed}
-              onCheckedChange={(val) => setAgreed(!!val)}
+              onCheckedChange={(val) =>
+                form.setValue("agreed", !!val, { shouldValidate: true })
+              }
             />
 
             <Text variant="muted" className="text-xs leading-5">
@@ -320,7 +336,7 @@ export default function BillingCheckout({
           </div>
           <Button
             onClick={handlePayment}
-            disabled={loading || !agreed}
+            disabled={loading || !form.formState.isValid}
             className="w-full h-12 text-base"
           >
             {loading ? (

@@ -1,9 +1,12 @@
 "use client";
 
 import { CalendarDays, User } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
 
+import { IncomeBreakdown } from "@/components/features/dashboard/income-breakdown";
+import { IncomeVsExpenses } from "@/components/features/dashboard/income-expense";
+import { PendingRequestsWidget } from "@/components/features/dashboard/pending-requests-widget";
+import { RecentActivityWidget } from "@/components/features/dashboard/recent-activity-widget";
 import { StatCard } from "@/components/features/dashboard/StatCard";
 import { TrendChart } from "@/components/features/dashboard/trend-chart";
 import MobileHeader from "@/components/layout/mobile-header";
@@ -31,6 +34,8 @@ type Props = {
   incomeTrendData: any[];
   upcomingEvents: Event[];
   upcomingBirthdays: { name: string; date: string }[];
+  canViewGiving: boolean;
+  canViewRequests: boolean;
 };
 
 export default function DashboardMobile({
@@ -44,6 +49,8 @@ export default function DashboardMobile({
   incomeTrendData,
   upcomingEvents,
   upcomingBirthdays,
+  canViewGiving,
+  canViewRequests,
 }: Props) {
   // Sort upcoming events by date
   const sortedUpcomingEvents = upcomingEvents
@@ -193,25 +200,15 @@ export default function DashboardMobile({
           </CardContent>
         </Card>
 
-        {/* Coming Soon Banner - Mobile Version */}
-        <div className="bg-white rounded-2xl border border-gray-300 shadow-[0_1px_4px_rgba(0,0,0,0.06)] flex flex-col items-center justify-center gap-3 py-8 px-4 text-center">
-          <div className="select-none">
-            <Image
-              src="/assets/coming-soon.png"
-              alt="Coming Soon"
-              width={120}
-              height={120}
-              className="object-contain"
-            />
+        {canViewGiving && (
+          <div className="space-y-4">
+            <IncomeVsExpenses />
+            <IncomeBreakdown />
           </div>
-          <p className="text-[15px] font-extrabold text-gray-900">
-            More Features Coming Soon!
-          </p>
-          <p className="text-[12px] text-gray-600 max-w-xs leading-relaxed">
-            We're working hard to bring you attendance analytics, financial
-            reports, communications, requests and more.
-          </p>
-        </div>
+        )}
+
+        {canViewRequests && <PendingRequestsWidget />}
+        <RecentActivityWidget />
       </div>
     </div>
   );

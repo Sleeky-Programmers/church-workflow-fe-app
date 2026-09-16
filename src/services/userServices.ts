@@ -35,6 +35,7 @@ export async function fetchAdmins({
 }
 
 export async function updateProfile(data: {
+  title?: string;
   firstName: string;
   lastName: string;
   email: string;

@@ -1,5 +1,6 @@
 "use client";
 import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Heading from "@/components/ui/typography/Heading";
@@ -14,20 +15,18 @@ import {
 } from "@/components/ui/form";
 import { Loader } from "@/components/ui/loader";
 import React from "react";
+import { forgotPasswordSchema, ForgotPasswordFormValues } from "@/types/schema";
 
 interface ForgotPasswordFormProps {
   onSubmit: (email: string) => void;
 }
-
-type ForgotPasswordFormValues = {
-  email: string;
-};
 
 export default function ForgotPasswordForm({
   onSubmit,
 }: ForgotPasswordFormProps) {
   const [isLoading, setIsLoading] = React.useState(false);
   const form = useForm<ForgotPasswordFormValues>({
+    resolver: zodResolver(forgotPasswordSchema),
     defaultValues: {
       email: "",
     },
@@ -53,9 +52,6 @@ export default function ForgotPasswordForm({
           <FormField
             control={form.control}
             name="email"
-            rules={{
-              required: "Email is required",
-            }}
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Email Address</FormLabel>

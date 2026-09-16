@@ -1,5 +1,7 @@
 "use client";
 import { useCallback, useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import {
   InputOTP,
   InputOTPGroup,
@@ -13,6 +15,7 @@ import { Loader } from "@/components/ui/loader";
 import Heading from "@/components/ui/typography/Heading";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
+import { verifyCodeSchema, VerifyCodeFormValues } from "@/types/schema";
 
 interface Props {
   email: string;
@@ -21,7 +24,11 @@ interface Props {
 }
 
 export default function VerifyOtpForm({ email, onVerify, onResend }: Props) {
-  const [otp, setOtp] = useState("");
+  const form = useForm<VerifyCodeFormValues>({
+    resolver: zodResolver(verifyCodeSchema),
+    defaultValues: { code: "" },
+  });
+  const otp = form.watch("code");
   const [isVerifying, setIsVerifying] = useState(false);
   const [isResending, setIsResending] = useState(false);
   const [error, setError] = useState(false);
@@ -31,7 +38,7 @@ export default function VerifyOtpForm({ email, onVerify, onResend }: Props) {
   const { toast } = useToast();
 
   useEffect(() => {
-    if (otp.length === 6) handleVerify(otp);
+    if (verifyCodeSchema.safeParse({ code: otp }).success) handleVerify(otp);
   }, [otp]);
 
   useEffect(() => {
@@ -53,10 +60,11 @@ export default function VerifyOtpForm({ email, onVerify, onResend }: Props) {
       const success = await onVerify(code);
       if (!success) {
         setError(true);
-        setOtp("");
+        form.setValue("code", "");
       }
       setIsVerifying(false);
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [isVerifying, onVerify],
   );
 
@@ -64,7 +72,7 @@ export default function VerifyOtpForm({ email, onVerify, onResend }: Props) {
     setIsResending(true);
     setError(false);
     setResendSuccess(false);
-    setOtp("");
+    form.setValue("code", "");
 
     try {
       await onResend();
@@ -102,7 +110,7 @@ export default function VerifyOtpForm({ email, onVerify, onResend }: Props) {
         <InputOTP
           maxLength={6}
           value={otp}
-          onChange={setOtp}
+          onChange={(value) => form.setValue("code", value)}
           autoFocus
           disabled={isVerifying}
           containerClassName="justify-center min-w-max mx-auto"

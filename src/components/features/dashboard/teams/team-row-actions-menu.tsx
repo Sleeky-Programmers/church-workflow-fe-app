@@ -11,6 +11,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { TeamRow } from "@/types";
 import { Text } from "@/components/ui/typography/Text";
+import { useHasAccess } from "@/lib/access-control";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -35,6 +36,11 @@ export default function TeamRowActionsMenu({
   onViewReport,
   onDeleteRequest,
 }: TeamRowActionsMenuProps) {
+  // Deleting a team is an org-wide administrative action (matches the
+  // backend's FULL_ACCESS requirement on DELETE /small-teams/:id) - not
+  // something a team's own leader can do.
+  const canDelete = useHasAccess("SMALL_TEAMS", "FULL_ACCESS");
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -69,13 +75,15 @@ export default function TeamRowActionsMenu({
           <BarChart3 className="h-4 w-4" />
           <Text variant="default">View Report</Text>
         </DropdownMenuItem>
-        <DropdownMenuItem
-          className="gap-2"
-          onClick={() => onDeleteRequest(row)}
-        >
-          <Trash2 className="h-4 w-4 text-destructive-600" />
-          <Text variant="error">Delete Team</Text>
-        </DropdownMenuItem>
+        {canDelete && (
+          <DropdownMenuItem
+            className="gap-2"
+            onClick={() => onDeleteRequest(row)}
+          >
+            <Trash2 className="h-4 w-4 text-destructive-600" />
+            <Text variant="error">Delete Team</Text>
+          </DropdownMenuItem>
+        )}
       </DropdownMenuContent>
     </DropdownMenu>
   );

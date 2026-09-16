@@ -89,7 +89,7 @@ export function AppSidebar() {
     }
   };
 
-  const comingSoonTitles = ["Departments/Units", "Request", "Finance"];
+  const comingSoonTitles: string[] = [];
 
   const mainPages = SidebarData.pages.filter(
     (p) => !comingSoonTitles.includes(p.title),
@@ -198,7 +198,7 @@ export function AppSidebar() {
             <SidebarMenu>
               {mainPages.map((page) => {
                 const active = isActive(page.url);
-                const Icon = page.icon;
+                const Icon = normalizeIcon(page.icon);
 
                 return (
                   <SidebarMenuItem key={page.title}>
@@ -225,26 +225,28 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        <SidebarGroup>
-          <SidebarGroupLabel>Coming Soon Pages</SidebarGroupLabel>
+        {comingSoonPages.length > 0 && (
+          <SidebarGroup>
+            <SidebarGroupLabel>Coming Soon Pages</SidebarGroupLabel>
 
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {comingSoonPages.map((page) => {
-                const Icon = normalizeIcon(page.icon);
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {comingSoonPages.map((page) => {
+                  const Icon = normalizeIcon(page.icon);
 
-                return (
-                  <SidebarMenuItem key={page.title}>
-                    <div className="flex items-center gap-2 px-3 py-2 opacity-50 cursor-not-allowed">
-                      <Icon className="h-4 w-4" />
-                      <Text variant="default">{page.title}</Text>
-                    </div>
-                  </SidebarMenuItem>
-                );
-              })}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+                  return (
+                    <SidebarMenuItem key={page.title}>
+                      <div className="flex items-center gap-2 px-3 py-2 opacity-50 cursor-not-allowed">
+                        <Icon className="h-4 w-4" />
+                        <Text variant="default">{page.title}</Text>
+                      </div>
+                    </SidebarMenuItem>
+                  );
+                })}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
 
         {/* <SidebarFooter className="mt-auto">
           <SidebarMenu>

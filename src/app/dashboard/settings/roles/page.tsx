@@ -195,6 +195,12 @@ export default function RolesPermissionsPage() {
         onOpenChange={setIsViewPermissionsDialogOpen}
         roleId={selectedRole?.id || null}
         roleName={selectedRole?.name || ""}
+        roleType={selectedRole?.type}
+        onEdit={
+          selectedRole?.type === "custom"
+            ? () => setIsEditSliderOpen(true)
+            : undefined
+        }
       />
 
       <EditRoleSlider

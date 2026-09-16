@@ -2,6 +2,8 @@
 
 import { X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -12,8 +14,15 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -22,9 +31,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { Text } from "@/components/ui/typography/Text";
 import { EventRecurrence, EventReminderType, EventType } from "@/lib/enums";
 import { EventFormData, ReminderTimeBefore } from "@/types";
+import { eventFormSchema, EventFormValues } from "@/types/schema";
 
 import {
   EVENT_REMINDER_MINUTES_OPTIONS,
@@ -44,7 +53,7 @@ type EventFormModalProps = {
   isEditMode?: boolean;
 };
 
-const DEFAULT_FORM_DATA: EventFormData = {
+const DEFAULT_FORM_VALUES: EventFormValues = {
   title: "",
   type: EventType.WORSHIP_SERVICE,
   recurrence: EventRecurrence.NONE,
@@ -66,62 +75,53 @@ export function EventFormModal({
   isSubmitting = false,
   isEditMode = false,
 }: EventFormModalProps) {
-  const [formData, setFormData] = useState<EventFormData>(DEFAULT_FORM_DATA);
-  const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [extraData, setExtraData] = useState<
+    Pick<EventFormData, "specialDays" | "serviceType">
+  >({});
 
+  const form = useForm<EventFormValues>({
+    resolver: zodResolver(eventFormSchema),
+    defaultValues: DEFAULT_FORM_VALUES,
+  });
+
+  const date = form.watch("date");
   const recurrenceOptions = useMemo(
-    () => getEventRecurrenceOptions(formData.date),
-    [formData.date],
+    () => getEventRecurrenceOptions(date),
+    [date],
   );
 
   useEffect(() => {
     if (!open) return;
-    setFormData(initialData ?? DEFAULT_FORM_DATA);
-    setErrors({});
+    form.reset(
+      initialData
+        ? {
+            title: initialData.title,
+            type: initialData.type,
+            recurrence: initialData.recurrence,
+            date: initialData.date,
+            startTime: initialData.startTime,
+            endTime: initialData.endTime || "",
+            location: initialData.location || "",
+            description: initialData.description || "",
+            sendReminder: initialData.sendReminder,
+            reminderType: initialData.reminderType,
+            remindBeforeMinutes: initialData.remindBeforeMinutes,
+          }
+        : DEFAULT_FORM_VALUES,
+    );
+    setExtraData({
+      specialDays: initialData?.specialDays,
+      serviceType: initialData?.serviceType,
+    });
     setSubmitError(null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, initialData]);
 
-  const handleFieldChange = <K extends keyof EventFormData>(
-    field: K,
-    value: EventFormData[K],
-  ) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
-    setErrors((prev) => {
-      if (!prev[field]) return prev;
-      const next = { ...prev };
-      delete next[field];
-      return next;
-    });
-    if (submitError) setSubmitError(null);
-  };
-
-  const validate = () => {
-    const nextErrors: Record<string, string> = {};
-
-    if (!formData.title.trim()) nextErrors.title = "Title is required";
-    if (!formData.date) nextErrors.date = "Date is required";
-    if (!formData.startTime) nextErrors.startTime = "Start time is required";
-    if (!formData.endTime) nextErrors.endTime = "End time is required";
-
-    if (
-      formData.endTime &&
-      formData.startTime &&
-      formData.endTime <= formData.startTime
-    ) {
-      nextErrors.endTime = "End time must be after start time";
-    }
-
-    setErrors(nextErrors);
-    return Object.keys(nextErrors).length === 0;
-  };
-
-  const handleSubmit = async () => {
-    if (!validate()) return;
-
+  const handleSubmit = async (values: EventFormValues) => {
     try {
       setSubmitError(null);
-      await onSubmit(formData);
+      await onSubmit({ ...values, ...extraData });
       onOpenChange(false);
     } catch (error: any) {
       let errorMessage = "Failed to save event. Please try again.";
@@ -174,225 +174,285 @@ export function EventFormModal({
           </div>
         </DialogHeader>
 
-        <div className="px-6 py-5 space-y-4 max-h-[80vh] overflow-y-auto">
-          {submitError && (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-start gap-3">
-              <div className="text-red-500 text-sm font-medium">Error</div>
-              <div className="flex-1 text-sm text-red-700">{submitError}</div>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-6 w-6 p-0 text-red-500 hover:text-red-700 hover:bg-red-100"
-                onClick={() => setSubmitError(null)}
-              >
-                <X className="h-4 w-4" />
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(handleSubmit)}>
+            <div className="px-6 py-5 space-y-4 max-h-[80vh] overflow-y-auto">
+              {submitError && (
+                <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-start gap-3">
+                  <div className="text-red-500 text-sm font-medium">Error</div>
+                  <div className="flex-1 text-sm text-red-700">
+                    {submitError}
+                  </div>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="h-6 w-6 p-0 text-red-500 hover:text-red-700 hover:bg-red-100"
+                    onClick={() => setSubmitError(null)}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              )}
+
+              <FormField
+                control={form.control}
+                name="title"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Title *</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="Event title..."
+                        disabled={isSubmitting}
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="type"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Event Type</FormLabel>
+                      <Select
+                        value={field.value}
+                        onValueChange={field.onChange}
+                        disabled={isSubmitting}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {EVENT_TYPE_OPTIONS.map((option) => (
+                            <SelectItem key={option.value} value={option.value}>
+                              {option.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="recurrence"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Event Recurrence</FormLabel>
+                      <Select
+                        value={field.value}
+                        onValueChange={field.onChange}
+                        disabled={isSubmitting}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Does not repeat" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {recurrenceOptions.map((option) => (
+                            <SelectItem key={option.value} value={option.value}>
+                              {option.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <FormField
+                control={form.control}
+                name="date"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Date *</FormLabel>
+                    <FormControl>
+                      <Input type="date" disabled={isSubmitting} {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="startTime"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Start Time *</FormLabel>
+                      <FormControl>
+                        <Input type="time" disabled={isSubmitting} {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="endTime"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>End Time *</FormLabel>
+                      <FormControl>
+                        <Input type="time" disabled={isSubmitting} {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <FormField
+                control={form.control}
+                name="location"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Location</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="e.g. Main Auditorium"
+                        disabled={isSubmitting}
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="sendReminder"
+                render={({ field }) => (
+                  <FormItem className="flex items-center gap-3 space-y-0">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={(checked) =>
+                          field.onChange(checked === true)
+                        }
+                        disabled={isSubmitting}
+                      />
+                    </FormControl>
+                    <FormLabel>Send reminder</FormLabel>
+                  </FormItem>
+                )}
+              />
+
+              {form.watch("sendReminder") ? (
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="reminderType"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Reminder Type</FormLabel>
+                        <Select
+                          value={field.value}
+                          onValueChange={field.onChange}
+                          disabled={isSubmitting}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="In-App Notification" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {EVENT_REMINDER_TYPE_OPTIONS.map((option) => (
+                              <SelectItem
+                                key={option.value}
+                                value={option.value}
+                              >
+                                {option.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="remindBeforeMinutes"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Time Before</FormLabel>
+                        <Select
+                          value={field.value}
+                          onValueChange={field.onChange}
+                          disabled={isSubmitting}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select time" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {EVENT_REMINDER_MINUTES_OPTIONS.map((option) => (
+                              <SelectItem
+                                key={option.value}
+                                value={option.value}
+                              >
+                                {REMINDER_TIME_LABEL_MAP[option.value]}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              ) : null}
+
+              <FormField
+                control={form.control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Description</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder="Add description"
+                        className="min-h-24"
+                        disabled={isSubmitting}
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <div className="px-6 py-4 border-t flex justify-end">
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting
+                  ? "Saving..."
+                  : isEditMode
+                    ? "Update event"
+                    : "Create event"}
               </Button>
             </div>
-          )}
-
-          <div className="space-y-2">
-            <Label htmlFor="event-title">Title *</Label>
-            <Input
-              id="event-title"
-              placeholder="Event title..."
-              value={formData.title}
-              onChange={(e) => handleFieldChange("title", e.target.value)}
-              disabled={isSubmitting}
-              className={errors.title ? "border-red-500" : ""}
-            />
-            {errors.title ? <Text variant="error">{errors.title}</Text> : null}
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label>Event Type</Label>
-              <Select
-                value={formData.type}
-                onValueChange={(value) =>
-                  handleFieldChange("type", value as EventType)
-                }
-                disabled={isSubmitting}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select" />
-                </SelectTrigger>
-                <SelectContent>
-                  {EVENT_TYPE_OPTIONS.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label>Event Recurrence</Label>
-              <Select
-                value={formData.recurrence}
-                onValueChange={(value) =>
-                  handleFieldChange("recurrence", value as EventRecurrence)
-                }
-                disabled={isSubmitting}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Does not repeat" />
-                </SelectTrigger>
-                <SelectContent>
-                  {recurrenceOptions.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="event-date">Date *</Label>
-            <Input
-              id="event-date"
-              type="date"
-              value={formData.date}
-              onChange={(e) => handleFieldChange("date", e.target.value)}
-              disabled={isSubmitting}
-              className={errors.date ? "border-red-500" : ""}
-            />
-            {errors.date ? <Text variant="error">{errors.date}</Text> : null}
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="event-start">Start Time *</Label>
-              <Input
-                id="event-start"
-                type="time"
-                value={formData.startTime}
-                onChange={(e) => handleFieldChange("startTime", e.target.value)}
-                disabled={isSubmitting}
-                className={errors.startTime ? "border-red-500" : ""}
-              />
-              {errors.startTime ? (
-                <Text variant="error">{errors.startTime}</Text>
-              ) : null}
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="event-end">End Time *</Label>
-              <Input
-                id="event-end"
-                type="time"
-                value={formData.endTime || ""}
-                onChange={(e) => handleFieldChange("endTime", e.target.value)}
-                disabled={isSubmitting}
-                className={errors.endTime ? "border-red-500" : ""}
-              />
-              {errors.endTime ? (
-                <Text variant="error">{errors.endTime}</Text>
-              ) : null}
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="event-location">Location</Label>
-            <Input
-              id="event-location"
-              placeholder="e.g. Main Auditorium"
-              value={formData.location || ""}
-              onChange={(e) => handleFieldChange("location", e.target.value)}
-              disabled={isSubmitting}
-            />
-          </div>
-
-          <div className="flex items-center gap-3">
-            <Checkbox
-              id="send-reminder"
-              checked={formData.sendReminder}
-              onCheckedChange={(checked) =>
-                handleFieldChange("sendReminder", checked === true)
-              }
-              disabled={isSubmitting}
-            />
-            <Label htmlFor="send-reminder">Send reminder</Label>
-          </div>
-
-          {formData.sendReminder ? (
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>Reminder Type</Label>
-                <Select
-                  value={formData.reminderType}
-                  onValueChange={(value) =>
-                    handleFieldChange(
-                      "reminderType",
-                      value as EventReminderType,
-                    )
-                  }
-                  disabled={isSubmitting}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="In-App Notification" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {EVENT_REMINDER_TYPE_OPTIONS.map((option) => (
-                      <SelectItem key={option.value} value={option.value}>
-                        {option.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label>Time Before</Label>
-                <Select
-                  value={formData.remindBeforeMinutes}
-                  onValueChange={(value) =>
-                    handleFieldChange(
-                      "remindBeforeMinutes",
-                      value as ReminderTimeBefore,
-                    )
-                  }
-                  disabled={isSubmitting}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select time" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {EVENT_REMINDER_MINUTES_OPTIONS.map((option) => (
-                      <SelectItem key={option.value} value={option.value}>
-                        {REMINDER_TIME_LABEL_MAP[option.value]}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-          ) : null}
-
-          <div className="space-y-2">
-            <Label htmlFor="event-description">Description</Label>
-            <Textarea
-              id="event-description"
-              placeholder="Add description"
-              value={formData.description || ""}
-              onChange={(e) => handleFieldChange("description", e.target.value)}
-              className="min-h-24"
-              disabled={isSubmitting}
-            />
-          </div>
-        </div>
-
-        <div className="px-6 py-4 border-t flex justify-end">
-          <Button onClick={handleSubmit} disabled={isSubmitting}>
-            {isSubmitting
-              ? "Saving..."
-              : isEditMode
-                ? "Update event"
-                : "Create event"}
-          </Button>
-        </div>
+          </form>
+        </Form>
       </DialogContent>
     </Dialog>
   );

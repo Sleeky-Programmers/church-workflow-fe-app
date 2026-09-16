@@ -1,8 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { AddMemberStep1Data } from "@/types";
-import { Gender, MaritalStatus, MemberTitle } from "@/lib/enums";
+import { Gender, MaritalStatus } from "@/lib/enums";
+import {
+  memberProfileStepSchema,
+  MemberProfileStepValues,
+} from "@/types/schema";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -12,7 +17,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
+import { TitleCombobox } from "@/components/ui/title-combobox";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Span, Text } from "@/components/ui/typography/Text";
 import Heading from "@/components/ui/typography/Heading";
@@ -26,31 +39,20 @@ export function ProfileDetailsStep({
   onNext,
   initialData = {},
 }: ProfileDetailsStepProps) {
-  const [formData, setFormData] =
-    useState<Partial<AddMemberStep1Data>>(initialData);
-  const [errors, setErrors] = useState<Record<string, string>>({});
+  const form = useForm<MemberProfileStepValues>({
+    resolver: zodResolver(memberProfileStepSchema),
+    defaultValues: {
+      title: initialData.title,
+      fullName: initialData.fullName || "",
+      gender: initialData.gender,
+      birthday: initialData.birthday || "",
+      maritalStatus: initialData.maritalStatus,
+      dateOfMarriage: initialData.dateOfMarriage || "",
+    },
+  });
 
-  const validateForm = () => {
-    const newErrors: Record<string, string> = {};
-
-    if (!formData.fullName?.trim()) {
-      newErrors.fullName = "Full name is required";
-    }
-    if (!formData.gender) {
-      newErrors.gender = "Gender is required";
-    }
-    if (!formData.maritalStatus) {
-      newErrors.maritalStatus = "Marital status is required";
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleNext = () => {
-    if (validateForm()) {
-      onNext(formData as AddMemberStep1Data);
-    }
+  const handleNext = (data: MemberProfileStepValues) => {
+    onNext(data as AddMemberStep1Data);
   };
 
   return (
@@ -66,157 +68,162 @@ export function ProfileDetailsStep({
           </Text>
         </div>
 
-        <div className="space-y-6">
-          <div className="grid grid-cols-3 gap-4">
-            <div>
-              <Label>Title</Label>
-              <Select
-                value={formData.title}
-                onValueChange={(value) =>
-                  setFormData({ ...formData, title: value as MemberTitle })
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value={MemberTitle.MR}>Mr.</SelectItem>
-                  <SelectItem value={MemberTitle.MRS}>Mrs.</SelectItem>
-                  <SelectItem value={MemberTitle.MISS}>Miss</SelectItem>
-                  <SelectItem value={MemberTitle.DR}>Dr.</SelectItem>
-                  <SelectItem value={MemberTitle.PASTOR}>Pastor</SelectItem>
-                  <SelectItem value={MemberTitle.REV}>Rev.</SelectItem>
-                </SelectContent>
-              </Select>
-              {formData.title && (
-                <Button
-                  type="button"
-                  variant="link"
-                  className="h-auto p-0 text-xs"
-                  onClick={() => setFormData({ ...formData, title: undefined })}
-                >
-                  Clear selection
-                </Button>
-              )}
-            </div>
-
-            <div className="col-span-2">
-              <Label>
-                Full Name <Span variant="error">*</Span>
-              </Label>
-              <Input
-                placeholder="Enter the full name"
-                value={formData.fullName || ""}
-                onChange={(e) =>
-                  setFormData({ ...formData, fullName: e.target.value })
-                }
-                className={errors.fullName ? "border-destructive-600" : ""}
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(handleNext)} className="space-y-6">
+            <div className="grid grid-cols-3 gap-4">
+              <FormField
+                control={form.control}
+                name="title"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Title</FormLabel>
+                    <FormControl>
+                      <TitleCombobox
+                        value={field.value}
+                        onChange={field.onChange}
+                      />
+                    </FormControl>
+                    {field.value && (
+                      <Button
+                        type="button"
+                        variant="link"
+                        className="h-auto p-0 text-xs"
+                        onClick={() => field.onChange(undefined)}
+                      >
+                        Clear selection
+                      </Button>
+                    )}
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-              {errors.fullName && (
-                <Text variant="error" className="mt-1">
-                  {errors.fullName}
-                </Text>
-              )}
-            </div>
-          </div>
 
-          <div className="grid grid-cols-3 gap-4">
-            <div>
-              <Label>
-                Gender <Span variant="error">*</Span>
-              </Label>
-              <RadioGroup
-                value={formData.gender || ""}
-                onValueChange={(value) =>
-                  setFormData({ ...formData, gender: value as Gender })
-                }
-                className="mt-2 space-y-3"
-              >
-                <div className="flex items-center gap-3">
-                  <RadioGroupItem value={Gender.MALE} id="male" />
-                  <Label htmlFor="male">Male</Label>
-                </div>
-                <div className="flex items-center gap-3">
-                  <RadioGroupItem value={Gender.FEMALE} id="female" />
-                  <Label htmlFor="female">Female</Label>
-                </div>
-              </RadioGroup>
-              {errors.gender && (
-                <Text variant="error" className="mt-1">
-                  {errors.gender}
-                </Text>
-              )}
-            </div>
-
-            <div className="col-span-2">
-              <Label>Birthday</Label>
-              <Input
-                type="date"
-                value={formData.birthday || ""}
-                onChange={(e) =>
-                  setFormData({ ...formData, birthday: e.target.value })
-                }
+              <FormField
+                control={form.control}
+                name="fullName"
+                render={({ field }) => (
+                  <FormItem className="col-span-2">
+                    <FormLabel>
+                      Full Name <Span variant="error">*</Span>
+                    </FormLabel>
+                    <FormControl>
+                      <Input placeholder="Enter the full name" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
             </div>
-          </div>
-          <div className="grid grid-cols-2 gap-6">
-            <div>
-              <Label>Marital Status</Label>
-              <Select
-                value={formData.maritalStatus || ""}
-                onValueChange={(value) =>
-                  setFormData({
-                    ...formData,
-                    maritalStatus: value as MaritalStatus,
-                  })
-                }
-              >
-                <SelectTrigger
-                  className={
-                    errors.maritalStatus ? "border-destructive-600" : ""
-                  }
-                >
-                  <SelectValue placeholder="Select" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value={MaritalStatus.SINGLE}>Single</SelectItem>
-                  <SelectItem value={MaritalStatus.MARRIED}>Married</SelectItem>
-                  <SelectItem value={MaritalStatus.DIVORCED}>
-                    Divorced
-                  </SelectItem>
-                  <SelectItem value={MaritalStatus.WIDOWED}>Widowed</SelectItem>
-                </SelectContent>
-              </Select>
-              {errors.maritalStatus && (
-                <Text variant="error" className="mt-1">
-                  {errors.maritalStatus}
-                </Text>
-              )}
-            </div>
 
-            {formData.maritalStatus === MaritalStatus.MARRIED && (
-              <div>
-                <Label>Date of Marriage</Label>
-                <Input
-                  type="date"
-                  value={formData.dateOfMarriage || ""}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      dateOfMarriage: e.target.value,
-                    })
-                  }
+            <div className="grid grid-cols-3 gap-4">
+              <FormField
+                control={form.control}
+                name="gender"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      Gender <Span variant="error">*</Span>
+                    </FormLabel>
+                    <RadioGroup
+                      value={field.value || ""}
+                      onValueChange={field.onChange}
+                      className="mt-2 space-y-3"
+                    >
+                      <div className="flex items-center gap-3">
+                        <RadioGroupItem value={Gender.MALE} id="male" />
+                        <FormLabel
+                          htmlFor="male"
+                          className="font-normal cursor-pointer"
+                        >
+                          Male
+                        </FormLabel>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <RadioGroupItem value={Gender.FEMALE} id="female" />
+                        <FormLabel
+                          htmlFor="female"
+                          className="font-normal cursor-pointer"
+                        >
+                          Female
+                        </FormLabel>
+                      </div>
+                    </RadioGroup>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="birthday"
+                render={({ field }) => (
+                  <FormItem className="col-span-2">
+                    <FormLabel>Birthday</FormLabel>
+                    <FormControl>
+                      <Input type="date" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-6">
+              <FormField
+                control={form.control}
+                name="maritalStatus"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Marital Status</FormLabel>
+                    <Select value={field.value} onValueChange={field.onChange}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value={MaritalStatus.SINGLE}>
+                          Single
+                        </SelectItem>
+                        <SelectItem value={MaritalStatus.MARRIED}>
+                          Married
+                        </SelectItem>
+                        <SelectItem value={MaritalStatus.DIVORCED}>
+                          Divorced
+                        </SelectItem>
+                        <SelectItem value={MaritalStatus.WIDOWED}>
+                          Widowed
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {form.watch("maritalStatus") === MaritalStatus.MARRIED && (
+                <FormField
+                  control={form.control}
+                  name="dateOfMarriage"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Date of Marriage</FormLabel>
+                      <FormControl>
+                        <Input type="date" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
-              </div>
-            )}
-          </div>
-        </div>
+              )}
+            </div>
 
-        <div className="flex justify-end pt-4">
-          <Button onClick={handleNext} className="px-6">
-            Next step
-          </Button>
-        </div>
+            <div className="flex justify-end pt-4">
+              <Button type="submit" className="px-6">
+                Next step
+              </Button>
+            </div>
+          </form>
+        </Form>
       </div>
     </div>
   );

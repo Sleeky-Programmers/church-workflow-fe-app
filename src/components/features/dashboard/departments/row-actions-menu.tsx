@@ -8,6 +8,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
+import { useHasAccess } from "@/lib/access-control";
 import { DepartmentRow } from "@/types";
 
 interface Props {
@@ -23,6 +24,11 @@ export default function RowActionsMenu({
   onExport,
   onDeleteRequest,
 }: Props) {
+  // Deleting a department is an org-wide administrative action (matches the
+  // backend's FULL_ACCESS requirement) - not something a department head can
+  // do.
+  const canDelete = useHasAccess("DEPARTMENTS", "FULL_ACCESS");
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -47,12 +53,14 @@ export default function RowActionsMenu({
           Export
         </DropdownMenuItem>
 
-        <DropdownMenuItem
-          onClick={() => onDeleteRequest(row)}
-          className="text-red-600"
-        >
-          Delete
-        </DropdownMenuItem>
+        {canDelete && (
+          <DropdownMenuItem
+            onClick={() => onDeleteRequest(row)}
+            className="text-red-600"
+          >
+            Delete
+          </DropdownMenuItem>
+        )}
       </DropdownMenuContent>
     </DropdownMenu>
   );

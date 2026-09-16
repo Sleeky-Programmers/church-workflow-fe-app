@@ -1,12 +1,24 @@
 "use client";
 
-import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { AddMemberStep2Data } from "@/types";
+import {
+  memberContactStepSchema,
+  MemberContactStepValues,
+} from "@/types/schema";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Text } from "@/components/ui/typography/Text";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import Heading from "@/components/ui/typography/Heading";
+import { Text } from "@/components/ui/typography/Text";
 
 type ContactDetailsStepProps = {
   onNext: (data: AddMemberStep2Data) => void;
@@ -21,141 +33,129 @@ export function ContactDetailsStep({
   onBack,
   initialData = {},
 }: ContactDetailsStepProps) {
-  const [formData, setFormData] =
-    useState<Partial<AddMemberStep2Data>>(initialData);
-  const [errors, setErrors] = useState<Record<string, string>>({});
+  const form = useForm<MemberContactStepValues>({
+    resolver: zodResolver(memberContactStepSchema),
+    defaultValues: {
+      email: initialData.email || "",
+      phone: initialData.phone || "",
+      address: initialData.address || "",
+      occupation: initialData.occupation || "",
+      education: initialData.education || "",
+    },
+  });
 
-  const validateForm = () => {
-    const newErrors: Record<string, string> = {};
-
-    if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = "Please enter a valid email address";
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+  const handleNext = (data: MemberContactStepValues) => {
+    onNext(data as AddMemberStep2Data);
   };
 
-  const handleNext = () => {
-    if (validateForm()) {
-      onNext(formData as AddMemberStep2Data);
-    }
-  };
-
-  const handleSaveImmediately = () => {
-    if (validateForm()) {
-      onSaveImmediately(formData as AddMemberStep2Data);
-    }
+  const handleSaveImmediately = (data: MemberContactStepValues) => {
+    onSaveImmediately(data as AddMemberStep2Data);
   };
 
   return (
-    <div className="space-y-6">
-      <div>
-        <Heading level={2} variant="primary">
-          Contact Details
-        </Heading>
-        <Text variant="default" className="mt-1">
-          Enter the member's phone number, email, and address details
-        </Text>
-      </div>
-      <div className="grid grid-cols-2 gap-4">
+    <Form {...form}>
+      <div className="space-y-6">
         <div>
-          <Label className="mb-2">Email</Label>
-          <Input
-            type="email"
-            placeholder="Enter email occupation"
-            value={formData.email || ""}
-            onChange={(e) =>
-              setFormData({ ...formData, email: e.target.value })
-            }
-            className={errors.email ? "border-destructive-600" : ""}
+          <Heading level={2} variant="primary">
+            Contact Details
+          </Heading>
+          <Text variant="default" className="mt-1">
+            Enter the member's phone number, email, and address details
+          </Text>
+        </div>
+        <div className="grid grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="email"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="mb-2">Email</FormLabel>
+                <FormControl>
+                  <Input
+                    type="email"
+                    placeholder="Enter email address"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
           />
-          {errors.email && (
-            <Text variant="error" className="mt-1">
-              {errors.email}
-            </Text>
-          )}
+
+          <FormField
+            control={form.control}
+            name="phone"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="mb-2">Phone Number</FormLabel>
+                <FormControl>
+                  <Input placeholder="Enter phone number" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
         </div>
 
-        <div>
-          <Label className="mb-2">Phone Number</Label>
-          <Input
-            placeholder="Enter phone number"
-            value={formData.phone || ""}
-            onChange={(e) =>
-              setFormData({ ...formData, phone: e.target.value })
-            }
-            className={errors.phone ? "border-destructive-600" : ""}
+        <div className="grid grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="address"
+            render={({ field }) => (
+              <FormItem className="col-span-2">
+                <FormLabel className="mb-2">Address</FormLabel>
+                <FormControl>
+                  <Input placeholder="Enter address" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
           />
-          {errors.phone && (
-            <Text variant="error" className="mt-1">
-              {errors.phone}
-            </Text>
-          )}
+          <FormField
+            control={form.control}
+            name="occupation"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="mb-2">Occupation</FormLabel>
+                <FormControl>
+                  <Input placeholder="Enter occupation" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="education"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="mb-2">Educational Background</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="Enter educational background"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+        <div className="flex justify-between">
+          <Button variant="outline" onClick={onBack}>
+            Back
+          </Button>
+          <Button
+            variant="secondary"
+            onClick={form.handleSubmit(handleSaveImmediately)}
+          >
+            Save Immediately
+          </Button>
+          <Button onClick={form.handleSubmit(handleNext)} variant="primary">
+            Next step
+          </Button>
         </div>
       </div>
-
-      <div className="grid grid-cols-2 gap-4">
-        <div className="col-span-2">
-          <Label className="mb-2">Address</Label>
-          <Input
-            placeholder="Enter address"
-            value={formData.address || ""}
-            onChange={(e) =>
-              setFormData({ ...formData, address: e.target.value })
-            }
-            className={errors.address ? "border-destructive-600" : ""}
-          />
-          {errors.address && (
-            <Text variant="error" className="mt-1">
-              {errors.address}
-            </Text>
-          )}
-        </div>
-        <div>
-          <Label className="mb-2">Occupation</Label>
-          <Input
-            placeholder="Enter occupation"
-            value={formData.occupation || ""}
-            onChange={(e) =>
-              setFormData({ ...formData, occupation: e.target.value })
-            }
-            className={errors.occupation ? "border-destructive-600" : ""}
-          />
-          {errors.occupation && (
-            <Text variant="error" className="mt-1">
-              {errors.occupation}
-            </Text>
-          )}
-        </div>
-        <div>
-          <Label className="mb-2">Educational Background</Label>
-          <Input
-            placeholder="Enter educational background"
-            value={formData.education || ""}
-            onChange={(e) =>
-              setFormData({ ...formData, education: e.target.value })
-            }
-            className={errors.education ? "border-destructive-600" : ""}
-          />
-          {errors.education && (
-            <Text variant="error" className="mt-1">
-              {errors.education}
-            </Text>
-          )}
-        </div>
-      </div>
-      <div className="flex justify-between">
-        <Button variant="outline" onClick={onBack}>
-          Back
-        </Button>
-        <Button variant="secondary" onClick={handleSaveImmediately}>
-          Save Immediately
-        </Button>
-        <Button onClick={handleNext} variant="primary">
-          Next step
-        </Button>
-      </div>
-    </div>
+    </Form>
   );
 }

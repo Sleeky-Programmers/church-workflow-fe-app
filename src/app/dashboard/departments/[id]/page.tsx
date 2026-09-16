@@ -6,6 +6,7 @@ import { formatDate } from "@/utils/helpers";
 import { useEffect, useState } from "react";
 import { Text } from "@/components/ui/typography/Text";
 import { AddMembersToDepartmentDialog } from "@/components/features/dashboard/departments/AddMemberDialogue";
+import { DepartmentRequisitionsTab } from "@/components/features/dashboard/departments/DepartmentRequisitionsTab";
 import {
   Breadcrumb,
   BreadcrumbList,
@@ -374,9 +375,7 @@ export default function DepartmentDetailPage() {
               )}
 
               {tab === DepartmentTabs.REQUISITIONS && (
-                <div className="p-6 text-gray-500">
-                  No requisitions data available
-                </div>
+                <DepartmentRequisitionsTab departmentId={id!} />
               )}
             </CardContent>
           </Card>

@@ -1,6 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Dialog,
   DialogContent,
@@ -17,7 +19,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { changeRoleSchema, ChangeRoleFormValues } from "@/types/schema";
 
 type ChangeRoleDialogProps = {
   open: boolean;
@@ -38,16 +48,20 @@ export function ChangeRoleDialog({
   onConfirm,
   isLoading,
 }: ChangeRoleDialogProps) {
-  const [selectedRole, setSelectedRole] = useState(currentRoleId);
+  const form = useForm<ChangeRoleFormValues>({
+    resolver: zodResolver(changeRoleSchema),
+    defaultValues: { roleId: currentRoleId },
+  });
 
   useEffect(() => {
-    setSelectedRole(currentRoleId);
-  }, [currentRoleId, open]);
+    form.reset({ roleId: currentRoleId });
+  }, [currentRoleId, open, form]);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (selectedRole && selectedRole !== currentRoleId) {
-      onConfirm(selectedRole);
+  const selectedRole = form.watch("roleId");
+
+  const handleSubmit = ({ roleId }: ChangeRoleFormValues) => {
+    if (roleId !== currentRoleId) {
+      onConfirm(roleId);
     } else {
       onOpenChange(false);
     }
@@ -59,50 +73,60 @@ export function ChangeRoleDialog({
         <DialogHeader>
           <DialogTitle>Change Role for {userName}</DialogTitle>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="role">Select New Role</Label>
-            <Select
-              value={selectedRole}
-              onValueChange={setSelectedRole}
-              required
-            >
-              <SelectTrigger id="role" className="w-full">
-                <SelectValue placeholder="Select a role" />
-              </SelectTrigger>
-              <SelectContent>
-                {roles.map((role: any) => (
-                  <SelectItem key={role._id} value={role._id}>
-                    {role.roleName}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <DialogFooter className="sm:justify-end">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-              disabled={isLoading}
-            >
-              Cancel
-            </Button>
-            <Button
-              type="submit"
-              disabled={isLoading || selectedRole === currentRoleId}
-            >
-              {isLoading ? (
-                <span className="flex items-center gap-2">
-                  <Loader size="w-4 h-4" showShadow={false} />
-                  Saving...
-                </span>
-              ) : (
-                "Save Changes"
+        <Form {...form}>
+          <form
+            onSubmit={form.handleSubmit(handleSubmit)}
+            className="space-y-4"
+          >
+            <FormField
+              control={form.control}
+              name="roleId"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Select New Role</FormLabel>
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <FormControl>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Select a role" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {roles.map((role: any) => (
+                        <SelectItem key={role._id} value={role._id}>
+                          {role.roleName}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
               )}
-            </Button>
-          </DialogFooter>
-        </form>
+            />
+            <DialogFooter className="sm:justify-end">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => onOpenChange(false)}
+                disabled={isLoading}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                disabled={isLoading || selectedRole === currentRoleId}
+              >
+                {isLoading ? (
+                  <span className="flex items-center gap-2">
+                    <Loader size="w-4 h-4" showShadow={false} />
+                    Saving...
+                  </span>
+                ) : (
+                  "Save Changes"
+                )}
+              </Button>
+            </DialogFooter>
+          </form>
+        </Form>
       </DialogContent>
     </Dialog>
   );

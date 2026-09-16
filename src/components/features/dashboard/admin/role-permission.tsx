@@ -10,11 +10,17 @@ import { UserDetailsPermissionsView } from "./mini-components/user-permission";
 type RolePermissionsViewProps = {
   rolePermissions: RolePermissionsType;
   onBack: () => void;
+  roleType?: "system" | "custom";
+  onEditRole?: () => void;
+  headerNote?: string;
 };
 
 export function RolePermissionsView({
   rolePermissions,
   onBack,
+  roleType,
+  onEditRole,
+  headerNote,
 }: RolePermissionsViewProps) {
   return (
     <div className="space-y-6">
@@ -38,7 +44,12 @@ export function RolePermissionsView({
       </div>
 
       <div>
-        <UserDetailsPermissionsView rolePermissions={rolePermissions} />
+        <UserDetailsPermissionsView
+          rolePermissions={rolePermissions}
+          roleType={roleType}
+          onEditRole={onEditRole}
+          headerNote={headerNote}
+        />
       </div>
 
       <div className="flex justify-end pt-4 border-t">

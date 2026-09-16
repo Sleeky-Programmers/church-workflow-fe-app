@@ -12,7 +12,6 @@ import {
   Gender,
   MaritalStatus,
   MembershipStatus,
-  MemberTitle,
   NotificationType,
   PaymentProvider,
   PlanType,
@@ -89,7 +88,8 @@ export type TeamRow = {
   id: string;
   name: string;
   description?: string;
-  leader: { name: string; initials?: string } | null;
+  leader: { id: string; name: string; initials?: string } | null;
+  pendingLeaderEmail?: string | null;
   members: number;
   status: "Active" | "Inactive";
 };
@@ -240,7 +240,7 @@ export type MemberAttendanceRecord = {
 
 export type MemberProfile = {
   id: string;
-  title?: MemberTitle;
+  title?: string;
   fullName: string;
   firstName: string;
   lastName: string;
@@ -268,7 +268,7 @@ export type MemberProfile = {
 };
 
 export type AddMemberStep1Data = {
-  title?: MemberTitle;
+  title?: string;
   fullName: string;
   gender: Gender;
   birthday?: string;

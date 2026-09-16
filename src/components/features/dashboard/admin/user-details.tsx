@@ -273,7 +273,10 @@ export function UserDetailsPage({
           </div>
         ) : rolePermissions ? (
           <div className="bg-white rounded-lg border p-6">
-            <UserDetailsPermissionsView rolePermissions={rolePermissions} />
+            <UserDetailsPermissionsView
+              rolePermissions={rolePermissions}
+              headerNote="Permissions are inherited from this user's assigned role. Change their role above to update what they can access."
+            />
           </div>
         ) : null}
 
