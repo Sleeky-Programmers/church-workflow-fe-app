@@ -10,7 +10,7 @@ import { Loader } from "@/components/ui/loader";
 import Heading from "@/components/ui/typography/Heading";
 import { Span, Text } from "@/components/ui/typography/Text";
 import { fetchExpenseMonthlyTrend } from "@/services/expenseService";
-import { fetchGivingMonthlyTrend } from "@/services/givingRecordService";
+import { fetchGivingMonthlyTrend } from "@/services/givingService";
 
 type MonthlyPoint = { month: string; income: number; expenses: number };
 
@@ -44,8 +44,25 @@ export function IncomeVsExpenses() {
           fetchExpenseMonthlyTrend(),
         ]);
 
+        // The giving trend can contain one point per currency per month -
+        // sum them together for this at-a-glance chart, which doesn't
+        // distinguish currencies.
+        const givingByMonth: Record<string, number> = {};
+        const givingMonthOrder: string[] = [];
+        if (givingResult.status === "fulfilled") {
+          for (const point of givingResult.value) {
+            if (!(point.month in givingByMonth)) {
+              givingMonthOrder.push(point.month);
+            }
+            givingByMonth[point.month] =
+              (givingByMonth[point.month] || 0) + point.totalAmount;
+          }
+        }
         const giving = lastSixMonths(
-          givingResult.status === "fulfilled" ? givingResult.value : [],
+          givingMonthOrder.map((month) => ({
+            month,
+            totalAmount: givingByMonth[month],
+          })),
         );
         const expenses = lastSixMonths(
           expenseResult.status === "fulfilled" ? expenseResult.value : [],

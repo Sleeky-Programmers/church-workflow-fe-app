@@ -35,7 +35,7 @@ import {
   isInFuture,
   sortBirthdaysByNearest,
 } from "@/lib/utils";
-import { fetchGivingMonthlyTrend } from "@/services/givingRecordService";
+import { fetchGivingMonthlyTrend } from "@/services/givingService";
 import { fetchMembers as fetchMemberProfiles } from "@/services/memberService";
 import { useUserStore } from "@/stores/useUserStore";
 import { ChurchEvent } from "@/types";
@@ -162,10 +162,19 @@ export default function Dashboard() {
   useEffect(() => {
     fetchGivingMonthlyTrend()
       .then((trend) => {
+        // Sum across currencies per month - this widget shows a single
+        // combined figure rather than breaking out by currency.
+        const byMonth: Record<string, number> = {};
+        const monthOrder: string[] = [];
+        for (const point of trend) {
+          if (!(point.month in byMonth)) monthOrder.push(point.month);
+          byMonth[point.month] =
+            (byMonth[point.month] || 0) + point.totalAmount;
+        }
         setIncomeTrendData(
-          trend.map((point) => ({
-            month: point.month,
-            thisMonth: point.totalAmount,
+          monthOrder.map((month) => ({
+            month,
+            thisMonth: byMonth[month],
             lastMonth: 0,
           })),
         );
