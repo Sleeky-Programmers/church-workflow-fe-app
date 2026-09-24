@@ -84,6 +84,16 @@ export default function Notification() {
 
   useEffect(() => {
     getAllNotifications();
+
+    // Poll for new notifications - without this, items created after the page
+    // loaded (e.g. a subscription upgrade while browsing) only appear after a
+    // manual refresh.
+    const interval = setInterval(() => {
+      getAllNotifications();
+    }, 30_000);
+
+    return () => clearInterval(interval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (

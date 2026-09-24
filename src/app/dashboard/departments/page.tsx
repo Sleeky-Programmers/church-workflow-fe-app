@@ -112,7 +112,7 @@ export default function DepartmentPage() {
 
       const link = document.createElement("a");
       link.href = url;
-      link.download = "departments.csv";
+      link.download = "departments.xlsx";
       link.click();
 
       window.URL.revokeObjectURL(url);

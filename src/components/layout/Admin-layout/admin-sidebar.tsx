@@ -8,6 +8,7 @@ import {
   Lock,
   ParkingMeterIcon,
   Building2,
+  ListChecks,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -44,6 +45,12 @@ const NAV_ITEMS: NavItem[] = [
     label: "Branches",
     icon: Building2,
     href: "/dashboard/settings/branches",
+  },
+  {
+    id: "lists",
+    label: "Titles & Locations",
+    icon: ListChecks,
+    href: "/dashboard/settings/lists",
   },
   {
     id: "preference",

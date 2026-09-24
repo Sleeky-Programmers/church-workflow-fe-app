@@ -277,6 +277,7 @@ export default function RequestsPage() {
           columns={columns}
           data={requisitions}
           rowKey={(row) => row.id}
+          minWidth="min-w-[760px]"
           isLoading={loading}
           emptyState={
             <div className="py-10 text-center">

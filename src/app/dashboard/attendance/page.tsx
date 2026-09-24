@@ -1,6 +1,6 @@
 "use client";
 
-import { endOfMonth, format, startOfMonth } from "date-fns";
+import { format } from "date-fns";
 import { Search } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
@@ -12,10 +12,7 @@ import {
   PendingRegularService,
 } from "@/components/features/dashboard/attendance/create-regular-service";
 import { CreateSpecialServiceModal } from "@/components/features/dashboard/attendance/create-special-service";
-import {
-  GivingRecordModal,
-  GivingValues,
-} from "@/components/features/dashboard/attendance/giving-record-modal";
+import { GivingRecordModal } from "@/components/features/dashboard/attendance/giving-record-modal";
 import { MobileAttendanceView } from "@/components/features/dashboard/attendance/mobile-view";
 import { ServiceDetailModal } from "@/components/features/dashboard/attendance/service-detail-modal";
 import { ServiceTypeModal } from "@/components/features/dashboard/attendance/service-type";
@@ -35,10 +32,6 @@ import { getCurrentUserProfile } from "@/lib/auth/session";
 import { DEFAULT_ORDER } from "@/lib/data";
 import { ServiceFrequency, ServiceType } from "@/lib/enums";
 import { createChurchService, DAY } from "@/services/churchService";
-import {
-  fetchGivingRecords,
-  saveGivingRecord,
-} from "@/services/givingRecordService";
 import { RegularService, SpecialServiceEvent } from "@/types";
 
 function useIsMobile() {
@@ -79,9 +72,6 @@ export default function AttendancePage() {
     null,
   );
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
-  const [givingRecords, setGivingRecords] = useState<
-    Record<string, GivingValues>
-  >({});
   const [orderByServiceDate, setOrderByServiceDate] = useState<
     Record<string, string[]>
   >({});
@@ -117,37 +107,8 @@ export default function AttendancePage() {
     }
   };
 
-  // Bulk-prefetch the current month's giving records so calendar entries
-  // show real totals immediately instead of only after each one is opened.
-  const loadGivingRecordsForMonth = async () => {
-    try {
-      const now = new Date();
-      const { data } = await fetchGivingRecords({
-        startDate: format(startOfMonth(now), "yyyy-MM-dd"),
-        endDate: format(endOfMonth(now), "yyyy-MM-dd"),
-        limit: 100,
-      });
-
-      setGivingRecords((prev) => {
-        const next = { ...prev };
-        for (const record of data) {
-          next[getServiceDateKey(record.churchServiceId, record.date)] = {
-            tithe: String(record.tithe || ""),
-            offering: String(record.offering || ""),
-            specialOffering: String(record.specialOffering || ""),
-            thanksgivingOffering: String(record.thanksgivingOffering || ""),
-          };
-        }
-        return next;
-      });
-    } catch {
-      // Non-fatal - calendar just shows "Add giving record" until opened.
-    }
-  };
-
   useEffect(() => {
     loadServices();
-    loadGivingRecordsForMonth();
   }, []);
 
   const handleCreateServices = async (newServices: PendingRegularService[]) => {
@@ -192,27 +153,6 @@ export default function AttendancePage() {
 
   const getServiceDateKey = (serviceId: string, date: string) =>
     `${serviceId}|${date}`;
-
-  const parseAmount = (value: string) => {
-    const normalized = value.replace(/,/g, "").trim();
-    const amount = Number(normalized);
-    return Number.isNaN(amount) ? 0 : amount;
-  };
-
-  const givingTotals = useMemo(() => {
-    return Object.entries(givingRecords).reduce<Record<string, number>>(
-      (acc, [key, values]) => {
-        const total =
-          parseAmount(values.tithe) +
-          parseAmount(values.offering) +
-          parseAmount(values.specialOffering) +
-          parseAmount(values.thanksgivingOffering);
-        acc[key] = total;
-        return acc;
-      },
-      {},
-    );
-  }, [givingRecords]);
 
   const selectedKey =
     selectedService && selectedDate
@@ -385,72 +325,9 @@ export default function AttendancePage() {
     });
   };
 
-  const handleAddGivingRecord = async (
-    service: RegularService,
-    date: string,
-  ) => {
+  const handleAddGivingRecord = (service: RegularService, date: string) => {
     setServiceContext(service, date);
     setIsGivingRecordModalOpen(true);
-
-    const key = getServiceDateKey(service.id, date);
-    if (givingRecords[key]) {
-      return;
-    }
-
-    try {
-      const { data } = await fetchGivingRecords({
-        churchServiceId: service.id,
-        startDate: date,
-        endDate: date,
-        limit: 1,
-      });
-      const existing = data[0];
-      if (existing) {
-        setGivingRecords((prev) => ({
-          ...prev,
-          [key]: {
-            tithe: String(existing.tithe || ""),
-            offering: String(existing.offering || ""),
-            specialOffering: String(existing.specialOffering || ""),
-            thanksgivingOffering: String(existing.thanksgivingOffering || ""),
-          },
-        }));
-      }
-    } catch {
-      // No existing record yet, or fetch failed - modal just opens blank.
-    }
-  };
-
-  const handleSaveGivingRecord = async (values: GivingValues) => {
-    if (!selectedService || !selectedDate) {
-      return;
-    }
-    try {
-      await saveGivingRecord({
-        churchServiceId: selectedService.id,
-        date: selectedDate,
-        tithe: parseAmount(values.tithe),
-        offering: parseAmount(values.offering),
-        specialOffering: parseAmount(values.specialOffering),
-        thanksgivingOffering: parseAmount(values.thanksgivingOffering),
-      });
-
-      setGivingRecords((prev) => ({
-        ...prev,
-        [getServiceDateKey(selectedService.id, selectedDate)]: values,
-      }));
-
-      toast({
-        title: "Success",
-        description: "Giving record saved successfully",
-      });
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to save giving record",
-        variant: "destructive",
-      });
-    }
   };
 
   const handleViewServiceDetails = (service: RegularService, date: string) => {
@@ -552,8 +429,6 @@ export default function AttendancePage() {
           onOpenChange={setIsGivingRecordModalOpen}
           service={selectedService}
           date={selectedDate}
-          initialValues={selectedKey ? givingRecords[selectedKey] : undefined}
-          onSave={handleSaveGivingRecord}
         />
 
         <ServiceDetailModal
@@ -632,7 +507,6 @@ export default function AttendancePage() {
               services={regularServices}
               specialServices={specialServices}
               searchQuery={searchQuery}
-              givingTotals={givingTotals}
               onAddAttendance={handleAddAttendance}
               onViewServiceDetails={handleViewServiceDetails}
               onAddGivingRecord={handleAddGivingRecord}
@@ -674,8 +548,6 @@ export default function AttendancePage() {
         onOpenChange={setIsGivingRecordModalOpen}
         service={selectedService}
         date={selectedDate}
-        initialValues={selectedKey ? givingRecords[selectedKey] : undefined}
-        onSave={handleSaveGivingRecord}
       />
 
       <ServiceDetailModal

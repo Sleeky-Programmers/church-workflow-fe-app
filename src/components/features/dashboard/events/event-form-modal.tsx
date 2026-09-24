@@ -23,6 +23,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { LocationCombobox } from "@/components/ui/location-combobox";
 import {
   Select,
   SelectContent,
@@ -324,10 +325,11 @@ export function EventFormModal({
                   <FormItem>
                     <FormLabel>Location</FormLabel>
                     <FormControl>
-                      <Input
+                      <LocationCombobox
+                        value={field.value}
+                        onChange={field.onChange}
                         placeholder="e.g. Main Auditorium"
                         disabled={isSubmitting}
-                        {...field}
                       />
                     </FormControl>
                     <FormMessage />

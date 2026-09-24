@@ -1,7 +1,8 @@
 "use client";
 
 import { format, startOfMonth } from "date-fns";
-import { Trash2 } from "lucide-react";
+import { ArrowRight, Trash2 } from "lucide-react";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 
 import { AddExpenseDialog } from "@/components/features/dashboard/finance/add-expense-dialog";
@@ -21,7 +22,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import Heading from "@/components/ui/typography/Heading";
-import { Text } from "@/components/ui/typography/Text";
+import { Span, Text } from "@/components/ui/typography/Text";
 import { useToast } from "@/hooks/use-toast";
 import { useHasAccess } from "@/lib/access-control";
 import { getMyChurch } from "@/lib/api";
@@ -34,25 +35,12 @@ import {
   fetchExpenseSummary,
 } from "@/services/expenseService";
 import {
-  fetchGivingRecords,
   fetchGivingSummary,
-  GivingRecordResponse,
   GivingSummaryResponse,
-} from "@/services/givingRecordService";
+} from "@/services/givingService";
 import { formatCurrency } from "@/utils/currency";
 
 type FinanceTab = "giving" | "expenses";
-
-const GIVING_SUMMARY_CARDS: {
-  key: keyof GivingSummaryResponse;
-  label: string;
-}[] = [
-  { key: "tithe", label: "Tithe" },
-  { key: "offering", label: "Offering" },
-  { key: "specialOffering", label: "Special Offering" },
-  { key: "thanksgivingOffering", label: "Thanksgiving Offering" },
-  { key: "totalAmount", label: "Total Giving" },
-];
 
 export default function FinancePage() {
   const { toast } = useToast();
@@ -71,10 +59,6 @@ export default function FinancePage() {
   const [givingSummary, setGivingSummary] =
     useState<GivingSummaryResponse | null>(null);
   const [givingSummaryLoading, setGivingSummaryLoading] = useState(false);
-  const [givingRecords, setGivingRecords] = useState<GivingRecordResponse[]>(
-    [],
-  );
-  const [givingRecordsLoading, setGivingRecordsLoading] = useState(false);
 
   const [expenseSummary, setExpenseSummary] =
     useState<ExpenseSummaryResponse | null>(null);
@@ -97,15 +81,10 @@ export default function FinancePage() {
 
   const loadGivingData = async () => {
     setGivingSummaryLoading(true);
-    setGivingRecordsLoading(true);
 
     try {
-      const [summaryData, recordsData] = await Promise.all([
-        fetchGivingSummary({ startDate, endDate }),
-        fetchGivingRecords({ startDate, endDate, limit: 50 }),
-      ]);
+      const summaryData = await fetchGivingSummary({ startDate, endDate });
       setGivingSummary(summaryData);
-      setGivingRecords(recordsData.data);
     } catch (error: any) {
       toast({
         title: "Error",
@@ -114,7 +93,6 @@ export default function FinancePage() {
       });
     } finally {
       setGivingSummaryLoading(false);
-      setGivingRecordsLoading(false);
     }
   };
 
@@ -171,56 +149,6 @@ export default function FinancePage() {
       setDeleteTarget(null);
     }
   };
-
-  const givingColumns: Column<GivingRecordResponse>[] = [
-    {
-      key: "date",
-      header: "Date",
-      render: (row) => format(new Date(row.date), "MMM d, yyyy"),
-      width: "w-32",
-    },
-    {
-      key: "service",
-      header: "Service",
-      render: (row) => row.serviceTitle || "-",
-    },
-    {
-      key: "tithe",
-      header: "Tithe",
-      render: (row) => formatCurrency(row.tithe, row.currency || currency),
-      align: "right",
-    },
-    {
-      key: "offering",
-      header: "Offering",
-      render: (row) => formatCurrency(row.offering, row.currency || currency),
-      align: "right",
-    },
-    {
-      key: "specialOffering",
-      header: "Special Offering",
-      render: (row) =>
-        formatCurrency(row.specialOffering, row.currency || currency),
-      align: "right",
-    },
-    {
-      key: "thanksgivingOffering",
-      header: "Thanksgiving",
-      render: (row) =>
-        formatCurrency(row.thanksgivingOffering, row.currency || currency),
-      align: "right",
-    },
-    {
-      key: "totalAmount",
-      header: "Total",
-      render: (row) => (
-        <span className="font-semibold">
-          {formatCurrency(row.totalAmount, row.currency || currency)}
-        </span>
-      ),
-      align: "right",
-    },
-  ];
 
   const expenseColumns: Column<ExpenseResponse>[] = [
     {
@@ -335,45 +263,93 @@ export default function FinancePage() {
 
       {activeTab === "giving" ? (
         <div className="space-y-6">
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
-            {GIVING_SUMMARY_CARDS.map((card) => (
-              <div
-                key={card.key}
-                className="bg-white rounded-2xl border border-gray-300 p-4
-                           shadow-[0_1px_4px_rgba(0,0,0,0.06)]"
-              >
-                <p className="text-[13px] font-bold text-black mb-1">
-                  {card.label}
-                </p>
-                <span className="text-xl font-bold text-black">
-                  {givingSummaryLoading || !givingSummary
-                    ? "—"
-                    : formatCurrency(
-                        givingSummary[card.key] as number,
-                        currency,
-                      )}
-                </span>
-              </div>
-            ))}
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+            <div
+              className="bg-white rounded-2xl border border-gray-300 p-4
+                         shadow-[0_1px_4px_rgba(0,0,0,0.06)]"
+            >
+              <p className="text-[13px] font-bold text-black mb-1">
+                Total Giving
+              </p>
+              <span className="text-xl font-bold text-black">
+                {givingSummaryLoading || !givingSummary
+                  ? "—"
+                  : formatCurrency(givingSummary.totalAmount, currency)}
+              </span>
+            </div>
+
+            <div
+              className="bg-white rounded-2xl border border-gray-300 p-4
+                         shadow-[0_1px_4px_rgba(0,0,0,0.06)]"
+            >
+              <p className="text-[13px] font-bold text-black mb-1">
+                Batches Recorded
+              </p>
+              <span className="text-xl font-bold text-black">
+                {givingSummaryLoading || !givingSummary
+                  ? "—"
+                  : givingSummary.recordCount}
+              </span>
+            </div>
+
+            {!givingSummaryLoading &&
+              givingSummary &&
+              [...givingSummary.byOfferingType]
+                .sort((a, b) => b.amount - a.amount)
+                .slice(0, 1)
+                .map((row) => (
+                  <div
+                    key={row.name}
+                    className="bg-white rounded-2xl border border-gray-300 p-4
+                               shadow-[0_1px_4px_rgba(0,0,0,0.06)]"
+                  >
+                    <p className="text-[13px] font-bold text-black mb-1">
+                      Top Offering Type
+                    </p>
+                    <span className="text-xl font-bold text-black">
+                      {row.name}
+                    </span>
+                  </div>
+                ))}
           </div>
 
-          <div className="max-h-[55vh] overflow-auto">
-            <Table
-              columns={givingColumns}
-              data={givingRecords}
-              rowKey={(row) => row.id}
-              isLoading={givingRecordsLoading}
-              emptyState={
-                <div className="py-10 text-center">
-                  <Text variant="muted">
-                    No giving records for this date range yet
-                    {canManageGiving
-                      ? " - record one from the Attendance page when marking a service."
-                      : "."}
-                  </Text>
-                </div>
-              }
-            />
+          <div className="bg-white rounded-2xl border border-gray-300 p-5 space-y-3">
+            <Text className="font-bold text-black">By Offering Type</Text>
+
+            {givingSummaryLoading || !givingSummary ? (
+              <Text variant="muted" className="text-sm">
+                Loading...
+              </Text>
+            ) : givingSummary.byOfferingType.length ? (
+              <div className="space-y-2">
+                {givingSummary.byOfferingType.map((row) => (
+                  <div
+                    key={row.name}
+                    className="flex items-center justify-between text-sm"
+                  >
+                    <Span>{row.name}</Span>
+                    <Span className="font-semibold">
+                      {formatCurrency(row.amount, currency)}
+                    </Span>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <Text variant="muted" className="text-sm">
+                No giving recorded for this date range yet
+                {canManageGiving
+                  ? " - record a batch from the Attendance page or the Giving section."
+                  : "."}
+              </Text>
+            )}
+
+            <Link
+              href="/dashboard/finance/giving"
+              className="inline-flex items-center gap-1 text-sm font-medium text-primary-600 hover:underline pt-2"
+            >
+              View all giving
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
           </div>
         </div>
       ) : (

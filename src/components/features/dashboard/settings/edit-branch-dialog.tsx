@@ -35,6 +35,7 @@ export function EditBranchDialog({
   const [address, setAddress] = useState("");
   const [country, setCountry] = useState("");
   const [state, setState] = useState("");
+  const [timeZone, setTimeZone] = useState("");
 
   useEffect(() => {
     if (!open || !branch) return;
@@ -43,6 +44,7 @@ export function EditBranchDialog({
     setAddress(branch.address || "");
     setCountry(branch.country || "");
     setState(branch.state || "");
+    setTimeZone(branch.timeZone || "");
   }, [open, branch]);
 
   async function handleSave() {
@@ -64,6 +66,7 @@ export function EditBranchDialog({
         address: address.trim(),
         country: country.trim(),
         state: state.trim(),
+        timeZone: timeZone.trim(),
       });
 
       await onSaved();
@@ -142,6 +145,16 @@ export function EditBranchDialog({
                 disabled={isSaving}
               />
             </div>
+          </div>
+
+          <div className="space-y-1.5">
+            <Label>Time Zone (optional)</Label>
+            <Input
+              value={timeZone}
+              onChange={(e) => setTimeZone(e.target.value)}
+              disabled={isSaving}
+              placeholder="e.g. Africa/Lagos"
+            />
           </div>
         </div>
 

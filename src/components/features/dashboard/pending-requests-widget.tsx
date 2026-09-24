@@ -1,9 +1,10 @@
 "use client";
 
-import { ClipboardList } from "lucide-react";
+import { ClipboardList, CheckCircle2 } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
+import { EmptyState } from "@/components/features/dashboard/empty-state";
 import { Loader } from "@/components/ui/loader";
 import Heading from "@/components/ui/typography/Heading";
 import { Span, Text } from "@/components/ui/typography/Text";
@@ -55,9 +56,12 @@ export function PendingRequestsWidget() {
             <Loader size="w-6 h-6" showShadow={false} />
           </div>
         ) : requisitions.length === 0 ? (
-          <Text variant="muted" className="text-sm">
-            No pending requests right now.
-          </Text>
+          <EmptyState
+            size="sm"
+            icon={CheckCircle2}
+            title="You're all caught up"
+            description="No pending requests right now. New requisitions from departments will appear here for review."
+          />
         ) : (
           <div className="space-y-3">
             {requisitions.map((req) => (
