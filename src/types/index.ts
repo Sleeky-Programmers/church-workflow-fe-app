@@ -455,6 +455,10 @@ export type Plan = {
   yearlyPrice: number;
   features: string[];
   popular?: boolean;
+  memberLimit: number;
+  userLimit: number;
+  branchLimit: number;
+  customRolesEnabled: boolean;
 };
 
 export type CurrentPlanResponse = Plan & {

@@ -21,6 +21,10 @@ export const FALLBACK_PLANS: Plan[] = [
       "Attendance tracking",
     ],
     popular: false,
+    memberLimit: 100,
+    userLimit: 3,
+    branchLimit: 2,
+    customRolesEnabled: false,
   },
   {
     type: PlanType.GROWTH,
@@ -34,6 +38,10 @@ export const FALLBACK_PLANS: Plan[] = [
       "Custom roles & permissions",
     ],
     popular: true,
+    memberLimit: 500,
+    userLimit: 10,
+    branchLimit: 5,
+    customRolesEnabled: true,
   },
   {
     type: PlanType.EXPANSION,
@@ -42,6 +50,10 @@ export const FALLBACK_PLANS: Plan[] = [
     yearlyPrice: 448200,
     features: ["Everything in Growth", "Up to 25 users", "Up to 1,500 members"],
     popular: false,
+    memberLimit: 1500,
+    userLimit: 25,
+    branchLimit: 25,
+    customRolesEnabled: true,
   },
   {
     type: PlanType.ENTERPRISE,
@@ -56,5 +68,9 @@ export const FALLBACK_PLANS: Plan[] = [
       "Unlimited members",
     ],
     popular: false,
+    memberLimit: -1,
+    userLimit: -1,
+    branchLimit: -1,
+    customRolesEnabled: true,
   },
 ];
