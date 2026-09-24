@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { LocationCombobox } from "@/components/ui/location-combobox";
 import { Span, Text } from "@/components/ui/typography/Text";
 import { convertTo12Hour } from "@/lib/utils";
 import { RegularService } from "@/types";
@@ -341,14 +342,13 @@ export function CreateRegularServiceModal({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="location">Location</Label>
-            <Input
-              id="location"
-              placeholder="e.g. Main Auditorium"
+            <Label>Location</Label>
+            <LocationCombobox
               value={formData.location}
-              onChange={(e) =>
-                setFormData((prev) => ({ ...prev, location: e.target.value }))
+              onChange={(value) =>
+                setFormData((prev) => ({ ...prev, location: value }))
               }
+              placeholder="e.g. Main Auditorium"
             />
           </div>
 

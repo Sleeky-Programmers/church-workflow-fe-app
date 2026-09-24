@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { LocationCombobox } from "@/components/ui/location-combobox";
 import { Loader } from "@/components/ui/loader";
 import {
   Select,
@@ -397,10 +398,10 @@ export function CreateSpecialServiceModal({
 
           <div className="space-y-2">
             <Label>Location</Label>
-            <Input
-              placeholder="e.g. Main Auditorium"
+            <LocationCombobox
               value={location}
-              onChange={(e) => setLocation(e.target.value)}
+              onChange={setLocation}
+              placeholder="e.g. Main Auditorium"
               disabled={isLoading}
             />
           </div>

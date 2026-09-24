@@ -1,10 +1,11 @@
 "use client";
 
-import { CalendarDays, User } from "lucide-react";
+import { Cake, CalendarDays, User } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
 import DashboardMobile from "@/components/features/dashboard/dashboard-mobile";
+import { EmptyState } from "@/components/features/dashboard/empty-state";
 import { IncomeBreakdown } from "@/components/features/dashboard/income-breakdown";
 import { IncomeVsExpenses } from "@/components/features/dashboard/income-expense";
 import { PendingRequestsWidget } from "@/components/features/dashboard/pending-requests-widget";
@@ -422,20 +423,34 @@ export default function Dashboard() {
 
             <div className="h-px bg-gray-100 my-4" />
 
-            <p className="text-[12.5px] font-bold text-primary-400 mb-3">
-              Birthdays
-            </p>
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-[12.5px] font-bold text-primary-400">
+                Birthdays
+              </p>
+              {upcomingBirthdays.length > 0 && (
+                <Link
+                  href="/dashboard/birthdays"
+                  className="text-[12px] font-semibold text-primary-400 hover:underline"
+                >
+                  View all
+                </Link>
+              )}
+            </div>
             <div className="flex flex-col gap-2.5 pb-2">
               {birthdaysLoading ? (
                 <div className="flex items-center justify-center py-3">
                   <Loader size="w-6 h-6" showShadow={false} />
                 </div>
               ) : upcomingBirthdays.length === 0 ? (
-                <p className="text-[12px] text-gray-400">
-                  No upcoming birthdays
-                </p>
+                <EmptyState
+                  size="sm"
+                  icon={Cake}
+                  title="No upcoming birthdays"
+                  description="Members with birthdays in the next 3 months will show up here."
+                  action={{ label: "View birthdays", href: "/dashboard/birthdays" }}
+                />
               ) : (
-                upcomingBirthdays.map((b, i) => (
+                upcomingBirthdays.slice(0, 5).map((b, i) => (
                   <div
                     key={`${b.name}-${i}`}
                     className="flex items-center justify-between gap-3"
@@ -464,7 +479,7 @@ export default function Dashboard() {
             className="w-full mt-5 rounded-xl bg-primary-400 hover:bg-primary-600
                         !text-white font-bold text-[13.5px] h-10 shrink-0"
           >
-            <Link href="/dashboard/events">View more</Link>
+            <Link href="/dashboard/birthdays">View more</Link>
           </Button>
         </aside>
       </div>

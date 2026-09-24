@@ -231,7 +231,10 @@ export default function SignupForm({
                 </FormControl>
                 <div className="space-y-1 leading-none">
                   <FormLabel>
-                    I agree to the <Link href="/terms">Terms & Conditions</Link>
+                    I agree to the{" "}
+                    <Link href="/terms" external>
+                      Terms & Conditions
+                    </Link>
                   </FormLabel>
                   <FormMessage />
                 </div>

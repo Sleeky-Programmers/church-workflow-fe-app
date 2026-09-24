@@ -1,9 +1,11 @@
 "use client";
 
 import { format, startOfMonth } from "date-fns";
+import { HandCoins } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Cell, Pie, PieChart, ResponsiveContainer } from "recharts";
 
+import { EmptyState } from "@/components/features/dashboard/empty-state";
 import { Card, CardContent } from "@/components/ui/card";
 import { ChartContainer } from "@/components/ui/chart";
 import { Loader } from "@/components/ui/loader";
@@ -80,11 +82,12 @@ export function IncomeBreakdown() {
               <Loader size="w-8 h-8" showShadow={false} />
             </div>
           ) : !hasData ? (
-            <div className="flex items-center justify-center h-[180px] sm:h-[160px]">
-              <Text variant="muted" className="text-sm">
-                No giving recorded this month yet.
-              </Text>
-            </div>
+            <EmptyState
+              icon={HandCoins}
+              title="No giving recorded this month"
+              description="Giving records added this month will appear here as a breakdown."
+              className="h-[180px] sm:h-[160px]"
+            />
           ) : (
             <ChartContainer
               className="w-full aspect-auto h-[180px] sm:h-[160px] overflow-hidden"
@@ -142,9 +145,12 @@ export function IncomeBreakdown() {
 
           <div className="space-y-2">
             {!isLoading && !hasData && (
-              <Text variant="muted" className="text-sm">
-                No giving recorded this month yet.
-              </Text>
+              <EmptyState
+                size="sm"
+                icon={HandCoins}
+                title="Nothing to break down yet"
+                description="Add a giving record to see the distribution by offering type."
+              />
             )}
             {slices.map((item) => (
               <div

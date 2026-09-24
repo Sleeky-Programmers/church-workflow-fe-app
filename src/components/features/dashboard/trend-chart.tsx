@@ -1,5 +1,6 @@
 "use client";
 
+import { TrendingUp } from "lucide-react";
 import { useState } from "react";
 import {
   CartesianGrid,
@@ -10,6 +11,7 @@ import {
   YAxis,
 } from "recharts";
 
+import { EmptyState } from "@/components/features/dashboard/empty-state";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ChartContainer, ChartTooltipContent } from "@/components/ui/chart";
@@ -109,9 +111,12 @@ export function TrendChart({
               </LineChart>
             </ChartContainer>
           ) : (
-            <div className="h-[260px] sm:h-[300px] flex items-center justify-center text-sm text-muted-foreground">
-              No trend data available yet.
-            </div>
+            <EmptyState
+              icon={TrendingUp}
+              title="No attendance trend yet"
+              description="Record attendance for your services to start seeing monthly trends here."
+              className="h-[260px] sm:h-[300px]"
+            />
           )}
         </div>
       </CardContent>

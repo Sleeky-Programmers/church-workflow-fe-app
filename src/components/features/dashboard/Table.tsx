@@ -47,6 +47,8 @@ export interface CustomTableProps<T> {
   emptyState?: React.ReactNode;
   onRowClick?: (row: T) => void;
   className?: string;
+  /** Tailwind min-width class (e.g. "min-w-[720px]") that makes the table scroll horizontally on narrow screens instead of squeezing columns. */
+  minWidth?: string;
   showCheckbox?: boolean;
   selectedRowKeys?: string[];
   onSelectedRowKeysChange?: (keys: string[]) => void;
@@ -69,6 +71,7 @@ export default function Table<T extends Record<string, any>>({
   emptyState,
   onRowClick,
   className = "",
+  minWidth,
   selectedRowKeys,
 }: CustomTableProps<T>) {
   const [sort, setSort] = useState<SortState>({
@@ -190,7 +193,7 @@ export default function Table<T extends Record<string, any>>({
     <Card className={className}>
       <CardContent className="p-0">
         <div className="overflow-x-auto overflow-y-visible w-full">
-          <TableComponent className="w-full table-fixed">
+          <TableComponent className={`w-full table-fixed ${minWidth ?? ""}`}>
             <TableHeader>
               <TableRow>
                 {columns.map((col) => (

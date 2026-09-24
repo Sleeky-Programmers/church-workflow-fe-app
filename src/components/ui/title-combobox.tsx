@@ -16,12 +16,12 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import {
-  findExactTitleMatch,
-  normalizeTitleQuery,
-  TITLE_CATEGORIES,
-  TITLE_MAX_LENGTH,
-} from "@/lib/titles";
+import { useTitles } from "@/hooks/use-titles";
+import { TITLE_MAX_LENGTH } from "@/lib/titles";
+
+function normalizeTitleQuery(value: string): string {
+  return value.toLowerCase().replace(/[.\s]/g, "");
+}
 
 interface TitleComboboxProps {
   value?: string;
@@ -30,34 +30,37 @@ interface TitleComboboxProps {
   disabled?: boolean;
 }
 
-// Searchable title picker: type-ahead over the shared title catalog
-// (case/punctuation-insensitive), with a "Use '...'" fallback so any custom
-// title up to 50 chars can still be entered when nothing matches.
+// Searchable title picker: type-ahead over the church's configured title
+// list (case/punctuation-insensitive), with a "Use '...'" fallback so any
+// custom title up to 50 chars can still be entered when nothing matches.
+// The list itself is managed at Settings > Titles & Locations.
 export function TitleCombobox({
   value,
   onChange,
   placeholder = "Select or type a title",
   disabled,
 }: TitleComboboxProps) {
+  const { titles, isLoading } = useTitles();
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
 
-  const filteredCategories = useMemo(() => {
-    const query = normalizeTitleQuery(search);
-    if (!query) return TITLE_CATEGORIES;
+  const activeLabels = useMemo(
+    () => titles.filter((t) => t.isActive).map((t) => t.name),
+    [titles],
+  );
 
-    const result: Record<string, string[]> = {};
-    for (const [category, labels] of Object.entries(TITLE_CATEGORIES)) {
-      const matches = labels.filter((label) =>
-        normalizeTitleQuery(label).includes(query),
-      );
-      if (matches.length) result[category] = matches;
-    }
-    return result;
-  }, [search]);
+  const filteredLabels = useMemo(() => {
+    const query = normalizeTitleQuery(search);
+    if (!query) return activeLabels;
+    return activeLabels.filter((label) =>
+      normalizeTitleQuery(label).includes(query),
+    );
+  }, [activeLabels, search]);
 
   const trimmedSearch = search.trim();
-  const hasExactMatch = Boolean(findExactTitleMatch(trimmedSearch));
+  const hasExactMatch = activeLabels.some(
+    (label) => normalizeTitleQuery(label) === normalizeTitleQuery(trimmedSearch),
+  );
 
   const handleSelect = (label: string) => {
     onChange(label);
@@ -71,7 +74,7 @@ export function TitleCombobox({
         <Button
           type="button"
           variant="ghost"
-          disabled={disabled}
+          disabled={disabled || isLoading}
           className="w-full border justify-between font-normal"
         >
           <span className="truncate">{value || placeholder}</span>
@@ -92,18 +95,16 @@ export function TitleCombobox({
           />
 
           <CommandList className="max-h-64">
-            {Object.entries(filteredCategories).map(([category, labels]) => (
-              <CommandGroup key={category} heading={category}>
-                {labels.map((label) => (
-                  <CommandItem key={label} onSelect={() => handleSelect(label)}>
-                    {label}
-                    <Check
-                      className={`ml-auto h-4 w-4 ${value === label ? "opacity-100" : "opacity-0"}`}
-                    />
-                  </CommandItem>
-                ))}
-              </CommandGroup>
-            ))}
+            <CommandGroup>
+              {filteredLabels.map((label) => (
+                <CommandItem key={label} onSelect={() => handleSelect(label)}>
+                  {label}
+                  <Check
+                    className={`ml-auto h-4 w-4 ${value === label ? "opacity-100" : "opacity-0"}`}
+                  />
+                </CommandItem>
+              ))}
+            </CommandGroup>
 
             {trimmedSearch && !hasExactMatch && (
               <CommandGroup>

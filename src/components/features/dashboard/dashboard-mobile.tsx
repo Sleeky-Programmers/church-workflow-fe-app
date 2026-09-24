@@ -1,8 +1,9 @@
 "use client";
 
-import { CalendarDays, User } from "lucide-react";
+import { Cake, CalendarDays, User } from "lucide-react";
 import Link from "next/link";
 
+import { EmptyState } from "@/components/features/dashboard/empty-state";
 import { IncomeBreakdown } from "@/components/features/dashboard/income-breakdown";
 import { IncomeVsExpenses } from "@/components/features/dashboard/income-expense";
 import { PendingRequestsWidget } from "@/components/features/dashboard/pending-requests-widget";
@@ -166,13 +167,28 @@ export default function DashboardMobile({
             <div className="h-px bg-gray-100 my-2" />
 
             <div className="space-y-3">
-              <p className="text-[12.5px] font-bold text-primary-400 mb-1">
-                Birthdays
-              </p>
+              <div className="flex items-center justify-between mb-1">
+                <p className="text-[12.5px] font-bold text-primary-400">
+                  Birthdays
+                </p>
+                {sortedBirthdays.length > 0 && (
+                  <Link
+                    href="/dashboard/birthdays"
+                    className="text-[12px] font-semibold text-primary-400 hover:underline"
+                  >
+                    View all
+                  </Link>
+                )}
+              </div>
               {sortedBirthdays.length === 0 ? (
-                <Text text="No upcoming birthdays" variant="muted" />
+                <EmptyState
+                  size="sm"
+                  icon={Cake}
+                  title="No upcoming birthdays"
+                  description="Members with birthdays in the next 3 months will show up here."
+                />
               ) : (
-                sortedBirthdays.map((b, i) => (
+                sortedBirthdays.slice(0, 5).map((b, i) => (
                   <div
                     key={`${b.name}-${i}`}
                     className="flex items-center justify-between"
@@ -195,7 +211,7 @@ export default function DashboardMobile({
               asChild
               className="w-full mt-4 rounded-xl bg-primary-400 hover:bg-primary-600 !text-white font-bold"
             >
-              <Link href="/dashboard/membership">View more</Link>
+              <Link href="/dashboard/birthdays">View more</Link>
             </Button>
           </CardContent>
         </Card>
