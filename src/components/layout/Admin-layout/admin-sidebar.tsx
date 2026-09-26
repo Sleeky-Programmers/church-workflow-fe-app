@@ -47,10 +47,10 @@ const NAV_ITEMS: NavItem[] = [
     href: "/dashboard/settings/branches",
   },
   {
-    id: "lists",
-    label: "Titles & Locations",
+    id: "configurations",
+    label: "Configurations",
     icon: ListChecks,
-    href: "/dashboard/settings/lists",
+    href: "/dashboard/settings/configurations",
   },
   {
     id: "preference",

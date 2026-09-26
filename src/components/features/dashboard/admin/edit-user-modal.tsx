@@ -115,10 +115,15 @@ export function EditPersonalInfoModal({
 
           <div>
             <Label>Email</Label>
-            <Input {...register("email")} className="bg-gray-100" />
-            {errors.email && (
-              <p className="text-red-500 text-sm">{errors.email.message}</p>
-            )}
+            <Input
+              {...register("email")}
+              disabled
+              readOnly
+              className="bg-gray-100 cursor-not-allowed text-gray-500"
+            />
+            <Text variant="muted" className="text-xs mt-1">
+              Email address can&apos;t be changed here.
+            </Text>
           </div>
 
           <DialogFooter className="pt-4 border-t mt-4">

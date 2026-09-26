@@ -74,6 +74,7 @@ export interface OfferingType {
   isActive: boolean;
   sortOrder: number;
   isSystem: boolean;
+  isDefault: boolean;
 }
 
 export interface Currency {
@@ -202,34 +203,78 @@ export async function fetchGivingMonthlyTrend(params?: {
 
 // ---- Offering types ----
 
+// The API returns Mongoose docs keyed by `_id`; normalize to `id` so callers
+// Have a stable identifier (matches the members/services convention).
+function normalizeOfferingType(raw: any): OfferingType {
+  return {
+    id: raw?._id ?? raw?.id,
+    name: raw?.name,
+    isActive: raw?.isActive,
+    sortOrder: raw?.sortOrder ?? 0,
+    isSystem: raw?.isSystem ?? false,
+    isDefault: raw?.isDefault ?? false,
+  };
+}
+
+function normalizeCurrency(raw: any): Currency {
+  return {
+    id: raw?._id ?? raw?.id,
+    code: raw?.code,
+    symbol: raw?.symbol,
+    name: raw?.name,
+    isDefault: raw?.isDefault ?? false,
+    isActive: raw?.isActive,
+  };
+}
+
 export async function fetchOfferingTypes() {
-  return authenticatedFetch<OfferingType[]>("/offering-types");
+  const data = await authenticatedFetch<any[]>("/offering-types");
+  return data.map(normalizeOfferingType);
 }
 
 export async function createOfferingType(payload: {
   name: string;
   sortOrder?: number;
 }) {
-  return authenticatedFetch<OfferingType>("/offering-types", {
+  const created = await authenticatedFetch<any>("/offering-types", {
     method: "POST",
     body: JSON.stringify(payload),
   });
+  return normalizeOfferingType(created);
 }
 
 export async function updateOfferingType(
   id: string,
   payload: Partial<Pick<OfferingType, "name" | "isActive" | "sortOrder">>,
 ) {
-  return authenticatedFetch<OfferingType>(`/offering-types/${id}`, {
+  const updated = await authenticatedFetch<any>(`/offering-types/${id}`, {
     method: "PUT",
     body: JSON.stringify(payload),
+  });
+  return normalizeOfferingType(updated);
+}
+
+export async function setDefaultOfferingType(id: string) {
+  const updated = await authenticatedFetch<any>(
+    `/offering-types/${id}/set-default`,
+    {
+      method: "PUT",
+    },
+  );
+  return normalizeOfferingType(updated);
+}
+
+export async function deleteOfferingType(id: string) {
+  return authenticatedFetch<{ message: string }>(`/offering-types/${id}`, {
+    method: "DELETE",
   });
 }
 
 // ---- Currencies ----
 
 export async function fetchCurrencies() {
-  return authenticatedFetch<Currency[]>("/currencies");
+  const data = await authenticatedFetch<any[]>("/currencies");
+  return data.map(normalizeCurrency);
 }
 
 export async function createCurrency(payload: {
@@ -237,24 +282,33 @@ export async function createCurrency(payload: {
   symbol: string;
   name: string;
 }) {
-  return authenticatedFetch<Currency>("/currencies", {
+  const created = await authenticatedFetch<any>("/currencies", {
     method: "POST",
     body: JSON.stringify(payload),
   });
+  return normalizeCurrency(created);
 }
 
 export async function updateCurrency(
   id: string,
   payload: Partial<Pick<Currency, "code" | "symbol" | "name" | "isActive">>,
 ) {
-  return authenticatedFetch<Currency>(`/currencies/${id}`, {
+  const updated = await authenticatedFetch<any>(`/currencies/${id}`, {
     method: "PUT",
     body: JSON.stringify(payload),
   });
+  return normalizeCurrency(updated);
 }
 
 export async function setDefaultCurrency(id: string) {
-  return authenticatedFetch<Currency>(`/currencies/${id}/set-default`, {
+  const updated = await authenticatedFetch<any>(`/currencies/${id}/set-default`, {
     method: "PUT",
+  });
+  return normalizeCurrency(updated);
+}
+
+export async function deleteCurrency(id: string) {
+  return authenticatedFetch<{ message: string }>(`/currencies/${id}`, {
+    method: "DELETE",
   });
 }

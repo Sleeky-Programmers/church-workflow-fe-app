@@ -16,20 +16,13 @@ import {
   GivingBatchEntryPayload,
   OfferingType,
 } from "@/services/givingService";
-
-export const PAYMENT_METHODS = [
-  { value: "CASH", label: "Cash" },
-  { value: "CARD", label: "Card" },
-  { value: "BANK_TRANSFER", label: "Bank Transfer" },
-  { value: "MOBILE_MONEY", label: "Mobile Money" },
-  { value: "CHEQUE", label: "Cheque" },
-  { value: "ONLINE", label: "Online" },
-];
+import { PaymentMethod } from "@/services/paymentMethodService";
 
 interface EntryLineProps {
   entry: GivingBatchEntryPayload;
   offeringTypes: OfferingType[];
   currencies: Currency[];
+  paymentMethods: PaymentMethod[];
   onChange: (entry: GivingBatchEntryPayload) => void;
   onRemove: () => void;
   canRemove: boolean;
@@ -40,6 +33,7 @@ export function EntryLine({
   entry,
   offeringTypes,
   currencies,
+  paymentMethods,
   onChange,
   onRemove,
   canRemove,
@@ -135,9 +129,9 @@ export function EntryLine({
             <SelectValue placeholder="Method" />
           </SelectTrigger>
           <SelectContent>
-            {PAYMENT_METHODS.map((method) => (
-              <SelectItem key={method.value} value={method.value}>
-                {method.label}
+            {paymentMethods.map((method) => (
+              <SelectItem key={method.code} value={method.code}>
+                {method.name}
               </SelectItem>
             ))}
           </SelectContent>

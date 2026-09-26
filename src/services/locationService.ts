@@ -20,26 +20,42 @@ export interface PaginatedList<T> {
 	};
 }
 
+// The API returns Mongoose documents keyed by `_id`; normalize to `id` so
+// Callers have a stable identifier (matches the members/services convention).
+function normalizeLocation(raw: any): Location {
+	return {
+		id: raw?._id ?? raw?.id,
+		name: raw?.name,
+		isActive: raw?.isActive,
+		sortOrder: raw?.sortOrder ?? 0,
+		isSystem: raw?.isSystem ?? false,
+	};
+}
+
 export async function fetchLocations() {
-	return authenticatedFetch<Location[]>('/locations');
+	const data = await authenticatedFetch<any[]>('/locations');
+	return data.map(normalizeLocation);
 }
 
 export async function fetchLocationsPage(page: number, limit: number) {
-	return authenticatedFetch<PaginatedList<Location>>(`/locations?page=${page}&limit=${limit}`);
+	const res = await authenticatedFetch<PaginatedList<any>>(`/locations?page=${page}&limit=${limit}`);
+	return { ...res, data: res.data.map(normalizeLocation) } as PaginatedList<Location>;
 }
 
 export async function createLocation(payload: { name: string; sortOrder?: number }) {
-	return authenticatedFetch<Location>('/locations', {
+	const created = await authenticatedFetch<any>('/locations', {
 		method: 'POST',
 		body: JSON.stringify(payload),
 	});
+	return normalizeLocation(created);
 }
 
 export async function updateLocation(id: string, payload: Partial<Pick<Location, 'name' | 'isActive' | 'sortOrder'>>) {
-	return authenticatedFetch<Location>(`/locations/${id}`, {
+	const updated = await authenticatedFetch<any>(`/locations/${id}`, {
 		method: 'PUT',
 		body: JSON.stringify(payload),
 	});
+	return normalizeLocation(updated);
 }
 
 export async function deleteLocation(id: string) {

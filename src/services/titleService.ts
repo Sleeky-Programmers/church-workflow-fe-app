@@ -20,26 +20,42 @@ export interface PaginatedList<T> {
 	};
 }
 
+// The API returns Mongoose documents keyed by `_id`; normalize to `id` so
+// Callers have a stable identifier (matches the members/services convention).
+function normalizeTitle(raw: any): Title {
+	return {
+		id: raw?._id ?? raw?.id,
+		name: raw?.name,
+		isActive: raw?.isActive,
+		sortOrder: raw?.sortOrder ?? 0,
+		isSystem: raw?.isSystem ?? false,
+	};
+}
+
 export async function fetchTitles() {
-	return authenticatedFetch<Title[]>('/titles');
+	const data = await authenticatedFetch<any[]>('/titles');
+	return data.map(normalizeTitle);
 }
 
 export async function fetchTitlesPage(page: number, limit: number) {
-	return authenticatedFetch<PaginatedList<Title>>(`/titles?page=${page}&limit=${limit}`);
+	const res = await authenticatedFetch<PaginatedList<any>>(`/titles?page=${page}&limit=${limit}`);
+	return { ...res, data: res.data.map(normalizeTitle) } as PaginatedList<Title>;
 }
 
 export async function createTitle(payload: { name: string; sortOrder?: number }) {
-	return authenticatedFetch<Title>('/titles', {
+	const created = await authenticatedFetch<any>('/titles', {
 		method: 'POST',
 		body: JSON.stringify(payload),
 	});
+	return normalizeTitle(created);
 }
 
 export async function updateTitle(id: string, payload: Partial<Pick<Title, 'name' | 'isActive' | 'sortOrder'>>) {
-	return authenticatedFetch<Title>(`/titles/${id}`, {
+	const updated = await authenticatedFetch<any>(`/titles/${id}`, {
 		method: 'PUT',
 		body: JSON.stringify(payload),
 	});
+	return normalizeTitle(updated);
 }
 
 export async function deleteTitle(id: string) {
