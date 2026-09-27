@@ -28,11 +28,15 @@ import { AdminOption } from "@/lib/enums";
 import { getNextPlan, getUpgradeFeatures } from "@/lib/plan-utils";
 import { getPlans } from "@/services/billingService";
 import { useUserStore } from "@/stores/useUserStore";
+
+// Add a "isCurrentUser" flag to each mapped user so the table can highlight
+// the signed-in admin's own row and lock its actions.
 import { Plan, PlanLimitStatus } from "@/types";
 import { User, UserAction } from "@/types/user";
 
 export function UserManagementPage() {
   const accessScope = useUserStore((state) => state.accessScope);
+  const currentUser = useUserStore((state) => state.user);
   const canManageBranchAccess = accessScope === "ORG_WIDE";
 
   const [users, setUsers] = useState<User[]>([]);
@@ -99,6 +103,7 @@ export function UserManagementPage() {
       ]);
 
       setRoles(rolesData);
+      const currentUserEmail = currentUser?.email?.toLowerCase();
       const mappedUsers: User[] = data.map((invite: any) => {
         const roleId =
           typeof invite.churchRole === "string"
@@ -119,7 +124,10 @@ export function UserManagementPage() {
             | "pending"
             | "suspended",
           dateInvited: new Date(invite.createdAt).toLocaleString(),
-        };
+          isCurrentUser:
+            !!currentUserEmail &&
+            invite.email?.toLowerCase() === currentUserEmail,
+        } as User & { isCurrentUser: boolean };
       });
       setUsers(mappedUsers);
     } catch (error: any) {

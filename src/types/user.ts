@@ -11,6 +11,8 @@ export type User = {
   status: UserStatus;
   dateInvited: string;
   avatar?: string;
+  /** True when this row belongs to the signed-in admin (self-action lockout). */
+  isCurrentUser?: boolean;
 };
 
 export type PendingInvite = {
@@ -30,6 +32,14 @@ export type UserAction =
   | "restore"
   | "remove"
   | "manage_branch_access";
+
+/** Actions that are safe for admins to perform on their own account. */
+const SELF_ALLOWED_ACTIONS: UserAction[] = ["view_details"];
+
+export function canPerformAction(action: UserAction, isCurrentUser: boolean) {
+  if (!isCurrentUser) return true;
+  return SELF_ALLOWED_ACTIONS.includes(action);
+}
 
 export type ActionItem = {
   label: string;

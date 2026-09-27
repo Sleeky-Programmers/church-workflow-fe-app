@@ -202,6 +202,53 @@ export const formatDateTime12h = (value: string | number | Date) =>
     hour12: true,
   });
 
+// All module values the backend can write to the activity log
+// (ModuleSections enum in the API). Kept in the order they should
+// appear in the activity-log filter dropdown.
+export const ACTIVITY_MODULES = [
+  "MEMBERS",
+  "GIVING",
+  "GIVING_AND_EXPENSES",
+  "REQUESTS",
+  "EVENTS",
+  "DEPARTMENTS",
+  "ATTENDANCE",
+  "CHURCH",
+  "SUBSCRIPTION",
+  "PAYMENTS",
+  "PAYMENT",
+  "ADMIN",
+  "SMALL_TEAMS",
+] as const;
+
+// Human-friendly labels for activity-log module values.
+const MODULE_LABELS: Record<string, string> = {
+  MEMBERS: "Membership",
+  GIVING: "Giving",
+  GIVING_AND_EXPENSES: "Giving & Expenses",
+  REQUESTS: "Requests",
+  EVENTS: "Events",
+  DEPARTMENTS: "Departments",
+  ATTENDANCE: "Attendance",
+  CHURCH: "Church",
+  SUBSCRIPTION: "Subscription",
+  PAYMENTS: "Payments",
+  PAYMENT: "Payment",
+  ADMIN: "Admin",
+  SMALL_TEAMS: "Small Teams",
+};
+
+export function formatModuleLabel(module: string): string {
+  return (
+    MODULE_LABELS[module] ||
+    module
+      .toLowerCase()
+      .split(/[_\s]+/)
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(" ")
+  );
+}
+
 export function getAvailableActions(status: UserStatus) {
   return USER_ACTION_ITEMS.filter((action) => action.showFor.includes(status));
 }

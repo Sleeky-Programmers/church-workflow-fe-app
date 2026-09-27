@@ -1,208 +1,430 @@
-"use client";
+'use client';
 
-import { Cake } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { Cake, ChevronLeft, ChevronRight, Download } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
 
-import { SidebarTrigger } from "@/components/ui/sidebar";
-import { Input } from "@/components/ui/input";
-import { Loader } from "@/components/ui/loader";
-import Heading from "@/components/ui/typography/Heading";
-import { Text } from "@/components/ui/typography/Text";
-import { useHasAccess } from "@/lib/access-control";
-import { formatUpcomingBirthday, getNextBirthdayDate } from "@/lib/utils";
-import { fetchMembers } from "@/services/memberService";
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Loader } from '@/components/ui/loader';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import { SidebarTrigger } from '@/components/ui/sidebar';
+import Heading from '@/components/ui/typography/Heading';
+import { Text } from '@/components/ui/typography/Text';
+import { useHasAccess } from '@/lib/access-control';
+import { BirthdayExportMember, exportBirthdaysToExcel } from '@/lib/birthday-export';
+import { cn, formatUpcomingBirthday, getNextBirthdayDate } from '@/lib/utils';
+import { fetchMembers } from '@/services/memberService';
+import { useUserStore } from '@/stores/useUserStore';
 
 type BirthdayEntry = {
-  id: string;
-  name: string;
-  date: string;
-  nextDate: Date;
+	id: string;
+	name: string;
+	date: string;
+	nextDate: Date;
 };
 
-const MONTH_LABEL = new Intl.DateTimeFormat("en-US", {
-  month: "long",
-  year: "numeric",
-});
+const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+
+const WEEKDAY_LABELS = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
+
+function buildBirthdayMap(entries: BirthdayEntry[]): Map<string, BirthdayEntry[]> {
+	const map = new Map<string, BirthdayEntry[]>();
+	for (const entry of entries) {
+		const key = `${entry.nextDate.getFullYear()}-${entry.nextDate.getMonth()}-${entry.nextDate.getDate()}`;
+		const list = map.get(key);
+		if (list) {
+			list.push(entry);
+		} else {
+			map.set(key, [entry]);
+		}
+	}
+	return map;
+}
 
 export default function BirthdaysPage() {
-  const canViewMembers = useHasAccess("MEMBERS", "VIEW");
+	const canViewMembers = useHasAccess('MEMBERS', 'VIEW');
 
-  const [entries, setEntries] = useState<BirthdayEntry[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState("");
+	const [entries, setEntries] = useState<BirthdayEntry[]>([]);
+	const [exportMembers, setExportMembers] = useState<BirthdayExportMember[]>([]);
+	const [loading, setLoading] = useState(true);
+	const [isExporting, setIsExporting] = useState(false);
 
-  useEffect(() => {
-    let mounted = true;
-    async function load() {
-      setLoading(true);
-      try {
-        // The members API is scoped to the admin's church server-side, so
-        // every birthday listed here belongs to the current church.
-        const pageSize = 100;
-        const firstPage = await fetchMembers(1, pageSize);
-        const members = [...(firstPage.data || [])];
-        const totalPages = firstPage.pagination?.totalPages || 1;
-        for (let page = 2; page <= totalPages; page++) {
-          const nextPage = await fetchMembers(page, pageSize);
-          members.push(...(nextPage.data || []));
-        }
-        if (!mounted) return;
+	const [searchInput, setSearchInput] = useState('');
+	const [appliedSearch, setAppliedSearch] = useState('');
 
-        const cutoff = new Date();
-        cutoff.setMonth(cutoff.getMonth() + 12);
+	const today = useMemo(() => new Date(), []);
+	const [viewYear, setViewYear] = useState(today.getFullYear());
+	const [viewMonth, setViewMonth] = useState(today.getMonth());
 
-        const mapped: BirthdayEntry[] = members
-          .filter(
-            (m) => m?.birthday && !isNaN(new Date(m.birthday).getTime()),
-          )
-          .map((m) => ({
-            id: m.id,
-            name: m.fullName,
-            date: m.birthday as string,
-            nextDate: getNextBirthdayDate(m.birthday as string),
-          }))
-          .filter((entry) => entry.nextDate <= cutoff)
-          .sort((a, b) => a.nextDate.getTime() - b.nextDate.getTime());
+	const [selectedDay, setSelectedDay] = useState<Date | null>(null);
 
-        setEntries(mapped);
-      } catch {
-        if (mounted) setEntries([]);
-      } finally {
-        if (mounted) setLoading(false);
-      }
-    }
-    load();
-    return () => {
-      mounted = false;
-    };
-  }, []);
+	useEffect(() => {
+		let mounted = true;
+		async function load() {
+			setLoading(true);
+			try {
+				// The members API is scoped to the admin's church server-side, so
+				// every birthday listed here belongs to the current church.
+				const pageSize = 100;
+				const firstPage = await fetchMembers(1, pageSize);
+				const members = [...(firstPage.data || [])];
+				const totalPages = firstPage.pagination?.totalPages || 1;
+				for (let page = 2; page <= totalPages; page++) {
+					const nextPage = await fetchMembers(page, pageSize);
+					members.push(...(nextPage.data || []));
+				}
+				if (!mounted) return;
 
-  // Group entries into upcoming months (nearest first), preserving the
-  // day order within each month.
-  const monthGroups = useMemo(() => {
-    const groups: { key: string; label: string; entries: BirthdayEntry[] }[] =
-      [];
-    const index = new Map<string, number>();
+				// Keep the raw mapped members for the Excel export (needs email/phone).
+				setExportMembers(
+					members.map((m) => ({
+						id: m.id,
+						fullName: m.fullName,
+						email: m.email,
+						phoneNumber: m.phone,
+						birthday: m.birthday,
+					}))
+				);
 
-    for (const entry of entries) {
-      const key = `${entry.nextDate.getFullYear()}-${entry.nextDate.getMonth()}`;
-      if (!index.has(key)) {
-        index.set(key, groups.length);
-        groups.push({
-          key,
-          label: MONTH_LABEL.format(entry.nextDate),
-          entries: [],
-        });
-      }
-      groups[index.get(key)!].entries.push(entry);
-    }
-    return groups;
-  }, [entries]);
+				const cutoff = new Date();
+				cutoff.setMonth(cutoff.getMonth() + 12);
 
-  const filteredGroups = useMemo(() => {
-    if (!search.trim()) return monthGroups;
-    const q = search.trim().toLowerCase();
-    return monthGroups
-      .map((g) => ({
-        ...g,
-        entries: g.entries.filter((e) => e.name.toLowerCase().includes(q)),
-      }))
-      .filter((g) => g.entries.length > 0);
-  }, [monthGroups, search]);
+				const mapped: BirthdayEntry[] = members
+					.filter((m) => m?.birthday && !isNaN(new Date(m.birthday).getTime()))
+					.map((m) => ({
+						id: m.id,
+						name: m.fullName,
+						date: m.birthday as string,
+						nextDate: getNextBirthdayDate(m.birthday as string),
+					}))
+					.filter((entry) => entry.nextDate <= cutoff)
+					.sort((a, b) => a.nextDate.getTime() - b.nextDate.getTime());
 
-  if (!canViewMembers) {
-    return (
-      <div className="space-y-4">
-        <div className="flex items-center gap-3">
-          <SidebarTrigger className="sm:hidden" />
-          <Heading level={2} text="Birthdays" />
-        </div>
-        <Text variant="muted">
-          You don&apos;t have permission to view member birthdays.
-        </Text>
-      </div>
-    );
-  }
+				setEntries(mapped);
+			} catch {
+				if (mounted) setEntries([]);
+			} finally {
+				if (mounted) setLoading(false);
+			}
+		}
+		load();
+		return () => {
+			mounted = false;
+		};
+	}, []);
 
-  return (
-    <div className="space-y-6">
-      <div className="flex items-center gap-3">
-        <SidebarTrigger className="sm:hidden" />
-        <Heading level={2} text="Birthdays" />
-      </div>
+	const birthdayMap = useMemo(() => buildBirthdayMap(entries), [entries]);
 
-      <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:justify-between">
-        <Input
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search by name..."
-          className="sm:max-w-xs"
-        />
-        {!loading && (
-          <Text variant="muted">
-            {entries.length} birthday{entries.length === 1 ? "" : "s"} in the
-            next 12 months
-          </Text>
-        )}
-      </div>
+	const visibleEntries = useMemo(() => {
+		if (!appliedSearch.trim()) return entries;
+		const q = appliedSearch.trim().toLowerCase();
+		return entries.filter((e) => e.name.toLowerCase().includes(q));
+	}, [entries, appliedSearch]);
 
-      {loading ? (
-        <div className="flex items-center justify-center py-16">
-          <Loader size="w-10 h-10" showShadow={false} />
-        </div>
-      ) : filteredGroups.length === 0 ? (
-        <div className="py-16 text-center">
-          <Cake className="w-10 h-10 mx-auto text-gray-300 mb-3" />
-          <Text variant="muted">
-            {search.trim()
-              ? "No birthdays match your search."
-              : "No upcoming birthdays in the next 12 months."}
-          </Text>
-        </div>
-      ) : (
-        <div className="space-y-8">
-          {filteredGroups.map((group) => (
-            <section key={group.key}>
-              <h3 className="text-sm font-bold text-primary-400 mb-3">
-                {group.label}
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
-                {group.entries.map((entry) => (
-                  <div
-                    key={entry.id}
-                    className="flex items-center justify-between gap-3
-                               bg-white rounded-xl border border-gray-300
-                               shadow-[0_1px_4px_rgba(0,0,0,0.06)] px-4 py-3"
-                  >
-                    <div className="flex items-center gap-3 min-w-0">
-                      <div
-                        className="w-9 h-9 rounded-full bg-blue-50 shrink-0
-                                   flex items-center justify-center"
-                      >
-                        <Cake className="w-4 h-4 text-primary-400" />
-                      </div>
-                      <div className="min-w-0">
-                        <p className="text-sm font-semibold text-gray-900 truncate">
-                          {entry.name}
-                        </p>
-                        <p className="text-xs text-gray-400">
-                          {formatUpcomingBirthday(entry.date)}
-                        </p>
-                      </div>
-                    </div>
-                    <span className="text-xs font-medium text-primary-400 shrink-0">
-                      {entry.nextDate.toLocaleDateString("en-US", {
-                        month: "short",
-                        day: "numeric",
-                      })}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </section>
-          ))}
-        </div>
-      )}
-    </div>
-  );
+	const visibleBirthdayMap = useMemo(() => buildBirthdayMap(visibleEntries), [visibleEntries]);
+
+	// Build a 6-week grid of days for the viewed month (with leading/trailing
+	// days from adjacent months, like a standard calendar).
+	const calendarDays = useMemo(() => {
+		const first = new Date(viewYear, viewMonth, 1);
+		const startOffset = first.getDay();
+		const start = new Date(viewYear, viewMonth, 1 - startOffset);
+
+		const weeks: Date[][] = [];
+		const cursor = new Date(start);
+		for (let w = 0; w < 6; w++) {
+			const week: Date[] = [];
+			for (let d = 0; d < 7; d++) {
+				week.push(new Date(cursor));
+				cursor.setDate(cursor.getDate() + 1);
+			}
+			weeks.push(week);
+		}
+		return weeks;
+	}, [viewYear, viewMonth]);
+
+	const goToPrevMonth = () => {
+		setViewMonth((m) => {
+			if (m === 0) {
+				setViewYear((y) => y - 1);
+				return 11;
+			}
+			return m - 1;
+		});
+	};
+
+	const goToNextMonth = () => {
+		setViewMonth((m) => {
+			if (m === 11) {
+				setViewYear((y) => y + 1);
+				return 0;
+			}
+			return m + 1;
+		});
+	};
+
+	const selectedDayKey = selectedDay ? `${selectedDay.getFullYear()}-${selectedDay.getMonth()}-${selectedDay.getDate()}` : null;
+	const selectedDayBirthdays = selectedDayKey ? birthdayMap.get(selectedDayKey) || [] : [];
+
+	const isSameDay = (a: Date, b: Date) => a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+
+	const churchName = useUserStore((state) => state.church?.name ?? null);
+
+	const handleExport = async () => {
+		setIsExporting(true);
+		try {
+			await exportBirthdaysToExcel(exportMembers, churchName);
+		} catch (error) {
+			console.error('Failed to export birthdays:', error);
+		} finally {
+			setIsExporting(false);
+		}
+	};
+
+	if (!canViewMembers) {
+		return (
+			<div className="space-y-4">
+				<div className="flex items-center gap-3">
+					<SidebarTrigger className="sm:hidden" />
+					<Heading
+						level={2}
+						text="Birthdays"
+					/>
+				</div>
+				<Text variant="muted">You don&apos;t have permission to view member birthdays.</Text>
+			</div>
+		);
+	}
+
+	return (
+		<div className="space-y-6">
+			<div className="flex items-center gap-3">
+				<SidebarTrigger className="sm:hidden" />
+				<Heading
+					level={2}
+					text="Birthdays"
+				/>
+			</div>
+
+			<div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:justify-between">
+				{/* Search commits on Enter (or the mobile keyboard's search key),
+            not on every keystroke. */}
+				<form
+					role="search"
+					onSubmit={(e) => {
+						e.preventDefault();
+						setAppliedSearch(searchInput);
+					}}
+					className="sm:max-w-xs w-full">
+					<Input
+						value={searchInput}
+						onChange={(e) => setSearchInput(e.target.value)}
+						onKeyDown={(e) => {
+							if (e.key === 'Enter') {
+								e.preventDefault();
+								setAppliedSearch(searchInput);
+							}
+						}}
+						enterKeyHint="search"
+						placeholder="Search by name, press Enter..."
+						className="w-full"
+					/>
+				</form>
+
+				<Button
+					variant="outline"
+					onClick={handleExport}
+					disabled={isExporting || loading || entries.length === 0}
+					className="gap-2">
+					<Download className="w-4 h-4" />
+					{isExporting ? 'Exporting...' : 'Export'}
+				</Button>
+			</div>
+
+			{loading ? (
+				<div className="flex items-center justify-center py-16">
+					<Loader
+						size="w-10 h-10"
+						showShadow={false}
+					/>
+				</div>
+			) : (
+				<div className="bg-white rounded-xl border border-gray-300 shadow-[0_1px_4px_rgba(0,0,0,0.06)] p-3 sm:p-6 w-full">
+					{/* Calendar header: month/year jump controls + prev/next */}
+					<div className="flex flex-wrap items-center justify-between gap-2 mb-4">
+						<div className="flex items-center gap-2">
+							<Select
+								value={String(viewMonth)}
+								onValueChange={(v) => setViewMonth(Number(v))}>
+								<SelectTrigger className="w-[130px]">
+									<SelectValue />
+								</SelectTrigger>
+								<SelectContent>
+									{MONTHS.map((month, idx) => (
+										<SelectItem
+											key={month}
+											value={String(idx)}>
+											{month}
+										</SelectItem>
+									))}
+								</SelectContent>
+							</Select>
+
+							<Select
+								value={String(viewYear)}
+								onValueChange={(v) => setViewYear(Number(v))}>
+								<SelectTrigger className="w-[100px]">
+									<SelectValue />
+								</SelectTrigger>
+								<SelectContent>
+									{Array.from({ length: 9 }, (_, i) => today.getFullYear() - 1 + i).map((year) => (
+										<SelectItem
+											key={year}
+											value={String(year)}>
+											{year}
+										</SelectItem>
+									))}
+								</SelectContent>
+							</Select>
+						</div>
+
+						<div className="flex items-center gap-1">
+							<button
+								type="button"
+								onClick={goToPrevMonth}
+								className="p-2 rounded-md hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-400"
+								aria-label="Previous month">
+								<ChevronLeft className="w-4 h-4" />
+							</button>
+							<button
+								type="button"
+								onClick={goToNextMonth}
+								className="p-2 rounded-md hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-400"
+								aria-label="Next month">
+								<ChevronRight className="w-4 h-4" />
+							</button>
+						</div>
+					</div>
+
+					{/* Weekday labels */}
+					<div className="grid grid-cols-7 mb-1">
+						{WEEKDAY_LABELS.map((label) => (
+							<div
+								key={label}
+								className="text-center text-xs font-medium text-gray-400 py-1">
+								{label}
+							</div>
+						))}
+					</div>
+
+					{/* Day grid */}
+					<div className="grid grid-cols-7 gap-1 sm:gap-y-1">
+						{calendarDays.flat().map((day) => {
+							const inMonth = day.getMonth() === viewMonth;
+							const key = `${day.getFullYear()}-${day.getMonth()}-${day.getDate()}`;
+							const dayBirthdays = visibleBirthdayMap.get(key) || [];
+							const hasBirthday = dayBirthdays.length > 0;
+							const isToday = isSameDay(day, today);
+							const isSelected = selectedDay ? isSameDay(day, selectedDay) : false;
+
+							return (
+								<button
+									key={key}
+									type="button"
+									onClick={() => {
+										if (inMonth && hasBirthday) {
+											setSelectedDay(day);
+										}
+									}}
+									disabled={!inMonth || !hasBirthday}
+									className={cn(
+										'relative h-[46px] w-full flex items-center justify-center rounded-md sm:rounded-lg text-sm sm:text-base transition-colors',
+										!inMonth && 'text-gray-300 opacity-50',
+										inMonth && !hasBirthday && 'text-gray-600',
+										hasBirthday && 'bg-primary-50 text-primary-700 font-semibold hover:bg-primary-100 cursor-pointer',
+										isToday && 'ring-1 ring-primary-400',
+										isSelected && 'bg-primary text-white hover:bg-primary ring-0'
+									)}
+									aria-label={
+										hasBirthday
+											? `${day.getDate()} ${MONTHS[day.getMonth()]}, ${dayBirthdays.length} birthday${dayBirthdays.length === 1 ? '' : 's'}`
+											: `${day.getDate()} ${MONTHS[day.getMonth()]}, no birthdays`
+									}>
+									<span className="flex items-center gap-1">
+										{day.getDate()}
+										{hasBirthday && !isSelected && <Cake className="w-3 h-3 text-primary-400" />}
+									</span>
+								</button>
+							);
+						})}
+					</div>
+
+					<div className="mt-4 flex items-center gap-2">
+						<span className="inline-flex items-center gap-1.5 text-xs text-gray-500">
+							<span className="w-4 h-4 rounded bg-primary-50 border border-primary-200 inline-flex items-center justify-center">
+								<Cake className="w-2.5 h-2.5 text-primary-400" />
+							</span>
+							Birthday
+						</span>
+						{appliedSearch.trim() && visibleEntries.length === 0 && <span className="text-xs text-gray-500 ml-2">No birthdays match your search.</span>}
+					</div>
+				</div>
+			)}
+
+			{/* Birthday drawer */}
+			<Sheet
+				open={!!selectedDay}
+				onOpenChange={(open) => !open && setSelectedDay(null)}>
+				<SheetContent
+					side="right"
+					className="flex w-full flex-col gap-0 p-0 sm:max-w-md">
+					<SheetHeader className="px-6 pt-6 pb-4 border-b">
+						<SheetTitle>
+							Birthdays on{' '}
+							{selectedDay?.toLocaleDateString('en-US', {
+								weekday: 'long',
+								month: 'long',
+								day: 'numeric',
+							})}
+						</SheetTitle>
+						<Text
+							variant="muted"
+							className="text-sm">
+							{selectedDayBirthdays.length} birthday
+							{selectedDayBirthdays.length === 1 ? '' : 's'}
+						</Text>
+					</SheetHeader>
+
+					<div className="flex-1 overflow-y-auto px-6 py-5">
+						{selectedDayBirthdays.length === 0 ? (
+							<div className="py-12 text-center">
+								<Cake className="w-10 h-10 mx-auto text-gray-300 mb-3" />
+								<Text variant="muted">No birthdays on this day.</Text>
+							</div>
+						) : (
+							<div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+								{selectedDayBirthdays.map((entry) => (
+									<div
+										key={entry.id}
+										className="flex flex-col items-start gap-2 bg-white rounded-xl border border-gray-300
+                               shadow-[0_1px_4px_rgba(0,0,0,0.06)] px-4 py-4">
+										<div
+											className="w-9 h-9 rounded-full bg-primary-50 shrink-0
+                                 flex items-center justify-center">
+											<Cake className="w-4 h-4 text-primary-400" />
+										</div>
+										<div className="min-w-0">
+											<p className="text-sm font-semibold text-gray-900 truncate">{entry.name}</p>
+											<p className="text-xs text-gray-400">{formatUpcomingBirthday(entry.date)}</p>
+										</div>
+									</div>
+								))}
+							</div>
+						)}
+					</div>
+				</SheetContent>
+			</Sheet>
+		</div>
+	);
 }

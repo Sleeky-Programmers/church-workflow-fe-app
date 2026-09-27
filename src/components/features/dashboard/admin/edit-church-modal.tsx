@@ -1,27 +1,44 @@
 "use client";
 
-import { Camera } from "lucide-react";
+import { AlertCircle, Camera } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import { Button } from "@/components/ui/button";
 import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+  Sheet,
+  SheetContent,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Text } from "@/components/ui/typography/Text";
-import { useIsMobile } from "@/hooks/use-mobile";
-import { useToast } from "@/hooks/use-toast";
+import {
+  getFriendlyErrorMessage,
+  MAX_IMAGE_SIZE_MB,
+} from "@/lib/api-errors";
 import { updateChurch } from "@/services/churchService";
 import { editChurchSchema, EditChurchFormValues } from "@/types/schema";
 
 type FormValues = EditChurchFormValues;
+
+const MAX_IMAGE_SIZE_BYTES = MAX_IMAGE_SIZE_MB * 1024 * 1024;
+const ACCEPTED_IMAGE_TYPES = [
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+  "image/gif",
+];
+
+function formatFileSize(bytes: number): string {
+  if (bytes < 1024 * 1024) {
+    return `${(bytes / 1024).toFixed(0)}KB`;
+  }
+  return `${(bytes / (1024 * 1024)).toFixed(1)}MB`;
+}
 
 export function EditChurchModal({
   open,
@@ -29,9 +46,10 @@ export function EditChurchModal({
   church,
   onUpdated,
 }: any) {
-  const { toast } = useToast();
   const [file, setFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [fileError, setFileError] = useState<string | null>(null);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const {
@@ -52,11 +70,13 @@ export function EditChurchModal({
       });
       setFile(null);
       setPreviewUrl(null);
+      setFileError(null);
+      setSubmitError(null);
     }
   }, [open, church, reset]);
 
   // Selecting a new logo swaps the preview to that file's image; the
-  // Object URL is revoked whenever it's replaced or the modal closes.
+  // Object URL is revoked whenever it's replaced or the drawer closes.
   useEffect(() => {
     return () => {
       if (previewUrl) {
@@ -67,44 +87,89 @@ export function EditChurchModal({
 
   const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selected = e.target.files?.[0] || null;
-    setFile(selected);
+
+    // Reset previous errors and selection state before validating
+    setFileError(null);
+    setSubmitError(null);
+    setFile(null);
     setPreviewUrl((current) => {
       if (current) URL.revokeObjectURL(current);
-      return selected ? URL.createObjectURL(selected) : null;
+      return null;
     });
+
+    if (!selected) return;
+
+    // Client-side validation: type
+    if (!ACCEPTED_IMAGE_TYPES.includes(selected.type)) {
+      setFileError(
+        `"${selected.name}" is not a supported image. Please upload a JPG, PNG, WEBP, or GIF file.`,
+      );
+      e.target.value = "";
+      return;
+    }
+
+    // Client-side validation: size
+    if (selected.size > MAX_IMAGE_SIZE_BYTES) {
+      setFileError(
+        `"${selected.name}" is ${formatFileSize(selected.size)}, which exceeds the ${MAX_IMAGE_SIZE_MB}MB limit. Please choose a smaller image.`,
+      );
+      e.target.value = "";
+      return;
+    }
+
+    setFile(selected);
+    setPreviewUrl(URL.createObjectURL(selected));
   };
 
-  const isMobile = useIsMobile();
   const displayedLogo = previewUrl || church?.logoUrl;
 
   const onSubmit = async (data: FormValues) => {
+    setSubmitError(null);
+
     try {
       const updated = await updateChurch(data, file || undefined);
-
-      toast({
-        title: "Success",
-        description: "Church updated successfully",
-      });
-
       onUpdated?.(updated);
       onOpenChange(false);
     } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message || "Update failed",
-        variant: "destructive",
-      });
+      // 413 can come from a proxy before our client-side check triggers,
+      // so map it to the same clear, size-specific message.
+      const status = error?.status;
+      const isTooLarge =
+        status === 413 || /too large|file size/i.test(error?.message || "");
+
+      setSubmitError(
+        isTooLarge
+          ? `The selected image is too large. Please choose an image smaller than ${MAX_IMAGE_SIZE_MB}MB.`
+          : getFriendlyErrorMessage(error, "Couldn't update the church. Please try again."),
+      );
     }
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent mobileSheet={isMobile} className="sm:max-w-lg p-0">
-        <DialogHeader className="px-6 pt-6 pb-2">
-          <DialogTitle>Edit Church</DialogTitle>
-        </DialogHeader>
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetContent
+        side="right"
+        className="flex w-full flex-col gap-0 p-0 sm:max-w-lg"
+      >
+        <SheetHeader className="px-6 pt-6 pb-4 border-b">
+          <SheetTitle>Edit Church</SheetTitle>
+        </SheetHeader>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="px-6 pb-5 space-y-4">
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          className="flex min-h-0 flex-1 flex-col"
+        >
+          <div className="flex-1 space-y-4 overflow-y-auto px-6 py-5">
+          {submitError && (
+            <div
+              role="alert"
+              className="flex items-start gap-2 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-600"
+            >
+              <AlertCircle className="mt-0.5 h-4 w-4 flex-shrink-0" />
+              <span>{submitError}</span>
+            </div>
+          )}
+
           <div className="flex flex-col items-center gap-2">
             <button
               type="button"
@@ -138,14 +203,29 @@ export function EditChurchModal({
             </Button>
             {file && (
               <Text variant="muted" className="text-xs">
-                Selected: {file.name}
+                Selected: {file.name} ({formatFileSize(file.size)})
+              </Text>
+            )}
+
+            {fileError && (
+              <p
+                role="alert"
+                className="flex items-start gap-1.5 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-600"
+              >
+                <AlertCircle className="mt-0.5 h-4 w-4 flex-shrink-0" />
+                <span>{fileError}</span>
+              </p>
+            )}
+            {!fileError && (
+              <Text variant="muted" className="text-xs">
+                JPG, PNG, WEBP, or GIF up to {MAX_IMAGE_SIZE_MB}MB
               </Text>
             )}
 
             <input
               ref={fileInputRef}
               type="file"
-              accept="image/*"
+              accept="image/jpeg,image/png,image/webp,image/gif"
               className="hidden"
               onChange={handleLogoChange}
             />
@@ -177,7 +257,9 @@ export function EditChurchModal({
             </div>
           </div>
 
-          <DialogFooter className="pt-4 border-t mt-4">
+          </div>
+
+          <SheetFooter className="mt-0 flex-row items-center justify-end gap-2 border-t px-6 py-4">
             <Button
               type="button"
               variant="destructive"
@@ -190,9 +272,9 @@ export function EditChurchModal({
             <Button type="submit" size={"sm"} disabled={isSubmitting}>
               {isSubmitting ? "Saving..." : "Save"}
             </Button>
-          </DialogFooter>
+          </SheetFooter>
         </form>
-      </DialogContent>
-    </Dialog>
+      </SheetContent>
+    </Sheet>
   );
 }
