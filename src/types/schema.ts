@@ -92,6 +92,15 @@ export const editPersonalInfoSchema = z.object({
   firstName: z.string().min(1, "First name is required"),
   lastName: z.string().min(1, "Last name is required"),
   email: z.string().min(1, "Email is required").email("Invalid email"),
+  phoneNumber: z
+    .string()
+    .trim()
+    .regex(/^\+?[0-9\s\-()]{7,20}$/, {
+      message:
+        "Phone number must be 7-20 digits and may start with + (spaces and dashes allowed)",
+    })
+    .optional()
+    .or(z.literal("")),
 });
 
 export type EditPersonalInfoFormValues = z.infer<typeof editPersonalInfoSchema>;

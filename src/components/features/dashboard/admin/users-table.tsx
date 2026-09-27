@@ -13,6 +13,7 @@ import { User, UserAction } from "@/types/user";
 import { UserActionsMenu } from "./mini-components/user-action";
 import Heading from "@/components/ui/typography/Heading";
 import { Text } from "@/components/ui/typography/Text";
+import { Badge } from "@/components/ui/badge";
 
 type UserTableProps = {
   users: User[];
@@ -51,7 +52,16 @@ export function UserTable({
       <TableBody>
         {users.map((user) => (
           <TableRow key={user.id}>
-            <TableCell className="font-medium">{user.name}</TableCell>
+            <TableCell className="font-medium">
+              <span className="inline-flex items-center gap-2">
+                {user.name}
+                {user.isCurrentUser && (
+                  <Badge shape="pill" className="bg-primary-50 text-primary-700 border border-primary-200">
+                    You
+                  </Badge>
+                )}
+              </span>
+            </TableCell>
             <TableCell>{user.email}</TableCell>
             <TableCell>{user.role}</TableCell>
             <TableCell>
@@ -64,6 +74,7 @@ export function UserTable({
                 userStatus={user.status}
                 onActionSelect={(action) => onActionSelect(user.id, action)}
                 canManageBranchAccess={canManageBranchAccess}
+                isCurrentUser={user.isCurrentUser}
               />
             </TableCell>
           </TableRow>

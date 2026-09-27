@@ -1038,8 +1038,16 @@ export async function markAllNotificationsAsRead() {
   });
 }
 
-export async function fetchActivityLogs(): Promise<ActivityLogApiResponse> {
-  return await apiFetch("/activity-log", {
+export async function fetchActivityLogs(
+  page = 1,
+  limit = 20,
+): Promise<ActivityLogApiResponse> {
+  const params = new URLSearchParams({
+    page: String(page),
+    limit: String(limit),
+  });
+
+  return await apiFetch(`/activity-log?${params.toString()}`, {
     method: "GET",
   });
 }

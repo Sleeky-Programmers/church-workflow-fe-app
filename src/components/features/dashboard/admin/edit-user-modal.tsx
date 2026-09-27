@@ -1,23 +1,23 @@
 "use client";
 
-import { useEffect } from "react";
+import { AlertCircle } from "lucide-react";
+import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import { Button } from "@/components/ui/button";
 import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+  Sheet,
+  SheetContent,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Text } from "@/components/ui/typography/Text";
 import { TitleCombobox } from "@/components/ui/title-combobox";
-import { useIsMobile } from "@/hooks/use-mobile";
-import { useToast } from "@/hooks/use-toast";
+import { getFriendlyErrorMessage } from "@/lib/api-errors";
 import { updateProfile } from "@/services/userServices";
 import {
   editPersonalInfoSchema,
@@ -32,7 +32,7 @@ export function EditPersonalInfoModal({
   user,
   onUpdated,
 }: any) {
-  const { toast } = useToast();
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const {
     register,
@@ -49,38 +49,50 @@ export function EditPersonalInfoModal({
         firstName: user?.firstName || "",
         lastName: user?.lastName || "",
         email: user?.email || "",
+        phoneNumber: user?.phoneNumber || "",
       });
     }
   }, [open, user, reset]);
-  const isMobile = useIsMobile();
+
   const onSubmit = async (data: FormValues) => {
+    setSubmitError(null);
+
     try {
       const updated = await updateProfile(data);
-
-      toast({
-        title: "Success",
-        description: "Profile updated successfully",
-      });
-
       onUpdated?.(updated);
       onOpenChange(false);
     } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message || "Update failed",
-        variant: "destructive",
-      });
+      setSubmitError(
+        getFriendlyErrorMessage(error, "Couldn't update your profile. Please try again."),
+      );
     }
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent mobileSheet={isMobile} className="sm:max-w-lg p-0">
-        <DialogHeader className="px-6 pt-6 pb-2">
-          <DialogTitle>Update Personal Information</DialogTitle>
-        </DialogHeader>
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetContent
+        side="right"
+        className="flex w-full flex-col gap-0 p-0 sm:max-w-lg"
+      >
+        <SheetHeader className="px-6 pt-6 pb-4 border-b">
+          <SheetTitle>Update Personal Information</SheetTitle>
+        </SheetHeader>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="px-6 pb-5 space-y-4">
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          className="flex min-h-0 flex-1 flex-col"
+        >
+          <div className="flex-1 space-y-4 overflow-y-auto px-6 py-5">
+          {submitError && (
+            <div
+              role="alert"
+              className="flex items-start gap-2 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-600"
+            >
+              <AlertCircle className="mt-0.5 h-4 w-4 flex-shrink-0" />
+              <span>{submitError}</span>
+            </div>
+          )}
+
           <div>
             <Label>Title</Label>
             <Controller
@@ -114,14 +126,34 @@ export function EditPersonalInfoModal({
           </div>
 
           <div>
-            <Label>Email</Label>
-            <Input {...register("email")} className="bg-gray-100" />
-            {errors.email && (
-              <p className="text-red-500 text-sm">{errors.email.message}</p>
+            <Label>Phone Number</Label>
+            <Input
+              {...register("phoneNumber")}
+              type="tel"
+              placeholder="e.g. +234 801 234 5678"
+              className="bg-gray-100"
+            />
+            {errors.phoneNumber && (
+              <Text variant="error">{errors.phoneNumber.message}</Text>
             )}
           </div>
 
-          <DialogFooter className="pt-4 border-t mt-4">
+          <div>
+            <Label>Email</Label>
+            <Input
+              {...register("email")}
+              disabled
+              readOnly
+              className="bg-gray-100 cursor-not-allowed text-gray-500"
+            />
+            <Text variant="muted" className="text-xs mt-1">
+              Email address can&apos;t be changed here.
+            </Text>
+          </div>
+
+          </div>
+
+          <SheetFooter className="mt-0 flex-row items-center justify-end gap-2 border-t px-6 py-4">
             <Button
               type="button"
               variant="destructive"
@@ -134,9 +166,9 @@ export function EditPersonalInfoModal({
             <Button type="submit" size={"sm"} disabled={isSubmitting}>
               {isSubmitting ? "Saving..." : "Save"}
             </Button>
-          </DialogFooter>
+          </SheetFooter>
         </form>
-      </DialogContent>
-    </Dialog>
+      </SheetContent>
+    </Sheet>
   );
 }

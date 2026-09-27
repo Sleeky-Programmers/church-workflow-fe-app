@@ -39,6 +39,7 @@ export async function updateProfile(data: {
   firstName: string;
   lastName: string;
   email: string;
+  phoneNumber?: string;
 }) {
   return await authenticatedFetch("/admin/me", {
     method: "PATCH",

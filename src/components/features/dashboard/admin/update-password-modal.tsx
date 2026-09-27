@@ -1,5 +1,7 @@
 "use client";
 
+import { AlertCircle, EyeOff } from "lucide-react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -13,15 +15,14 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { EyeOff } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { getFriendlyErrorMessage } from "@/lib/api-errors";
 import { updatePassword } from "@/services/authService";
 import { updatePasswordSchema, UpdatePasswordFormValues } from "@/types/schema";
 
 type FormValues = UpdatePasswordFormValues;
 
 export function UpdatePasswordModal({ open, onOpenChange }: any) {
-  const { toast } = useToast();
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const isMobile = useIsMobile();
 
   const {
@@ -32,6 +33,8 @@ export function UpdatePasswordModal({ open, onOpenChange }: any) {
   } = useForm<FormValues>({ resolver: zodResolver(updatePasswordSchema) });
 
   const onSubmit = async (data: FormValues) => {
+    setSubmitError(null);
+
     try {
       await updatePassword({
         currentPassword: data.currentPassword,
@@ -39,19 +42,12 @@ export function UpdatePasswordModal({ open, onOpenChange }: any) {
         confirmNewPassword: data.confirmPassword,
       });
 
-      toast({
-        title: "Success",
-        description: "Password updated successfully",
-      });
-
       reset();
       onOpenChange(false);
     } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to update password",
-        variant: "destructive",
-      });
+      setSubmitError(
+        getFriendlyErrorMessage(error, "Couldn't update your password. Please try again."),
+      );
     }
   };
 
@@ -63,6 +59,16 @@ export function UpdatePasswordModal({ open, onOpenChange }: any) {
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="px-6 space-y-4">
+          {submitError && (
+            <div
+              role="alert"
+              className="flex items-start gap-2 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-600"
+            >
+              <AlertCircle className="mt-0.5 h-4 w-4 flex-shrink-0" />
+              <span>{submitError}</span>
+            </div>
+          )}
+
           <div>
             <Label>Current Password</Label>
             <Input

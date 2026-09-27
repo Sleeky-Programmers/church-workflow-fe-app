@@ -12,11 +12,16 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
-import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Text } from "@/components/ui/typography/Text";
 import ActivityLogPopup from "@/components/features/dashboard/ActivityLogPopup";
 import { ActivityRow, ActivityLogApiResponse } from "@/types";
-import { formatDateTime12h } from "@/lib/utils";
 import { Span } from "@/components/ui/typography/Text";
 import { fetchActivityLogs } from "@/lib/api";
 import { Loader } from "@/components/ui/loader";
@@ -26,6 +31,12 @@ import {
   PaginationItem,
 } from "@/components/ui/pagination";
 import { useToast } from "@/hooks/use-toast";
+import {
+  ACTIVITY_MODULES,
+  formatDateTime12h,
+  formatModuleLabel,
+} from "@/lib/utils";
+import { Input } from "@/components/ui/input";
 
 export default function ActivityLogPage() {
   const [query, setQuery] = useState("");
@@ -35,6 +46,7 @@ export default function ActivityLogPage() {
   const [activityLogs, setActivityLogs] = useState<ActivityRow[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
   const [pagination, setPagination] = useState<
     ActivityLogApiResponse["pagination"] | null
   >(null);
@@ -48,10 +60,13 @@ export default function ActivityLogPage() {
     "rgba(6,95,36,1)",
   ];
 
-  const getActivityLogs = async (page: number = 1) => {
+  const getActivityLogs = async (
+    page: number = 1,
+    limit: number = pageSize,
+  ) => {
     setIsLoading(true);
     try {
-      const response = await fetchActivityLogs();
+      const response = await fetchActivityLogs(page, limit);
       if (!response.data) {
         setIsLoading(false);
         return;
@@ -155,6 +170,7 @@ export default function ActivityLogPage() {
       header: "Module",
       accessor: "module",
       width: "w-40",
+      render: (row) => formatModuleLabel(row.module),
     },
     {
       key: "details",
@@ -198,21 +214,19 @@ export default function ActivityLogPage() {
           {showFilter && (
             <div className="absolute right-0 top-10 w-56 rounded-xl border bg-background shadow-lg p-3 z-20">
               <Text text="Filter by module" className=" mb-2" />
-              {["Requisition", "Membership", "Events", "Authentication"].map(
-                (m) => (
-                  <Button
-                    key={m}
-                    variant={moduleFilter === m ? "secondary" : "ghost"}
-                    className="w-full justify-start "
-                    onClick={() => {
-                      setModuleFilter(m);
-                      setShowFilter(false);
-                    }}
-                  >
-                    {m}
-                  </Button>
-                ),
-              )}
+              {ACTIVITY_MODULES.map((m) => (
+                <Button
+                  key={m}
+                  variant={moduleFilter === m ? "secondary" : "ghost"}
+                  className="w-full justify-start "
+                  onClick={() => {
+                    setModuleFilter(m);
+                    setShowFilter(false);
+                  }}
+                >
+                  {formatModuleLabel(m)}
+                </Button>
+              ))}
               <Button
                 variant="ghost"
                 className="mt-2"
@@ -245,6 +259,7 @@ export default function ActivityLogPage() {
             rowKey={(r) => r._id}
             showCheckbox={false}
             enablePagination={false}
+            minWidth="min-w-[880px]"
             onRowClick={(r) => setSelectedRow(r as ActivityRow)}
             emptyState={
               <Text
@@ -255,11 +270,42 @@ export default function ActivityLogPage() {
             }
           />
 
-          {pagination && pagination.totalPages > 1 && (
-            <div className="mt-8 flex items-center justify-between">
-              <Text variant="muted" className="text-sm">
-                Page {currentPage} of {pagination.totalPages}
+          <div className="mt-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-center gap-3">
+              <Text variant="muted" className="text-sm whitespace-nowrap">
+                Rows per page
               </Text>
+              <Select
+                value={String(pageSize)}
+                onValueChange={(value) => {
+                  const nextLimit = Number(value);
+                  setPageSize(nextLimit);
+                  getActivityLogs(1, nextLimit);
+                }}
+              >
+                <SelectTrigger className="w-[80px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {[5, 10, 25].map((size) => (
+                    <SelectItem key={size} value={String(size)}>
+                      {size}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {pagination && (
+              <Text variant="muted" className="text-sm">
+                Showing {activityLogs.length} of {pagination.itemCount} records
+                • Page {currentPage} of {pagination.totalPages}
+              </Text>
+            )}
+          </div>
+
+          {pagination && pagination.totalPages > 1 && (
+            <div className="mt-4 flex justify-end">
               <Pagination className="justify-end m-0">
                 <PaginationContent>
                   <PaginationItem>

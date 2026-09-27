@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 
 import DashboardMobile from "@/components/features/dashboard/dashboard-mobile";
 import { EmptyState } from "@/components/features/dashboard/empty-state";
+import { GivingConfigWarningBanner } from "@/components/features/dashboard/giving-config-warning-banner";
 import { IncomeBreakdown } from "@/components/features/dashboard/income-breakdown";
 import { IncomeVsExpenses } from "@/components/features/dashboard/income-expense";
 import { PendingRequestsWidget } from "@/components/features/dashboard/pending-requests-widget";
@@ -264,7 +265,9 @@ export default function Dashboard() {
   // ── Mobile shell ──
   if (isMobile) {
     return (
-      <DashboardMobile
+      <>
+        {canViewGiving && <GivingConfigWarningBanner />}
+        <DashboardMobile
         displayName={displayName}
         churchName={church?.name || "Your Church"}
         totalMembers={totalMembers}
@@ -277,7 +280,8 @@ export default function Dashboard() {
         upcomingBirthdays={upcomingBirthdays}
         canViewGiving={canViewGiving}
         canViewRequests={canViewRequests}
-      />
+        />
+      </>
     );
   }
 
@@ -303,6 +307,8 @@ export default function Dashboard() {
 
   return (
     <div className="flex flex-col gap-5 pb-8">
+      {canViewGiving && <GivingConfigWarningBanner />}
+
       <div className="flex items-center justify-between">
         <h1 className="text-[22px] font-bold text-gray-900 tracking-tight flex items-center gap-2">
           Hello, {user?.firstName || "User"}

@@ -6,10 +6,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
 import { BatchStatusBadge } from "@/components/features/dashboard/finance/giving/batch-status-badge";
-import {
-  EntryLine,
-  PAYMENT_METHODS,
-} from "@/components/features/dashboard/finance/giving/entry-line";
+import { EntryLine } from "@/components/features/dashboard/finance/giving/entry-line";
 import { VoidDialog } from "@/components/features/dashboard/finance/giving/void-dialog";
 import { Button } from "@/components/ui/button";
 import {
@@ -49,6 +46,10 @@ import {
   updateGivingBatch,
   voidGivingBatch,
 } from "@/services/givingService";
+import {
+  fetchPaymentMethods,
+  PaymentMethod,
+} from "@/services/paymentMethodService";
 import { formatCurrency } from "@/utils/currency";
 
 type ServiceOption = { id: string; title: string };
@@ -68,6 +69,7 @@ export default function GivingBatchDetailPage() {
   const [services, setServices] = useState<ServiceOption[]>([]);
   const [offeringTypes, setOfferingTypes] = useState<OfferingType[]>([]);
   const [currencies, setCurrencies] = useState<Currency[]>([]);
+  const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
 
   const [isEditing, setIsEditing] = useState(false);
   const [date, setDate] = useState("");
@@ -82,12 +84,13 @@ export default function GivingBatchDetailPage() {
   const load = async () => {
     setIsLoading(true);
     try {
-      const [batchData, servicesData, offeringTypesData, currenciesData] =
+      const [batchData, servicesData, offeringTypesData, currenciesData, paymentMethodsData] =
         await Promise.all([
           fetchGivingBatch(id),
           fetchAllServices(format(new Date(), "yyyy-MM")),
           fetchOfferingTypes(),
           fetchCurrencies(),
+          fetchPaymentMethods(),
         ]);
 
       setBatch(batchData);
@@ -96,6 +99,7 @@ export default function GivingBatchDetailPage() {
       );
       setOfferingTypes(offeringTypesData);
       setCurrencies(currenciesData);
+      setPaymentMethods(paymentMethodsData);
 
       setDate(batchData.date?.slice(0, 10) || "");
       setCountedWith(batchData.countedWith || "");
@@ -134,6 +138,10 @@ export default function GivingBatchDetailPage() {
     () => currencies.filter((c) => c.isActive),
     [currencies],
   );
+  const activePaymentMethods = useMemo(
+    () => paymentMethods.filter((m) => m.isActive),
+    [paymentMethods],
+  );
 
   const totalsByCurrency = useMemo(() => {
     const totals: Record<string, number> = {};
@@ -153,10 +161,13 @@ export default function GivingBatchDetailPage() {
     setEntries((prev) => [
       ...prev,
       {
-        offeringTypeId: activeOfferingTypes[0]?.id || "",
+        offeringTypeId:
+          activeOfferingTypes.find((t) => t.isDefault)?.id ||
+          activeOfferingTypes[0]?.id ||
+          "",
         currencyCode: defaultCurrency,
         amount: 0,
-        paymentMethod: PAYMENT_METHODS[0].value,
+        paymentMethod: activePaymentMethods[0]?.code || "",
       },
     ]);
   };
@@ -376,14 +387,12 @@ export default function GivingBatchDetailPage() {
 
         <div className="space-y-1.5">
           <Label>Date</Label>
-          {isEditing ? (
-            <Input
-              type="date"
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
-            />
-          ) : (
-            <Text>{format(new Date(batch.date), "MMM d, yyyy")}</Text>
+          <Text>{format(new Date(batch.date), "MMM d, yyyy")}</Text>
+          {isEditing && (
+            <Text variant="muted" className="text-xs">
+              Fixed to the service occurrence being recorded and can&apos;t be
+              changed.
+            </Text>
           )}
         </div>
 
@@ -419,6 +428,7 @@ export default function GivingBatchDetailPage() {
                 entry={entry}
                 offeringTypes={activeOfferingTypes}
                 currencies={activeCurrencies}
+                paymentMethods={activePaymentMethods}
                 onChange={(next) => handleEntryChange(index, next)}
                 onRemove={() => handleRemoveEntry(index)}
                 canRemove={entries.length > 1}

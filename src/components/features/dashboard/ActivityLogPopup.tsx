@@ -1,11 +1,12 @@
 import { Dialog, DialogClose, DialogContent } from "@/components/ui/dialog";
-import { Check, Trash2, X } from "lucide-react";
+import { Check, X } from "lucide-react";
 import { ActivityRow } from "@/types";
 import Heading from "@/components/ui/typography/Heading";
 import { Span, Text } from "@/components/ui/typography/Text";
 import { Button } from "@/components/ui/button";
 import { activityDetailsConfig } from "@/config/activity-log";
 import { formatDateTime12h } from "@/lib/utils";
+import { formatModuleLabel } from "@/lib/utils";
 
 export default function ActivityLogPopup({
   selectedRow,
@@ -14,10 +15,6 @@ export default function ActivityLogPopup({
   selectedRow: ActivityRow | null;
   setSelectedRow: (row: ActivityRow | null) => void;
 }) {
-  const handleDelete = () => {
-    setSelectedRow(null);
-  };
-
   return (
     <Dialog
       open={!!selectedRow}
@@ -40,22 +37,12 @@ export default function ActivityLogPopup({
                     className="text-lg font-semibold"
                   />
                   <Text variant="default" className=" mt-1">
-                    {`${formatDateTime12h(selectedRow.createdAt).toUpperCase()} • Module: ${selectedRow.module}`}
+                    {`${formatDateTime12h(selectedRow.createdAt).toUpperCase()} • Module: ${formatModuleLabel(selectedRow.module)}`}
                   </Text>
                 </div>
               </div>
 
               <div className="flex items-center gap-2">
-                <Button
-                  className="p-2 rounded-md"
-                  size="icon"
-                  variant="ghost"
-                  onClick={handleDelete}
-                  aria-label="Delete activity"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </Button>
-
                 <DialogClose asChild>
                   <Button
                     className="p-2 rounded-md"

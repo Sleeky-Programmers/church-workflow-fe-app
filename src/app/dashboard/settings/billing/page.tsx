@@ -114,17 +114,24 @@ export default function BillingPage() {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
         {plans.map((plan) => {
+          // The church's current plan should be marked even while on trial or
+          // in its grace period — only an expired subscription frees the plan
+          // up for re-purchase.
           const isCurrent =
             plan.type === currentPlan &&
-            subscriptionStatus === SubscriptionStatus.ACTIVE;
+            subscriptionStatus !== SubscriptionStatus.EXPIRED;
+
+          const isCurrentTrial =
+            isCurrent && subscriptionStatus === SubscriptionStatus.TRIAL;
 
           const isActivePaidPlan =
             !!currentPlan &&
             currentPlan !== PlanType.STARTER &&
-            subscriptionStatus === SubscriptionStatus.ACTIVE;
+            (subscriptionStatus === SubscriptionStatus.ACTIVE ||
+              subscriptionStatus === SubscriptionStatus.GRACE);
 
           const actionLabel = isActivePaidPlan
-            ? PLAN_ORDER.indexOf(plan.type) > PLAN_ORDER.indexOf(currentPlan)
+            ? PLAN_ORDER.indexOf(plan.type) > PLAN_ORDER.indexOf(currentPlan!)
               ? "Upgrade"
               : "Downgrade"
             : "Get Started";
@@ -134,15 +141,16 @@ export default function BillingPage() {
               key={plan.type}
               className={cn(
                 "relative rounded-xl border bg-background p-6 flex flex-col justify-between transition",
-                plan.popular && "border-primary shadow-md",
+                plan.popular && !isCurrent && "border-primary shadow-md",
+                isCurrent && "border-primary shadow-md ring-1 ring-primary",
               )}
             >
-              {plan.popular && (
+              {isCurrent && (
                 <Badge
                   shape="pill"
-                  className="absolute -top-3 left-1/2 -translate-x-1/2"
+                  className="absolute -top-3 left-1/2 -translate-x-1/2 bg-green-600"
                 >
-                  MOST POPULAR
+                  CURRENT PLAN
                 </Badge>
               )}
 
@@ -179,7 +187,7 @@ export default function BillingPage() {
               <div className="mt-6">
                 {isCurrent ? (
                   <Button disabled className="w-full">
-                    Current Plan
+                    {isCurrentTrial ? "Currently Active (Trial)" : "Currently Active"}
                   </Button>
                 ) : (
                   <Button

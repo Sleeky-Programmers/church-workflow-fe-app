@@ -1,6 +1,6 @@
 "use client";
 
-import { Edit, LockOpenIcon } from "lucide-react";
+import { Edit, LockOpenIcon, AlertCircle } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 
@@ -11,11 +11,10 @@ import { Button } from "@/components/ui/button";
 import { Loader } from "@/components/ui/loader";
 import Heading from "@/components/ui/typography/Heading";
 import { Span, Text } from "@/components/ui/typography/Text";
-import { useToast } from "@/hooks/use-toast";
+import { CURRENCY_CATALOG_BY_CODE } from "@/lib/currency-catalog";
 import { useUserStore } from "@/stores/useUserStore";
 
 export default function UserProfilePage() {
-  const { toast } = useToast();
   const {
     user,
     church,
@@ -36,17 +35,6 @@ export default function UserProfilePage() {
     fetchUserData();
   }, [fetchUserData]);
 
-  // Show error toast if there's an error
-  useEffect(() => {
-    if (error) {
-      toast({
-        title: "Error",
-        description: error,
-        variant: "destructive",
-      });
-    }
-  }, [error, toast]);
-
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-16 gap-2">
@@ -58,6 +46,9 @@ export default function UserProfilePage() {
 
   const fullName = getUserFullName();
   const churchRole = getUserChurchRole();
+  const defaultCurrency = church?.defaultCurrency
+    ? CURRENCY_CATALOG_BY_CODE[church.defaultCurrency]
+    : undefined;
 
   return (
     <div className="space-y-6">
@@ -72,6 +63,16 @@ export default function UserProfilePage() {
           Refresh
         </Button>
       </div>
+
+      {error && (
+        <div
+          role="alert"
+          className="flex items-start gap-2 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-600"
+        >
+          <AlertCircle className="mt-0.5 h-4 w-4 flex-shrink-0" />
+          <span>{error}</span>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* User Section */}
@@ -229,7 +230,9 @@ export default function UserProfilePage() {
               <div>
                 <Text className="text-gray-500 text-sm">Default Currency</Text>
                 <Text className="font-medium">
-                  {church?.defaultCurrency || "NGN"}
+                  {defaultCurrency
+                    ? `${defaultCurrency.code} - ${defaultCurrency.name} (${defaultCurrency.symbol})`
+                    : church?.defaultCurrency || "NGN"}
                 </Text>
               </div>
 
