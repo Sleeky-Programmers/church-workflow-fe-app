@@ -1,6 +1,6 @@
 "use client";
 
-import { CrossIcon, Phone, User } from "lucide-react";
+import { Cross, Phone, User } from "lucide-react";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -42,54 +42,47 @@ const STEP_CONFIG = [
   {
     number: 3,
     label: "Church activity",
-    icon: CrossIcon,
+    icon: Cross,
   },
 ];
 
 function MembershipStepIndicator({ step }: { step: 1 | 2 | 3 }) {
+  const active =
+    STEP_CONFIG.find((c) => c.number === step) ?? STEP_CONFIG[0];
+  const ActiveIcon = active.icon;
+
+  // Per the design: a compact pill with the active step's icon chip on the
+  // left, its "Step n/3" label, then the remaining step icons separated by
+  // dividers on the right.
   return (
     <div className="flex-shrink-0">
-      <div className="flex items-center rounded-xl sm:rounded-2xl border border-gray-300 px-2 sm:px-4 py-2 sm:py-3">
-        {STEP_CONFIG.map((config, index) => {
+      <div className="flex items-stretch rounded-lg border border-gray-300 overflow-hidden">
+        <div className="flex items-center gap-3 px-3 py-2.5">
+          <div className="h-9 w-9 rounded-full bg-primary-600 flex items-center justify-center flex-shrink-0">
+            <ActiveIcon className="h-4.5 w-4.5 text-white" />
+          </div>
+          <div className="block text-left">
+            <Text variant="muted" className="text-xs leading-tight">
+              Step {active.number}/3
+            </Text>
+            <Text
+              variant="menuActive"
+              className="text-sm font-semibold leading-tight"
+            >
+              {active.label}
+            </Text>
+          </div>
+        </div>
+
+        {STEP_CONFIG.filter((c) => c.number !== active.number).map((config) => {
           const Icon = config.icon;
-          const isActive = step === config.number;
-          const isCompleted = step > config.number;
 
           return (
             <div
               key={config.number}
-              className={`flex items-center ${isActive ? "flex-[1.6]" : "flex-1"}`}
+              className="flex items-center border-l border-gray-200 px-5"
             >
-              <div className="flex items-center gap-4">
-                <div
-                  className={`h-8 w-8 sm:h-14 sm:w-14 rounded-full flex items-center justify-center flex-shrink-0 ${
-                    isActive
-                      ? "bg-primary-600"
-                      : isCompleted
-                        ? "bg-primary-100"
-                        : "bg-gray-100"
-                  }`}
-                >
-                  <Icon
-                    className={`h-4 w-4 sm:h-7 sm:w-7 ${isActive ? "text-white" : isCompleted ? "text-primary-600" : "text-gray-400"}`}
-                  />
-                </div>
-
-                {isActive && (
-                  <div className="block">
-                    <Text variant="muted" className="text-xs sm:text-sm">
-                      Step {config.number}/3
-                    </Text>
-                    <Text variant="menuActive" className="text-base sm:text-lg">
-                      {config.label}
-                    </Text>
-                  </div>
-                )}
-              </div>
-
-              {index < STEP_CONFIG.length - 1 && (
-                <div className="mx-2 sm:mx-6 h-8 sm:h-12 w-px bg-gray-200" />
-              )}
+              <Icon className="h-5 w-5 text-gray-400" />
             </div>
           );
         })}

@@ -1,6 +1,7 @@
 "use client";
-import { Plus } from "lucide-react";
+import { Plus, Users } from "lucide-react";
 import { MemberProfile } from "@/types";
+import { EmptyState } from "@/components/features/dashboard/empty-state";
 import {
   Table,
   TableBody,
@@ -32,6 +33,8 @@ type MembersTableProps = {
   setIsDeleteModalOpen: any;
   setIsFormatModalOpen: any;
   isCsvUploading: boolean;
+  /** True when a search/filter is active, so the empty state can be specific. */
+  searchActive?: boolean;
 };
 
 export function MembersTable({
@@ -46,6 +49,7 @@ export function MembersTable({
   setIsDeleteModalOpen,
   setIsFormatModalOpen,
   isCsvUploading,
+  searchActive,
 }: MembersTableProps) {
   const isMobile = useIsMobile();
   const currentPage = pagination?.page || 1;
@@ -81,13 +85,11 @@ export function MembersTable({
                 <Text text="Add" variant="default" />
               </Button>
             )}
-          </div>
-
-          {members.map((member) => (
-            <div
-              key={member.id}
-              className="flex items-center justify-between px-3 py-3 hover:bg-gray-50 cursor-pointer"
-            >
+          </div>            {members.map((member) => (
+              <div
+                key={member.id}
+                className="flex items-center justify-between px-3 py-3 hover:bg-primary-50/50 transition-colors cursor-pointer"
+              >
               <div className="flex items-center gap-3 min-w-0">
                 <Checkbox
                   checked={selectedMemberIds.includes(member.id)}
@@ -115,8 +117,21 @@ export function MembersTable({
         </div>
 
         {members.length === 0 && (
-          <div className="p-6 text-center">
-            <Text text="No members found" variant="muted" />
+          <div className="p-4">
+            <EmptyState
+              icon={Users}
+              title={
+                searchActive
+                  ? "No members match your search or filters"
+                  : "No members yet"
+              }
+              description={
+                searchActive
+                  ? "Try a different search term or clear the filters to see everyone."
+                  : "Add your first member or import a CSV to get started."
+              }
+              size="sm"
+            />
           </div>
         )}
 
@@ -185,7 +200,7 @@ export function MembersTable({
             {members.map((member) => (
               <TableRow
                 key={member.id}
-                className="cursor-pointer hover:bg-gray-50"
+                className="cursor-pointer transition-colors hover:bg-primary-50/50"
               >
                 <TableCell onClick={(e) => e.stopPropagation()}>
                   <Checkbox
@@ -211,7 +226,7 @@ export function MembersTable({
                   <Text
                     text={member.email}
                     variant="default"
-                    className="truncate"
+                    className="truncate underline decoration-gray-300 underline-offset-2"
                   />
                 </TableCell>
                 <TableCell>
@@ -219,6 +234,7 @@ export function MembersTable({
                     onClick={() => onRowClick(member.id)}
                     variant="outline"
                     size="sm"
+                    className="transition-colors hover:border-primary-400 hover:text-primary-400 hover:bg-primary-50/40"
                   >
                     <Text text="View Profile" variant="default" />
                   </Button>
@@ -230,9 +246,25 @@ export function MembersTable({
       </div>
 
       {members.length === 0 && (
-        <div className="p-8 text-center">
-          <Text text="No members found" variant="muted" />
-        </div>
+        <EmptyState
+          icon={Users}
+          title={
+            searchActive
+              ? "No members match your search or filters"
+              : "No members yet"
+          }
+          description={
+            searchActive
+              ? "Try a different search term or clear the filters to see everyone."
+              : "Add your first member or import a CSV to get started."
+          }
+          action={
+            searchActive
+              ? undefined
+              : { label: "Add a member", href: "/dashboard/membership/members" }
+          }
+          className="py-10"
+        />
       )}
 
       {pagination && members.length > 0 && (

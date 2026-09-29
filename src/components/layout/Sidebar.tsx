@@ -1,5 +1,6 @@
 "use client";
 
+import { ChevronDown, CornerDownRight } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -99,6 +100,16 @@ export function AppSidebar() {
     comingSoonTitles.includes(p.title),
   );
 
+  // A module is "active" when the current path lives under it, e.g.
+  // /dashboard/membership/... highlights the Membership parent item.
+  const isModuleActive = (page: (typeof SidebarData.pages)[number]) =>
+    Boolean(page.url) && pathname.startsWith(page.url);
+
+  const [openModules, setOpenModules] = useState<Record<string, boolean>>({});
+
+  const toggleModule = (title: string) =>
+    setOpenModules((prev) => ({ ...prev, [title]: !prev[title] }));
+
   return (
     <Sidebar>
       <SidebarContent>
@@ -197,27 +208,86 @@ export function AppSidebar() {
           <SidebarGroupContent>
             <SidebarMenu>
               {mainPages.map((page) => {
-                const active = isActive(page.url);
+                const hasChildren =
+                  Array.isArray(page.children) && page.children.length > 0;
+                const moduleActive = isModuleActive(page);
+                const expanded = openModules[page.title] ?? moduleActive;
                 const Icon = normalizeIcon(page.icon);
 
                 return (
                   <SidebarMenuItem key={page.title}>
-                    <SidebarMenuButton asChild isActive={active}>
-                      <Link
-                        href={page.url}
-                        className="flex items-center gap-2"
-                        onClick={handleNavigate}
-                      >
-                        <Icon
-                          className={cn(
-                            "h-4 w-4 transition-colors",
-                            active ? "text-primary" : "text-primary/70",
-                          )}
-                        />
-
-                        <Text variant="default">{page.title}</Text>
-                      </Link>
+                    <SidebarMenuButton
+                      asChild={!hasChildren}
+                      isActive={hasChildren ? moduleActive : isActive(page.url)}
+                      onClick={
+                        hasChildren
+                          ? (e) => {
+                              e.preventDefault();
+                              toggleModule(page.title);
+                            }
+                          : undefined
+                      }
+                    >
+                      {hasChildren ? (
+                        <button
+                          type="button"
+                          className="flex w-full items-center gap-2"
+                          aria-expanded={expanded}
+                        >
+                          <Icon className="h-4 w-4 text-primary" />
+                          <Text variant="default">{page.title}</Text>
+                          <ChevronDown
+                            className={cn(
+                              "ml-auto h-4 w-4 shrink-0 text-primary transition-transform",
+                              expanded && "rotate-180",
+                            )}
+                          />
+                        </button>
+                      ) : (
+                        <Link
+                          href={page.url}
+                          className="flex items-center gap-2"
+                          onClick={handleNavigate}
+                        >
+                          <Icon className="h-4 w-4 text-primary" />
+                          <Text variant="default">{page.title}</Text>
+                        </Link>
+                      )}
                     </SidebarMenuButton>
+
+                    {hasChildren && expanded && (
+                      <ul className="mx-3.5 flex min-w-0 translate-x-px flex-col gap-1 border-l border-sidebar-border px-2.5 py-0.5">
+                        {(page.children ?? []).map((child) => {
+                          const childActive = isActive(child.url);
+
+                          return (
+                            <li key={child.url}>
+                              <Link
+                                href={child.url}
+                                onClick={handleNavigate}
+                                data-active={childActive}
+                                className={cn(
+                                  "flex h-8 min-w-0 -translate-x-px items-center gap-2 rounded-md px-2 text-sm outline-none transition-colors hover:bg-sidebar-accent hover:text-primary",
+                                  childActive &&
+                                    "bg-sidebar-accent font-medium text-primary",
+                                  !childActive && "text-sidebar-foreground",
+                                )}
+                              >
+                                <CornerDownRight
+                                  className={cn(
+                                    "h-4 w-4 shrink-0 transition-colors",
+                                    moduleActive
+                                      ? "text-primary"
+                                      : "text-sidebar-foreground",
+                                  )}
+                                />
+                                <span className="truncate">{child.title}</span>
+                              </Link>
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    )}
                   </SidebarMenuItem>
                 );
               })}

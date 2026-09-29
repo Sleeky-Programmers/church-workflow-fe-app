@@ -6,10 +6,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { BookPlus, ChevronRight, UploadIcon } from "lucide-react";
-import { Text, Span } from "@/components/ui/typography/Text";
-import { Button } from "@/components/ui/button";
+import { FileUp, FolderPlus } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { cn } from "@/lib/utils";
 
 import { MemberFormType } from "@/lib/enums";
 
@@ -19,6 +18,9 @@ type AddMemberFormatModalProps = {
   onSelectFormat: (format: MemberFormType.FORM | MemberFormType.CSV) => void;
 };
 
+// Per the Figma design: a centered "Add Member" dialog with two large square
+// tiles - "Create a Form" and "Upload CSV" - each with a big blue icon and a
+// bordered card; the hovered/selected tile gets a light blue fill.
 export function AddMemberFormatModal({
   open,
   onOpenChange,
@@ -38,83 +40,48 @@ export function AddMemberFormatModal({
       <DialogContent
         showClose={false}
         mobileSheet
-        className="sm:max-w-md max-sm:max-h-[70vh] max-sm:p-4"
+        className="sm:max-w-lg max-sm:max-h-[70vh] max-sm:p-4"
       >
-        <DialogHeader>
-          <DialogTitle className="text-center text-xl font-semibold">
+        <DialogHeader className="sm:border-b-0">
+          <DialogTitle className="text-center text-xl font-bold text-gray-900">
             Add Member
           </DialogTitle>
         </DialogHeader>
 
-        {isMobile ? (
-          <div className="py-4 space-y-3">
-            <Button
-              variant="outline"
-              onClick={() => handleFormatSelect(MemberFormType.FORM)}
-              className="w-full h-auto justify-between p-4"
-            >
-              <div className="flex items-center gap-3 text-left">
-                <span className="h-10 w-10 rounded-md bg-primary-50 flex items-center justify-center">
-                  <BookPlus className="h-5 w-5 text-primary-600" />
-                </span>
+        <div
+          className={cn(
+            "grid gap-6",
+            isMobile ? "grid-cols-1 py-4" : "grid-cols-2 py-8 px-2",
+          )}
+        >
+          <button
+            type="button"
+            onClick={() => handleFormatSelect(MemberFormType.FORM)}
+            className={cn(
+              "flex flex-col items-center justify-center gap-5 rounded-lg border border-gray-200 bg-white transition-colors hover:bg-blue-50/60 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-200",
+              isMobile ? "h-40 w-full" : "h-44 w-full",
+            )}
+          >
+            <FolderPlus className="h-12 w-12 text-primary-400" strokeWidth={1.5} />
+            <span className="text-xs font-bold tracking-wide text-primary-400 uppercase">
+              Create a Form
+            </span>
+          </button>
 
-                <div className="flex flex-col">
-                  <Text variant="default">Create a Form</Text>
-                  <Text variant="muted" className="text-xs">
-                    Add a new member manually.
-                  </Text>
-                </div>
-              </div>
-
-              <ChevronRight className="h-4 w-4 text-muted-foreground" />
-            </Button>
-
-            <Button
-              variant="outline"
-              onClick={() => handleFormatSelect(MemberFormType.CSV)}
-              className="w-full h-auto justify-between p-4"
-            >
-              <div className="flex items-center gap-3 text-left">
-                <span className="h-10 w-10 rounded-md bg-primary-50 flex items-center justify-center">
-                  <UploadIcon className="h-5 w-5 text-primary-600" />
-                </span>
-
-                <div className="flex flex-col">
-                  <Text variant="default">Upload CSV</Text>
-                  <Text variant="muted" className="text-xs">
-                    Import multiple members at once.
-                  </Text>
-                </div>
-              </div>
-
-              <ChevronRight className="h-4 w-4 text-muted-foreground" />
-            </Button>
-          </div>
-        ) : (
-          <div className="grid grid-cols-2 gap-6 py-6">
-            <Button
-              variant="outline"
-              onClick={() => handleFormatSelect(MemberFormType.FORM)}
-              className="h-44 flex-col gap-4 "
-            >
-              <BookPlus className="h-12 w-12 text-primary-600" />
-              <Text variant="blue" className="uppercase">
-                Create a Form
-              </Text>
-            </Button>
-
-            <Button
-              variant="outline"
-              onClick={() => handleFormatSelect(MemberFormType.CSV)}
-              className="h-44 flex-col gap-4"
-            >
-              <UploadIcon className="h-12 w-12 text-primary-600" />
-              <Text variant="blue" className="uppercase">
-                Upload CSV
-              </Text>
-            </Button>
-          </div>
-        )}
+          <button
+            type="button"
+            onClick={() => handleFormatSelect(MemberFormType.CSV)}
+            className={cn(
+              "flex flex-col items-center justify-center gap-5 rounded-lg border border-gray-200 bg-blue-50/60 transition-colors hover:bg-blue-100/70 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-200",
+              isMobile ? "h-40 w-full" : "h-44 w-full",
+            )}
+          >
+            <FileUp className="h-12 w-12 text-primary-400" strokeWidth={1.5} />
+            <span className="text-xs font-bold tracking-wide text-primary-400 uppercase">
+              Upload CSV
+            </span>
+          </button>
+        </div>
       </DialogContent>
     </Dialog>
   );

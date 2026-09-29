@@ -14,7 +14,7 @@ export enum Routes {
   Search = "/dashboard/search",
   Home = "/",
   Attendance = "/dashboard/attendance",
-  Membership = "/dashboard/membership",
+  Membership = "/dashboard/membership/dashboard",
   DepartmentDetails = "/dashboard/departments/[id]",
   DepartmentEdit = "/dashboard/departments/[id]/edit",
 
