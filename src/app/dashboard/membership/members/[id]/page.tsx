@@ -48,7 +48,7 @@ export default function MemberDetailsRoutePage() {
   return (
     <MemberDetailsPage
       member={member}
-      onBack={() => router.push("/dashboard/membership")}
+      onBack={() => router.push("/dashboard/membership/members")}
     />
   );
 }

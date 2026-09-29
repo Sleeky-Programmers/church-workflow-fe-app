@@ -273,9 +273,27 @@ export const SidebarData = {
       icon: ChartPie,
     },
     {
-      title: "Membership",
-      url: "/dashboard/membership",
+      title: "CW Members",
+      url: "/dashboard/membership/dashboard",
       icon: Inbox,
+      children: [
+        {
+          title: "Dashboard",
+          url: "/dashboard/membership/dashboard",
+        },
+        {
+          title: "Attention Center",
+          url: "/dashboard/membership/attention-center",
+        },
+        {
+          title: "Members",
+          url: "/dashboard/membership/members",
+        },
+        {
+          title: "Settings",
+          url: "/dashboard/membership/settings",
+        },
+      ],
     },
     {
       title: "Attendance",

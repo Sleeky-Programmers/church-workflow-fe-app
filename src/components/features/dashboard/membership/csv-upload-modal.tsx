@@ -7,6 +7,7 @@ import {
   PauseCircle,
   PlayCircle,
   UploadCloud,
+  X,
   XCircle,
 } from "lucide-react";
 import Papa from "papaparse";
@@ -23,6 +24,7 @@ import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import Heading from "@/components/ui/typography/Heading";
 import { Span, Text } from "@/components/ui/typography/Text";
+import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { getAccessToken } from "@/lib/auth/session";
 import {
@@ -561,11 +563,11 @@ export function CsvUploadModal({
           Upload church members via CSV file.
         </DialogDescription>
 
-        <Heading level={2} variant="primary" className=" sm:text-xl">
+        <Heading level={2} variant="primary" className="sm:text-2xl">
           Upload Church Members
         </Heading>
-        <Text className="mt-1 sm:text-base text-gray-600">
-          Upload your members in bulk using CSV files
+        <Text className="mt-1 text-sm text-gray-600">
+          Upload your members in bulk using a CSV
         </Text>
 
         <div className="flex-1 min-h-0 overflow-y-auto mt-4">
@@ -579,9 +581,15 @@ export function CsvUploadModal({
           />
         </div>
 
-        <div className="mt-4 sm:mt-6 flex justify-end gap-2">
-          <Button variant="outline" onClick={handleClose}>
-            Close
+        <div className="mt-4 sm:mt-6">
+          <Button
+            onClick={handleClose}
+            disabled={files.some((f) => f.status === "uploading")}
+            className="w-full h-11 rounded-lg text-sm font-semibold"
+          >
+            {files.some((f) => f.status === "uploading")
+              ? "Uploading…"
+              : "Done"}
           </Button>
         </div>
       </DialogContent>
@@ -650,55 +658,45 @@ MR.,Anthony Carter,MALE,1/12/1991,SINGLE,,,,14155667788,anthony.carter@example.c
 MRS.,Rebecca Allen,FEMALE,4/25/1984,MARRIED,5/10/2009,,,14156778899,rebecca.allen@example.com,Teacher,Master,MEMBER,2/18/2021,Grace Church,FALSE,Hospitality,Teaching,Kappa Group`;
 
   return (
-    <div className="space-y-6">
-      {/* Template Download Section */}
-      <div className="bg-gray-50 rounded-lg p-4">
-        <div className="flex items-center justify-between mb-3">
-          <div>
-            <Text className="font-semibold">Sample CSV Template</Text>
-            <Text className="text-xs text-gray-500 mt-1">
-              Download and use this template for correct formatting
-            </Text>
-          </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => {
-              const blob = new Blob([csvContent], {
-                type: "text/csv;charset=utf-8;",
-              });
-              const url = URL.createObjectURL(blob);
-              const link = document.createElement("a");
-              link.href = url;
-              link.setAttribute("download", "sample-members.csv");
-              document.body.appendChild(link);
-              link.click();
-              document.body.removeChild(link);
-              URL.revokeObjectURL(url);
-            }}
-          >
-            <Download className="w-4 h-4 mr-2" />
-            Download Template
-          </Button>
-        </div>
+    <div className="space-y-5">
+      {/* Template Download Section - per the design: "Use this template" */}
+      <div>
+        <Text className="font-semibold text-gray-900">Use this template</Text>
+        <Button
+          variant="outline"
+          size="lg"
+          onClick={() => {
+            const blob = new Blob([csvContent], {
+              type: "text/csv;charset=utf-8;",
+            });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.href = url;
+            link.setAttribute("download", "sample-members.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+          }}
+          className="w-full mt-2 h-10 rounded-lg border-gray-200 text-sm font-medium text-gray-800 hover:bg-gray-50"
+        >
+          <Download className="w-4 h-4 mr-2" />
+          Download Sample CSV
+        </Button>
       </div>
 
-      {/* Upload Area */}
+      {/* Upload Area - per the design: "Upload file" dashed dropzone */}
       <div>
-        <Text className="mb-2 font-semibold">Upload CSV File</Text>
+        <Text className="mb-2 font-semibold text-gray-900">Upload file</Text>
 
         <div
           onClick={() => inputRef.current?.click()}
           onDragOver={(e) => e.preventDefault()}
           onDrop={handleDrop}
-          className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center cursor-pointer hover:border-blue-400 hover:bg-blue-50 transition-all duration-200"
+          className="border border-dashed border-gray-300 rounded-lg py-7 text-center cursor-pointer hover:border-blue-400 hover:bg-blue-50/40 transition-all duration-200"
         >
-          <UploadCloud className="w-12 h-12 text-gray-400 mx-auto mb-3" />
-          <Text className="text-gray-600">
-            Click or drag and drop to upload
-          </Text>
-          <Text className="text-xs text-gray-400 mt-1">
-            Supported formats: .csv
+          <Text className="text-sm text-gray-500">
+            Click to upload file (Supported formats: .csv)
           </Text>
 
           <Input
@@ -712,109 +710,87 @@ MRS.,Rebecca Allen,FEMALE,4/25/1984,MARRIED,5/10/2009,,,14156778899,rebecca.alle
         </div>
       </div>
 
-      {/* Uploaded Files List */}
+      {/* Uploaded Files List - per the design: "Uploaded files" progress rows */}
       {files.length > 0 && (
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <Text className="font-semibold">Upload Queue</Text>
-            <Text className="text-xs text-gray-500">
-              {files.length} file(s)
-            </Text>
-          </div>
+        <div>
+          <Text className="font-semibold text-gray-900">Uploaded files</Text>
 
-          <div className="space-y-3 max-h-64 overflow-y-auto">
+          <div className="mt-2 space-y-4 max-h-64 overflow-y-auto">
             {files.map((file, index) => (
-              <div
-                key={index}
-                className="bg-white border border-gray-200 rounded-lg p-3 space-y-2 hover:shadow-sm transition-shadow"
-              >
-                <div className="flex justify-between items-start">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      {getStatusIcon(file.status)}
-                      <Span className="font-medium truncate">
-                        {file.file.name}
-                      </Span>
-                    </div>
-                    <Text className="text-xs text-gray-500">
-                      {(file.file.size / 1024).toFixed(2)} KB
-                    </Text>
-                  </div>
-
-                  <div className="flex items-center gap-1">
-                    {(file.status === "uploading" ||
-                      file.status === "paused") && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => onPauseResume(file)}
-                        className="h-8 w-8 p-0"
-                      >
-                        {file.status === "paused" ? (
-                          <PlayCircle className="w-4 h-4" />
-                        ) : (
-                          <PauseCircle className="w-4 h-4" />
-                        )}
-                      </Button>
-                    )}
-
-                    {(file.status === "uploading" ||
-                      file.status === "paused" ||
-                      file.status === "error") && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleCancel(file)}
-                        className="h-8 w-8 p-0 hover:text-red-500"
-                      >
-                        <XCircle className="w-4 h-4" />
-                      </Button>
-                    )}
-                  </div>
+              <div key={index} className="space-y-1.5">
+                <div className="flex items-center justify-between gap-2">
+                  <Span className="font-semibold text-gray-900 truncate">
+                    {file.file.name}
+                  </Span>
+                  <Span className="font-semibold text-gray-900 shrink-0">
+                    {Math.round(file.progress)}%
+                  </Span>
                 </div>
 
-                <div className="space-y-1">
-                  <div className="flex justify-between text-xs">
-                    <Span className="text-gray-600">
-                      {file.status === "uploading"
-                        ? "Uploading..."
-                        : file.status === "paused"
-                          ? "Paused"
-                          : file.status === "success"
-                            ? "Complete"
-                            : "Failed"}
-                    </Span>
-                    <Span className="font-medium">
-                      {Math.round(file.progress)}%
-                    </Span>
-                  </div>
-                  <Progress
-                    value={file.progress}
-                    className={`h-2 ${getStatusColor(file.status)}`}
-                  />
-                </div>
-
-                {file.status === "error" && file.error && (
-                  <Alert variant="destructive" className="mt-2 py-2">
-                    <AlertCircle className="h-3 w-3" />
-                    <AlertDescription className="text-xs">
-                      <strong>{file.error}</strong>
-                      {"errorDetails" in file && file.errorDetails && (
-                        <div className="mt-1 text-gray-700">
-                          {file.errorDetails}
-                        </div>
+                <div className="flex items-center gap-3">
+                  <div className="flex-1 h-2 rounded-full bg-gray-200 overflow-hidden">
+                    <div
+                      className={cn(
+                        "h-full rounded-full transition-all duration-300",
+                        getStatusColor(file.status),
                       )}
-                    </AlertDescription>
-                  </Alert>
-                )}
+                      style={{ width: `${Math.max(file.progress, 4)}%` }}
+                    />
+                  </div>
 
+                  {(file.status === "uploading" ||
+                    file.status === "paused") && (
+                    <button
+                      onClick={() => onPauseResume(file)}
+                      className="text-gray-700 hover:text-gray-900 shrink-0"
+                      aria-label={
+                        file.status === "paused" ? "Resume" : "Pause"
+                      }
+                    >
+                      {file.status === "paused" ? (
+                        <PlayCircle className="w-5 h-5" />
+                      ) : (
+                        <PauseCircle className="w-5 h-5" />
+                      )}
+                    </button>
+                  )}
+
+                  {file.status !== "success" && (
+                    <button
+                      onClick={() => handleCancel(file)}
+                      className="text-gray-700 hover:text-red-500 shrink-0"
+                      aria-label="Remove file"
+                    >
+                      <X className="w-5 h-5" />
+                    </button>
+                  )}
+                </div>
+
+                {file.status === "uploading" && (
+                  <Text className="text-xs text-gray-500">Uploading…l</Text>
+                )}
+                {file.status === "paused" && (
+                  <Text className="text-xs text-gray-500">Paused</Text>
+                )}
+                {file.status === "error" && (
+                  <div>
+                    <Text className="text-xs text-red-500 font-medium">
+                      Error…l
+                    </Text>
+                    {file.error && (
+                      <Text className="text-xs text-gray-500 mt-0.5">
+                        {file.error}
+                        {"errorDetails" in file && file.errorDetails
+                          ? ` — ${file.errorDetails}`
+                          : ""}
+                      </Text>
+                    )}
+                  </div>
+                )}
                 {file.status === "success" && (
-                  <Alert className="mt-2 py-2 border-green-200 bg-green-50">
-                    <CheckCircle className="h-3 w-3 text-green-600" />
-                    <AlertDescription className="text-xs text-green-700">
-                      File uploaded successfully!
-                    </AlertDescription>
-                  </Alert>
+                  <Text className="text-xs text-primary-400 font-medium">
+                    Successfully Uploaded!
+                  </Text>
                 )}
               </div>
             ))}

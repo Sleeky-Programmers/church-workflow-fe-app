@@ -50,6 +50,7 @@ export async function fetchMembers(
   limit = 10,
   search?: string,
   filter?: string,
+  facets?: { gender?: string; maritalStatus?: string; membershipStatus?: string },
 ): Promise<FetchMembersResponse> {
   const params = new URLSearchParams({
     page: String(page),
@@ -62,6 +63,12 @@ export async function fetchMembers(
   if (filter && filter !== "all") {
     params.append("filter", filter);
   }
+  // Independent facet filters (AND-ed server-side)
+  if (facets?.gender) params.append("gender", facets.gender);
+  if (facets?.maritalStatus)
+    params.append("maritalStatus", facets.maritalStatus);
+  if (facets?.membershipStatus)
+    params.append("membershipStatus", facets.membershipStatus);
 
   const response = await authenticatedFetch<FetchMembersResponse>(
     `/members?${params}`,

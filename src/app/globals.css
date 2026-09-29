@@ -76,6 +76,38 @@
   body {
     @apply bg-background text-foreground;
   }
+
+  /* ── Global scrollbar: brand blue thumb on a white track ── */
+  /* Firefox */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--primary) / 0.55) transparent;
+  }
+
+  /* Chromium + Safari */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: #ffffff;
+    border-radius: 10px;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: hsl(var(--primary) / 0.55);
+    border-radius: 10px;
+    border: 2px solid #ffffff; /* keeps the thumb slim over a white rail */
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--primary) / 0.8);
+  }
+
+  ::-webkit-scrollbar-corner {
+    background: #ffffff;
+  }
 }
 
 .hide-scrollbar {
