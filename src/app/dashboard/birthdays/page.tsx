@@ -250,14 +250,14 @@ export default function BirthdaysPage() {
 					/>
 				</div>
 			) : (
-				<div className="bg-white rounded-xl border border-gray-300 shadow-[0_1px_4px_rgba(0,0,0,0.06)] p-3 sm:p-6 w-full">
+				<div className="bg-white rounded-xl border border-gray-300 shadow-[0_1px_4px_rgba(0,0,0,0.06)] p-2 sm:p-6 w-full">
 					{/* Calendar header: month/year jump controls + prev/next */}
-					<div className="flex flex-wrap items-center justify-between gap-2 mb-4">
+					<div className="flex items-center justify-between gap-2 mb-4">
 						<div className="flex items-center gap-2">
 							<Select
 								value={String(viewMonth)}
 								onValueChange={(v) => setViewMonth(Number(v))}>
-								<SelectTrigger className="w-[130px]">
+								<SelectTrigger className="w-[118px] sm:w-[130px]">
 									<SelectValue />
 								</SelectTrigger>
 								<SelectContent>
@@ -274,7 +274,7 @@ export default function BirthdaysPage() {
 							<Select
 								value={String(viewYear)}
 								onValueChange={(v) => setViewYear(Number(v))}>
-								<SelectTrigger className="w-[100px]">
+								<SelectTrigger className="w-[88px] sm:w-[100px]">
 									<SelectValue />
 								</SelectTrigger>
 								<SelectContent>
@@ -293,14 +293,14 @@ export default function BirthdaysPage() {
 							<button
 								type="button"
 								onClick={goToPrevMonth}
-								className="p-2 rounded-md hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-400"
+								className="p-2.5 rounded-md hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-400"
 								aria-label="Previous month">
 								<ChevronLeft className="w-4 h-4" />
 							</button>
 							<button
 								type="button"
 								onClick={goToNextMonth}
-								className="p-2 rounded-md hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-400"
+								className="p-2.5 rounded-md hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-400"
 								aria-label="Next month">
 								<ChevronRight className="w-4 h-4" />
 							</button>
@@ -319,7 +319,7 @@ export default function BirthdaysPage() {
 					</div>
 
 					{/* Day grid */}
-					<div className="grid grid-cols-7 gap-1 sm:gap-y-1">
+					<div className="grid grid-cols-7 gap-0.5 sm:gap-1">
 						{calendarDays.flat().map((day) => {
 							const inMonth = day.getMonth() === viewMonth;
 							const key = `${day.getFullYear()}-${day.getMonth()}-${day.getDate()}`;
@@ -339,7 +339,7 @@ export default function BirthdaysPage() {
 									}}
 									disabled={!inMonth || !hasBirthday}
 									className={cn(
-										'relative h-[46px] w-full flex items-center justify-center rounded-md sm:rounded-lg text-sm sm:text-base transition-colors',
+										'relative h-11 sm:h-[46px] w-full flex items-center justify-center rounded-md sm:rounded-lg text-sm sm:text-base transition-colors touch-manipulation',
 										!inMonth && 'text-gray-300 opacity-50',
 										inMonth && !hasBirthday && 'text-gray-600',
 										hasBirthday && 'bg-primary-50 text-primary-700 font-semibold hover:bg-primary-100 cursor-pointer',
@@ -353,7 +353,18 @@ export default function BirthdaysPage() {
 									}>
 									<span className="flex items-center gap-1">
 										{day.getDate()}
-										{hasBirthday && !isSelected && <Cake className="w-3 h-3 text-primary-400" />}
+										{hasBirthday && !isSelected && <Cake className="hidden sm:block w-3 h-3 text-primary-400" />}
+											{hasBirthday && <span aria-hidden className={cn('sm:hidden absolute bottom-1 left-1/2 -translate-x-1/2 h-1.5 w-1.5 rounded-full', isSelected ? 'bg-white' : 'bg-primary-400')} />}
+											{dayBirthdays.length > 1 && (
+												<span
+													aria-hidden
+													className={cn(
+														'absolute top-0.5 right-0.5 sm:top-1 sm:right-1 min-w-[14px] h-[14px] px-0.5 rounded-full text-[9px] leading-[14px] font-semibold',
+														isSelected ? 'bg-white text-primary' : 'bg-primary-400 text-white'
+													)}>
+													{dayBirthdays.length}
+												</span>
+											)}
 									</span>
 								</button>
 							);

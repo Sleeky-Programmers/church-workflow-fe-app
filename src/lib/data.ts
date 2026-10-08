@@ -11,6 +11,7 @@ import {
   Inbox,
   Layers,
   LogOut,
+  Package,
   Settings,
   Tag,
   UserPlus,
@@ -324,6 +325,11 @@ export const SidebarData = {
       title: "Finance",
       url: "/dashboard/finance",
       icon: Wallet,
+    },
+    {
+      title: "Asset Management",
+      url: "/dashboard/asset-management",
+      icon: Package,
     },
   ],
   footer: [

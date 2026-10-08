@@ -3,6 +3,7 @@ import Header from "@/components/features/landing/layout/header";
 import Footer from "@/components/features/landing/layout/footer";
 import Heading from "@/components/ui/typography/Heading";
 import { Text } from "@/components/ui/typography/Text";
+import { privacySections } from "@/lib/legal-content";
 
 // DRAFT PAGE — generic placeholder structure only. Do not treat as a
 // finished legal document: it has not been reviewed by counsel and must be
@@ -15,59 +16,7 @@ export const metadata = generateSeoMetadata({
   noIndex: true,
 });
 
-const sections: { heading: string; body: string[] }[] = [
-  {
-    heading: "Information We Collect",
-    body: [
-      "Account information you provide when you sign up, such as your name, email address, phone number, and church details.",
-      "Member and operational data you or your team enter into Church Workflow, such as membership records, attendance, and department/team information.",
-      "Usage data collected automatically, such as pages visited and features used, via analytics tools (Google Analytics, Mixpanel).",
-      "Payment information processed by our payment providers (Paystack, Flutterwave) — we do not store your card details ourselves.",
-    ],
-  },
-  {
-    heading: "How We Use Information",
-    body: [
-      "To provide, maintain, and improve the Church Workflow service.",
-      "To communicate with you about your account, updates, and support requests.",
-      "To process payments and manage subscriptions.",
-      "To understand product usage and improve the product experience.",
-    ],
-  },
-  {
-    heading: "Data Sharing",
-    body: [
-      "We do not sell your personal data.",
-      "We share data with service providers who help us operate the platform (e.g. hosting, email delivery, payment processing, analytics), under agreements that require them to protect your data.",
-      "We may disclose information if required by law.",
-    ],
-  },
-  {
-    heading: "Data Retention",
-    body: [
-      "We retain account and member data for as long as your account is active, and for a reasonable period afterward as required for legal, accounting, or legitimate business purposes.",
-    ],
-  },
-  {
-    heading: "Your Rights",
-    body: [
-      "You may request access to, correction of, or deletion of your personal data by contacting us.",
-      "You may opt out of non-essential analytics tracking where technically supported.",
-    ],
-  },
-  {
-    heading: "Changes to This Policy",
-    body: [
-      "We may update this policy from time to time. Material changes will be communicated to registered users.",
-    ],
-  },
-  {
-    heading: "Contact",
-    body: [
-      "Questions about this policy can be directed to our support team through the contact channels listed on our website.",
-    ],
-  },
-];
+const sections = privacySections;
 
 export default function PrivacyPolicyPage() {
   return (

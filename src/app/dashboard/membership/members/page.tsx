@@ -270,19 +270,58 @@ export default function MembershipPage() {
       />
 
       <div className="bg-white border-b border-gray-200">
-        <div className="px-4 sm:px-6 py-4 flex items-center justify-between gap-2">
-          <div className="flex items-center gap-3 min-w-0 flex-1">
+        <div className="px-4 sm:px-6 py-3 sm:py-4 flex flex-wrap items-center gap-x-3 gap-y-3 md:flex-nowrap md:justify-between">
+          <div className="flex items-center gap-3 min-w-0 flex-1 md:flex-none">
             {isMobile && (
-              <div className="flex items-center justify-center h-8 w-8">
+              <div className="flex items-center justify-center h-8 w-8 shrink-0">
                 <SidebarTrigger />
               </div>
             )}
-            <Heading level={3} className="leading-none m-0 shrink-0">
+            <Heading
+              level={3}
+              className="leading-none m-0 whitespace-nowrap truncate"
+            >
               CW Members
             </Heading>
+          </div>
 
-            {/* Inline search with / hint, per the design */}
-            <div className="relative w-48 md:w-80 max-w-full">
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0 md:order-3">
+            <MemberFilterDropdown
+              filters={filters}
+              setFilters={setFilters}
+              searchQuery={searchQuery}
+              setSearchQuery={setSearchQuery}
+            />
+
+            {selectedMemberIds.length > 0 ? (
+              <Button
+                variant="destructive"
+                onClick={() => setIsDeleteModalOpen(true)}
+                className="rounded-lg whitespace-nowrap"
+              >
+                Remove
+                <span className="hidden sm:inline">&nbsp;Members</span>
+              </Button>
+            ) : (
+              <Button
+                onClick={handleAddMemberClick}
+                disabled={isCsvUploading}
+                className="rounded-lg whitespace-nowrap"
+              >
+                {isCsvUploading ? (
+                  "Uploading..."
+                ) : (
+                  <>
+                    Add<span className="hidden sm:inline">&nbsp;a member</span>
+                  </>
+                )}
+              </Button>
+            )}
+          </div>
+
+          {/* Full-width on its own row on mobile; inline on md+ */}
+          <div className="w-full md:order-2 md:flex-1 md:w-auto md:max-w-sm">
+            <div className="relative w-full">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
               <Input
                 placeholder="Search"
@@ -303,33 +342,6 @@ export default function MembershipPage() {
                 </kbd>
               )}
             </div>
-          </div>
-
-          <div className="flex items-center gap-3 shrink-0">
-            <MemberFilterDropdown
-              filters={filters}
-              setFilters={setFilters}
-              searchQuery={searchQuery}
-              setSearchQuery={setSearchQuery}
-            />
-
-            {selectedMemberIds.length > 0 ? (
-              <Button
-                variant="destructive"
-                onClick={() => setIsDeleteModalOpen(true)}
-                className="rounded-lg"
-              >
-                Remove Members
-              </Button>
-            ) : (
-              <Button
-                onClick={handleAddMemberClick}
-                disabled={isCsvUploading}
-                className="rounded-lg"
-              >
-                {isCsvUploading ? "Uploading..." : "Add a member"}
-              </Button>
-            )}
           </div>
         </div>
       </div>
