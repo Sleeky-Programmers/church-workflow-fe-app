@@ -138,12 +138,12 @@ export default function MembershipSettingsPage() {
         setCountSmallTeams(saved.countSmallTeams);
       })
       .catch(() => {
-        // First visit — server creates defaults on read
+        // First visit: server creates defaults on read
       })
       .finally(() => setIsLoading(false));
   }, []);
 
-  // Live impact counts — debounced so dragging a slider doesn't hammer the API
+  // Live impact counts, debounced so dragging a slider doesn't hammer the API
   const countsTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   useEffect(() => {
     if (isLoading) return;
@@ -207,7 +207,7 @@ export default function MembershipSettingsPage() {
       toast({
         title: "Settings saved",
         description:
-          "Membership attention settings updated — the dashboard now uses these thresholds.",
+          "Membership attention settings updated. The dashboard now uses these thresholds.",
       });
     } catch (err: any) {
       const message =
@@ -506,7 +506,7 @@ export default function MembershipSettingsPage() {
               : "All changes saved"}
         </Button>
 
-        <p className="text-xs text-gray-400 text-center -mt-2">
+        <p className="text-xs text-gray-400 text-center mt-3">
           Changes take effect immediately on the{" "}
           <Link
             href="/dashboard/membership/dashboard"

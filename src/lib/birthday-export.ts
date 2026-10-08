@@ -72,14 +72,14 @@ export async function exportBirthdaysToExcel(
   const totalBirthdays = rows.length;
 
   // --- Title block (rows 1-2) ---
-  sheet.mergeCells("A1:G1");
+  sheet.mergeCells("A1:F1");
   const titleCell = sheet.getCell("A1");
   titleCell.value = churchName ? `${churchName} — Upcoming Birthdays` : "Upcoming Birthdays";
   titleCell.font = { name: FONT, size: 16, bold: true, color: { argb: COLORS.primary900 } };
   titleCell.alignment = { vertical: "middle", horizontal: "left" };
   sheet.getRow(1).height = 28;
 
-  sheet.mergeCells("A2:G2");
+  sheet.mergeCells("A2:F2");
   const subtitleCell = sheet.getCell("A2");
   subtitleCell.value = `${totalBirthdays} birthday${totalBirthdays === 1 ? "" : "s"} in the next 12 months • Generated ${new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}`;
   subtitleCell.font = { name: FONT, size: 10, italic: true, color: { argb: COLORS.grayText } };
@@ -93,7 +93,6 @@ export async function exportBirthdaysToExcel(
     "Email",
     "Phone Number",
     "Birthday",
-    "Upcoming Date",
     "Age Turning",
   ];
   const headerRow = sheet.getRow(headerRowIndex);
@@ -116,11 +115,6 @@ export async function exportBirthdaysToExcel(
   // --- Data rows ---
   rows.forEach((row, idx) => {
     const sheetRow = sheet.getRow(headerRowIndex + 1 + idx);
-    const upcomingLabel = row.nextDate.toLocaleDateString("en-US", {
-      weekday: "short",
-      month: "short",
-      day: "numeric",
-    });
     const dayNum = row.nextDate.getDate();
     const birthdayLabel = row.nextDate.toLocaleDateString("en-US", {
       month: "long",
@@ -133,7 +127,6 @@ export async function exportBirthdaysToExcel(
       row.email,
       row.phone,
       birthdayLabel,
-      upcomingLabel,
       ageTurning ?? "",
     ];
 
@@ -172,7 +165,6 @@ export async function exportBirthdaysToExcel(
     { width: 32 }, // Email
     { width: 18 }, // Phone
     { width: 18 }, // Birthday
-    { width: 22 }, // Upcoming
     { width: 13 }, // Age
   ];
 

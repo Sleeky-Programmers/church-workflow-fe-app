@@ -15,6 +15,8 @@ export enum Routes {
   Home = "/",
   Attendance = "/dashboard/attendance",
   Membership = "/dashboard/membership/dashboard",
+  Assets = "/dashboard/asset-management",
+  AssetDetails = "/dashboard/asset-management/[id]",
   DepartmentDetails = "/dashboard/departments/[id]",
   DepartmentEdit = "/dashboard/departments/[id]/edit",
 
@@ -45,6 +47,9 @@ export const RouteConfig = {
     notifications: Routes.Notifications,
     attendance: Routes.Attendance,
     membership: Routes.Membership,
+    assets: Routes.Assets,
+    assetDetails: (assetId: string) =>
+      getRouteWithParams(Routes.AssetDetails, { id: assetId }),
     departmentDetails: (id: string) =>
       getRouteWithParams(Routes.DepartmentDetails, { id }),
     departmentEdit: (departmentId: string) =>

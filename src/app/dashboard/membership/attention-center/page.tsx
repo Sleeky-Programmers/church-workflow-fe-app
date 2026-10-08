@@ -6,6 +6,8 @@ import {
   CalendarClock,
   CheckCircle2,
   ChevronDown,
+  ChevronLeft,
+  ChevronRight,
   Eye,
   Mail,
   MessageCircle,
@@ -38,6 +40,18 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+} from "@/components/ui/pagination";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import Heading from "@/components/ui/typography/Heading";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -365,6 +379,8 @@ export default function AttentionCenterPage() {
   const [tab, setTab] = useState<TabKey>("all");
   const [showResolved, setShowResolved] = useState(false);
   const [busyId, setBusyId] = useState<string | null>(null);
+  const [pageSize, setPageSize] = useState(10);
+  const [currentPage, setCurrentPage] = useState(1);
 
   // Dialog state: null = closed. noteTarget carries { alert, editIndex, initialBody }
   // so the same dialog handles add and edit.
@@ -408,6 +424,24 @@ export default function AttentionCenterPage() {
     () =>
       showResolved ? filtered : filtered.filter((a) => !a.resolved),
     [filtered, showResolved],
+  );
+
+  // Reset to page 1 whenever the active tab or resolved-filter changes so a
+  // deep page number from a previous view never leaves the list looking empty.
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [tab, showResolved]);
+
+  const totalPages = Math.max(1, Math.ceil(visible.length / pageSize));
+
+  useEffect(() => {
+    if (currentPage > totalPages) setCurrentPage(totalPages);
+  }, [currentPage, totalPages]);
+
+  const paginated = useMemo(
+    () =>
+      visible.slice((currentPage - 1) * pageSize, currentPage * pageSize),
+    [visible, currentPage, pageSize],
   );
 
   const withBusy = async (id: string, fn: () => Promise<void>) => {
@@ -574,7 +608,7 @@ export default function AttentionCenterPage() {
             animate="visible"
             className="flex flex-col gap-3"
           >
-            {visible.map((alert) => (
+            {paginated.map((alert) => (
               <motion.div
                 key={alert.alertId}
                 variants={fadeUpBounce}
@@ -610,6 +644,96 @@ export default function AttentionCenterPage() {
               </motion.div>
             ))}
           </motion.div>
+        )}
+
+        {!isLoading && visible.length > 0 && (
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-medium text-gray-500 whitespace-nowrap">
+                Rows per page
+              </span>
+              <Select
+                value={String(pageSize)}
+                onValueChange={(value) => {
+                  setPageSize(Number(value));
+                  setCurrentPage(1);
+                }}
+              >
+                <SelectTrigger className="w-[72px] h-8 text-xs">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {[10, 25].map((size) => (
+                    <SelectItem key={size} value={String(size)}>
+                      {size}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <span className="text-xs text-gray-400 whitespace-nowrap">
+                Showing {Math.min(paginated.length, visible.length)} of{" "}
+                {visible.length}
+              </span>
+            </div>
+
+            {totalPages > 1 && (
+              <Pagination className="sm:justify-end m-0">
+                <PaginationContent>
+                  <PaginationItem>
+                    <button
+                      onClick={() =>
+                        setCurrentPage((p) => Math.max(1, p - 1))
+                      }
+                      disabled={currentPage === 1}
+                      className={cn(
+                        "flex items-center justify-center h-8 w-8 rounded-md border border-gray-200 text-gray-500 transition-colors",
+                        currentPage === 1
+                          ? "opacity-40 cursor-not-allowed"
+                          : "hover:bg-gray-50",
+                      )}
+                    >
+                      <ChevronLeft className="h-4 w-4" />
+                    </button>
+                  </PaginationItem>
+
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                    (page) => (
+                      <PaginationItem key={page}>
+                        <button
+                          onClick={() => setCurrentPage(page)}
+                          className={cn(
+                            "flex items-center justify-center h-8 w-8 rounded-md text-xs font-medium border transition-colors",
+                            currentPage === page
+                              ? "bg-primary-400 text-white border-primary-400"
+                              : "border-gray-200 text-gray-600 hover:bg-gray-50",
+                          )}
+                        >
+                          {page}
+                        </button>
+                      </PaginationItem>
+                    ),
+                  )}
+
+                  <PaginationItem>
+                    <button
+                      onClick={() =>
+                        setCurrentPage((p) => Math.min(totalPages, p + 1))
+                      }
+                      disabled={currentPage === totalPages}
+                      className={cn(
+                        "flex items-center justify-center h-8 w-8 rounded-md border border-gray-200 text-gray-500 transition-colors",
+                        currentPage === totalPages
+                          ? "opacity-40 cursor-not-allowed"
+                          : "hover:bg-gray-50",
+                      )}
+                    >
+                      <ChevronRight className="h-4 w-4" />
+                    </button>
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
+            )}
+          </div>
         )}
       </div>
 

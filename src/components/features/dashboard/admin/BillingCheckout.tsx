@@ -16,6 +16,10 @@ import { validateCoupon } from "@/services/couponService";
 import { Coupon, Plan, PlanChangePreview } from "@/types";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
+import {
+  LegalDocument,
+  LegalDocumentModal,
+} from "./LegalDocumentModal";
 import { useUserStore } from "@/stores/useUserStore";
 import {
   billingAgreementSchema,
@@ -45,6 +49,7 @@ export default function BillingCheckout({
   const [isApplyingCoupon, setIsApplyingCoupon] = useState(false);
   const [couponError, setCouponError] = useState<string | null>(null);
   const [appliedCoupon, setAppliedCoupon] = useState<Coupon | null>(null);
+  const [legalDoc, setLegalDoc] = useState<LegalDocument | null>(null);
 
   const form = useForm<BillingAgreementFormValues>({
     resolver: zodResolver(billingAgreementSchema),
@@ -320,20 +325,43 @@ export default function BillingCheckout({
           </div>
           <div className="flex items-start gap-2">
             <Checkbox
+              id="billing-agreement"
               checked={agreed}
               onCheckedChange={(val) =>
-                form.setValue("agreed", !!val, { shouldValidate: true })
+                form.setValue("agreed", val === true, { shouldValidate: true })
               }
+              className="mt-0.5 h-5 w-5 shrink-0"
             />
 
             <Text variant="muted" className="text-xs leading-5">
-              By completing this purchase, you agree to our{" "}
-              <span className="underline cursor-pointer">Terms of Service</span>{" "}
+              <label htmlFor="billing-agreement" className="cursor-pointer">
+                By completing this purchase, you agree to our{" "}
+              </label>
+              <button
+                type="button"
+                onClick={() => setLegalDoc("terms")}
+                className="underline text-primary hover:opacity-80"
+              >
+                Terms of Service
+              </button>{" "}
               and{" "}
-              <span className="underline cursor-pointer">Privacy Policy</span>.
-              Your subscription will automatically renew.
+              <button
+                type="button"
+                onClick={() => setLegalDoc("privacy")}
+                className="underline text-primary hover:opacity-80"
+              >
+                Privacy Policy
+              </button>
+              .{" "}
+              <label htmlFor="billing-agreement" className="cursor-pointer">
+                Your subscription will automatically renew.
+              </label>
             </Text>
           </div>
+          <LegalDocumentModal
+            document={legalDoc}
+            onClose={() => setLegalDoc(null)}
+          />
           <Button
             onClick={handlePayment}
             disabled={loading || !form.formState.isValid}

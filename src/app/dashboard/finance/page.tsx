@@ -389,6 +389,7 @@ export default function FinancePage() {
           <div className="max-h-[55vh] overflow-auto">
             <Table
               columns={expenseColumns}
+              minWidth="min-w-[720px]"
               data={expenses}
               rowKey={(row) => row.id}
               isLoading={expensesLoading}
