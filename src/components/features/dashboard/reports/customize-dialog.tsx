@@ -146,7 +146,7 @@ export function CustomizeDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-[666px]">
+      <DialogContent showClose={false} className="max-h-[90vh] overflow-y-auto sm:max-w-[666px]">
         <DialogHeader>
           <DialogTitle>Customize your report</DialogTitle>
           <DialogDescription>
@@ -156,7 +156,7 @@ export function CustomizeDialog({
         </DialogHeader>
 
         {prefs?.canEditChurch && (
-          <div className="inline-flex rounded-lg bg-muted p-1 text-sm">
+          <div className="mt-5 inline-flex rounded-lg bg-muted p-1 text-sm">
             {(["personal", "church"] as const).map((t) => (
               <button
                 key={t}
@@ -227,7 +227,7 @@ export function CustomizeDialog({
         </div>
 
         {!editingChurch && (
-          <div>
+          <div className="mt-6">
             <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-gray-400">
               Email me a summary
             </p>
