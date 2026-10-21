@@ -1,3 +1,4 @@
+import { trackAction } from "@/lib/usage-tracker";
 import { authenticatedFetch } from "@/lib/api";
 
 export type GivingBatchStatus = "draft" | "submitted" | "confirmed" | "voided";
@@ -149,9 +150,12 @@ export async function submitGivingBatch(id: string) {
 }
 
 export async function confirmGivingBatch(id: string) {
-  return authenticatedFetch<GivingBatch>(`/giving-batches/${id}/confirm`, {
-    method: "POST",
-  });
+  const batch = await authenticatedFetch<GivingBatch>(
+    `/giving-batches/${id}/confirm`,
+    { method: "POST" },
+  );
+  trackAction("giving.confirm");
+  return batch;
 }
 
 export async function voidGivingBatch(id: string, voidReason: string) {

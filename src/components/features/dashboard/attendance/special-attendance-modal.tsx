@@ -25,6 +25,8 @@ import {
 import { getCurrentUserProfile } from "@/lib/auth/session";
 import { AttendanceRecord, SpecialServiceEvent } from "@/types";
 
+import { trackAction } from "@/lib/usage-tracker";
+
 import { AttendanceStatsView } from "./attendance-stats";
 import { SelectMembersView } from "./select-member-view";
 
@@ -272,6 +274,7 @@ export function SpecialAttendanceModal({
           date,
           presentMembers: state.presentMembers,
         });
+        trackAction("attendance.mark");
       }
 
       if (absentSelections.length > 0) {

@@ -1,3 +1,4 @@
+import { trackAction } from "@/lib/usage-tracker";
 import { authenticatedFetch } from "@/lib/api";
 import { mapMember } from "@/mappers/member.mapper";
 import {
@@ -105,6 +106,7 @@ export async function createMember(data: NewMemberData) {
     body: JSON.stringify(payload),
   });
 
+  trackAction("member.add");
   return mapMember(response);
 }
 

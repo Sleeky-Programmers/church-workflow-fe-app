@@ -1,3 +1,4 @@
+import { trackAction } from "@/lib/usage-tracker";
 import { authenticatedFetch } from "@/lib/api";
 
 export interface CreateExpensePayload {
@@ -52,10 +53,12 @@ export interface ExpenseMonthlyTrendPoint {
 }
 
 export async function createExpense(payload: CreateExpensePayload) {
-  return authenticatedFetch<ExpenseResponse>("/expenses", {
+  const expense = await authenticatedFetch<ExpenseResponse>("/expenses", {
     method: "POST",
     body: JSON.stringify(payload),
   });
+  trackAction("expense.add");
+  return expense;
 }
 
 export async function fetchExpenses(params: ExpenseQueryParams) {

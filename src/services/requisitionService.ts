@@ -1,3 +1,4 @@
+import { trackAction } from "@/lib/usage-tracker";
 import { authenticatedFetch } from "@/lib/api";
 import { RequisitionStatus } from "@/lib/enums";
 
@@ -65,17 +66,24 @@ export async function fetchRequisitionById(id: string) {
 }
 
 export async function approveRequisition(id: string) {
-  return authenticatedFetch<RequisitionResponse>(
+  const result = await authenticatedFetch<RequisitionResponse>(
     `/requisitions/${id}/approve`,
     { method: "PUT" },
   );
+  trackAction("requisition.review");
+  return result;
 }
 
 export async function rejectRequisition(id: string, reviewNote: string) {
-  return authenticatedFetch<RequisitionResponse>(`/requisitions/${id}/reject`, {
-    method: "PUT",
-    body: JSON.stringify({ reviewNote }),
-  });
+  const result = await authenticatedFetch<RequisitionResponse>(
+    `/requisitions/${id}/reject`,
+    {
+      method: "PUT",
+      body: JSON.stringify({ reviewNote }),
+    },
+  );
+  trackAction("requisition.review");
+  return result;
 }
 
 export async function deleteRequisition(id: string) {

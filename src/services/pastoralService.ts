@@ -1,3 +1,4 @@
+import { trackAction } from "@/lib/usage-tracker";
 import { authenticatedFetch } from "@/lib/api";
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -152,13 +153,15 @@ export async function setAlertResolved(
   resolved: boolean,
   outcomeNote?: string,
 ): Promise<PastoralAlert> {
-  return authenticatedFetch<PastoralAlert>(
+  const alert = await authenticatedFetch<PastoralAlert>(
     `/members/pastoral/alerts/${alertId}/resolve`,
     {
       method: "PUT",
       body: JSON.stringify({ resolved, outcomeNote }),
     },
   );
+  if (resolved) trackAction("alert.resolve");
+  return alert;
 }
 
 export async function setAlertRead(

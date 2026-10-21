@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
 import { DashboardGuard } from "@/components/auth/dashboard-guard";
+import { SuggestionsProvider } from "@/components/features/dashboard/suggestions-context";
+import { SuggestionsStrip } from "@/components/features/dashboard/suggestions-strip";
+import { UsageTracker } from "@/components/layout/usage-tracker";
 import { Navbar } from "@/components/layout/Navbar";
 import { RecentTracker } from "@/components/layout/recent-tracker";
 import { AppSidebar } from "@/components/layout/Sidebar";
@@ -21,18 +24,24 @@ export default function DashboardLayout({
 }) {
   return (
     <DashboardGuard>
-      <SidebarProvider>
-        <RecentTracker />
+      <SuggestionsProvider>
+        <SidebarProvider>
+          <RecentTracker />
+          <UsageTracker />
 
-        <div className="relative flex min-h-screen w-full bg-gray-50">
-          <AppSidebar />
+          <div className="relative flex min-h-screen w-full bg-gray-50">
+            <AppSidebar />
 
-          <SidebarInset className="min-w-0">
-            <Navbar />
-            <main className="min-w-0 w-full p-3 sm:p-4 md:p-6">{children}</main>
-          </SidebarInset>
-        </div>
-      </SidebarProvider>
+            <SidebarInset className="min-w-0">
+              <Navbar />
+              <main className="min-w-0 w-full p-3 sm:p-4 md:p-6">
+                <SuggestionsStrip />
+                {children}
+              </main>
+            </SidebarInset>
+          </div>
+        </SidebarProvider>
+      </SuggestionsProvider>
     </DashboardGuard>
   );
 }

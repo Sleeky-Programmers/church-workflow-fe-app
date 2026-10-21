@@ -17,6 +17,7 @@ import {
   UserPlus,
   Users,
   Wallet,
+  BarChart3,
 } from "lucide-react";
 
 import {
@@ -330,6 +331,11 @@ export const SidebarData = {
       title: "Asset Management",
       url: "/dashboard/asset-management",
       icon: Package,
+    },
+    {
+      title: "Reports",
+      url: "/dashboard/reports",
+      icon: BarChart3,
     },
   ],
   footer: [

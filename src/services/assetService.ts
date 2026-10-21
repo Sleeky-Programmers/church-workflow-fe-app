@@ -1,3 +1,4 @@
+import { trackAction } from "@/lib/usage-tracker";
 import { authenticatedFetch } from "@/lib/api";
 
 import {
@@ -132,10 +133,12 @@ export async function deleteAsset(id: string) {
 }
 
 export async function logAssetService(id: string, payload: LogServicePayload) {
-  return authenticatedFetch<Asset>(`/assets/${id}/services`, {
+  const asset = await authenticatedFetch<Asset>(`/assets/${id}/services`, {
     method: "POST",
     body: JSON.stringify(payload),
   });
+  trackAction("asset.service");
+  return asset;
 }
 
 export async function updateMaintenanceNotifications(
