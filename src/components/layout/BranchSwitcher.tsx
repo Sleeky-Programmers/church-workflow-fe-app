@@ -15,7 +15,7 @@ import {
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
 
-export function BranchSwitcher() {
+export function BranchSwitcher({ fullWidth = false }: { fullWidth?: boolean }) {
   const { branches, activeBranchId, switchActiveBranch } = useUserStore();
   const [isSwitching, setIsSwitching] = useState(false);
 
@@ -45,17 +45,32 @@ export function BranchSwitcher() {
       <DropdownMenuTrigger asChild>
         <Button
           variant="outline"
-          className="hidden md:flex items-center gap-2"
+          className={
+            fullWidth
+              ? "flex h-9 w-full items-center justify-between gap-2 px-3 text-sm"
+              : "hidden md:flex items-center gap-2"
+          }
           disabled={isSwitching}
         >
-          <Building2 className="w-4 h-4" />
-          <span className="max-w-[140px] truncate">
+          <Building2 className="w-4 h-4 shrink-0" />
+          <span
+            className={
+              fullWidth ? "min-w-0 flex-1 truncate text-left" : "max-w-[140px] truncate"
+            }
+          >
             {activeBranch?.name || "Select branch"}
           </span>
-          <ChevronsUpDown className="w-4 h-4 opacity-50" />
+          <ChevronsUpDown className="w-4 h-4 shrink-0 opacity-50" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-56">
+      <DropdownMenuContent
+        align={fullWidth ? "start" : "end"}
+        className={
+          fullWidth
+            ? "w-[var(--radix-dropdown-menu-trigger-width)] min-w-56"
+            : "w-56"
+        }
+      >
         <DropdownMenuLabel>Branches</DropdownMenuLabel>
         <DropdownMenuSeparator />
         {branches.map((branch) => (

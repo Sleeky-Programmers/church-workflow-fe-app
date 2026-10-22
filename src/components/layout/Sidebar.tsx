@@ -25,6 +25,7 @@ import { ActiveTab } from "@/lib/enums";
 import { cn } from "@/lib/utils";
 import { useFavoritesStore } from "@/stores/useFavoritesStore";
 
+import { BranchSwitcher } from "./BranchSwitcher";
 import { SuggestionAnchor } from "@/components/features/dashboard/suggestion-anchor";
 
 import { Span, Text } from "../ui/typography/Text";
@@ -130,6 +131,11 @@ export function AppSidebar() {
                 priority
               />
             </Link>
+          </div>
+
+          {/* The desktop navbar carries the switcher; on mobile it lives here in the drawer. */}
+          <div className="px-2 md:hidden">
+            <BranchSwitcher fullWidth />
           </div>
 
           <SidebarMenu className="grid grid-cols-2 gap-2 sm:gap-3">
