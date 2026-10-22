@@ -22,16 +22,22 @@ type BirthdayEntry = {
 	name: string;
 	date: string;
 	nextDate: Date;
+	/** 0-based month and day of the birthday; the same every year. */
+	month: number;
+	day: number;
 };
 
 const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
 const WEEKDAY_LABELS = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
 
+const isLeapYear = (year: number) => (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0;
+
+// Keyed by month and day only, so a birthday shows on the calendar in every year.
 function buildBirthdayMap(entries: BirthdayEntry[]): Map<string, BirthdayEntry[]> {
 	const map = new Map<string, BirthdayEntry[]>();
 	for (const entry of entries) {
-		const key = `${entry.nextDate.getFullYear()}-${entry.nextDate.getMonth()}-${entry.nextDate.getDate()}`;
+		const key = `${entry.month}-${entry.day}`;
 		const list = map.get(key);
 		if (list) {
 			list.push(entry);
@@ -40,6 +46,15 @@ function buildBirthdayMap(entries: BirthdayEntry[]): Map<string, BirthdayEntry[]
 		}
 	}
 	return map;
+}
+
+// Birthdays on a given calendar day. Feb 29 birthdays fall on Feb 28 in years without a leap day.
+function birthdaysOn(map: Map<string, BirthdayEntry[]>, day: Date): BirthdayEntry[] {
+	const list = map.get(`${day.getMonth()}-${day.getDate()}`) ?? [];
+	if (day.getMonth() === 1 && day.getDate() === 28 && !isLeapYear(day.getFullYear())) {
+		return [...list, ...(map.get('1-29') ?? [])];
+	}
+	return list;
 }
 
 export default function BirthdaysPage() {
@@ -87,18 +102,19 @@ export default function BirthdaysPage() {
 					}))
 				);
 
-				const cutoff = new Date();
-				cutoff.setMonth(cutoff.getMonth() + 12);
-
 				const mapped: BirthdayEntry[] = members
 					.filter((m) => m?.birthday && !isNaN(new Date(m.birthday).getTime()))
-					.map((m) => ({
-						id: m.id,
-						name: m.fullName,
-						date: m.birthday as string,
-						nextDate: getNextBirthdayDate(m.birthday as string),
-					}))
-					.filter((entry) => entry.nextDate <= cutoff)
+					.map((m) => {
+						const parsed = new Date(m.birthday as string);
+						return {
+							id: m.id,
+							name: m.fullName,
+							date: m.birthday as string,
+							nextDate: getNextBirthdayDate(m.birthday as string),
+							month: parsed.getUTCMonth(),
+							day: parsed.getUTCDate(),
+						};
+					})
 					.sort((a, b) => a.nextDate.getTime() - b.nextDate.getTime());
 
 				setEntries(mapped);
@@ -164,8 +180,7 @@ export default function BirthdaysPage() {
 		});
 	};
 
-	const selectedDayKey = selectedDay ? `${selectedDay.getFullYear()}-${selectedDay.getMonth()}-${selectedDay.getDate()}` : null;
-	const selectedDayBirthdays = selectedDayKey ? birthdayMap.get(selectedDayKey) || [] : [];
+	const selectedDayBirthdays = selectedDay ? birthdaysOn(birthdayMap, selectedDay) : [];
 
 	const isSameDay = (a: Date, b: Date) => a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
 
@@ -323,7 +338,7 @@ export default function BirthdaysPage() {
 						{calendarDays.flat().map((day) => {
 							const inMonth = day.getMonth() === viewMonth;
 							const key = `${day.getFullYear()}-${day.getMonth()}-${day.getDate()}`;
-							const dayBirthdays = visibleBirthdayMap.get(key) || [];
+							const dayBirthdays = birthdaysOn(visibleBirthdayMap, day);
 							const hasBirthday = dayBirthdays.length > 0;
 							const isToday = isSameDay(day, today);
 							const isSelected = selectedDay ? isSameDay(day, selectedDay) : false;

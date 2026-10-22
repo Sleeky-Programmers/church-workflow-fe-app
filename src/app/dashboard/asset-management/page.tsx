@@ -494,6 +494,11 @@ export default function AssetManagementPage() {
 
 										<TableCell className="px-4 py-2.5 align-middle">
 											<CellBadge tone={CONDITION_TONE[asset.condition]}>{asset.condition}</CellBadge>
+											{(asset.needsAttention ?? 0) > 0 && asset.qty > 1 && (
+												<p className="mt-1 text-xs text-gray-500">
+													{asset.needsAttention} of {asset.qty} need attention
+												</p>
+											)}
 										</TableCell>
 
 										<TableCell className="px-4 py-2.5 align-middle">

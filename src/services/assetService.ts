@@ -27,6 +27,8 @@ export interface AssetListRow {
   department: string;
   qty: number;
   condition: AssetCondition;
+  /** Items that are in repair or damaged. */
+  needsAttention?: number;
   risk: AssetRisk;
   status: AssetStatus;
   maintenance: string | null;
@@ -48,6 +50,15 @@ export interface AssetConditionPayload {
   damaged: number;
 }
 
+export interface AssetUnitPayload {
+  id?: string;
+  serial?: string;
+  condition: AssetCondition;
+  conditionNote?: string;
+  purchaseDate?: string;
+  value?: number;
+}
+
 export interface CreateAssetPayload {
   name: string;
   tag?: string;
@@ -60,7 +71,8 @@ export interface CreateAssetPayload {
   responsibleAdmin?: string;
   responsibleManualName?: string;
   responsibleManualEmail?: string;
-  conditions: AssetConditionPayload;
+  /** One entry per physical item. */
+  units: AssetUnitPayload[];
   risk: AssetRisk;
   status: AssetStatus;
   maintenanceEnabled: boolean;
