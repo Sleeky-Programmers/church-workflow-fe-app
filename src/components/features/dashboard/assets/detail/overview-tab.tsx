@@ -13,7 +13,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-import { Asset, ConditionBreakdown } from "../data";
+import { Asset, AssetCondition, ConditionBreakdown } from "../data";
 
 interface DetailItem {
   label: string;
@@ -74,6 +74,21 @@ const CONDITION_META: {
   { key: "repair", label: "Needs Repair", dotClass: "bg-amber-500" },
   { key: "damaged", label: "Damaged", dotClass: "bg-red-500" },
 ];
+
+/** Worst condition first, so items needing attention are at the top. */
+const UNIT_RANK: Record<AssetCondition, number> = {
+  Damaged: 3,
+  Repair: 2,
+  Fair: 1,
+  Good: 0,
+};
+
+const UNIT_PILL: Record<AssetCondition, string> = {
+  Good: "bg-emerald-50 text-emerald-700",
+  Fair: "bg-blue-50 text-blue-700",
+  Repair: "bg-amber-50 text-amber-700",
+  Damaged: "bg-red-50 text-red-700",
+};
 
 const BAR_CLASSES: Record<keyof ConditionBreakdown, string> = {
   good: "bg-emerald-500",
@@ -248,6 +263,59 @@ export function OverviewTab({
           </Card>
         </div>
       </div>
+
+      {asset.units?.length > 0 && (
+        <Card title="Items">
+          <p className="mt-1 text-sm text-gray-400">
+            Each item&apos;s own condition and details. Use Edit to update them.
+          </p>
+
+          <div className="mt-4 divide-y divide-gray-100">
+            {[...asset.units]
+              .map((unit, index) => ({ unit, index }))
+              .sort(
+                (a, b) =>
+                  UNIT_RANK[b.unit.condition] - UNIT_RANK[a.unit.condition] ||
+                  a.index - b.index,
+              )
+              .map(({ unit, index }) => (
+                <div
+                  key={unit.id ?? index}
+                  className="flex flex-col gap-1 py-3 sm:flex-row sm:items-start sm:justify-between sm:gap-6"
+                >
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold text-gray-900">
+                      {unit.serial || `Item ${index + 1}`}
+                    </p>
+                    {unit.conditionNote && (
+                      <p className="mt-0.5 text-sm text-gray-600">
+                        {unit.conditionNote}
+                      </p>
+                    )}
+                    {(unit.purchaseDate || unit.value !== null) && (
+                      <p className="mt-0.5 text-xs text-gray-400">
+                        {unit.purchaseDate && `Bought ${unit.purchaseDate}`}
+                        {unit.purchaseDate && unit.value !== null && " · "}
+                        {unit.value !== null && `Value ${unit.value}`}
+                      </p>
+                    )}
+                  </div>
+
+                  <span
+                    className={cn(
+                      "inline-flex w-fit shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium",
+                      UNIT_PILL[unit.condition],
+                    )}
+                  >
+                    {unit.condition === "Repair"
+                      ? "Needs Repair"
+                      : unit.condition}
+                  </span>
+                </div>
+              ))}
+          </div>
+        </Card>
+      )}
 
       <Card title="Remarks">
         <p className="mt-3 text-sm leading-relaxed text-gray-600">

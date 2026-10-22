@@ -35,6 +35,19 @@ export interface ConditionBreakdown {
   damaged: number;
 }
 
+/** One physical item within an asset, with its own condition and details. */
+export interface AssetUnit {
+  /** Present for saved items; absent for ones added in the form. */
+  id?: string;
+  serial: string;
+  condition: AssetCondition;
+  conditionNote: string;
+  /** yyyy-MM-dd, or empty. */
+  purchaseDate: string;
+  value: number | null;
+  addedAt?: string;
+}
+
 export type DueState = "Upcoming" | "Due" | "Overdue";
 
 export interface MaintenanceSchedule {
@@ -111,6 +124,8 @@ export interface AssetDetailFields {
   remarks: string;
   responsible: ResponsiblePerson;
   conditions: ConditionBreakdown;
+  /** Each physical item with its own condition and details. */
+  units: AssetUnit[];
   schedule: MaintenanceSchedule;
   services: ServiceRecord[];
   history: HistoryEvent[];
