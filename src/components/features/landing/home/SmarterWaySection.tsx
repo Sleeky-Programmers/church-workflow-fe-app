@@ -64,7 +64,7 @@ export default function SmarterWaySection() {
             className="mt-5 text-center max-w-lg mx-auto leading-relaxed"
           >
             Church Workflow unifies administration, automates tasks, and
-            simplifies record-keeping — helping church leaders focus on ministry
+            simplifies record-keeping - helping church leaders focus on ministry
             instead of paperwork.
           </Text>
         </div>

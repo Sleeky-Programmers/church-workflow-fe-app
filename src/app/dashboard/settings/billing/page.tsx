@@ -67,7 +67,7 @@ export default function BillingPage() {
   const formatPrice = (price: number) => `₦${price.toLocaleString()}`;
 
   // Yearly billing is shown as its monthly-equivalent (yearly total / 12)
-  // for an apples-to-apples comparison with the monthly toggle — the actual
+  // for an apples-to-apples comparison with the monthly toggle - the actual
   // yearly total is what gets charged, surfaced at checkout instead.
   const getPrice = (plan: Plan) => {
     return billingCycle === BillingCycle.MONTHLY
@@ -115,7 +115,7 @@ export default function BillingPage() {
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
         {plans.map((plan) => {
           // The church's current plan should be marked even while on trial or
-          // in its grace period — only an expired subscription frees the plan
+          // in its grace period - only an expired subscription frees the plan
           // up for re-purchase.
           const isCurrent =
             plan.type === currentPlan &&

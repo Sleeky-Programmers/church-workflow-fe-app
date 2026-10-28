@@ -286,7 +286,7 @@ export function AssetDetail({ asset: initial }: { asset: Asset }) {
             history, images, and maintenance data. This action cannot be
             undone.{" "}
             <span className="font-semibold text-gray-700">
-              Be careful — only grant this permission to trusted
+              Be careful - only grant this permission to trusted
               administrators.
             </span>
           </p>

@@ -52,7 +52,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { SidebarTrigger } from "@/components/ui/sidebar";
 import Heading from "@/components/ui/typography/Heading";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useToast } from "@/hooks/use-toast";
@@ -69,7 +68,7 @@ import {
 } from "@/services/pastoralService";
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Attention Center — alerts are computed server-side and persisted. Actions
+// Attention Center - alerts are computed server-side and persisted. Actions
 // (note / resolve / read) hit real endpoints, so state survives refreshes.
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -270,7 +269,7 @@ function AlertCard({
             Add Note
           </button>
 
-          {/* Contact menu — call / email / WhatsApp depending on data on file */}
+          {/* Contact menu - call / email / WhatsApp depending on data on file */}
           <div className="relative">
             <button
               onClick={() => setContactOpen((v) => !v)}
@@ -295,7 +294,7 @@ function AlertCard({
                   className="fixed inset-0 z-10"
                   onClick={() => setContactOpen(false)}
                 />
-                <div className="absolute left-0 top-full mt-1 z-20 w-44 rounded-lg border border-gray-200 bg-white shadow-lg py-1">
+                <div className="absolute left-0 top-full mt-1 z-20 w-44 rounded-lg border border-gray-200 bg-popover shadow-lg py-1">
                   {hasPhone && (
                     <a
                       href={`tel:${alert.memberPhone}`}
@@ -512,7 +511,7 @@ export default function AttentionCenterPage() {
       toast({ title: editIndex !== null ? "Note updated" : "Note added" });
     } catch {
       toast({
-        title: "Failed to save note — you can only edit your own notes",
+        title: "Failed to save note - you can only edit your own notes",
         variant: "destructive",
       });
     }
@@ -537,7 +536,6 @@ export default function AttentionCenterPage() {
     <div className="min-h-screen bg-gray-50 pb-10">
       <div className="bg-white border-b border-gray-200">
         <div className="px-4 sm:px-6 py-4 flex items-center gap-2">
-          {isMobile && <SidebarTrigger />}
           <Heading level={3} className="leading-none m-0">
             Attention Center
           </Heading>
@@ -762,7 +760,7 @@ export default function AttentionCenterPage() {
                 Resolve alert for {resolveTarget.memberName}
               </DialogTitle>
               <DialogDescription className="text-sm text-gray-500">
-                Add a quick outcome note — it's saved to this alert's history
+                Add a quick outcome note - it's saved to this alert's history
                 so the team knows what happened.
               </DialogDescription>
             </DialogHeader>
@@ -771,7 +769,7 @@ export default function AttentionCenterPage() {
               value={outcomeNote}
               onChange={(e) => setOutcomeNote(e.target.value)}
               rows={4}
-              placeholder="e.g. Visited on Sunday — doing well, will join a small team…"
+              placeholder="e.g. Visited on Sunday - doing well, will join a small team…"
               className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-100 resize-none"
             />
 

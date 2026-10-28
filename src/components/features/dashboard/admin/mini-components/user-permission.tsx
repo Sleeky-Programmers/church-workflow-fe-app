@@ -35,7 +35,7 @@ export function UserDetailsPermissionsView({
           <Heading level={3}>Permissions</Heading>
           <Text variant="default" className="mt-1">
             {roleType === "system"
-              ? "System role — permissions are set by Church Workflow and can't be changed."
+              ? "System role - permissions are set by Church Workflow and can't be changed."
               : roleType === "custom"
                 ? "Permissions assigned to this role."
                 : headerNote ||

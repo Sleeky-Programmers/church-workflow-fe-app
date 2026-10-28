@@ -14,7 +14,7 @@ export async function getSubscriptionOverview(): Promise<SubscriptionOverviewRes
   });
 }
 
-// Public endpoint — no auth required, used on the marketing pricing page.
+// Public endpoint - no auth required, used on the marketing pricing page.
 export async function getPlans(): Promise<Plan[]> {
   return await apiFetch<Plan[]>(`/subscription/plans`, {
     method: "GET",

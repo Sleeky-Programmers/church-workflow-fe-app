@@ -31,7 +31,7 @@ export default function PricingSectionClient({
   );
   const router = useRouter();
 
-  // Only logged-in visitors have a subscription to reflect — fails silently
+  // Only logged-in visitors have a subscription to reflect - fails silently
   // so an anonymous visitor or a fetch hiccup never blocks the public page.
   useEffect(() => {
     if (!getAccessToken()) {
@@ -64,7 +64,7 @@ export default function PricingSectionClient({
 
     const token = getAccessToken();
 
-    // Already on an active paid plan — send them to the dashboard's
+    // Already on an active paid plan - send them to the dashboard's
     // plan-change-aware checkout instead of the new-subscriber checkout.
     const isActivePaidPlan =
       currentPlan?.status === SubscriptionStatus.ACTIVE &&
@@ -90,7 +90,7 @@ export default function PricingSectionClient({
   };
 
   // Yearly billing is shown as its monthly-equivalent (yearly total / 12) so
-  // the two toggle states are visually comparable at a glance — the actual
+  // the two toggle states are visually comparable at a glance - the actual
   // yearly total is still what gets charged, just not the headline number.
   const getDisplayPrice = (plan: Plan) =>
     billing === "monthly"

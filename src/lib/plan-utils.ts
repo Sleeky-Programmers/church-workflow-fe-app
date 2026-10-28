@@ -8,7 +8,7 @@ export const PLAN_ORDER = [
   PlanType.ENTERPRISE,
 ];
 
-/** Looks up the tier one above `currentPlanName` in the plans list — null if there isn't one (top tier / unknown plans list). */
+/** Looks up the tier one above `currentPlanName` in the plans list - null if there isn't one (top tier / unknown plans list). */
 export function getNextPlan(currentPlanName: string | null, plans: Plan[]) {
   const currentIndex = PLAN_ORDER.indexOf(
     (currentPlanName as PlanType) ?? PlanType.STARTER,

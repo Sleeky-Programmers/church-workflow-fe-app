@@ -1,4 +1,4 @@
-// DRAFT CONTENT — generic placeholder structure only. Not reviewed by counsel.
+// DRAFT CONTENT - generic placeholder structure only. Not reviewed by counsel.
 // Shared by the /terms and /privacy pages and the billing checkout modal so
 // the text only lives in one place.
 export type LegalSection = { heading: string; body: string[] };
@@ -76,7 +76,7 @@ export const privacySections: LegalSection[] = [
       "Account information you provide when you sign up, such as your name, email address, phone number, and church details.",
       "Member and operational data you or your team enter into Church Workflow, such as membership records, attendance, and department/team information.",
       "Usage data collected automatically, such as pages visited and features used, via analytics tools (Google Analytics, Mixpanel).",
-      "Payment information processed by our payment providers (Paystack, Flutterwave) — we do not store your card details ourselves.",
+      "Payment information processed by our payment providers (Paystack, Flutterwave) - we do not store your card details ourselves.",
     ],
   },
   {

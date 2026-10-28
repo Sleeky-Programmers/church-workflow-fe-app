@@ -49,7 +49,7 @@ export default function ContactPage() {
         </Heading>
         <Text variant="muted" className="text-base md:text-lg mb-12">
           Have a question about Church Workflow, or need help with your account?
-          Reach out through any of the channels below — our team aims to get
+          Reach out through any of the channels below - our team aims to get
           back to you as quickly as possible.
         </Text>
 

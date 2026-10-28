@@ -79,6 +79,19 @@ type UserStore = {
 // Cache duration (5 minutes)
 const CACHE_DURATION = 5 * 60 * 1000;
 
+// Turn a raw fetch/HTTP error into something a user can act on. A bare
+// "Failed to fetch" (network/offline/CORS) is meaningless to them.
+function toProfileErrorMessage(error: unknown): string {
+  if (typeof navigator !== "undefined" && navigator.onLine === false) {
+    return "You appear to be offline. Check your connection and try again.";
+  }
+  const message = error instanceof Error ? error.message : String(error ?? "");
+  if (!message || message === "Failed to fetch" || message === "Load failed") {
+    return "We couldn't reach the server. Check your connection and try again.";
+  }
+  return message;
+}
+
 export const useUserStore = create<UserStore>()(
   persist(
     (set, get) => ({
@@ -113,18 +126,35 @@ export const useUserStore = create<UserStore>()(
         set({ isLoading: true, error: null });
 
         try {
-          const [userData, churchData, branchData] = await Promise.all([
-            getProfile() as any,
-            getMyChurch(),
-            getMyBranches().catch(() => null),
-          ]);
+          // Only the profile is critical. Church and branches are best-effort:
+          // both have UI fallbacks, so a transient failure on either must not
+          // blow away the whole dashboard. allSettled keeps them independent.
+          const [userResult, churchResult, branchResult] =
+            await Promise.allSettled([
+              getProfile() as Promise<any>,
+              getMyChurch(),
+              getMyBranches(),
+            ]);
+
+          if (userResult.status === "rejected") {
+            throw userResult.reason;
+          }
+
+          const userData = userResult.value;
+          const churchData =
+            churchResult.status === "fulfilled"
+              ? churchResult.value
+              : get().church;
+          const branchData =
+            branchResult.status === "fulfilled" ? branchResult.value : null;
 
           set({
             user: userData,
             church: churchData,
-            branches: branchData?.branches || [],
-            activeBranchId: branchData?.activeBranchId || null,
-            accessScope: branchData?.accessScope || null,
+            branches: branchData?.branches || get().branches || [],
+            activeBranchId:
+              branchData?.activeBranchId ?? get().activeBranchId ?? null,
+            accessScope: branchData?.accessScope ?? get().accessScope ?? null,
             isLoading: false,
             lastFetched: now,
             error: null,
@@ -132,7 +162,7 @@ export const useUserStore = create<UserStore>()(
 
           // Enrich the Mixpanel profile beyond the basic name/email set at
           // login, so recordings in the dashboard are easy to identify by
-          // full name, role, and church — not just an anonymous session id.
+          // full name, role, and church - not just an anonymous session id.
           if (userData) {
             const fullName =
               [userData.firstName, userData.lastName]
@@ -147,9 +177,11 @@ export const useUserStore = create<UserStore>()(
               church: churchData?.name,
             });
           }
-        } catch (error: any) {
+        } catch (error: unknown) {
+          // Preserve any previously cached user/church so a transient refresh
+          // failure doesn't tear down a dashboard the user can still use.
           set({
-            error: error.message || "Failed to load profile",
+            error: toProfileErrorMessage(error),
             isLoading: false,
           });
         }

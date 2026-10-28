@@ -49,7 +49,7 @@ export default function DepartmentMobile({ data }: Props) {
             </div>
 
             <div className="space-y-1">
-              <Text text={`HOD: ${dept.hod?.name ?? "—"}`} />
+              <Text text={`HOD: ${dept.hod?.name ?? "-"}`} />
 
               <Text text={`Members: ${dept.members}`} />
 

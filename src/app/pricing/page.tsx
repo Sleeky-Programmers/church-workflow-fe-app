@@ -13,7 +13,7 @@ export const metadata = generateSeoMetadata({
 });
 
 // See src/app/page.tsx for why this is revalidated rather than left fully
-// static — this page's plan prices come from the same server fetch.
+// static - this page's plan prices come from the same server fetch.
 export const revalidate = 3600;
 
 export default function PricingPage() {
@@ -22,7 +22,7 @@ export default function PricingPage() {
       <Header />
       <PageIntro
         title="Church Management Software Pricing"
-        description="Church Workflow is priced for churches of every size — from a free starter plan for small congregations to multi-branch plans for large ministries, with Naira pricing built for Nigerian churches."
+        description="Church Workflow is priced for churches of every size - from a free starter plan for small congregations to multi-branch plans for large ministries, with Naira pricing built for Nigerian churches."
       />
       <PricingSection />
       <CtaSection />

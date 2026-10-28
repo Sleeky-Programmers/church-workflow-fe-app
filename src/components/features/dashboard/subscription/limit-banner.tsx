@@ -24,7 +24,7 @@ const iconColors: Record<BannerColor, string> = {
 };
 
 export interface LimitBannerProps {
-  /** Stable reference (module-level export) — an inline arrow function will refetch on every render. */
+  /** Stable reference (module-level export) - an inline arrow function will refetch on every render. */
   fetchStatus: () => Promise<PlanLimitStatus>;
   /** sessionStorage key used to remember this banner was dismissed; must be unique per resource. */
   dismissKey: string;
@@ -33,7 +33,7 @@ export interface LimitBannerProps {
   /** Limit noun used in messaging, e.g. "member limit", "user seat limit". */
   resourceLimitLabel: string;
   upgradeHref?: string;
-  /** Extra classes for the outer wrapper — use this to add page-specific spacing (e.g. full-bleed pages need horizontal margin the caller's padded container already provides). */
+  /** Extra classes for the outer wrapper - use this to add page-specific spacing (e.g. full-bleed pages need horizontal margin the caller's padded container already provides). */
   className?: string;
 }
 

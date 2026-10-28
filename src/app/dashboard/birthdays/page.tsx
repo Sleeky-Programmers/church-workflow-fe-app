@@ -8,7 +8,6 @@ import { Input } from '@/components/ui/input';
 import { Loader } from '@/components/ui/loader';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
-import { SidebarTrigger } from '@/components/ui/sidebar';
 import Heading from '@/components/ui/typography/Heading';
 import { Text } from '@/components/ui/typography/Text';
 import { useHasAccess } from '@/lib/access-control';
@@ -201,7 +200,6 @@ export default function BirthdaysPage() {
 		return (
 			<div className="space-y-4">
 				<div className="flex items-center gap-3">
-					<SidebarTrigger className="sm:hidden" />
 					<Heading
 						level={2}
 						text="Birthdays"
@@ -215,7 +213,6 @@ export default function BirthdaysPage() {
 	return (
 		<div className="space-y-6">
 			<div className="flex items-center gap-3">
-				<SidebarTrigger className="sm:hidden" />
 				<Heading
 					level={2}
 					text="Birthdays"

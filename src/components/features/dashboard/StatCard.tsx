@@ -19,6 +19,10 @@ interface StatCardProps {
   icon?: React.ReactNode;
   className?: string;
   isLoading?: boolean;
+  /** When true, the card shows a compact "couldn't load" state instead of the count. */
+  hasError?: boolean;
+  /** Called when the user clicks Retry in the error state. */
+  onRetry?: () => void;
 }
 
 interface TotalIncomeCardProps {
@@ -81,7 +85,7 @@ const IncomeIcon = () => (
 );
 
 // ─────────────────────────────────────────────────────────────────────────────
-// StatCard — matches the design: white card, coloured icon box, big number
+// StatCard - matches the design: white card, coloured icon box, big number
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const StatCard = ({
@@ -93,6 +97,8 @@ export const StatCard = ({
   icon,
   className,
   isLoading = false,
+  hasError = false,
+  onRetry,
 }: StatCardProps) => {
   const isPositive = growth ? !growth.startsWith("-") : true;
 
@@ -125,6 +131,20 @@ export const StatCard = ({
         </p>
         {isLoading ? (
           <Loader size="w-6 h-6" showShadow={false} />
+        ) : hasError ? (
+          <div className="flex flex-col items-center gap-0.5">
+            <span className="text-[13px] font-semibold text-red-500">
+              Couldn&apos;t load
+            </span>
+            {onRetry && (
+              <button
+                onClick={onRetry}
+                className="text-[12px] font-medium text-primary-500 hover:underline"
+              >
+                Retry
+              </button>
+            )}
+          </div>
         ) : (
           <span className="text-[30px] text-center font-bold text-black leading-none tracking-tight">
             {count}

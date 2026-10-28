@@ -21,7 +21,6 @@ import { AddMemberFormatModal } from "@/components/features/dashboard/membership
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Loader } from "@/components/ui/loader";
-import { SidebarTrigger } from "@/components/ui/sidebar";
 import Heading from "@/components/ui/typography/Heading";
 import { useDebounce } from "@/hooks/use-debounce";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -274,7 +273,6 @@ export default function MembershipPage() {
           <div className="flex items-center gap-3 min-w-0 flex-1 md:flex-none">
             {isMobile && (
               <div className="flex items-center justify-center h-8 w-8 shrink-0">
-                <SidebarTrigger />
               </div>
             )}
             <Heading

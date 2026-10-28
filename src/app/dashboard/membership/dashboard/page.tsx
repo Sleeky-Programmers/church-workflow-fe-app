@@ -38,7 +38,6 @@ import {
   tapPress,
   hoverSpring,
 } from "@/components/features/dashboard/membership/animations";
-import { SidebarTrigger } from "@/components/ui/sidebar";
 import Heading from "@/components/ui/typography/Heading";
 import { Loader } from "@/components/ui/loader";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -53,7 +52,7 @@ import {
 } from "@/services/pastoralService";
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Pastoral dashboard — fully server-computed via /members/pastoral/dashboard.
+// Pastoral dashboard - fully server-computed via /members/pastoral/dashboard.
 // Classifications use the church's saved settings thresholds.
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -292,7 +291,6 @@ export default function MembershipDashboardPage() {
       <div className="min-h-screen bg-gray-50">
         <header className="bg-white border-b border-gray-200">
           <div className="h-14 px-4 sm:px-6 flex items-center gap-3">
-            {isMobile && <SidebarTrigger />}
             <Heading level={3} className="leading-none m-0">
               Pastoral Dashboard
             </Heading>
@@ -312,7 +310,6 @@ export default function MembershipDashboardPage() {
       {/* ── Page title ── */}
       <div className="bg-white border-b border-gray-200">
         <div className="px-4 sm:px-6 py-4 flex items-center gap-2">
-          {isMobile && <SidebarTrigger />}
           <Heading level={3} className="leading-none m-0">
             Pastoral Dashboard
           </Heading>
@@ -320,7 +317,7 @@ export default function MembershipDashboardPage() {
       </div>
 
       <div className="px-3 sm:px-6 py-4 flex flex-col gap-5">
-        {/* Stat cards — staggered entrance on load */}
+        {/* Stat cards - staggered entrance on load */}
         <motion.div
           variants={staggerContainer}
           initial="hidden"
@@ -346,7 +343,7 @@ export default function MembershipDashboardPage() {
           ))}
         </motion.div>
 
-        {/* Attention + Alerts — sections fade-rise in sequence */}
+        {/* Attention + Alerts - sections fade-rise in sequence */}
         <motion.div
           variants={staggerContainer}
           initial="hidden"
@@ -651,7 +648,7 @@ export default function MembershipDashboardPage() {
           </SectionCard>
         </motion.div>
 
-        {/* Highly Engaged — top members link out to the full members list */}
+        {/* Highly Engaged - top members link out to the full members list */}
         <motion.div variants={fadeUp} initial="hidden" animate="visible">
         <SectionCard
           title="Highly Engaged"
@@ -677,7 +674,7 @@ export default function MembershipDashboardPage() {
                   attendance
                 </p>
                 <p className="text-xs text-gray-500 mt-0.5">
-                  Your most committed members — consider them for leadership and
+                  Your most committed members - consider them for leadership and
                   volunteering opportunities.
                 </p>
               </div>

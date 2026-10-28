@@ -74,7 +74,7 @@ export async function exportBirthdaysToExcel(
   // --- Title block (rows 1-2) ---
   sheet.mergeCells("A1:F1");
   const titleCell = sheet.getCell("A1");
-  titleCell.value = churchName ? `${churchName} — Upcoming Birthdays` : "Upcoming Birthdays";
+  titleCell.value = churchName ? `${churchName} - Upcoming Birthdays` : "Upcoming Birthdays";
   titleCell.font = { name: FONT, size: 16, bold: true, color: { argb: COLORS.primary900 } };
   titleCell.alignment = { vertical: "middle", horizontal: "left" };
   sheet.getRow(1).height = 28;

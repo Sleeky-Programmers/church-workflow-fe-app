@@ -3,7 +3,6 @@
 import * as React from "react";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
-import { X } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
@@ -56,22 +55,7 @@ const DialogContent = React.forwardRef<
         <VisuallyHidden>
           <DialogTitle>Add Member</DialogTitle>
         </VisuallyHidden>
-        <div className="relative flex h-full min-h-0 flex-col">
-          {children}
-
-          {showClose && (
-            <DialogPrimitive.Close
-              className={cn(
-                "absolute right-6 top-6 inline-flex h-9 w-9 items-center justify-center rounded-md border border-destructive text-destructive",
-                "hover:bg-destructive hover:text-destructive-foreground",
-                "transition-colors focus:outline-none focus:ring-2 focus:ring-ring",
-              )}
-            >
-              <X className="h-4 w-4" />
-              <span className="sr-only">Close</span>
-            </DialogPrimitive.Close>
-          )}
-        </div>
+        <div className="relative flex h-full min-h-0 flex-col">{children}</div>
       </DialogPrimitive.Content>
     </DialogPortal>
   ),

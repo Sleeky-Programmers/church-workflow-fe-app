@@ -1,8 +1,8 @@
 "use client";
 
-import { ReactNode } from "react";
-import { SidebarTrigger } from "@/components/ui/sidebar";
 import { MoreVertical } from "lucide-react";
+import { ReactNode } from "react";
+
 import { Button } from "@/components/ui/button";
 import Heading from "@/components/ui/typography/Heading";
 
@@ -11,15 +11,16 @@ type Props = {
   rightAction?: ReactNode;
 };
 
+/**
+ * In-page title row for the mobile views. The menu button and pinned top bar
+ * come from the dashboard layout (MobileTopBar), so this only carries the
+ * page title and its actions.
+ */
 export default function MobileHeader({ title, rightAction }: Props) {
   return (
-    <div className="sticky top-0 z-50 bg-white border-b">
-      <div className="flex items-center justify-between h-14 px-3">
-        <div className="flex items-center gap-2">
-          <SidebarTrigger className="h-5 w-5 shrink-0" />
-
-          <Heading level={3} text={title} className="leading-none" />
-        </div>
+    <div className="bg-white border-b">
+      <div className="flex items-center justify-between h-12 px-3">
+        <Heading level={3} text={title} className="leading-none" />
 
         {rightAction ?? (
           <Button

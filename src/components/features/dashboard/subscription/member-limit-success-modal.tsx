@@ -17,7 +17,7 @@ export interface MemberLimitSuccessModalProps {
   onOpenChange: (open: boolean) => void;
   /** "import" shows CSV-import copy ("Import Successful!"); "add" shows single-member copy ("Member Added!"). */
   context: "import" | "add";
-  /** Number of members just added — only meaningful/shown for the "import" context. */
+  /** Number of members just added - only meaningful/shown for the "import" context. */
   addedCount?: number;
   current: number;
   limit: number;

@@ -24,7 +24,7 @@ const solutionLinks = [
 ];
 
 // Help Center, Documentation, and Support were removed rather than pointed
-// at real pages — no content exists yet for any of them, and a dead link is
+// at real pages - no content exists yet for any of them, and a dead link is
 // worse than no link. Add them back once there's something to link to.
 const legalLinks = [
   { label: "Privacy Policy", href: "/privacy" },

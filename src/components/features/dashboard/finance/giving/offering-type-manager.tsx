@@ -384,7 +384,7 @@ export function OfferingTypeManager() {
         open={!!pendingDelete}
         onOpenChange={(open) => !open && setPendingDelete(null)}
         title={`Delete "${pendingDelete?.name}"?`}
-        description="This permanently removes the offering type. If it's used by existing giving records, deletion will be blocked — deactivate it instead. This action cannot be undone."
+        description="This permanently removes the offering type. If it's used by existing giving records, deletion will be blocked - deactivate it instead. This action cannot be undone."
         confirmLabel="Delete"
         isConfirming={deletingId === pendingDelete?.id}
         onConfirm={handleConfirmDelete}

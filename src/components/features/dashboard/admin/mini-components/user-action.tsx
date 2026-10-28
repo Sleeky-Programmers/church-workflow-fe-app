@@ -44,7 +44,7 @@ export function UserActionsMenu({
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         {availableActions.map((action) => {
-          // Admins can't take actions on their own account — only viewing
+          // Admins can't take actions on their own account - only viewing
           // their own details is allowed.
           const isSelfAction =
             isCurrentUser && !canPerformAction(action.value, isCurrentUser);
