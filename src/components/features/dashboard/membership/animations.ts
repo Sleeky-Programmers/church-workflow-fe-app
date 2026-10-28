@@ -1,6 +1,6 @@
 // ─────────────────────────────────────────────────────────────────────────────
 // Shared motion language for the CW Members module. Everything here is tuned
-// for a dashboard: quick, subtle, and professional — small distances, short
+// for a dashboard: quick, subtle, and professional - small distances, short
 // durations, gentle overshoot (bounce) only where it reads as feedback rather
 // than playfulness.
 // ─────────────────────────────────────────────────────────────────────────────
@@ -39,7 +39,7 @@ export const fadeUp: Variants = {
   },
 };
 
-/** Fade + rise with a small bounce overshoot — for list rows and badges. */
+/** Fade + rise with a small bounce overshoot - for list rows and badges. */
 export const fadeUpBounce: Variants = {
   hidden: { opacity: 0, y: 16 },
   visible: {
@@ -59,7 +59,7 @@ export const scaleIn: Variants = {
   },
 };
 
-/** Exit fade — pairs with AnimatePresence for list removals. */
+/** Exit fade - pairs with AnimatePresence for list removals. */
 export const fadeOut: Variants = {
   hidden: { opacity: 0, transition: { duration: 0.18 } },
   visible: { opacity: 1 },
@@ -81,7 +81,7 @@ export const pageTransition: Variants = {
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Hover language — quick lift with a soft spring, and a gentle press-down on
+// Hover language - quick lift with a soft spring, and a gentle press-down on
 // tap. Subtle enough for data-dense dashboard surfaces.
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -91,7 +91,7 @@ export const hoverLift = { y: -2 } as const;
 /** Slightly stronger lift for primary interactive tiles (stat cards). */
 export const hoverLiftStrong = { y: -3, scale: 1.01 } as const;
 
-/** whileTap target — tactile press without feeling mushy. */
+/** whileTap target - tactile press without feeling mushy. */
 export const tapPress = { scale: 0.99 } as const;
 
 /** Transition used for hover/tap so the response feels immediate. */

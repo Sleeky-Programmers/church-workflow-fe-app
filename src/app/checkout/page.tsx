@@ -51,7 +51,7 @@ export default function CheckoutPage() {
 
         if (response.ok) {
           const data = await response.json();
-          // Only block a no-op re-purchase of the plan already active — a
+          // Only block a no-op re-purchase of the plan already active - a
           // genuine plan change (upgrade/downgrade) still proceeds to checkout.
           const isSamePlanActive =
             data?.currentPlan === selected.plan &&
@@ -64,7 +64,7 @@ export default function CheckoutPage() {
           }
         }
       } catch {
-        // fails silently — payment API will catch it
+        // fails silently - payment API will catch it
       }
 
       setPlan(selected);
@@ -82,7 +82,7 @@ export default function CheckoutPage() {
       .catch(() => setPlanDetails(null));
   }, [plan]);
 
-  // The actual amount charged today — always the real total for the chosen
+  // The actual amount charged today - always the real total for the chosen
   // cycle, never a monthly-equivalent, since this is the payment confirmation.
   const price =
     plan && planDetails

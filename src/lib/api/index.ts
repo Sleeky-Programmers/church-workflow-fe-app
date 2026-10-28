@@ -521,26 +521,48 @@ export function getRefreshToken(): string | null {
   return localStorage.getItem("refreshToken");
 }
 
+// A single in-flight refresh shared by every caller. The refresh token is
+// rotated server-side on first use, so if parallel 401s each kicked off their
+// own refresh, the first would invalidate the token for all the others
+// ("Refresh failed" → spurious logout). De-duping them behind one promise is
+// what keeps a token expiry from randomly nuking the whole dashboard.
+let inFlightRefresh: Promise<{
+  accessToken: string;
+  refreshToken: string;
+}> | null = null;
+
 export async function refreshAuthToken() {
-  const refreshToken = getRefreshToken();
-
-  if (!refreshToken) {
-    throw new Error("No refresh token");
+  if (inFlightRefresh) {
+    return inFlightRefresh;
   }
 
-  const response = await fetch(`${BASE_URL}/auth/refresh-token`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ refreshToken }),
-  });
+  inFlightRefresh = (async () => {
+    const refreshToken = getRefreshToken();
 
-  if (!response.ok) {
-    throw new Error("Refresh failed");
+    if (!refreshToken) {
+      throw new Error("No refresh token");
+    }
+
+    const response = await fetch(`${BASE_URL}/auth/refresh-token`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ refreshToken }),
+    });
+
+    if (!response.ok) {
+      throw new Error("Refresh failed");
+    }
+
+    return response.json();
+  })();
+
+  try {
+    return await inFlightRefresh;
+  } finally {
+    inFlightRefresh = null;
   }
-
-  return response.json();
 }
 
 function mapChurchServiceToRegular(service: ChurchServiceApi): RegularService {

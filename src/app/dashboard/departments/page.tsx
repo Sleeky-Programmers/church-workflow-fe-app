@@ -21,7 +21,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Loader } from "@/components/ui/loader";
-import { SidebarTrigger } from "@/components/ui/sidebar";
 import Heading from "@/components/ui/typography/Heading";
 import { RouteConfig } from "@/config/routes";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -163,7 +162,6 @@ export default function DepartmentPage() {
       <div className="min-h-screen bg-white">
         <div className="px-4 py-4 flex items-center justify-between gap-2">
           <div className="flex items-center gap-3">
-            <SidebarTrigger />
             <Heading level={3}>Department Name</Heading>
           </div>
 

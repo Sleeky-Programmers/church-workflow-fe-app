@@ -41,7 +41,7 @@ import { csvMemberRowSchema } from "@/types/schema";
 
 // Human-readable labels for each field, keyed by the internal snake_case
 // name used for header matching. Used for the downloadable template and
-// for validation error messages shown to the user — the underlying
+// for validation error messages shown to the user - the underlying
 // snake_case keys and the camelCase payload sent to the backend
 // (see `convertToCSV`) are unaffected.
 const FIELD_LABELS: Record<string, string> = {
@@ -70,11 +70,11 @@ const CSV_TEMPLATE_COLUMNS = Object.keys(FIELD_LABELS);
 
 // Android's native file pickers (Google Files, Samsung My Files, Downloads
 // app, etc.) filter by the MIME type the OS indexed for a file, not by the
-// ".csv" extension itself — and CSVs downloaded on Android are inconsistently
+// ".csv" extension itself - and CSVs downloaded on Android are inconsistently
 // tagged across devices/apps (rarely the canonical "text/csv"). Listing only
 // ".csv" greys the file out or hides it entirely on many Android pickers,
 // even though the same file selects fine on iOS/desktop. Widening this to
-// every MIME type Android commonly (mis)assigns to CSVs fixes that — content
+// every MIME type Android commonly (mis)assigns to CSVs fixes that - content
 // is still fully validated after selection (see validateCsvData below), so
 // a broader filter can't let anything genuinely invalid through unnoticed.
 const CSV_ACCEPT =
@@ -294,7 +294,7 @@ export function CsvUploadModal({
 
     // Fixed camelCase headers the backend expects. This list is always
     // used here regardless of how the uploaded file's own headers were
-    // labeled (human-readable, snake_case, etc.) — normalizeRow() already
+    // labeled (human-readable, snake_case, etc.) - normalizeRow() already
     // mapped every row to these exact keys before we get here.
     const headers = [
       "title",
@@ -781,7 +781,7 @@ MRS.,Rebecca Allen,FEMALE,4/25/1984,MARRIED,5/10/2009,,,14156778899,rebecca.alle
                       <Text className="text-xs text-gray-500 mt-0.5">
                         {file.error}
                         {"errorDetails" in file && file.errorDetails
-                          ? ` — ${file.errorDetails}`
+                          ? ` - ${file.errorDetails}`
                           : ""}
                       </Text>
                     )}

@@ -18,7 +18,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Textarea } from "@/components/ui/textarea";
 import Heading from "@/components/ui/typography/Heading";
 import { Text } from "@/components/ui/typography/Text";
@@ -259,7 +258,6 @@ function NewGivingBatchContent() {
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-3">
-        <SidebarTrigger className="sm:hidden" />
         <Heading level={2} text="New Giving Batch" />
       </div>
 

@@ -80,7 +80,7 @@ export function CurrencyCombobox({
         >
           <span className="truncate">
             {selected
-              ? `${selected.code} — ${selected.name} (${selected.symbol})`
+              ? `${selected.code} - ${selected.name} (${selected.symbol})`
               : placeholder}
           </span>
           <ChevronDown className="w-4 h-4 opacity-50 shrink-0" />
@@ -107,7 +107,7 @@ export function CurrencyCombobox({
                   onSelect={() => handleSelect(entry.code)}
                 >
                   <span className="truncate">
-                    {entry.code} — {entry.name} ({entry.symbol})
+                    {entry.code} - {entry.name} ({entry.symbol})
                   </span>
                   <Check
                     className={`ml-auto h-4 w-4 shrink-0 ${

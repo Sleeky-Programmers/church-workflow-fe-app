@@ -18,7 +18,6 @@ import {
   hoverSpring,
 } from "@/components/features/dashboard/membership/animations";
 
-import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
@@ -257,7 +256,6 @@ export default function MembershipSettingsPage() {
     <div className="min-h-screen bg-gray-50 pb-10">
       <div className="bg-white border-b border-gray-200">
         <div className="px-4 sm:px-6 py-4 flex items-center gap-2">
-          {isMobile && <SidebarTrigger />}
           <Heading level={3} className="leading-none m-0">
             Settings
           </Heading>

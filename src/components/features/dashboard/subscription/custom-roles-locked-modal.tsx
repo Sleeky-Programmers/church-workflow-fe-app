@@ -15,9 +15,9 @@ import { Text } from "@/components/ui/typography/Text";
 export interface CustomRolesLockedModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  /** Display name of the next tier that unlocks custom roles, e.g. "Growth" — null once resolved if there is no higher plan. */
+  /** Display name of the next tier that unlocks custom roles, e.g. "Growth" - null once resolved if there is no higher plan. */
   nextPlanName?: string | null;
-  /** True until the plans list has loaded — while true, the next-tier name/button are not guessed. */
+  /** True until the plans list has loaded - while true, the next-tier name/button are not guessed. */
   isNextPlanLoading?: boolean;
   upgradeHref?: string;
 }

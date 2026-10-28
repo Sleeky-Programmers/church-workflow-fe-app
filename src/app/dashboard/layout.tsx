@@ -3,6 +3,7 @@ import { DashboardGuard } from "@/components/auth/dashboard-guard";
 import { SuggestionsProvider } from "@/components/features/dashboard/suggestions-context";
 import { SuggestionsStrip } from "@/components/features/dashboard/suggestions-strip";
 import { UsageTracker } from "@/components/layout/usage-tracker";
+import { MobileTopBar } from "@/components/layout/mobile-top-bar";
 import { Navbar } from "@/components/layout/Navbar";
 import { RecentTracker } from "@/components/layout/recent-tracker";
 import { AppSidebar } from "@/components/layout/Sidebar";
@@ -34,6 +35,7 @@ export default function DashboardLayout({
 
             <SidebarInset className="min-w-0">
               <Navbar />
+              <MobileTopBar />
               <main className="min-w-0 w-full p-3 sm:p-4 md:p-6">
                 <SuggestionsStrip />
                 {children}

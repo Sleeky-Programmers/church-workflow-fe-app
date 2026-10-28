@@ -20,7 +20,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { SidebarTrigger } from "@/components/ui/sidebar";
 import Heading from "@/components/ui/typography/Heading";
 import { Span, Text } from "@/components/ui/typography/Text";
 import { useToast } from "@/hooks/use-toast";
@@ -208,7 +207,6 @@ export default function FinancePage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <SidebarTrigger className="sm:hidden" />
           <Heading level={2} text="Finance" />
         </div>
 
@@ -273,7 +271,7 @@ export default function FinancePage() {
               </p>
               <span className="text-xl font-bold text-black">
                 {givingSummaryLoading || !givingSummary
-                  ? "—"
+                  ? "-"
                   : formatCurrency(givingSummary.totalAmount, currency)}
               </span>
             </div>
@@ -287,7 +285,7 @@ export default function FinancePage() {
               </p>
               <span className="text-xl font-bold text-black">
                 {givingSummaryLoading || !givingSummary
-                  ? "—"
+                  ? "-"
                   : givingSummary.recordCount}
               </span>
             </div>
@@ -364,7 +362,7 @@ export default function FinancePage() {
               </p>
               <span className="text-xl font-bold text-black">
                 {expenseSummaryLoading || !expenseSummary
-                  ? "—"
+                  ? "-"
                   : formatCurrency(expenseSummary.totalAmount, currency)}
               </span>
             </div>
@@ -378,7 +376,7 @@ export default function FinancePage() {
               </p>
               <span className="text-xl font-bold text-black">
                 {expenseSummaryLoading || !expenseSummary?.byCategory.length
-                  ? "—"
+                  ? "-"
                   : [...expenseSummary.byCategory].sort(
                       (a, b) => b.amount - a.amount,
                     )[0]?.category}

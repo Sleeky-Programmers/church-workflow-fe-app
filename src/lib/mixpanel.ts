@@ -5,7 +5,7 @@ let recording = false;
 
 // Routes whose sessions get recorded by Session Replay. Recording is scoped
 // (rather than site-wide) to keep the monthly replay quota spent on the
-// conversion-critical flow — the public marketing pages get event tracking
+// conversion-critical flow - the public marketing pages get event tracking
 // via trackEvent/autocapture but not full replay.
 // "/" matches only the exact home route; every other entry also matches its
 // sub-paths (e.g. "/dashboard" covers "/dashboard/settings/...").
@@ -28,7 +28,7 @@ export function initMixpanel() {
     // App Router route changes are tracked manually via AnalyticsPageView.
     track_pageview: false,
     debug: process.env.NODE_ENV !== "production",
-    // Only needed if the Mixpanel project uses EU data residency — set to
+    // Only needed if the Mixpanel project uses EU data residency - set to
     // https://api-eu.mixpanel.com in that case. Defaults to Mixpanel's own
     // US host when unset.
     ...(process.env.NEXT_PUBLIC_MIXPANEL_API_HOST
@@ -75,11 +75,11 @@ export function trackMixpanelEvent(
 }
 
 interface MixpanelUserTraits {
-  /** Maps to Mixpanel's reserved $name — shown as the profile/session label in the dashboard. */
+  /** Maps to Mixpanel's reserved $name - shown as the profile/session label in the dashboard. */
   name?: string;
   /** Maps to Mixpanel's reserved $email. */
   email?: string;
-  /** Maps to Mixpanel's reserved $avatar — shown next to the name in Session Replay/People. */
+  /** Maps to Mixpanel's reserved $avatar - shown next to the name in Session Replay/People. */
   avatarUrl?: string;
   /** Any other properties are sent as-is (e.g. role, church name). */
   [key: string]: string | number | boolean | undefined;

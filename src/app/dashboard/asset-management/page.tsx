@@ -15,7 +15,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem } from '@/components/ui/pagination';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { RouteConfig } from '@/config/routes';
 import { useToast } from '@/hooks/use-toast';
@@ -284,7 +283,6 @@ export default function AssetManagementPage() {
 			<div className="flex flex-wrap items-center gap-4">
 				<div className="flex min-w-0 flex-1 flex-wrap items-center gap-x-10 gap-y-3 lg:flex-nowrap">
 					<div className="flex items-center gap-2">
-						<SidebarTrigger className="sm:hidden" />
 						<h1 className="text-base font-semibold text-gray-900">Asset Management</h1>
 					</div>
 
@@ -510,7 +508,7 @@ export default function AssetManagementPage() {
 										</TableCell>
 
 										<TableCell className="px-4 py-2.5 align-middle">
-											<p className="text-xs text-gray-500">{asset.maintenance ?? '—'}</p>
+											<p className="text-xs text-gray-500">{asset.maintenance ?? '-'}</p>
 											{asset.maintenanceDue && <p className="mt-0.5 text-xs font-medium text-red-500">{asset.maintenanceDue}</p>}
 										</TableCell>
 
@@ -643,7 +641,7 @@ export default function AssetManagementPage() {
 
 					<p className="mt-4 text-sm leading-relaxed text-gray-500">
 						This will permanently delete the asset and all its records, history, images, and maintenance data. This action cannot be undone.{' '}
-						<span className="font-semibold text-gray-700">Be careful — only grant this permission to trusted administrators.</span>
+						<span className="font-semibold text-gray-700">Be careful - only grant this permission to trusted administrators.</span>
 					</p>
 
 					<div className="mt-5 space-y-2">

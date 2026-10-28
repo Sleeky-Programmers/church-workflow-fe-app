@@ -21,7 +21,7 @@ export default function FeaturesPage() {
       <Header />
       <PageIntro
         title="Everything Your Church Management Software Needs"
-        description="Church Workflow brings church member management, church communication software, attendance, and ministry operations together in one church administration platform — so your team spends less time on admin and more time on ministry."
+        description="Church Workflow brings church member management, church communication software, attendance, and ministry operations together in one church administration platform - so your team spends less time on admin and more time on ministry."
       />
       <FocusMinistrySection />
       <BuiltForChurchSection />

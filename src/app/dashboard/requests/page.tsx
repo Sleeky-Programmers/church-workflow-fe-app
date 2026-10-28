@@ -1,6 +1,7 @@
 "use client";
 
 import { format } from "date-fns";
+import { Check, X } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import Table, { Column } from "@/components/features/dashboard/Table";
@@ -25,8 +26,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import Heading from "@/components/ui/typography/Heading";
 import { Text } from "@/components/ui/typography/Text";
 import { useToast } from "@/hooks/use-toast";
@@ -207,19 +213,36 @@ export default function RequestsPage() {
             header: "",
             render: (row: RequisitionResponse) =>
               row.status === RequisitionStatus.PENDING ? (
-                <div className="flex justify-end gap-2 w-full">
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="text-red-600 border-red-300 hover:bg-red-50"
-                    onClick={() => setRejectTarget(row)}
-                  >
-                    Reject
-                  </Button>
-                  <Button size="sm" onClick={() => setApproveTarget(row)}>
-                    Approve
-                  </Button>
-                </div>
+                <TooltipProvider>
+                  <div className="flex justify-end gap-2 w-full">
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          size="icon"
+                          variant="outline"
+                          className="text-red-600 border-red-300 hover:bg-red-50 hover:text-red-700"
+                          onClick={() => setRejectTarget(row)}
+                          aria-label="Reject request"
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>Reject</TooltipContent>
+                    </Tooltip>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          size="icon"
+                          onClick={() => setApproveTarget(row)}
+                          aria-label="Approve request"
+                        >
+                          <Check className="h-4 w-4" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>Approve</TooltipContent>
+                    </Tooltip>
+                  </div>
+                </TooltipProvider>
               ) : null,
             align: "right" as const,
           },
@@ -230,7 +253,6 @@ export default function RequestsPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-3">
-        <SidebarTrigger className="sm:hidden" />
         <Heading level={2} text="Requests" />
       </div>
 

@@ -22,11 +22,11 @@ export interface PlanLimitReachedModalProps {
   resourceLabel: string;
   /** Plural noun, e.g. "members" or "users". */
   resourceLabelPlural: string;
-  /** Display name of the next tier up, e.g. "Growth" — null once resolved if there is no higher plan. */
+  /** Display name of the next tier up, e.g. "Growth" - null once resolved if there is no higher plan. */
   nextPlanName?: string | null;
-  /** True until the plans list has loaded — while true, the next-tier name/button are not guessed. */
+  /** True until the plans list has loaded - while true, the next-tier name/button are not guessed. */
   isNextPlanLoading?: boolean;
-  /** Feature bullets for the next tier (from the plans list) — generic "Everything in X" lines are filtered by the caller. */
+  /** Feature bullets for the next tier (from the plans list) - generic "Everything in X" lines are filtered by the caller. */
   features: string[];
   upgradeHref?: string;
 }

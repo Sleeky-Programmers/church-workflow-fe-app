@@ -5,7 +5,7 @@ import Heading from "@/components/ui/typography/Heading";
 import { Text } from "@/components/ui/typography/Text";
 import { termsSections } from "@/lib/legal-content";
 
-// DRAFT PAGE — generic placeholder structure only. Do not treat as a
+// DRAFT PAGE - generic placeholder structure only. Do not treat as a
 // finished legal document: it has not been reviewed by counsel and must be
 // replaced with real, reviewed content before this is unindexed (see
 // `noIndex` below) or relied upon for compliance purposes.
@@ -26,7 +26,7 @@ export default function TermsOfServicePage() {
       <section className="max-w-3xl mx-auto px-6 pt-32 pb-20 md:pt-40">
         <div className="mb-8 rounded-lg border border-amber-300 bg-amber-50 px-4 py-3">
           <Text className="text-sm text-amber-900 font-medium">
-            Draft — this page is a placeholder and has not yet been reviewed by
+            Draft - this page is a placeholder and has not yet been reviewed by
             legal counsel. It is not a finished or binding agreement.
           </Text>
         </div>
@@ -35,7 +35,7 @@ export default function TermsOfServicePage() {
           Terms of Service
         </Heading>
         <Text variant="muted" className="mb-10 text-sm">
-          Last updated: placeholder — update this date once finalized.
+          Last updated: placeholder - update this date once finalized.
         </Text>
 
         <div className="space-y-8">

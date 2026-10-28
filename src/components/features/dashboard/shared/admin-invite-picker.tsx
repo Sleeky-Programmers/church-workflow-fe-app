@@ -56,7 +56,7 @@ export function AdminInvitePicker({
         <div className="rounded-md border bg-muted/30 px-3 py-2">
           <Text variant="default" className="text-sm">
             {pendingEmail
-              ? `Invitation pending — ${pendingEmail}`
+              ? `Invitation pending - ${pendingEmail}`
               : adminName || "Not set"}
           </Text>
         </div>
@@ -109,7 +109,7 @@ export function AdminInvitePicker({
       {pendingEmail ? (
         <div className="flex items-center justify-between gap-2 rounded-md border px-3 py-2">
           <Text variant="muted" className="text-sm truncate">
-            Invitation pending — {pendingEmail}
+            Invitation pending - {pendingEmail}
           </Text>
           <Button
             type="button"

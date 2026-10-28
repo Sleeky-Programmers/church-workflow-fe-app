@@ -53,7 +53,7 @@ export default function CheckoutPage() {
   const selectedPlan = plans.find((plans) => plans.type === plan);
 
   // A plan change while a paid plan is already active must keep the
-  // existing billing cycle — the remaining time carries over, the cycle doesn't switch mid-change.
+  // existing billing cycle - the remaining time carries over, the cycle doesn't switch mid-change.
   const isPlanChange =
     !!selectedPlan &&
     subscriptionStatus === SubscriptionStatus.ACTIVE &&

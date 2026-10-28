@@ -11,14 +11,14 @@ export const metadata = generateSeoMetadata({
 });
 
 // See src/app/page.tsx for why this is revalidated rather than left fully
-// static — this page's plan prices come from the same server fetch.
+// static - this page's plan prices come from the same server fetch.
 export const revalidate = 3600;
 
 export default function ChurchManagementSoftwarePage() {
   return (
     <KeywordLandingTemplate
       title="Church Management Software for Growing Ministries"
-      description="Church Workflow is church management software that gives your team a single church member management system for records, attendance, communication, and finance — replacing spreadsheets and scattered tools with one church workflow system."
+      description="Church Workflow is church management software that gives your team a single church member management system for records, attendance, communication, and finance - replacing spreadsheets and scattered tools with one church workflow system."
     >
       <section className="max-w-3xl mx-auto px-6 py-16">
         <Heading level={2} className="text-2xl md:text-3xl font-black mb-4">
@@ -27,7 +27,7 @@ export default function ChurchManagementSoftwarePage() {
         <div className="space-y-4">
           <Text variant="muted" className="leading-relaxed">
             Church management software (often shortened to ChMS) is a
-            purpose-built system for running the operational side of a church —
+            purpose-built system for running the operational side of a church -
             keeping member records accurate, tracking who attended which
             service, organizing volunteers and departments into teams, and
             giving leadership a single, current picture of the congregation
@@ -35,7 +35,7 @@ export default function ChurchManagementSoftwarePage() {
             chats.
           </Text>
           <Text variant="muted" className="leading-relaxed">
-            Most churches start with what's free and familiar — a shared
+            Most churches start with what's free and familiar - a shared
             spreadsheet, a notebook at the welcome desk, a WhatsApp group for
             each unit. That works until the church grows past a handful of
             families. Past that point, records go stale, the same member gets
@@ -53,7 +53,7 @@ export default function ChurchManagementSoftwarePage() {
             member database that's fast to search and easy to keep clean,
             attendance tracking that takes seconds per service rather than
             minutes, role-based access so volunteers only see what's relevant to
-            their team, and a record of who changed what and when — so
+            their team, and a record of who changed what and when - so
             leadership isn't left guessing when something looks off.
           </Text>
           <Heading level={3} className="text-lg font-bold mt-6 mb-2">
@@ -61,7 +61,7 @@ export default function ChurchManagementSoftwarePage() {
           </Heading>
           <Text variant="muted" className="leading-relaxed">
             Church administration runs on trust between leadership, department
-            heads, and the congregation — which is exactly why an auditable
+            heads, and the congregation - which is exactly why an auditable
             trail of who did what matters more here than in a typical business
             tool. Church Workflow's role-based permissions and activity log
             exist for that reason: a pastor or admin can see what changed in the

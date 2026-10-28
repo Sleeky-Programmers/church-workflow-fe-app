@@ -2,7 +2,7 @@
 
 import { Cake, CalendarDays, User } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import DashboardMobile from "@/components/features/dashboard/dashboard-mobile";
 import { EmptyState } from "@/components/features/dashboard/empty-state";
@@ -84,9 +84,11 @@ export default function Dashboard() {
   const [totalMembers, setTotalMembers] = useState("0");
   const [totalMembersGrowth, setTotalMembersGrowth] = useState("0%");
   const [membersLoading, setMembersLoading] = useState(true);
+  const [membersError, setMembersError] = useState(false);
   const [serviceAttendance, setServiceAttendance] = useState("0");
   const [serviceAttendanceGrowth, setServiceAttendanceGrowth] = useState("0%");
   const [attendanceLoading, setAttendanceLoading] = useState(true);
+  const [attendanceError, setAttendanceError] = useState(false);
   const [attendanceTrendData, setAttendanceTrendData] = useState<any[]>([]);
   const [incomeTrendData, setIncomeTrendData] = useState<any[]>([]);
   const [upcomingBirthdays, setUpcomingBirthdays] = useState<
@@ -109,55 +111,62 @@ export default function Dashboard() {
   }, [fetchUserData]);
 
   // ── Members ──
-  useEffect(() => {
+  const loadMembers = useCallback(async () => {
     setMembersLoading(true);
-    fetchTotalMembers()
-      .then(({ totalMembers, growth }) => {
-        setTotalMembers(totalMembers.toLocaleString());
-        setTotalMembersGrowth(growth || "0%");
-      })
-      .catch(() => {})
-      .finally(() => setMembersLoading(false));
+    setMembersError(false);
+    try {
+      const { totalMembers, growth } = await fetchTotalMembers();
+      setTotalMembers(totalMembers.toLocaleString());
+      setTotalMembersGrowth(growth || "0%");
+    } catch (err) {
+      console.error("Failed to load member stats:", err);
+      setMembersError(true);
+    } finally {
+      setMembersLoading(false);
+    }
   }, []);
+
+  useEffect(() => {
+    loadMembers();
+  }, [loadMembers]);
 
   // ── Attendance ──
-  useEffect(() => {
-    async function loadAttendanceData() {
-      setAttendanceLoading(true);
-      try {
-        // Fetch attendance stats
-        const stats = await fetchAttendanceStats();
-        const { totalAttendance, attendanceGrowth, monthlyAttendanceTrends } =
-          stats;
-        setServiceAttendance(totalAttendance.toLocaleString());
-        setServiceAttendanceGrowth(attendanceGrowth || "0%");
-        const trends = monthlyAttendanceTrends || [];
-        setAttendanceTrendData(trends);
+  const loadAttendanceData = useCallback(async () => {
+    setAttendanceLoading(true);
+    setAttendanceError(false);
+    try {
+      // Fetch attendance stats
+      const stats = await fetchAttendanceStats();
+      const { totalAttendance, attendanceGrowth, monthlyAttendanceTrends } =
+        stats;
+      setServiceAttendance(totalAttendance.toLocaleString());
+      setServiceAttendanceGrowth(attendanceGrowth || "0%");
+      const trends = monthlyAttendanceTrends || [];
+      setAttendanceTrendData(trends);
 
-        // Fetch attendance trend (regular and special services)
-        const trend = await fetchAttendanceTrend();
+      // Fetch attendance trend (regular and special services)
+      const trend = await fetchAttendanceTrend();
 
-        // Combine regular and special service data for the chart
-        const combinedTrendData = trend.regularService.map(
-          (regular, index) => ({
-            month: regular.month,
-            thisMonth: regular.totalAttendance,
-            lastMonth: trend.specialService[index]?.totalAttendance || 0,
-          }),
-        );
+      // Combine regular and special service data for the chart
+      const combinedTrendData = trend.regularService.map((regular, index) => ({
+        month: regular.month,
+        thisMonth: regular.totalAttendance,
+        lastMonth: trend.specialService[index]?.totalAttendance || 0,
+      }));
 
-        // Update attendance trend data with the combined data
-        setAttendanceTrendData(combinedTrendData);
-      } catch (error) {
-        console.error("Failed to load attendance data:", error);
-        // Keep existing data or set empty arrays
-      } finally {
-        setAttendanceLoading(false);
-      }
+      // Update attendance trend data with the combined data
+      setAttendanceTrendData(combinedTrendData);
+    } catch (error) {
+      console.error("Failed to load attendance data:", error);
+      setAttendanceError(true);
+    } finally {
+      setAttendanceLoading(false);
     }
-
-    loadAttendanceData();
   }, []);
+
+  useEffect(() => {
+    loadAttendanceData();
+  }, [loadAttendanceData]);
 
   // ── Income (Giving) ── independent of attendance, since a role without
   // GIVING access shouldn't stop the attendance trend from loading.
@@ -239,13 +248,15 @@ export default function Dashboard() {
     }
   }, []);
 
-  // Handle error state
-  if (error) {
+  // Only block the whole page when we have no profile to show at all (a true
+  // cold failure). If a cached user exists, a transient refresh error is shown
+  // as a non-blocking banner below and the dashboard stays usable.
+  if (error && !user) {
     return (
       <div className="flex items-center justify-center py-16 gap-2 flex-col">
         <div className="text-red-500 text-center">
           <Text variant="error" className="mb-2">
-            Error loading profile
+            Error loading dashboard
           </Text>
           <Text variant="default" className="text-sm text-gray-600">
             {error}
@@ -262,10 +273,30 @@ export default function Dashboard() {
     );
   }
 
+  // Non-blocking banner: profile refresh failed but we still have cached data.
+  const profileRefreshBanner =
+    error && user ? (
+      <div className="flex items-center justify-between gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3">
+        <p className="text-[13px] text-amber-800">
+          Some data may be out of date. {error}
+        </p>
+        <Button
+          onClick={() => fetchUserData(true)}
+          size="sm"
+          variant="outline"
+          disabled={isLoading}
+          className="shrink-0 border-amber-300 text-amber-800 hover:bg-amber-100"
+        >
+          {isLoading ? "Retrying…" : "Retry"}
+        </Button>
+      </div>
+    ) : null;
+
   // ── Mobile shell ──
   if (isMobile) {
     return (
       <>
+        {profileRefreshBanner}
         {canViewGiving && <GivingConfigWarningBanner />}
         <DashboardMobile
         displayName={displayName}
@@ -307,6 +338,7 @@ export default function Dashboard() {
 
   return (
     <div className="flex flex-col gap-5 pb-8">
+      {profileRefreshBanner}
       {canViewGiving && <GivingConfigWarningBanner />}
 
       <div className="flex items-center justify-between">
@@ -352,6 +384,8 @@ export default function Dashboard() {
               growth={totalMembersGrowth}
               iconVariant="blue"
               isLoading={membersLoading}
+              hasError={membersError}
+              onRetry={loadMembers}
             />
             <StatCard
               title="Attendance"
@@ -360,6 +394,8 @@ export default function Dashboard() {
               growthLabel="Last Event"
               iconVariant="orange"
               isLoading={attendanceLoading}
+              hasError={attendanceError}
+              onRetry={loadAttendanceData}
             />
           </div>
 

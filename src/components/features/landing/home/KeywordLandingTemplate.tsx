@@ -14,7 +14,7 @@ interface KeywordLandingTemplateProps {
   title: string;
   description: string;
   /** Page-specific body copy rendered between the intro and the shared
-   * sections below — this is what keeps each keyword page's content
+   * sections below - this is what keeps each keyword page's content
    * genuinely distinct instead of just swapping the H1. */
   children?: React.ReactNode;
 }

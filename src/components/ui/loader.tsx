@@ -8,7 +8,7 @@ type LoaderProps = {
   logoUrl?: string;
   size?: string;
   className?: string;
-  /** Hides the little ground shadow — turn off for tiny inline uses (buttons, table cells). */
+  /** Hides the little ground shadow - turn off for tiny inline uses (buttons, table cells). */
   showShadow?: boolean;
 };
 

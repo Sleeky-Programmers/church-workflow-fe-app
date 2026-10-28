@@ -47,7 +47,7 @@ function daysFromToday(dateLabel: string): number | null {
 
 function ChangeCell({ value }: { value: number }) {
   if (value === 0) {
-    return <span className="text-sm text-gray-400">—</span>;
+    return <span className="text-sm text-gray-400">-</span>;
   }
 
   return (

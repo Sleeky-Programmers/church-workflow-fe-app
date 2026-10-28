@@ -54,6 +54,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.5,
     },
     // Add more public, indexable pages here as they are created
-    // (do not list /auth, /dashboard, /checkout, /payment, /onboarding — these are noindexed)
+    // (do not list /auth, /dashboard, /checkout, /payment, /onboarding - these are noindexed)
   ];
 }

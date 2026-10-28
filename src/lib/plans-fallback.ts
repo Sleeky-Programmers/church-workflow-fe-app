@@ -3,7 +3,7 @@ import { Plan } from "@/types";
 
 /**
  * Snapshot of GET /subscription/plans, used only if that request fails
- * during server-side rendering — so the pricing page never renders with no
+ * during server-side rendering - so the pricing page never renders with no
  * prices at all. Pulled from the live API on 2026-08-29; refresh this if
  * pricing changes, since it will silently go stale otherwise.
  */
