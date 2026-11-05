@@ -31,6 +31,28 @@ export const getMemberColumns = ({
     accessor: "phone",
   },
   {
+    key: "status",
+    header: "Status",
+    render: (row) => {
+      const status = row.membershipStatus;
+      if (!status) return <Text className="text-gray-400">—</Text>;
+      const isGuest = status === "VISITOR";
+      return (
+        <span
+          className={
+            isGuest
+              ? "inline-flex rounded-full bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-700"
+              : "inline-flex rounded-full bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-700"
+          }
+        >
+          {isGuest
+            ? "Guest"
+            : status.charAt(0) + status.slice(1).toLowerCase()}
+        </span>
+      );
+    },
+  },
+  {
     key: "email",
     header: "Email",
     accessor: "email",

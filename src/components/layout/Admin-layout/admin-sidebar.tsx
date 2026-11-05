@@ -21,7 +21,7 @@ type NavItem = {
   href: string;
 };
 
-const NAV_ITEMS: NavItem[] = [
+export const NAV_ITEMS: NavItem[] = [
   {
     id: "user-profile",
     label: "User & Church Info",

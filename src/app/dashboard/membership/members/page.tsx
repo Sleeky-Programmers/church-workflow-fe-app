@@ -13,6 +13,8 @@ import { LimitBanner } from "@/components/features/dashboard/subscription/limit-
 import { PlanLimitReachedModal } from "@/components/features/dashboard/subscription/plan-limit-reached-modal";
 import { MemberLimitSuccessModal } from "@/components/features/dashboard/subscription/member-limit-success-modal";
 import { AddMemberModal } from "@/components/features/dashboard/membership/add-member-modal";
+import { ArchivedGuestsPanel } from "@/components/features/dashboard/membership/archived-guests-panel";
+import { FrequentGuestsBanner } from "@/components/features/dashboard/membership/frequent-guests-banner";
 import { CsvUploadModal } from "@/components/features/dashboard/membership/csv-upload-modal";
 import { DeleteMembersModal } from "@/components/features/dashboard/membership/delete-member-modal";
 import { MemberFilterDropdown } from "@/components/features/dashboard/membership/member-filter-dropdown";
@@ -35,11 +37,13 @@ import { mapFiltersToQueryParams } from "@/mappers/filter.mapper";
 import { getNextPlan, getUpgradeFeatures } from "@/lib/plan-utils";
 import {
   fetchMembers,
+  getGuestPlanLimitStatus,
   getMemberPlanLimitStatus,
+  getResourcePlanLimitStatus,
 } from "@/services/memberService";
 import { getPlans } from "@/services/billingService";
 import { useSearchStore } from "@/stores/useSearchStore";
-import { MemberProfile, Plan, PlanLimitStatus } from "@/types";
+import { LimitResource, MemberProfile, Plan, PlanLimitStatus } from "@/types";
 
 export default function MembershipPage() {
   const { toast } = useToast();
@@ -80,6 +84,14 @@ export default function MembershipPage() {
   const [isLoading, setIsLoading] = useState(false);
 
   const [limitStatus, setLimitStatus] = useState<PlanLimitStatus | null>(null);
+  const [guestLimitStatus, setGuestLimitStatus] =
+    useState<PlanLimitStatus | null>(null);
+  // Which limit the "limit reached" modal is about.
+  const [limitModalResource, setLimitModalResource] =
+    useState<LimitResource>("member");
+  const activeTab =
+    searchParams.get("tab") === "archived" ? "archived" : "people";
+  const [bannerKey, setBannerKey] = useState(0);
   const [plans, setPlans] = useState<Plan[]>([]);
   const [plansLoaded, setPlansLoaded] = useState(false);
   const [isLimitReachedModalOpen, setIsLimitReachedModalOpen] = useState(false);
@@ -118,8 +130,12 @@ export default function MembershipPage() {
 
   const refreshLimitStatus = useCallback(async () => {
     try {
-      const status = await getMemberPlanLimitStatus();
+      const [status, guestStatus] = await Promise.all([
+        getMemberPlanLimitStatus(),
+        getResourcePlanLimitStatus("guest"),
+      ]);
       setLimitStatus(status);
+      setGuestLimitStatus(guestStatus);
       return status;
     } catch (error) {
       console.error("Failed to load member limit status:", error);
@@ -143,13 +159,35 @@ export default function MembershipPage() {
   const nextPlan = getNextPlan(limitStatus?.planName ?? null, plans);
   const nextPlanFeatures = getUpgradeFeatures(nextPlan);
 
+  const atLimit = (s: PlanLimitStatus | null) =>
+    !!s && s.limit > 0 && s.current >= s.limit;
+
+  // Members and guests have separate limits, so adding is only blocked up
+  // front when both are full. The server checks the right limit for the
+  // status chosen and names it in its message.
   const handleAddMemberClick = async () => {
     const status = limitStatus ?? (await refreshLimitStatus());
-    if (status && status.limit > 0 && status.current >= status.limit) {
+    const guestStatus =
+      guestLimitStatus ?? (await getResourcePlanLimitStatus("guest"));
+    if (atLimit(status) && atLimit(guestStatus)) {
+      setLimitModalResource("member");
       setIsLimitReachedModalOpen(true);
       return;
     }
     setIsFormatModalOpen(true);
+  };
+
+  const setTab = (tab: "people" | "archived") => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (tab === "archived") params.set("tab", "archived");
+    else params.delete("tab");
+    router.replace(`?${params.toString()}`);
+  };
+
+  const handleGuestsChanged = () => {
+    loadMembers(page, debouncedSearch, facetQuery);
+    refreshLimitStatus();
+    setBannerKey((k) => k + 1);
   };
 
   const handleViewUpgradePlans = () => {
@@ -267,6 +305,18 @@ export default function MembershipPage() {
         resourceLimitLabel="member limit"
         className="mx-4 mt-3 mb-1 sm:mx-6"
       />
+      <LimitBanner
+        key={`guest-${bannerKey}`}
+        fetchStatus={getGuestPlanLimitStatus}
+        dismissKey="guestLimitBannerDismissed"
+        resourceLabel="guests"
+        resourceLimitLabel="guest limit"
+        className="mx-4 mt-3 mb-1 sm:mx-6"
+      />
+      <FrequentGuestsBanner
+        key={`frequent-${bannerKey}`}
+        onConverted={handleGuestsChanged}
+      />
 
       <div className="bg-white border-b border-gray-200">
         <div className="px-4 sm:px-6 py-3 sm:py-4 flex flex-wrap items-center gap-x-3 gap-y-3 md:flex-nowrap md:justify-between">
@@ -344,6 +394,34 @@ export default function MembershipPage() {
         </div>
       </div>
 
+      <div className="px-3 sm:px-4 pt-4 flex gap-2" role="tablist">
+        {(
+          [
+            ["people", "People"],
+            ["archived", "Archived guests"],
+          ] as const
+        ).map(([tab, label]) => (
+          <button
+            key={tab}
+            role="tab"
+            aria-selected={activeTab === tab}
+            onClick={() => setTab(tab)}
+            className={
+              activeTab === tab
+                ? "rounded-full bg-primary-500 px-3 py-1.5 text-sm font-medium text-white"
+                : "rounded-full border border-gray-200 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
+            }
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+
+      {activeTab === "archived" ? (
+        <div className="py-4 sm:py-6 px-3 sm:px-4">
+          <ArchivedGuestsPanel onRestored={handleGuestsChanged} />
+        </div>
+      ) : (
       <motion.div
         variants={fadeUp}
         initial="hidden"
@@ -378,6 +456,7 @@ export default function MembershipPage() {
           searchActive={Boolean(searchQuery || facetQuery)}
         />
       </motion.div>
+      )}
 
       <AddMemberFormatModal
         open={isFormatModalOpen}
@@ -401,6 +480,7 @@ export default function MembershipPage() {
           setPage(1);
 
           const status = await refreshLimitStatus();
+          setBannerKey((k) => k + 1);
           if (status?.isOverLimit && status.isWithinGracePeriod) {
             setSuccessModal({ context: "import", addedCount: insertedCount });
           }
@@ -455,10 +535,16 @@ export default function MembershipPage() {
       <PlanLimitReachedModal
         open={isLimitReachedModalOpen}
         onOpenChange={setIsLimitReachedModalOpen}
-        limit={limitStatus?.limit ?? 0}
+        limit={
+          (limitModalResource === "guest"
+            ? guestLimitStatus?.limit
+            : limitStatus?.limit) ?? 0
+        }
         planName={limitStatus?.planName ?? null}
-        resourceLabel="member"
-        resourceLabelPlural="members"
+        resourceLabel={limitModalResource === "guest" ? "guest" : "member"}
+        resourceLabelPlural={
+          limitModalResource === "guest" ? "guests" : "members"
+        }
         nextPlanName={nextPlan?.name}
         isNextPlanLoading={!plansLoaded}
         features={nextPlanFeatures}

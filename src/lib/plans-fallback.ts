@@ -4,8 +4,9 @@ import { Plan } from "@/types";
 /**
  * Snapshot of GET /subscription/plans, used only if that request fails
  * during server-side rendering - so the pricing page never renders with no
- * prices at all. Pulled from the live API on 2026-08-29; refresh this if
- * pricing changes, since it will silently go stale otherwise.
+ * prices at all. Mirrors backend/src/modules/subscription/plan-defaults.ts
+ * (pricing update of 2026-11-05); refresh this if pricing changes, since it
+ * will silently go stale otherwise.
  */
 export const FALLBACK_PLANS: Plan[] = [
   {
@@ -13,64 +14,59 @@ export const FALLBACK_PLANS: Plan[] = [
     name: "Starter",
     monthlyPrice: 0,
     yearlyPrice: 0,
-    features: [
-      "Small teams",
-      "Membership management",
-      "Up to 3 users",
-      "Up to 100 members",
-      "Attendance tracking",
-    ],
+    features: ["Membership management", "Attendance tracking", "Small teams"],
     popular: false,
     memberLimit: 100,
+    guestLimit: 200,
     userLimit: 3,
-    branchLimit: 2,
+    branchLimit: 1,
     customRolesEnabled: false,
+    contactSales: false,
   },
   {
     type: PlanType.GROWTH,
     name: "Growth",
-    monthlyPrice: 20000,
-    yearlyPrice: 199200,
+    monthlyPrice: 5000,
+    yearlyPrice: 50000,
     features: [
       "Everything in Starter",
-      "Up to 10 users",
-      "Up to 500 members",
+      "Multiple branches",
       "Custom roles & permissions",
     ],
     popular: true,
     memberLimit: 500,
+    guestLimit: 1500,
     userLimit: 10,
     branchLimit: 5,
     customRolesEnabled: true,
+    contactSales: false,
   },
   {
     type: PlanType.EXPANSION,
     name: "Expansion",
-    monthlyPrice: 45000,
-    yearlyPrice: 448200,
-    features: ["Everything in Growth", "Up to 25 users", "Up to 1,500 members"],
+    monthlyPrice: 10000,
+    yearlyPrice: 100000,
+    features: ["Everything in Growth", "Room for larger and multi-site churches"],
     popular: false,
     memberLimit: 1500,
+    guestLimit: 6000,
     userLimit: 25,
     branchLimit: 25,
     customRolesEnabled: true,
+    contactSales: false,
   },
   {
     type: PlanType.ENTERPRISE,
     name: "Enterprise",
-    monthlyPrice: 100000,
-    yearlyPrice: 996000,
-    features: [
-      "Everything in Expansion",
-      "Priority support",
-      "Unlimited users",
-      "Advanced controls",
-      "Unlimited members",
-    ],
+    monthlyPrice: 50000,
+    yearlyPrice: 500000,
+    features: ["Everything in Expansion", "Custom onboarding", "Priority support"],
     popular: false,
     memberLimit: -1,
+    guestLimit: -1,
     userLimit: -1,
     branchLimit: -1,
     customRolesEnabled: true,
+    contactSales: true,
   },
 ];

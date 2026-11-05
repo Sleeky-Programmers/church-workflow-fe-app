@@ -1,7 +1,7 @@
 'use client';
 
 import { CheckCircle2, ChevronLeft, ChevronRight, MoreHorizontal, Package, Search, TriangleAlert, Wrench } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
 import { AddAssetModal, AssetModalMode } from '@/components/features/dashboard/assets/add-asset-modal';
@@ -85,7 +85,10 @@ export default function AssetManagementPage() {
 	const [assetStats, setAssetStats] = useState<AssetStatsResponse>(DEFAULT_STATS);
 	const [itemCount, setItemCount] = useState(0);
 	const [loading, setLoading] = useState(false);
-	const [query, setQuery] = useState('');
+	const searchParams = useSearchParams();
+	// ?search= (e.g. from the global search palette) seeds the initial query.
+	const urlSearch = searchParams.get('search') ?? '';
+	const [query, setQuery] = useState(urlSearch);
 	const [category, setCategory] = useState('ALL');
 	const [risk, setRisk] = useState('ALL');
 	const [type, setType] = useState('ALL');
@@ -144,6 +147,12 @@ export default function AssetManagementPage() {
 	useEffect(() => {
 		loadStats();
 	}, []);
+
+	// Follow ?search= if it changes while already on this page.
+	useEffect(() => {
+		setQuery(urlSearch);
+		setPage(1);
+	}, [urlSearch]);
 
 	const totalPages = Math.max(1, Math.ceil(itemCount / PAGE_SIZE));
 	const currentPage = Math.min(page, totalPages);

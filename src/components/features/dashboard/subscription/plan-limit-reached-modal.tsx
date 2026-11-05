@@ -57,13 +57,20 @@ export function PlanLimitReachedModal({
     ? "Upgrade Plan"
     : hasNextPlan
       ? `Upgrade to ${nextPlanName}`
-      : "No Upgrade Available";
+      : "Contact Us";
 
   const title = `${toSentenceCase(resourceLabel)} Limit Reached`;
 
   const handleUpgrade = () => {
     onOpenChange(false);
     router.push(upgradeHref);
+  };
+
+  // On the top plan (or when the next tier is sales-led) there's nothing to
+  // buy, so send them to the contact page instead.
+  const handleContact = () => {
+    onOpenChange(false);
+    router.push("/contact");
   };
 
   return (
@@ -105,8 +112,13 @@ export function PlanLimitReachedModal({
               Not Now
             </Button>
             <Button
-              onClick={hasNextPlan ? handleUpgrade : undefined}
-              disabled={!hasNextPlan}
+              onClick={
+                isNextPlanLoading
+                  ? handleUpgrade
+                  : hasNextPlan
+                    ? handleUpgrade
+                    : handleContact
+              }
               className="flex-1"
             >
               {buttonLabel}

@@ -27,12 +27,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import Heading from "@/components/ui/typography/Heading";
 import { Text } from "@/components/ui/typography/Text";
 import { useToast } from "@/hooks/use-toast";
@@ -40,6 +34,7 @@ import { useHasAccess } from "@/lib/access-control";
 import { RequisitionStatus } from "@/lib/enums";
 import { fetchDepartments } from "@/services/departmentService";
 import {
+  addRequisitionComment,
   approveRequisition,
   fetchRequisitions,
   rejectRequisition,
@@ -57,6 +52,21 @@ const STATUS_STYLES: Record<RequisitionStatus, string> = {
 function RequesterName(row: RequisitionResponse) {
   if (typeof row.requestedBy === "string") return "-";
   return row.requestedBy?.name || "-";
+}
+
+function DetailItem({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="space-y-0.5">
+      <dt className="text-muted-foreground">{label}</dt>
+      <dd className="font-medium break-words">{children}</dd>
+    </div>
+  );
 }
 
 export default function RequestsPage() {
@@ -78,6 +88,47 @@ export default function RequestsPage() {
   );
   const [reviewNote, setReviewNote] = useState("");
   const [actionLoading, setActionLoading] = useState(false);
+  const [detailTarget, setDetailTarget] = useState<RequisitionResponse | null>(
+    null,
+  );
+  const [commentDraft, setCommentDraft] = useState("");
+  const [commentLoading, setCommentLoading] = useState(false);
+
+  const handleAddComment = async () => {
+    const body = commentDraft.trim();
+    if (!detailTarget || !body) return;
+    setCommentLoading(true);
+    try {
+      const updated = await addRequisitionComment(detailTarget.id, body);
+      setDetailTarget(updated);
+      setRequisitions((prev) =>
+        prev.map((r) => (r.id === updated.id ? updated : r)),
+      );
+      setCommentDraft("");
+      toast({
+        title: "Comment added",
+        description: "The requester has been notified",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to add comment",
+        variant: "destructive",
+      });
+    } finally {
+      setCommentLoading(false);
+    }
+  };
+
+  // Close the detail view first so the confirm dialogs don't stack on it.
+  const openApprove = (row: RequisitionResponse) => {
+    setDetailTarget(null);
+    setApproveTarget(row);
+  };
+  const openReject = (row: RequisitionResponse) => {
+    setDetailTarget(null);
+    setRejectTarget(row);
+  };
 
   useEffect(() => {
     fetchDepartments({ page: 1, limit: 100 })
@@ -206,48 +257,6 @@ export default function RequestsPage() {
       ),
       align: "center",
     },
-    ...(canApprove
-      ? [
-          {
-            key: "actions",
-            header: "",
-            render: (row: RequisitionResponse) =>
-              row.status === RequisitionStatus.PENDING ? (
-                <TooltipProvider>
-                  <div className="flex justify-end gap-2 w-full">
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          size="icon"
-                          variant="outline"
-                          className="text-red-600 border-red-300 hover:bg-red-50 hover:text-red-700"
-                          onClick={() => setRejectTarget(row)}
-                          aria-label="Reject request"
-                        >
-                          <X className="h-4 w-4" />
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>Reject</TooltipContent>
-                    </Tooltip>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          size="icon"
-                          onClick={() => setApproveTarget(row)}
-                          aria-label="Approve request"
-                        >
-                          <Check className="h-4 w-4" />
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>Approve</TooltipContent>
-                    </Tooltip>
-                  </div>
-                </TooltipProvider>
-              ) : null,
-            align: "right" as const,
-          },
-        ]
-      : []),
   ];
 
   return (
@@ -299,6 +308,7 @@ export default function RequestsPage() {
           columns={columns}
           data={requisitions}
           rowKey={(row) => row.id}
+          onRowClick={setDetailTarget}
           minWidth="min-w-[760px]"
           isLoading={loading}
           emptyState={
@@ -311,6 +321,156 @@ export default function RequestsPage() {
           }
         />
       </div>
+
+      <Dialog
+        open={!!detailTarget}
+        onOpenChange={(open) => {
+          if (!open) {
+            setDetailTarget(null);
+            setCommentDraft("");
+          }
+        }}
+      >
+        <DialogContent className="sm:max-w-[560px] max-h-[85vh] overflow-y-auto">
+          {detailTarget && (
+            <div className="space-y-5 p-2">
+              <div className="space-y-2 pr-6">
+                <Badge
+                  variant="outline"
+                  className={STATUS_STYLES[detailTarget.status]}
+                >
+                  {detailTarget.status}
+                </Badge>
+                <Heading level={3} className="break-words">
+                  {detailTarget.title}
+                </Heading>
+                <p className="text-2xl font-semibold">
+                  {formatCurrency(detailTarget.amount, detailTarget.currency)}
+                </p>
+              </div>
+
+              <dl className="grid grid-cols-1 gap-4 text-sm sm:grid-cols-2">
+                <DetailItem label="Department">
+                  {detailTarget.departmentName || "-"}
+                </DetailItem>
+                <DetailItem label="Requested by">
+                  {RequesterName(detailTarget)}
+                  {typeof detailTarget.requestedBy !== "string" &&
+                    detailTarget.requestedBy?.email && (
+                      <span className="block text-muted-foreground break-all">
+                        {detailTarget.requestedBy.email}
+                      </span>
+                    )}
+                </DetailItem>
+                <DetailItem label="Submitted">
+                  {format(
+                    new Date(detailTarget.createdAt),
+                    "MMM d, yyyy 'at' h:mm a",
+                  )}
+                </DetailItem>
+                {detailTarget.reviewedAt && (
+                  <DetailItem label="Reviewed">
+                    {format(
+                      new Date(detailTarget.reviewedAt),
+                      "MMM d, yyyy 'at' h:mm a",
+                    )}
+                  </DetailItem>
+                )}
+              </dl>
+
+              <div className="space-y-1.5">
+                <Label>Description</Label>
+                <p className="whitespace-pre-wrap break-words rounded-md border bg-muted/30 p-3 text-sm">
+                  {detailTarget.description || (
+                    <span className="text-muted-foreground">
+                      No description provided.
+                    </span>
+                  )}
+                </p>
+              </div>
+
+              {detailTarget.reviewNote && (
+                <div className="space-y-1.5">
+                  <Label>Review note</Label>
+                  <p className="whitespace-pre-wrap break-words rounded-md border border-red-200 bg-red-50/50 p-3 text-sm">
+                    {detailTarget.reviewNote}
+                  </p>
+                </div>
+              )}
+
+              <div className="space-y-2">
+                <Label>
+                  Comments
+                  {detailTarget.comments?.length
+                    ? ` (${detailTarget.comments.length})`
+                    : ""}
+                </Label>
+                {detailTarget.comments?.length ? (
+                  <ul className="space-y-2">
+                    {detailTarget.comments.map((c) => (
+                      <li key={c.id} className="rounded-md border p-3 text-sm">
+                        <div className="mb-1 flex flex-wrap items-baseline justify-between gap-2">
+                          <span className="font-medium">{c.authorName}</span>
+                          <span className="text-xs text-muted-foreground">
+                            {format(new Date(c.createdAt), "MMM d, yyyy h:mm a")}
+                          </span>
+                        </div>
+                        <p className="whitespace-pre-wrap break-words">
+                          {c.body}
+                        </p>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <Text variant="muted">
+                    No comments yet. Ask for clarification before deciding.
+                  </Text>
+                )}
+                <Textarea
+                  rows={2}
+                  maxLength={2000}
+                  value={commentDraft}
+                  onChange={(e) => setCommentDraft(e.target.value)}
+                  placeholder="Ask a question or explain a concern…"
+                />
+                <div className="flex justify-end">
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    onClick={handleAddComment}
+                    disabled={commentLoading || !commentDraft.trim()}
+                  >
+                    {commentLoading ? "Posting…" : "Post comment"}
+                  </Button>
+                </div>
+              </div>
+
+              <div className="flex flex-wrap justify-end gap-2 border-t pt-4">
+                <DialogClose asChild>
+                  <Button variant="outline">Close</Button>
+                </DialogClose>
+                {canApprove &&
+                  detailTarget.status === RequisitionStatus.PENDING && (
+                    <>
+                      <Button
+                        variant="outline"
+                        className="text-red-600 border-red-300 hover:bg-red-50 hover:text-red-700"
+                        onClick={() => openReject(detailTarget)}
+                      >
+                        <X className="mr-1 h-4 w-4" />
+                        Reject
+                      </Button>
+                      <Button onClick={() => openApprove(detailTarget)}>
+                        <Check className="mr-1 h-4 w-4" />
+                        Approve
+                      </Button>
+                    </>
+                  )}
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
 
       <AlertDialog
         open={!!approveTarget}

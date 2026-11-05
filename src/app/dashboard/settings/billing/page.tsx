@@ -16,6 +16,11 @@ import {
   PlanType,
   SubscriptionStatus,
 } from "@/lib/enums";
+import {
+  CONTACT_SALES_HREF,
+  getPlanLimitLines,
+  isContactSalesPlan,
+} from "@/lib/plan-utils";
 import { cn } from "@/lib/utils";
 import { getSubscriptionOverview } from "@/services/billingService";
 import { Plan } from "@/types";
@@ -157,25 +162,44 @@ export default function BillingPage() {
               <div className="space-y-4">
                 <Heading level={4}>{plan.name}</Heading>
 
-                <div className="flex items-end gap-1.5 flex-wrap">
-                  {billingCycle === BillingCycle.YEARLY && (
-                    <Span variant="muted" className="text-sm line-through">
+                {isContactSalesPlan(plan) ? (
+                  <div className="flex items-end gap-1.5 flex-wrap">
+                    <Span variant="muted" className="text-sm">
+                      From
+                    </Span>
+                    <Span className="text-2xl font-bold">
                       {formatPrice(plan.monthlyPrice)}
                     </Span>
-                  )}
-                  <Span className="text-2xl font-bold">
-                    {formatPrice(getPrice(plan))}
-                  </Span>
-                  <Span variant="muted">/month</Span>
-                </div>
-                {billingCycle === BillingCycle.YEARLY && (
-                  <Text variant="muted" className="text-xs">
-                    billed annually
-                  </Text>
+                    <Span variant="muted">/month</Span>
+                  </div>
+                ) : (
+                  <>
+                    <div className="flex items-end gap-1.5 flex-wrap">
+                      {billingCycle === BillingCycle.YEARLY &&
+                        plan.monthlyPrice > 0 && (
+                          <Span
+                            variant="muted"
+                            className="text-sm line-through"
+                          >
+                            {formatPrice(plan.monthlyPrice)}
+                          </Span>
+                        )}
+                      <Span className="text-2xl font-bold">
+                        {formatPrice(getPrice(plan))}
+                      </Span>
+                      <Span variant="muted">/month</Span>
+                    </div>
+                    {billingCycle === BillingCycle.YEARLY &&
+                      plan.monthlyPrice > 0 && (
+                        <Text variant="muted" className="text-xs">
+                          billed annually
+                        </Text>
+                      )}
+                  </>
                 )}
 
                 <div className="space-y-2 pt-2">
-                  {plan.features.map((feature) => (
+                  {[...getPlanLimitLines(plan), ...plan.features].map((feature) => (
                     <div key={feature} className="flex items-start gap-2">
                       <Check className="h-4 w-4 text-green-500 mt-[2px]" />
                       <Text variant="muted">{feature}</Text>
@@ -188,6 +212,14 @@ export default function BillingPage() {
                 {isCurrent ? (
                   <Button disabled className="w-full">
                     {isCurrentTrial ? "Currently Active (Trial)" : "Currently Active"}
+                  </Button>
+                ) : isContactSalesPlan(plan) ? (
+                  <Button
+                    onClick={() => router.push(CONTACT_SALES_HREF)}
+                    variant="outline"
+                    className="w-full"
+                  >
+                    Contact us
                   </Button>
                 ) : (
                   <Button
@@ -207,6 +239,11 @@ export default function BillingPage() {
           );
         })}
       </div>
+
+      <Text variant="muted" className="text-center text-sm">
+        Guests are visitors you&apos;re following up. They don&apos;t count
+        towards your member limit.
+      </Text>
     </div>
   );
 }

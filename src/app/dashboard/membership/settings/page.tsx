@@ -105,6 +105,11 @@ export default function MembershipSettingsPage() {
     useState<PastoralSettings["trackingMode"]>("SUNDAYS_ONLY");
   const [countSpecialEvents, setCountSpecialEvents] = useState(false);
   const [countSmallTeams, setCountSmallTeams] = useState(false);
+  const [archiveAfterDays, setArchiveAfterDays] = useState(90);
+  const archiveDaysInvalid =
+    !Number.isInteger(archiveAfterDays) ||
+    archiveAfterDays < 30 ||
+    archiveAfterDays > 180;
 
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -135,6 +140,7 @@ export default function MembershipSettingsPage() {
         setTrackingMode(saved.trackingMode);
         setCountSpecialEvents(saved.countSpecialEvents);
         setCountSmallTeams(saved.countSmallTeams);
+        setArchiveAfterDays(saved.archiveAfterDays ?? 90);
       })
       .catch(() => {
         // First visit: server creates defaults on read
@@ -191,7 +197,7 @@ export default function MembershipSettingsPage() {
   };
 
   const handleSave = async () => {
-    if (validationError) return;
+    if (validationError || archiveDaysInvalid) return;
     setIsSaving(true);
     try {
       await updatePastoralSettings({
@@ -201,6 +207,7 @@ export default function MembershipSettingsPage() {
         trackingMode,
         countSpecialEvents,
         countSmallTeams,
+        archiveAfterDays,
       });
       setDirty(false);
       toast({
@@ -487,12 +494,83 @@ export default function MembershipSettingsPage() {
           </div>
         </motion.section>
 
+        {/* ── Guests ── */}
+        <motion.section
+          variants={fadeUp}
+          initial="hidden"
+          animate="visible"
+          className="bg-white rounded-xl border border-gray-200 p-5 sm:p-6"
+        >
+          <h2 className="text-base font-semibold text-gray-900">Guests</h2>
+          <p className="text-sm text-gray-500 mt-0.5">
+            Guests are people with the Visitor status. They count towards your
+            guest limit, not your member limit.
+          </p>
+
+          <div className="mt-5 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <div className="min-w-0">
+              <label
+                htmlFor="archive-after-days"
+                className="text-[15px] font-semibold text-gray-900"
+              >
+                Archive inactive guests after
+              </label>
+              <p className="text-sm text-gray-500 mt-0.5">
+                Guests with no attendance for this long move to the archive and
+                stop counting towards your guest limit. You can restore them
+                any time. Between 30 and 180 days.
+              </p>
+            </div>
+            <div className="flex items-center gap-2 shrink-0">
+              <input
+                id="archive-after-days"
+                type="number"
+                min={30}
+                max={180}
+                step={1}
+                value={Number.isNaN(archiveAfterDays) ? "" : archiveAfterDays}
+                onChange={(e) => {
+                  setArchiveAfterDays(parseInt(e.target.value, 10));
+                  setDirty(true);
+                }}
+                className="w-20 h-10 rounded-lg border border-gray-300 px-3 text-sm"
+              />
+              <span className="text-sm text-gray-600">days</span>
+            </div>
+          </div>
+          {archiveDaysInvalid && (
+            <p className="mt-2 text-sm text-red-600">
+              Enter a whole number of days between 30 and 180.
+            </p>
+          )}
+
+          <div className="mt-5 rounded-lg bg-gray-50 p-3 text-sm text-gray-600 space-y-1">
+            <p>
+              <span className="font-semibold text-gray-800">
+                Frequent guests count as members.
+              </span>{" "}
+              A guest who attends 4 or more services in 60 days counts towards
+              your member limit, even if still marked as a guest. This rule is
+              fixed.
+            </p>
+            <p>
+              Archived guests are permanently deleted after 12 months in the
+              archive. You&apos;ll get an in-app and email reminder 30 days
+              before, with the option to export the list.
+            </p>
+          </div>
+        </motion.section>
+
         {/* ── Save ── */}
         <motion.div variants={fadeUp} initial="hidden" animate="visible">
         <Button
           onClick={handleSave}
           disabled={
-            isSaving || isLoading || Boolean(validationError) || !dirty
+            isSaving ||
+            isLoading ||
+            Boolean(validationError) ||
+            archiveDaysInvalid ||
+            !dirty
           }
           className="w-full h-11 rounded-lg text-sm font-semibold"
         >

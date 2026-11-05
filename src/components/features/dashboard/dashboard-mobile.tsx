@@ -9,6 +9,7 @@ import { IncomeVsExpenses } from "@/components/features/dashboard/income-expense
 import { PendingRequestsWidget } from "@/components/features/dashboard/pending-requests-widget";
 import { RecentActivityWidget } from "@/components/features/dashboard/recent-activity-widget";
 import { StatCard } from "@/components/features/dashboard/StatCard";
+import { PlanUsageStrip } from "@/components/features/dashboard/subscription/plan-usage-strip";
 import { TrendChart } from "@/components/features/dashboard/trend-chart";
 import MobileHeader from "@/components/layout/mobile-header";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -107,6 +108,8 @@ export default function DashboardMobile({
             iconVariant="orange"
           />
         </div>
+
+        <PlanUsageStrip />
 
         <div className="pt-2">
           <TrendChart

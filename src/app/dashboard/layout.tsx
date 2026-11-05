@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { DashboardGuard } from "@/components/auth/dashboard-guard";
 import { SuggestionsProvider } from "@/components/features/dashboard/suggestions-context";
 import { SuggestionsStrip } from "@/components/features/dashboard/suggestions-strip";
+import { CommandPalette } from "@/components/features/search/command-palette";
 import { UsageTracker } from "@/components/layout/usage-tracker";
 import { MobileTopBar } from "@/components/layout/mobile-top-bar";
 import { Navbar } from "@/components/layout/Navbar";
@@ -29,6 +30,7 @@ export default function DashboardLayout({
         <SidebarProvider>
           <RecentTracker />
           <UsageTracker />
+          <CommandPalette />
 
           <div className="relative flex min-h-screen w-full bg-gray-50">
             <AppSidebar />

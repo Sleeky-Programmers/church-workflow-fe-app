@@ -26,6 +26,7 @@ import {
   BillingAgreementFormValues,
   promoCodeSchema,
 } from "@/types/schema";
+import { getPlanLimitLines } from "@/lib/plan-utils";
 
 export default function BillingCheckout({
   plan,
@@ -198,7 +199,7 @@ export default function BillingCheckout({
           <div className="space-y-3">
             <Text className="font-medium">What's included:</Text>
 
-            {plan.features.map((feature) => (
+            {[...getPlanLimitLines(plan), ...plan.features].map((feature) => (
               <div key={feature} className="flex items-center gap-2">
                 <Check className="h-4 w-4 text-green-500" />
                 <Text variant="muted">{feature}</Text>

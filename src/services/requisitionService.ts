@@ -15,6 +15,14 @@ export interface RequisitionRequesterRef {
   email: string;
 }
 
+export interface RequisitionComment {
+  id: string;
+  authorId: string;
+  authorName: string;
+  body: string;
+  createdAt: string;
+}
+
 export interface RequisitionResponse {
   id: string;
   departmentId: string;
@@ -29,6 +37,7 @@ export interface RequisitionResponse {
   reviewedAt: string | null;
   reviewNote: string | null;
   expenseId: string | null;
+  comments?: RequisitionComment[];
   createdAt: string;
   updatedAt: string;
 }
@@ -63,6 +72,18 @@ export async function fetchRequisitions(params: RequisitionQueryParams) {
 
 export async function fetchRequisitionById(id: string) {
   return authenticatedFetch<RequisitionResponse>(`/requisitions/${id}`);
+}
+
+export async function addRequisitionComment(id: string, body: string) {
+  const result = await authenticatedFetch<RequisitionResponse>(
+    `/requisitions/${id}/comments`,
+    {
+      method: "POST",
+      body: JSON.stringify({ body }),
+    },
+  );
+  trackAction("requisition.comment");
+  return result;
 }
 
 export async function approveRequisition(id: string) {

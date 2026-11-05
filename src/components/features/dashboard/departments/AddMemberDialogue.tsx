@@ -5,7 +5,7 @@ import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { MemberMultiSelect } from "@/components/features/dashboard/departments/member-selectors";
-import { fetchMembers } from "@/services/memberService";
+import { fetchGroupEligibleMembers } from "@/services/memberService";
 import { addDepartmentMembers } from "@/services/departmentService";
 import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -135,7 +135,7 @@ export function AddMembersToDepartmentDialog({
             <Text className="text-sm font-medium">Add Members</Text>
 
             <MemberMultiSelect
-              fetchOptions={fetchMembers}
+              fetchOptions={fetchGroupEligibleMembers}
               value={memberIds}
               onChange={(ids, members) => {
                 setMemberIds(ids);

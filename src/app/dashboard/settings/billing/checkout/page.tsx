@@ -90,6 +90,18 @@ export default function CheckoutPage() {
     return <div className="p-6">This plan is free. No payment required.</div>;
   }
 
+  if (selectedPlan.contactSales) {
+    return (
+      <div className="p-6">
+        {selectedPlan.name} is set up by our team.{" "}
+        <a href="/contact" className="font-semibold text-primary-500 underline">
+          Contact us
+        </a>{" "}
+        and we&apos;ll get you started.
+      </div>
+    );
+  }
+
   if (
     currentPlan === selectedPlan.type &&
     subscriptionStatus === SubscriptionStatus.ACTIVE

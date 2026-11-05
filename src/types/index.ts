@@ -456,9 +456,13 @@ export type Plan = {
   features: string[];
   popular?: boolean;
   memberLimit: number;
+  /** Separate cap for guests (Visitor status). -1 = unlimited. */
+  guestLimit?: number;
   userLimit: number;
   branchLimit: number;
   customRolesEnabled: boolean;
+  /** Not self-serve: show "From ₦X / month" and a Contact us button. */
+  contactSales?: boolean;
 };
 
 export type CurrentPlanResponse = Plan & {
@@ -521,6 +525,19 @@ export type InitializePaymentResponse = {
   authorization_url: string;
 };
 
+export interface LimitUsage {
+  current: number;
+  /** -1 = unlimited */
+  limit: number;
+  unlimited: boolean;
+  percentage: number;
+  isOverLimit: boolean;
+  isNearLimit: boolean;
+  atLimit: boolean;
+}
+
+export type LimitResource = "member" | "guest";
+
 export interface MemberLimitStatus {
   currentMembers: number;
   limit: number;
@@ -532,6 +549,51 @@ export interface MemberLimitStatus {
   needsAction: boolean;
   isNearLimit: boolean;
   daysRemaining: number | null;
+  /** Members (incl. guests who attended 4+ services in 60 days) vs the member limit. */
+  members?: LimitUsage;
+  /** Guests (VISITOR) vs the separate guest limit. */
+  guests?: LimitUsage;
+  /** Guests who now count towards the member limit (4+ services in 60 days). */
+  frequentGuests?: number;
+  /** Room left under each limit; null = unlimited. */
+  room?: { members: number | null; guests: number | null };
+}
+
+export interface CsvImportRowError {
+  row: number;
+  column?: string;
+  reason: string;
+}
+
+/** Returned by POST /members/csv/preview (and in the body of a rejected import). */
+export interface CsvImportReport {
+  totalRows: number;
+  validRows: number;
+  addMembers: number;
+  addGuests: number;
+  room: { members: number | null; guests: number | null };
+  limits: { members: number; guests: number };
+  overBy: { members: number; guests: number };
+  totalErrors: number;
+  errors: CsvImportRowError[];
+  canImport: boolean;
+}
+
+export interface ArchivedGuest {
+  _id: string;
+  fullName: string;
+  phoneNumber?: string | null;
+  email?: string | null;
+  membershipStatus?: string | null;
+  archivedAt: string;
+  deletesOn: string | null;
+}
+
+export interface FrequentGuest {
+  _id: string;
+  fullName: string;
+  phoneNumber?: string | null;
+  email?: string | null;
 }
 
 export interface UserLimitStatus {
@@ -546,6 +608,7 @@ export interface UserLimitStatus {
 // Generic shape consumed by the reusable plan-limit banner (LimitBanner),
 // so a single component can render member limits, user-seat limits, etc.
 export interface PlanLimitStatus {
+  resource?: LimitResource;
   current: number;
   limit: number;
   percentage: number;
