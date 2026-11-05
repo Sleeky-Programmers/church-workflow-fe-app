@@ -27,12 +27,21 @@ import Heading from "@/components/ui/typography/Heading";
 import { useHasAccess } from "@/lib/access-control";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useToast } from "@/hooks/use-toast";
-import { createDepartment } from "@/services/departmentService";
-import { fetchMembers } from "@/services/memberService";
+import {
+  createDepartment,
+  DepartmentResponse,
+} from "@/services/departmentService";
+import { fetchGroupEligibleMembers } from "@/services/memberService";
 import { MemberProfile } from "@/types";
 
 interface Props {
   onSave?: () => void | Promise<void>;
+  // Receives the newly created department, e.g. so a picker can select it.
+  onCreated?: (department: DepartmentResponse) => void;
+  // Controlled mode: pass both to open the dialog from elsewhere (such as a
+  // dropdown option). The built-in "Add a department" button is then hidden.
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
 interface Member {
@@ -65,12 +74,23 @@ const getVisibleMembers = <T extends Member>(
     .filter((member) => member !== undefined);
 };
 
-export default function AddDepartmentDialog({ onSave }: Props) {
+export default function AddDepartmentDialog({
+  onSave,
+  onCreated,
+  open: controlledOpen,
+  onOpenChange,
+}: Props) {
   const { toast } = useToast();
   const isMobile = useIsMobile();
   const canCreate = useHasAccess("DEPARTMENTS", "FULL_ACCESS");
 
-  const [open, setOpen] = useState(false);
+  const [internalOpen, setInternalOpen] = useState(false);
+  const isControlled = controlledOpen !== undefined;
+  const open = isControlled ? controlledOpen : internalOpen;
+  const setOpen = (next: boolean) => {
+    if (!isControlled) setInternalOpen(next);
+    onOpenChange?.(next);
+  };
   const [departmentName, setDepartmentName] = useState("");
   const [hodId, setHodId] = useState("");
   const [pendingHodEmail, setPendingHodEmail] = useState<string | null>(null);
@@ -112,7 +132,7 @@ export default function AddDepartmentDialog({ onSave }: Props) {
     setLoading(true);
 
     try {
-      await createDepartment({
+      const created = await createDepartment({
         name: departmentName.trim(),
         description,
         hod: hodId || undefined,
@@ -125,6 +145,7 @@ export default function AddDepartmentDialog({ onSave }: Props) {
       if (onSave) {
         await onSave();
       }
+      onCreated?.(created);
 
       toast({
         title: "Success",
@@ -156,12 +177,14 @@ export default function AddDepartmentDialog({ onSave }: Props) {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button className="flex items-center gap-2">
-          <Plus className="w-4 h-4" />
-          {isMobile ? "Add" : "Add a department"}
-        </Button>
-      </DialogTrigger>
+      {!isControlled && (
+        <DialogTrigger asChild>
+          <Button className="flex items-center gap-2">
+            <Plus className="w-4 h-4" />
+            {isMobile ? "Add" : "Add a department"}
+          </Button>
+        </DialogTrigger>
+      )}
 
       <DialogContent
         showClose={false}
@@ -288,7 +311,7 @@ export default function AddDepartmentDialog({ onSave }: Props) {
           <div className="space-y-1.5">
             <Label>Add Members</Label>
             <MemberMultiSelect
-              fetchOptions={fetchMembers}
+              fetchOptions={fetchGroupEligibleMembers}
               value={memberIds}
               onChange={(ids, members) => {
                 setMemberIds(ids);

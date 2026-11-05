@@ -3,7 +3,9 @@
 import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import Image from "next/image";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { RouteConfig } from "@/config/routes";
 import { Text } from "@/components/ui/typography/Text";
 import Heading from "@/components/ui/typography/Heading";
 import { FloatingBadge } from "@/components/ui/landing-page/FloatingBadge";
@@ -78,18 +80,19 @@ export default function CtaSection() {
           </Heading>
 
           <Text variant="muted" className="text-sm leading-relaxed max-w-md">
-            Join hundreds of church leaders who have streamlined administration,
-            automated tasks, and improved decision-making with Church Workflow.
+            Streamline administration, automate routine tasks, and make better
+            decisions with Church Workflow. Start free, no card needed.
           </Text>
 
           <div className="flex flex-wrap gap-3 pt-2">
             <AuthAwareCta className="rounded-[8px] px-7" />
             <Button
+              asChild
               variant="outline"
               size="lg"
               className="rounded-[8px] px-7 border-[#0C5FB3] text-[#0C5FB3] hover:bg-white hover:text-[#0C5FB3]"
             >
-              Start Free Plan
+              <Link href={RouteConfig.auth.signUp}>Start Free Plan</Link>
             </Button>
           </div>
         </div>

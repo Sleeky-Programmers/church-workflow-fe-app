@@ -1,11 +1,12 @@
 "use client";
 
-import { Bell, User } from "lucide-react";
+import { Bell, Search, User } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useMemo } from "react";
 
 import { RouteConfig } from "@/config/routes";
+import { useCommandPaletteStore } from "@/stores/useCommandPaletteStore";
 import { useUserStore } from "@/stores/useUserStore";
 
 import { Avatar, AvatarFallback } from "../ui/avatar";
@@ -22,6 +23,7 @@ export function MobileTopBar() {
   const pathname = usePathname() || RouteConfig.dashboard.home;
   const getUserFullName = useUserStore((state) => state.getUserFullName);
   const displayName = getUserFullName();
+  const openPalette = useCommandPaletteStore((state) => state.setOpen);
 
   const pageLabel = useMemo(() => {
     const rest = pathname.replace(/\/+$/, "").replace(/^\/dashboard\/?/, "");
@@ -39,6 +41,16 @@ export function MobileTopBar() {
       <h1 className="min-w-0 flex-1 truncate text-base font-semibold text-gray-900">
         {pageLabel}
       </h1>
+
+      <Button
+        size="icon"
+        variant="ghost"
+        className="shrink-0"
+        aria-label="Search"
+        onClick={() => openPalette(true)}
+      >
+        <Search className="h-4 w-4" />
+      </Button>
 
       <Link href={RouteConfig.dashboard.notifications} className="shrink-0">
         <Button size="icon" variant="ghost" aria-label="Notifications">

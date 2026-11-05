@@ -1,7 +1,7 @@
 "use client";
 
 import { ChevronDown, MoreVertical, Search, X } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import AddDepartmentDialog from "@/components/features/dashboard/departments/AddDepartmentDialog";
@@ -38,8 +38,11 @@ export default function DepartmentPage() {
   const isMobile = useIsMobile();
   const { toast } = useToast();
 
-  const [searchInput, setSearchInput] = useState(""); // For input value
-  const [searchTerm, setSearchTerm] = useState(""); // For actual search query
+  const searchParams = useSearchParams();
+  // ?search= (e.g. from the global search palette) seeds the initial query.
+  const urlSearch = searchParams.get("search") ?? "";
+  const [searchInput, setSearchInput] = useState(urlSearch); // For input value
+  const [searchTerm, setSearchTerm] = useState(urlSearch); // For actual search query
   const [data, setData] = useState<DepartmentRow[]>([]);
   const [loading, setLoading] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<DepartmentRow | null>(null);
@@ -90,9 +93,13 @@ export default function DepartmentPage() {
     await loadDepartments(searchTerm);
   };
 
+  // Runs on mount and again if ?search= changes while already on the page.
   useEffect(() => {
-    loadDepartments();
-  }, []);
+    setSearchInput(urlSearch);
+    setSearchTerm(urlSearch);
+    loadDepartments(urlSearch || undefined);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [urlSearch]);
 
   const handleEdit = (row: DepartmentRow) => {
     setEditTargetId(row.id);

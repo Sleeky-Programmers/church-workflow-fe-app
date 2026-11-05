@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import { Check } from "lucide-react";
 import { getPlans } from "@/services/billingService";
 import { Plan } from "@/types";
+import { getPlanLimitLines } from "@/lib/plan-utils";
 
 const formatPrice = (price: number) => `₦${price.toLocaleString()}`;
 
@@ -37,6 +38,12 @@ export default function CheckoutPage() {
     const selected = getSelectedPlan();
     if (!selected || selected.plan === "STARTER") {
       router.replace(RouteConfig.home);
+      return;
+    }
+    // Enterprise is activated by our team after a conversation.
+    if (selected.plan === "ENTERPRISE") {
+      clearSelectedPlan();
+      router.replace("/contact");
       return;
     }
 
@@ -200,7 +207,7 @@ export default function CheckoutPage() {
           </div>
 
           <div className="flex flex-col gap-2 pt-1">
-            {planDetails.features.map((feature) => (
+            {[...getPlanLimitLines(planDetails), ...planDetails.features].map((feature) => (
               <div key={feature} className="flex items-center gap-2">
                 <Check size={13} className="text-green-600 shrink-0" />
                 <Text variant="muted" className="text-xs">

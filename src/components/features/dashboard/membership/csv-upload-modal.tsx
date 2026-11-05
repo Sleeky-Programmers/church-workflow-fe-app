@@ -10,6 +10,7 @@ import {
   X,
   XCircle,
 } from "lucide-react";
+import Link from "next/link";
 import Papa from "papaparse";
 import { useRef, useState } from "react";
 
@@ -28,14 +29,23 @@ import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { getAccessToken } from "@/lib/auth/session";
 import {
+  CSV_STATUS_VALUES,
   GENDER_MAP,
   MARITAL_MAP,
   MEMBERSHIP_MAP,
   TITLE_MAP,
 } from "@/lib/constant";
 import { MembershipStatus } from "@/lib/enums";
-import { uploadMembersCsv } from "@/services/memberService";
-import { CsvUploadModalProps, UploadFile } from "@/types";
+import {
+  previewMembersCsv,
+  uploadMembersCsv,
+} from "@/services/memberService";
+import {
+  CsvImportReport,
+  CsvImportRowError,
+  CsvUploadModalProps,
+  UploadFile,
+} from "@/types";
 import { FileInputProps } from "@/types/index";
 import { csvMemberRowSchema } from "@/types/schema";
 
@@ -57,7 +67,7 @@ const FIELD_LABELS: Record<string, string> = {
   email: "Email",
   occupation: "Occupation",
   educational_background: "Educational Background",
-  membership_status: "Membership Status",
+  status: "Status",
   date_joined: "Date Joined",
   previous_church_membership: "Previous Church Membership",
   is_baptized: "Is Baptized",
@@ -67,6 +77,40 @@ const FIELD_LABELS: Record<string, string> = {
 };
 
 const CSV_TEMPLATE_COLUMNS = Object.keys(FIELD_LABELS);
+
+const normalizeHeaderKey = (key: string) =>
+  key.toLowerCase().replace(/[\s_]/g, "");
+
+/** Case/space-insensitive lookup; `aliases` covers older templates ("Membership Status"). */
+const getCsvValue = (row: any, field: string, aliases: string[] = []) => {
+  for (const name of [field, ...aliases]) {
+    const key = Object.keys(row).find(
+      (k) => normalizeHeaderKey(k) === normalizeHeaderKey(name),
+    );
+    if (key !== undefined) return row[key];
+  }
+  return undefined;
+};
+
+const STATUS_ALIASES = ["membership_status"];
+
+const STATUS_HELP = `Allowed values: ${CSV_STATUS_VALUES.join(", ")}`;
+
+/** Maps a sheet value to a status, or null if blank/unknown. Never guesses. */
+const parseStatus = (value: unknown): MembershipStatus | null => {
+  const raw = value?.toString().trim().toLowerCase();
+  if (!raw) return null;
+  return MEMBERSHIP_MAP[raw] ?? MEMBERSHIP_MAP[raw.replace(/_/g, " ")] ?? null;
+};
+
+const formatRoom = (room: number | null) =>
+  room === null ? "unlimited" : room.toLocaleString();
+
+type PendingImport = {
+  file: File;
+  normalizedFile: File;
+  report: CsvImportReport;
+};
 
 // Android's native file pickers (Google Files, Samsung My Files, Downloads
 // app, etc.) filter by the MIME type the OS indexed for a file, not by the
@@ -137,7 +181,7 @@ export function CsvUploadModal({
     const spouseLastName = getValue("spouse_last_name");
     const occupation = getValue("occupation");
     const educationalBackground = getValue("educational_background");
-    const membershipStatus = getValue("membership_status");
+    const membershipStatus = getCsvValue(row, "status", STATUS_ALIASES);
     const dateJoined = getValue("date_joined");
     const previousChurchMembership = getValue("previous_church_membership");
     const isBaptized = getValue("is_baptized");
@@ -172,9 +216,9 @@ export function CsvUploadModal({
       spouseLastName: spouseLastName?.toString().trim() || null,
       occupation: occupation?.toString().trim() || null,
       educationalBackground: educationalBackground?.toString().trim() || null,
+      // Never defaulted: a blank/invalid status is reported as a row error.
       membershipStatus:
-        MEMBERSHIP_MAP[membershipStatus?.toString().toLowerCase()] ||
-        MembershipStatus.MEMBER,
+        parseStatus(membershipStatus) ?? membershipStatus?.toString().trim() ?? "",
       dateJoined:
         dateJoined && typeof dateJoined === "string" && dateJoined.trim()
           ? new Date(dateJoined).toISOString().split("T")[0]
@@ -192,33 +236,40 @@ export function CsvUploadModal({
 
   const validateCsvData = (
     data: any[],
-  ): { isValid: boolean; errors: string[] } => {
+  ): { isValid: boolean; errors: string[]; rowErrors: CsvImportRowError[] } => {
     const errors: string[] = [];
+    const rowErrors: CsvImportRowError[] = [];
 
     if (data.length === 0) {
       errors.push("CSV file is empty");
-      return { isValid: false, errors };
+      return { isValid: false, errors, rowErrors };
     }
 
     // Get actual headers from the first row
     const headers = Object.keys(data[0] || {});
 
     // Check if required headers exist
-    const requiredHeaders = ["full_name", "phone_number"];
-    const missingHeaders = requiredHeaders.filter(
-      (req) =>
-        !headers.some(
-          (h) =>
-            h.toLowerCase().replace(/[\s_]/g, "") ===
-            req.toLowerCase().replace(/[\s_]/g, ""),
-        ),
-    );
+    const requiredHeaders: [string, string[]][] = [
+      ["full_name", []],
+      ["phone_number", []],
+      ["status", STATUS_ALIASES],
+    ];
+    const missingHeaders = requiredHeaders
+      .filter(
+        ([req, aliases]) =>
+          ![req, ...aliases].some((name) =>
+            headers.some(
+              (h) => normalizeHeaderKey(h) === normalizeHeaderKey(name),
+            ),
+          ),
+      )
+      .map(([req]) => req);
 
     if (missingHeaders.length > 0) {
       errors.push(
-        `Missing required columns: ${missingHeaders.map((h) => FIELD_LABELS[h] || h).join(", ")}. Found columns: ${headers.join(", ")}`,
+        `Missing required columns: ${missingHeaders.map((h) => FIELD_LABELS[h] || h).join(", ")}. Download the latest template, which has a Status column.`,
       );
-      return { isValid: false, errors };
+      return { isValid: false, errors, rowErrors };
     }
 
     let hasEncounteredEmptyRow = false;
@@ -274,6 +325,22 @@ export function CsvUploadModal({
       if (!result.success) {
         result.error.issues.forEach((issue) => {
           errors.push(`Row ${index + 2}: ${issue.message}`);
+          rowErrors.push({ row: index + 2, reason: issue.message });
+        });
+      }
+
+      const rawStatus = getCsvValue(row, "status", STATUS_ALIASES);
+      if (!rawStatus?.toString().trim()) {
+        rowErrors.push({
+          row: index + 2,
+          column: "Status",
+          reason: `Status is required. ${STATUS_HELP}`,
+        });
+      } else if (!parseStatus(rawStatus)) {
+        rowErrors.push({
+          row: index + 2,
+          column: "Status",
+          reason: `Invalid status "${rawStatus}". ${STATUS_HELP}`,
         });
       }
 
@@ -285,7 +352,11 @@ export function CsvUploadModal({
     if (validRowCount === 0 && !hasEncounteredEmptyRow) {
       errors.push("No valid data rows found in the CSV file");
     }
-    return { isValid: errors.length === 0, errors };
+    return {
+      isValid: errors.length === 0 && rowErrors.length === 0,
+      errors,
+      rowErrors,
+    };
   };
 
   // Helper function to convert normalized data to CSV
@@ -354,193 +425,181 @@ export function CsvUploadModal({
     return csvRows.join("\n");
   };
 
+  const [pending, setPending] = useState<PendingImport | null>(null);
+  const [localErrors, setLocalErrors] = useState<CsvImportRowError[]>([]);
+  const [importing, setImporting] = useState(false);
+
+  const setFileState = (file: File, patch: Partial<UploadFile>) =>
+    setFiles((prev) =>
+      prev.map((f) => (f.file === file ? { ...f, ...patch } : f)),
+    );
+
+  /**
+   * Step 1: read and check the file locally, then ask the server for the
+   * import summary (counts, room left, rejected rows). Nothing is imported.
+   */
   const handleUpload = async (file: File) => {
     const controller = new AbortController();
-    const newFile: UploadFile = {
-      file,
-      progress: 0,
-      status: "uploading",
-      controller,
-    };
-
-    setFiles((prev) => {
-      const exists = prev.find((f) => f.file === file);
-      if (exists)
-        return prev.map((f) =>
-          f.file === file ? { ...f, controller, status: "uploading" } : f,
-        );
-      return [...prev, newFile];
-    });
+    setPending(null);
+    setLocalErrors([]);
+    setFiles([{ file, progress: 10, status: "uploading", controller }]);
 
     try {
-      // Parse CSV
       const parsed = await new Promise<any[]>((resolve, reject) =>
         Papa.parse(file, {
           header: true,
           skipEmptyLines: true,
           transformHeader: (header) =>
             header.trim().toLowerCase().replace(/\s/g, "_"),
-          complete: (results) => {
-            resolve(results.data as any[]);
-          },
+          complete: (results) => resolve(results.data as any[]),
           error: (err) => reject(err),
         }),
       );
 
-      // Find the first empty row and truncate data there
-      let firstEmptyRowIndex = -1;
-      for (let i = 0; i < parsed.length; i++) {
-        const row = parsed[i];
-        const isEmptyRow =
+      // Only keep rows before the first empty row
+      const firstEmpty = parsed.findIndex(
+        (row) =>
           !row ||
           Object.keys(row).length === 0 ||
           Object.values(row).every(
             (value) =>
               !value || (typeof value === "string" && value.trim() === ""),
-          );
-
-        if (isEmptyRow) {
-          firstEmptyRowIndex = i;
-          break;
-        }
-      }
-
-      // Only keep rows before the first empty row
+          ),
+      );
       const cleanedData =
-        firstEmptyRowIndex === -1
-          ? parsed
-          : parsed.slice(0, firstEmptyRowIndex);
+        firstEmpty === -1 ? parsed : parsed.slice(0, firstEmpty);
 
       if (cleanedData.length === 0) {
         throw new Error("CSV file contains no valid data rows");
       }
 
-      // Validate CSV data
-      const { isValid, errors } = validateCsvData(cleanedData);
-      if (!isValid) {
-        throw new Error(
-          `Validation failed:\n${errors.slice(0, 10).join("\n")}${errors.length > 10 ? `\n... and ${errors.length - 10} more errors` : ""}`,
-        );
+      const { errors, rowErrors } = validateCsvData(cleanedData);
+      if (errors.length && !rowErrors.length) {
+        // File-level problem (missing columns, empty file).
+        throw new Error(errors.join("\n"));
+      }
+      if (rowErrors.length) {
+        setLocalErrors(rowErrors);
+        setFileState(file, {
+          status: "error",
+          progress: 100,
+          error: `${rowErrors.length} row error(s) found`,
+          errorDetails: "Fix the rows listed below and upload the file again.",
+          controller: undefined,
+        });
+        return;
       }
 
-      // Normalize the data to match backend expectations
-      const normalizedData = cleanedData.map(normalizeRow);
-
-      // Convert normalized data back to CSV
-      const normalizedCSV = convertToCSV(normalizedData);
-
-      // Create a new File object from the normalized CSV
+      const normalizedCSV = convertToCSV(cleanedData.map(normalizeRow));
       const normalizedFile = new File([normalizedCSV], file.name, {
         type: "text/csv",
       });
 
-      // Send the new CSV file to the backend
+      setFileState(file, { progress: 60 });
+      const report = await previewMembersCsv(normalizedFile);
+
+      setPending({ file, normalizedFile, report });
+      setFileState(file, {
+        status: report.canImport ? "success" : "error",
+        progress: 100,
+        controller: undefined,
+        error: report.canImport
+          ? undefined
+          : report.totalErrors
+            ? `${report.totalErrors} row error(s) found`
+            : "Over your plan limit",
+        errorDetails: undefined,
+      });
+    } catch (err: any) {
+      const report = err?.response?.data as CsvImportReport | undefined;
+      if (report && Array.isArray(report.errors)) {
+        setPending({ file, normalizedFile: file, report });
+      }
+      const message =
+        err?.name === "AbortError"
+          ? "Upload cancelled"
+          : err?.message?.includes("Failed to fetch")
+            ? "Unable to connect to the server. Please check your internet connection."
+            : err?.message || "An unexpected error occurred";
+
+      setFileState(file, {
+        status: "error",
+        progress: 100,
+        error: "Could not read this file",
+        errorDetails: message,
+        controller: undefined,
+      });
+    }
+  };
+
+  /** Step 2: import, only after the church has seen the summary. */
+  const handleConfirmImport = async () => {
+    if (!pending?.report.canImport) return;
+    const { file, normalizedFile } = pending;
+    const controller = new AbortController();
+    setImporting(true);
+    setFileState(file, { status: "uploading", progress: 0, controller });
+
+    try {
       const result = await uploadMembersCsv(normalizedFile, {
         token,
         signal: controller.signal,
-        onProgress: (progress) =>
-          setFiles((prev) =>
-            prev.map((f) => (f.file === file ? { ...f, progress } : f)),
-          ),
+        onProgress: (progress) => setFileState(file, { progress }),
       });
 
-      if (result?.error || result?.message?.includes("failed")) {
-        // Handle specific error types
-        let errorMessage = result.error || result.message || "Upload failed";
-        let errorDetails = "";
-
-        if (errorMessage.toLowerCase().includes("duplicate")) {
-          errorMessage = "Duplicate entries detected";
-          errorDetails =
-            "Some members already exist in your database. Please check the file and remove duplicates.";
-        } else if (errorMessage.toLowerCase().includes("validation")) {
-          errorMessage = "Data validation failed";
-          errorDetails = "Please ensure all fields meet the required format.";
-        } else if (errorMessage.toLowerCase().includes("network")) {
-          errorMessage = "Network error";
-          errorDetails = "Please check your internet connection and try again.";
-        }
-
-        setFiles((prev) =>
-          prev.map((f) =>
-            f.file === file
-              ? {
-                  ...f,
-                  status: "error",
-                  error: errorMessage,
-                  errorDetails,
-                  controller: undefined,
-                }
-              : f,
-          ),
-        );
-        return;
-      }
-
-      setFiles((prev) =>
-        prev.map((f) =>
-          f.file === file
-            ? { ...f, status: "success", progress: 100, controller: undefined }
-            : f,
-        ),
-      );
-      const insertedCount =
-        result?.inserted || result?.count || normalizedData.length;
+      setFileState(file, {
+        status: "success",
+        progress: 100,
+        controller: undefined,
+      });
+      const insertedCount = result?.inserted ?? pending.report.validRows;
+      const parts = [
+        result?.addMembers ? `${result.addMembers} members` : null,
+        result?.addGuests ? `${result.addGuests} guests` : null,
+      ].filter(Boolean);
 
       toast({
-        title: "Upload successful",
-        description: `${insertedCount} members imported successfully`,
-        variant: "default",
+        title: "Import complete",
+        description: parts.length
+          ? `Imported ${parts.join(" and ")}.`
+          : `${insertedCount} people imported.`,
       });
       onSuccess(insertedCount);
-
-      // Close modal after successful upload
-      setTimeout(() => {
-        handleClose();
-      }, 1500);
+      setTimeout(() => handleClose(), 1500);
     } catch (err: any) {
-      let errorMessage = "Upload failed";
-      let errorDetails = err?.message || "An unexpected error occurred";
-
-      if (err?.name === "AbortError") {
-        errorMessage = "Upload cancelled";
-        errorDetails = "The upload was cancelled. You can try again.";
-      } else if (err?.message?.includes("Validation failed")) {
-        errorMessage = "CSV validation failed";
-        errorDetails = err.message;
-      } else if (err?.message?.includes("Failed to fetch")) {
-        errorMessage = "Connection error";
-        errorDetails =
-          "Unable to connect to the server. Please check your internet connection.";
+      // A rejected import returns the same report shape as the preview.
+      const body = err && typeof err === "object" ? err : {};
+      if (Array.isArray(body.errors) && body.overBy) {
+        setPending({ ...pending, report: { ...body, canImport: false } });
       }
-
-      setFiles((prev) =>
-        prev.map((f) =>
-          f.file === file
-            ? {
-                ...f,
-                status: "error",
-                error: errorMessage,
-                errorDetails,
-                controller: undefined,
-              }
-            : f,
-        ),
-      );
-
+      const message = body.message || err?.message || "Import failed";
+      setFileState(file, {
+        status: "error",
+        error: "Nothing was imported",
+        errorDetails: message,
+        controller: undefined,
+      });
       toast({
-        title: errorMessage,
-        description: errorDetails,
+        title: "Nothing was imported",
+        description: message,
         variant: "destructive",
       });
+    } finally {
+      setImporting(false);
     }
   };
 
   const handleClose = () => {
     setFiles([]);
+    setPending(null);
+    setLocalErrors([]);
     onClose?.();
     onOpenChange(false);
   };
+
+  const report = pending?.report;
+  const reportErrors = localErrors.length ? localErrors : report?.errors ?? [];
+  const isBusy = importing || files.some((f) => f.status === "uploading");
 
   return (
     <Dialog
@@ -573,27 +632,138 @@ export function CsvUploadModal({
         <div className="flex-1 min-h-0 overflow-y-auto mt-4">
           <FileInput
             accept={CSV_ACCEPT}
-            multiple
+            multiple={false}
             files={files}
             onUpload={handleUpload}
-            onRemove={handleRemoveFile}
+            onRemove={(file) => {
+              handleRemoveFile(file);
+              setPending(null);
+              setLocalErrors([]);
+            }}
             onPauseResume={handlePauseResume}
           />
+
+          {report && (
+            <ImportSummary report={report} />
+          )}
+
+          {reportErrors.length > 0 && (
+            <RowErrorTable errors={reportErrors} />
+          )}
         </div>
 
-        <div className="mt-4 sm:mt-6">
+        <div className="mt-4 sm:mt-6 flex flex-col-reverse sm:flex-row gap-2">
           <Button
+            variant="outline"
             onClick={handleClose}
-            disabled={files.some((f) => f.status === "uploading")}
-            className="w-full h-11 rounded-lg text-sm font-semibold"
+            disabled={isBusy}
+            className="w-full sm:flex-1 h-11 rounded-lg text-sm font-semibold"
           >
-            {files.some((f) => f.status === "uploading")
-              ? "Uploading…"
-              : "Done"}
+            {files.some((f) => f.status === "success") && !report?.canImport
+              ? "Done"
+              : "Cancel"}
           </Button>
+          {report && (
+            <Button
+              onClick={handleConfirmImport}
+              disabled={!report.canImport || isBusy}
+              className="w-full sm:flex-1 h-11 rounded-lg text-sm font-semibold"
+            >
+              {importing
+                ? "Importing…"
+                : `Import ${report.validRows.toLocaleString()} ${report.validRows === 1 ? "person" : "people"}`}
+            </Button>
+          )}
         </div>
       </DialogContent>
     </Dialog>
+  );
+}
+
+function ImportSummary({ report }: { report: CsvImportReport }) {
+  const over: string[] = [];
+  if (report.overBy.members > 0) {
+    over.push(
+      `${report.overBy.members.toLocaleString()} ${report.overBy.members === 1 ? "row" : "rows"} over the member limit`,
+    );
+  }
+  if (report.overBy.guests > 0) {
+    over.push(
+      `${report.overBy.guests.toLocaleString()} ${report.overBy.guests === 1 ? "row" : "rows"} over the guest limit`,
+    );
+  }
+
+  return (
+    <div className="mt-5 space-y-3">
+      <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
+        <Text className="font-semibold text-gray-900">Before you import</Text>
+        <Text className="mt-1 text-sm text-gray-700">
+          This file adds {report.addMembers.toLocaleString()}{" "}
+          {report.addMembers === 1 ? "member" : "members"} and{" "}
+          {report.addGuests.toLocaleString()}{" "}
+          {report.addGuests === 1 ? "guest" : "guests"}. You have room for{" "}
+          {formatRoom(report.room.members)} members and{" "}
+          {formatRoom(report.room.guests)} guests.
+        </Text>
+        {report.totalErrors > 0 && (
+          <Text className="mt-1 text-sm text-red-600">
+            {report.totalErrors} row error(s) must be fixed first. Nothing is
+            imported until every row is valid.
+          </Text>
+        )}
+      </div>
+
+      {over.length > 0 && (
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>
+            Import blocked: this file has {over.join(" and ")}. Remove rows or{" "}
+            <Link
+              href="/dashboard/settings/billing"
+              className="font-semibold underline"
+            >
+              upgrade your plan
+            </Link>
+            . Nothing has been imported.
+          </AlertDescription>
+        </Alert>
+      )}
+    </div>
+  );
+}
+
+function RowErrorTable({ errors }: { errors: CsvImportRowError[] }) {
+  return (
+    <div className="mt-4">
+      <Text className="font-semibold text-gray-900">
+        Import report: {errors.length} rejected{" "}
+        {errors.length === 1 ? "entry" : "entries"}
+      </Text>
+      <div className="mt-2 max-h-56 overflow-y-auto rounded-lg border border-gray-200">
+        <table className="w-full text-left text-xs">
+          <thead className="sticky top-0 bg-gray-50 text-gray-600">
+            <tr>
+              <th className="px-3 py-2 font-medium">Row</th>
+              <th className="px-3 py-2 font-medium">Column</th>
+              <th className="px-3 py-2 font-medium">Problem</th>
+            </tr>
+          </thead>
+          <tbody>
+            {errors.map((e, i) => (
+              <tr key={`${e.row}-${i}`} className="border-t border-gray-100">
+                <td className="px-3 py-2 align-top text-gray-900">{e.row}</td>
+                <td className="px-3 py-2 align-top text-gray-700">
+                  {e.column ?? "—"}
+                </td>
+                <td className="px-3 py-2 align-top text-gray-700">
+                  {e.reason}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
   );
 }
 
@@ -654,8 +824,8 @@ export function FileInput({
   };
 
   const csvContent = `${CSV_TEMPLATE_COLUMNS.map((key) => FIELD_LABELS[key]).join(",")}
-MR.,Anthony Carter,MALE,1/12/1991,SINGLE,,,,14155667788,anthony.carter@example.com,Developer,Bachelor,MEMBER,7/15/2022,,TRUE,Music,Outreach,Iota Group
-MRS.,Rebecca Allen,FEMALE,4/25/1984,MARRIED,5/10/2009,,,14156778899,rebecca.allen@example.com,Teacher,Master,MEMBER,2/18/2021,Grace Church,FALSE,Hospitality,Teaching,Kappa Group`;
+MR.,Anthony Carter,MALE,1/12/1991,SINGLE,,,,14155667788,anthony.carter@example.com,Developer,Bachelor,Member,7/15/2022,,TRUE,Music,Outreach,Iota Group
+MRS.,Rebecca Allen,FEMALE,4/25/1984,MARRIED,5/10/2009,,,14156778899,rebecca.allen@example.com,Teacher,Master,Visitor,2/18/2021,Grace Church,FALSE,,,`;
 
   return (
     <div className="space-y-5">
@@ -683,6 +853,36 @@ MRS.,Rebecca Allen,FEMALE,4/25/1984,MARRIED,5/10/2009,,,14156778899,rebecca.alle
           <Download className="w-4 h-4 mr-2" />
           Download Sample CSV
         </Button>
+
+        <div className="mt-3 rounded-lg bg-blue-50/60 p-3 text-xs text-gray-700 space-y-1">
+          <Text className="text-xs font-semibold text-gray-900">
+            How to fill it in
+          </Text>
+          <ul className="list-disc pl-4 space-y-0.5">
+            <li>
+              Required columns: <b>Full Name</b>, <b>Phone Number</b>,{" "}
+              <b>Gender</b> (Male or Female) and <b>Status</b>.
+            </li>
+            <li>
+              Status must be one of: {CSV_STATUS_VALUES.join(", ")}. Rows with
+              a blank or unknown status are rejected, never guessed.
+            </li>
+            <li>
+              Visitors count towards your guest limit. Everyone else counts
+              towards your member limit.
+            </li>
+            <li>
+              Visitors can&apos;t have a Cell Group Name. Leave it blank for
+              them.
+            </li>
+            <li>Dates use month/day/year, for example 7/15/2022.</li>
+            <li>
+              You&apos;ll see a summary before anything is imported. If any
+              row is rejected, or the file goes over a limit, nothing is
+              imported.
+            </li>
+          </ul>
+        </div>
       </div>
 
       {/* Upload Area - per the design: "Upload file" dashed dropzone */}
@@ -767,7 +967,7 @@ MRS.,Rebecca Allen,FEMALE,4/25/1984,MARRIED,5/10/2009,,,14156778899,rebecca.alle
                 </div>
 
                 {file.status === "uploading" && (
-                  <Text className="text-xs text-gray-500">Uploading…l</Text>
+                  <Text className="text-xs text-gray-500">Working…</Text>
                 )}
                 {file.status === "paused" && (
                   <Text className="text-xs text-gray-500">Paused</Text>
@@ -775,7 +975,7 @@ MRS.,Rebecca Allen,FEMALE,4/25/1984,MARRIED,5/10/2009,,,14156778899,rebecca.alle
                 {file.status === "error" && (
                   <div>
                     <Text className="text-xs text-red-500 font-medium">
-                      Error…l
+                      Needs attention
                     </Text>
                     {file.error && (
                       <Text className="text-xs text-gray-500 mt-0.5">
@@ -789,7 +989,7 @@ MRS.,Rebecca Allen,FEMALE,4/25/1984,MARRIED,5/10/2009,,,14156778899,rebecca.alle
                 )}
                 {file.status === "success" && (
                   <Text className="text-xs text-primary-400 font-medium">
-                    Successfully Uploaded!
+                    File checked
                   </Text>
                 )}
               </div>

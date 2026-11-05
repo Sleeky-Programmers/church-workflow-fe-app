@@ -12,6 +12,7 @@ import { IncomeVsExpenses } from "@/components/features/dashboard/income-expense
 import { PendingRequestsWidget } from "@/components/features/dashboard/pending-requests-widget";
 import { RecentActivityWidget } from "@/components/features/dashboard/recent-activity-widget";
 import { StatCard } from "@/components/features/dashboard/StatCard";
+import { PlanUsageStrip } from "@/components/features/dashboard/subscription/plan-usage-strip";
 import { TrendChart } from "@/components/features/dashboard/trend-chart";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -398,6 +399,8 @@ export default function Dashboard() {
               onRetry={loadAttendanceData}
             />
           </div>
+
+          <PlanUsageStrip />
 
           <div
             className="bg-white rounded-2xl border border-gray-300

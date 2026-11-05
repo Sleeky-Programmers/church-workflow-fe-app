@@ -28,7 +28,7 @@ import { Span, Text } from "@/components/ui/typography/Text";
 import { useHasAccess } from "@/lib/access-control";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
-import { fetchMembers } from "@/services/memberService";
+import { fetchGroupEligibleMembers } from "@/services/memberService";
 import { MemberProfile } from "@/types";
 
 const PANEL_PAGE_SIZE = 8;
@@ -398,7 +398,7 @@ export default function AddSmallTeamDialog({
                   <Label className="text-sm sm:text-base">Add Members</Label>
 
                   <MemberMultiSelect
-                    fetchOptions={fetchMembers}
+                    fetchOptions={fetchGroupEligibleMembers}
                     value={memberIds}
                     onChange={(ids) => setMemberIds(ids)}
                     placeholder="Select or search"

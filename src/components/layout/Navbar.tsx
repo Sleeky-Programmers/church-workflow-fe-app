@@ -1,14 +1,15 @@
 "use client";
 
-import { Bell, Search, Star, User, X } from "lucide-react";
+import { Bell, Search, Star, User } from "lucide-react";
 import Link from "next/link";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import React, { useEffect, useMemo } from "react";
+import { usePathname } from "next/navigation";
+import { useEffect, useMemo } from "react";
 
 import { RouteConfig } from "@/config/routes";
+import { useModKeyLabel } from "@/components/features/search/command-palette";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useFavoritesStore } from "@/stores/useFavoritesStore";
-import { useSearchStore } from "@/stores/useSearchStore";
+import { useCommandPaletteStore } from "@/stores/useCommandPaletteStore";
 import { useUserStore } from "@/stores/useUserStore";
 
 import { Avatar, AvatarFallback } from "../ui/avatar";
@@ -22,24 +23,14 @@ import {
   BreadcrumbSeparator,
 } from "../ui/breadcrumb";
 import { Button } from "../ui/button";
-import { Input } from "../ui/input";
 import { SidebarTrigger } from "../ui/sidebar";
 import { Text } from "../ui/typography/Text";
 
 export function Navbar() {
   const pathname = usePathname() || RouteConfig.dashboard.home;
-  const router = useRouter();
   const isMobile = useIsMobile();
-  const searchParams = useSearchParams();
-
-  // Use Zustand store instead of local state
-  const {
-    searchQuery,
-    setSearchQuery,
-    clearSearch,
-    updateURLSearch,
-    syncFromURL,
-  } = useSearchStore();
+  const openPalette = useCommandPaletteStore((s) => s.setOpen);
+  const modKeyLabel = useModKeyLabel();
 
   const { toggleFavorite, isFavorite } = useFavoritesStore();
   const { user, getUserFullName, fetchUserData } = useUserStore();
@@ -49,11 +40,6 @@ export function Navbar() {
   useEffect(() => {
     fetchUserData();
   }, [fetchUserData]);
-
-  // Sync URL changes with store
-  useEffect(() => {
-    syncFromURL(searchParams);
-  }, [searchParams, syncFromURL]);
 
   const pageLabel = useMemo(() => {
     const path = pathname.replace(/\/+$/, "");
@@ -65,20 +51,6 @@ export function Navbar() {
       .replace(/[-_]+/g, " ")
       .replace(/\b\w/g, (c: string) => c.toUpperCase());
   }, [pathname]);
-
-  const handleSearch = () => {
-    if (!searchQuery.trim()) return;
-    updateURLSearch(pathname, router);
-  };
-
-  const handleClearSearch = () => {
-    clearSearch();
-    updateURLSearch(pathname, router);
-  };
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(e.target.value);
-  };
 
   const displayName = getUserFullName();
 
@@ -124,31 +96,24 @@ export function Navbar() {
           variant="ghost"
           className="sm:hidden"
           aria-label="Open search"
-          onClick={handleSearch}
+          onClick={() => openPalette(true)}
         >
           <Search className="w-4 h-4" />
         </Button>
 
-        <div className="hidden sm:block relative">
-          <Input
-            leftIcon={<Search className="w-4 h-4" />}
-            placeholder="Search"
-            value={searchQuery}
-            onChange={handleChange}
-            onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-            className="w-48 md:w-64 pr-8"
-          />
-          {searchQuery && (
-            <Button
-              size="icon"
-              variant="ghost"
-              className="absolute right-0 top-0 h-full px-3"
-              onClick={handleClearSearch}
-            >
-              <X className="w-4 h-4" />
-            </Button>
-          )}
-        </div>
+        <button
+          type="button"
+          onClick={() => openPalette(true)}
+          aria-label="Search (opens the command palette)"
+          aria-keyshortcuts="Control+K Meta+K /"
+          className="hidden sm:flex h-10 w-48 md:w-64 items-center gap-2 rounded-md border border-input bg-transparent px-3 text-sm text-muted-foreground shadow-sm transition-colors hover:bg-accent/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        >
+          <Search className="w-4 h-4 shrink-0" />
+          <span className="flex-1 truncate text-left">Search…</span>
+          <kbd className="pointer-events-none hidden md:inline-flex select-none items-center rounded border bg-muted px-1.5 py-0.5 font-sans text-[10px] font-medium text-muted-foreground">
+            {modKeyLabel}
+          </kbd>
+        </button>
 
         <BranchSwitcher />
 

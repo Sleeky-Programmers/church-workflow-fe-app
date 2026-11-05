@@ -10,6 +10,11 @@ import { RouteConfig } from "@/config/routes";
 import { PlanType, SubscriptionStatus } from "@/lib/enums";
 import { getAccessToken } from "@/lib/auth/session";
 import { saveSelectedPlan } from "@/lib/plan-selection";
+import {
+  CONTACT_SALES_HREF,
+  getPlanLimitLines,
+  isContactSalesPlan,
+} from "@/lib/plan-utils";
 import { getCurrentPlan } from "@/services/billingService";
 import { CurrentPlanResponse, Plan } from "@/types";
 
@@ -48,6 +53,13 @@ export default function PricingSectionClient({
 
   const handleGetStarted = (planKey: string) => {
     if (loadingPlan) {
+      return;
+    }
+
+    // Enterprise is quoted and activated by our team, never bought here.
+    const selected = plans.find((p) => p.type === planKey);
+    if (isContactSalesPlan(selected)) {
+      router.push(CONTACT_SALES_HREF);
       return;
     }
     setLoadingPlan(planKey);
@@ -194,26 +206,43 @@ export default function PricingSectionClient({
                 <Text variant="label" className="text-gray-800">
                   {plan.name}
                 </Text>
-                <div className="flex items-baseline gap-1.5 flex-wrap">
-                  {billing === "yearly" && (
-                    <span className="text-sm text-gray-400 line-through">
-                      {formatPrice(plan.monthlyPrice)}
+                {isContactSalesPlan(plan) ? (
+                  <>
+                    <div className="flex items-baseline gap-1.5 flex-wrap">
+                      <span className="text-xs text-gray-500">From</span>
+                      <span className="text-2xl font-black text-gray-900">
+                        {formatPrice(plan.monthlyPrice)}
+                      </span>
+                      <span className="text-xs text-gray-400">/ month</span>
+                    </div>
+                    <span className="text-[11px] text-gray-400">
+                      tailored to your church
                     </span>
-                  )}
-                  <span className="text-2xl font-black text-gray-900">
-                    {formatPrice(getDisplayPrice(plan))}
-                  </span>
-                  <span className="text-xs text-gray-400">/ month</span>
-                </div>
-                {billing === "yearly" && (
-                  <span className="text-[11px] text-gray-400">
-                    billed annually
-                  </span>
+                  </>
+                ) : (
+                  <>
+                    <div className="flex items-baseline gap-1.5 flex-wrap">
+                      {billing === "yearly" && plan.monthlyPrice > 0 && (
+                        <span className="text-sm text-gray-400 line-through">
+                          {formatPrice(plan.monthlyPrice)}
+                        </span>
+                      )}
+                      <span className="text-2xl font-black text-gray-900">
+                        {formatPrice(getDisplayPrice(plan))}
+                      </span>
+                      <span className="text-xs text-gray-400">/ month</span>
+                    </div>
+                    {billing === "yearly" && plan.monthlyPrice > 0 && (
+                      <span className="text-[11px] text-gray-400">
+                        billed annually
+                      </span>
+                    )}
+                  </>
                 )}
               </div>
 
               <div className="flex flex-col gap-2.5 flex-1">
-                {plan.features.map((feature) => (
+                {[...getPlanLimitLines(plan), ...plan.features].map((feature) => (
                   <div key={feature} className="flex items-start gap-2">
                     <Check
                       size={14}
@@ -242,14 +271,24 @@ export default function PricingSectionClient({
                 >
                   {loadingPlan === plan.type
                     ? "Redirecting..."
-                    : plan.type === "STARTER"
-                      ? "Get Started Free"
-                      : "Get Started"}
+                    : isContactSalesPlan(plan)
+                      ? "Contact us"
+                      : plan.type === "STARTER"
+                        ? "Get Started Free"
+                        : "Get Started"}
                 </button>
               )}
             </div>
           ))}
         </div>
+
+        <Text
+          variant="muted"
+          className="mt-8 text-center text-sm max-w-xl mx-auto"
+        >
+          Guests are visitors you&apos;re following up. They don&apos;t count
+          towards your member limit.
+        </Text>
       </div>
     </section>
   );

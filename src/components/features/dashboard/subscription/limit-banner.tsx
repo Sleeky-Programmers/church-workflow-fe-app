@@ -26,8 +26,11 @@ const iconColors: Record<BannerColor, string> = {
 export interface LimitBannerProps {
   /** Stable reference (module-level export) - an inline arrow function will refetch on every render. */
   fetchStatus: () => Promise<PlanLimitStatus>;
-  /** sessionStorage key used to remember this banner was dismissed; must be unique per resource. */
-  dismissKey: string;
+  /**
+   * @deprecated No longer used. Dismissing only hides the banner until the
+   * page is reloaded or the user navigates away, so it isn't remembered.
+   */
+  dismissKey?: string;
   /** Plural noun used in messaging, e.g. "members", "user seats". */
   resourceLabel: string;
   /** Limit noun used in messaging, e.g. "member limit", "user seat limit". */
@@ -39,7 +42,6 @@ export interface LimitBannerProps {
 
 export function LimitBanner({
   fetchStatus,
-  dismissKey,
   resourceLabel,
   resourceLimitLabel,
   upgradeHref = "/dashboard/settings/billing",
@@ -69,16 +71,9 @@ export function LimitBanner({
     };
   }, [fetchStatus]);
 
-  useEffect(() => {
-    if (sessionStorage.getItem(dismissKey)) {
-      setIsVisible(false);
-    }
-  }, [dismissKey]);
-
-  const handleDismiss = () => {
-    setIsVisible(false);
-    sessionStorage.setItem(dismissKey, "true");
-  };
+  // Dismissing is temporary: the banner lives in component state only, so it
+  // shows again after a reload or when the user comes back to the page.
+  const handleDismiss = () => setIsVisible(false);
 
   if (loading || !status || !isVisible) return null;
 
@@ -86,7 +81,6 @@ export function LimitBanner({
     current,
     limit,
     percentage,
-    isOverLimit,
     isWithinGracePeriod,
     isNearLimit,
     daysRemaining,
@@ -94,13 +88,21 @@ export function LimitBanner({
     gracePeriodEnds,
   } = status;
 
-  if (!isNearLimit && !isOverLimit) return null;
+  // Work it out from the counts: some status endpoints report `isOverLimit`
+  // when the limit is merely reached. Reaching it is a warning (amber); only
+  // going past it is an error (red).
+  const hasLimit = limit > 0;
+  const exceeded = hasLimit && current > limit;
+  const atLimit = hasLimit && current === limit;
+  const plan = toSentenceCase(planName || "");
+
+  if (!isNearLimit && !atLimit && !exceeded) return null;
 
   let bannerColor: BannerColor = "blue";
   let title = "";
   let message = "";
 
-  if (isOverLimit && isWithinGracePeriod) {
+  if (exceeded && isWithinGracePeriod) {
     bannerColor = "blue";
     title = "Action Required:";
     const formattedDate = gracePeriodEnds
@@ -111,17 +113,26 @@ export function LimitBanner({
         })
       : "soon";
     message = `Your ${daysRemaining || 7}-day grace period to manage over-limit ${resourceLabel} ends on ${formattedDate}. Upgrade to prevent dashboard restrictions.`;
-  } else if (isOverLimit) {
+  } else if (exceeded) {
     bannerColor = "red";
+    title = "Over Limit:";
+    message = `Your ${plan} plan has ${current} ${resourceLabel}, which is over the ${limit} ${resourceLimitLabel}. Upgrade now to keep adding ${resourceLabel}.`;
+  } else if (atLimit) {
+    bannerColor = "amber";
     title = "Limit Reached:";
-    message = `Your ${toSentenceCase(planName || "")} plan has ${current} ${resourceLabel}, which has reached the ${limit} ${resourceLimitLabel}. Please upgrade now to continue.`;
+    message = `You're using all ${limit} ${resourceLabel} on your ${plan} plan. Upgrade to add more.`;
   } else if (isNearLimit) {
     bannerColor = "amber";
     title = "Approaching Limit:";
     message = `You have ${current} out of ${limit} ${resourceLabel} (${Math.round(percentage)}%). Consider upgrading to avoid reaching the limit.`;
   }
 
-  const Icon = isOverLimit ? MdError : isNearLimit ? MdWarning : MdInfo;
+  const Icon =
+    bannerColor === "red"
+      ? MdError
+      : bannerColor === "amber"
+        ? MdWarning
+        : MdInfo;
 
   return (
     <div

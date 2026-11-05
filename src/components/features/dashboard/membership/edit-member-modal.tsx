@@ -238,6 +238,9 @@ export function EditMemberModal({ member, onClose, onSave }: Props) {
                             <SelectItem value={MembershipStatus.VISITOR}>
                               Visitor
                             </SelectItem>
+                            <SelectItem value={MembershipStatus.VOLUNTEER}>
+                              Volunteer
+                            </SelectItem>
                             <SelectItem value={MembershipStatus.WORKER}>
                               Worker
                             </SelectItem>
@@ -249,6 +252,13 @@ export function EditMemberModal({ member, onClose, onSave }: Props) {
                             </SelectItem>
                           </SelectContent>
                         </Select>
+                        {field.value === MembershipStatus.VISITOR && (
+                          <p className="mt-1 text-xs text-gray-500">
+                            Guests count towards your guest limit and
+                            can&apos;t be in departments, small teams or cell
+                            groups.
+                          </p>
+                        )}
                         <FormMessage />
                       </FormItem>
                     )}

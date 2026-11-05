@@ -1,5 +1,6 @@
 "use client";
 
+import { useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
 import Table from "@/components/features/dashboard/Table";
@@ -52,7 +53,13 @@ export default function TeamsPage() {
   const { toast } = useToast();
 
   // Search and filters
-  const [query, setQuery] = useState("");
+  // ?search= (e.g. from the global search palette) seeds the filter.
+  const searchParams = useSearchParams();
+  const urlSearch = searchParams.get("search") ?? "";
+  const [query, setQuery] = useState(urlSearch);
+  useEffect(() => {
+    setQuery(urlSearch);
+  }, [urlSearch]);
   const [statusFilter, setStatusFilter] = useState<TeamStatusFilter>("all");
   const [selectedMemberId, setSelectedMemberId] = useState("all");
   const [minMembers, setMinMembers] = useState(0);

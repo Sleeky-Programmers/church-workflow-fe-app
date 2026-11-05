@@ -93,6 +93,9 @@ export function ChurchActivityStep({
                     <SelectItem value={MembershipStatus.VOLUNTEER}>
                       Volunteer
                     </SelectItem>
+                    <SelectItem value={MembershipStatus.WORKER}>
+                      Worker
+                    </SelectItem>
                     <SelectItem value={MembershipStatus.LEADER}>
                       Leader
                     </SelectItem>
@@ -101,6 +104,10 @@ export function ChurchActivityStep({
                     </SelectItem>
                   </SelectContent>
                 </Select>
+                <p className="mt-1 text-xs text-gray-500">
+                  Visitors count towards your separate guest limit and can&apos;t
+                  join departments, small teams or cell groups.
+                </p>
                 <FormMessage />
               </FormItem>
             )}

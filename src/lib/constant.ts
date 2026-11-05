@@ -25,4 +25,17 @@ export const MEMBERSHIP_MAP: Record<string, MembershipStatus> = {
   worker: MembershipStatus.WORKER,
   leader: MembershipStatus.LEADER,
   "new convert": MembershipStatus.CONVERT,
+  new_convert: MembershipStatus.CONVERT,
+  convert: MembershipStatus.CONVERT,
+  guest: MembershipStatus.VISITOR,
 };
+
+/** Status values accepted in the member upload sheet (case-insensitive). */
+export const CSV_STATUS_VALUES = [
+  "Visitor",
+  "New convert",
+  "Member",
+  "Volunteer",
+  "Worker",
+  "Leader",
+];

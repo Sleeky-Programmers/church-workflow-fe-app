@@ -1,18 +1,21 @@
 'use client';
 
-import { Check, ChevronDown, Minus, Plus, TriangleAlert, X } from 'lucide-react';
+import { Check, ChevronDown, Info, Minus, Plus, TriangleAlert, X } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 
+import AddDepartmentDialog from '@/components/features/dashboard/departments/AddDepartmentDialog';
 import { Button } from '@/components/ui/button';
 import { DatePicker } from '@/components/ui/date-picker';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Select, SelectContent, SelectItem, SelectSeparator, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useToast } from '@/hooks/use-toast';
+import { useHasAccess } from '@/lib/access-control';
 import { cn } from '@/lib/utils';
 import { createAsset, CreateAssetPayload, updateAsset } from '@/services/assetService';
 import { fetchDepartments } from '@/services/departmentService';
@@ -20,6 +23,36 @@ import { fetchLocations } from '@/services/locationService';
 import { fetchAdmins } from '@/services/userServices';
 
 import { Asset, AssetCondition, ASSET_CATEGORIES, ASSET_RISKS, ASSET_STATUSES, MAINTENANCE_FREQUENCIES } from './data';
+
+// Sentinel value for the "Add new department" option at the end of the
+// department dropdown - it opens the create dialog instead of being selected.
+const ADD_DEPARTMENT_VALUE = '__add_department__';
+
+// Ownership is stored in the asset's existing free-text `owner` field as a
+// readable string ("Church-owned", "Borrowed from X", "Leased from X"), so it
+// displays correctly anywhere the owner is shown without a schema change.
+type Ownership = 'church' | 'borrowed' | 'leased';
+
+const OWNERSHIP_OPTIONS: { value: Ownership; label: string; nameLabel?: string }[] = [
+	{ value: 'church', label: 'Church-owned' },
+	{ value: 'borrowed', label: 'Borrowed', nameLabel: 'Borrowed from' },
+	{ value: 'leased', label: 'Leased', nameLabel: 'Leased from' },
+];
+
+function parseOwner(owner: string | undefined): { ownership: Ownership; ownerName: string } {
+	const match = owner?.trim().match(/^(borrowed|leased) from (.+)$/i);
+	if (match) {
+		return { ownership: match[1].toLowerCase() as Ownership, ownerName: match[2].trim() };
+	}
+	// Empty, "Church-owned", or a legacy free-text value.
+	return { ownership: 'church', ownerName: '' };
+}
+
+function formatOwner(ownership: Ownership, ownerName: string): string {
+	if (ownership === 'church') return 'Church-owned';
+	const option = OWNERSHIP_OPTIONS.find((o) => o.value === ownership);
+	return `${option?.nameLabel} ${ownerName.trim()}`;
+}
 
 export type AssetModalMode = 'create' | 'edit' | 'view';
 
@@ -46,7 +79,11 @@ interface FormState {
 	description: string;
 	category: string;
 	department: string;
-	owner: string;
+	ownership: Ownership;
+	ownerName: string;
+	// True once the user changes ownership, so editing an asset with a legacy
+	// free-text owner doesn't overwrite it unless they actually touch it.
+	ownerTouched: boolean;
 	responsibleMode: 'system' | 'manual';
 	assignee: string;
 	manualName: string;
@@ -67,7 +104,9 @@ const EMPTY_FORM: FormState = {
 	description: '',
 	category: 'Other',
 	department: '',
-	owner: '',
+	ownership: 'church',
+	ownerName: '',
+	ownerTouched: false,
 	responsibleMode: 'system',
 	assignee: '',
 	manualName: '',
@@ -301,6 +340,9 @@ export function AddAssetModal({ open, onOpenChange, mode = 'create', asset, onSa
 	const [admins, setAdmins] = useState<{ id: string; fullName: string }[]>([]);
 	const [locations, setLocations] = useState<{ id: string; name: string }[]>([]);
 	const [submitting, setSubmitting] = useState(false);
+	const [addDepartmentOpen, setAddDepartmentOpen] = useState(false);
+	// Same permission the backend requires on POST /department.
+	const canCreateDepartment = useHasAccess('DEPARTMENTS', 'FULL_ACCESS');
 	const scrollRef = useRef<HTMLDivElement>(null);
 
 	useEffect(() => {
@@ -329,7 +371,7 @@ export function AddAssetModal({ open, onOpenChange, mode = 'create', asset, onSa
 				),
 			)
 			.catch(() => {
-				// Location select just stays empty when the API is unavailable.
+				// Location suggestions just stay empty when the API is unavailable.
 			});
 	}, [open]);
 
@@ -351,7 +393,7 @@ export function AddAssetModal({ open, onOpenChange, mode = 'create', asset, onSa
 				description: asset.description,
 				category: asset.category,
 				department: asset.departmentId || '',
-				owner: asset.owner,
+				...parseOwner(asset.owner),
 				responsibleMode: asset.responsible.isSystem ? 'system' : 'manual',
 				assignee: asset.responsible.isSystem ? asset.responsible.id || '' : '',
 				manualName: !asset.responsible.isSystem ? asset.responsible.name : '',
@@ -406,7 +448,12 @@ export function AddAssetModal({ open, onOpenChange, mode = 'create', asset, onSa
 	const needAttention = summary.Repair + summary.Damaged;
 
 	const stepValid = (id: number) => {
-		if (id === 1) return Boolean(form.name.trim()) && Boolean(form.description.trim());
+		if (id === 1)
+			return (
+				Boolean(form.name.trim()) &&
+				Boolean(form.description.trim()) &&
+				(form.ownership === 'church' || Boolean(form.ownerName.trim()))
+			);
 		if (id === 3) return units.length > 0 && duplicateSerials.size === 0;
 		return true;
 	};
@@ -436,7 +483,7 @@ export function AddAssetModal({ open, onOpenChange, mode = 'create', asset, onSa
 		if (!isValid) {
 			toast({
 				title: 'Missing information',
-				description: 'Asset name, description and valid items are required',
+				description: 'Asset name, description, owner name (if borrowed or leased) and valid items are required',
 				variant: 'destructive',
 			});
 			return;
@@ -449,7 +496,8 @@ export function AddAssetModal({ open, onOpenChange, mode = 'create', asset, onSa
 			department: form.department || undefined,
 			description: form.description.trim(),
 			location: form.location.trim() || undefined,
-			owner: form.owner.trim() || undefined,
+			// Leave a legacy owner value untouched on edit unless it was changed.
+			owner: mode === 'edit' && !form.ownerTouched ? undefined : formatOwner(form.ownership, form.ownerName),
 			responsibleMode: form.responsibleMode,
 			responsibleAdmin: form.responsibleMode === 'system' ? form.assignee || undefined : undefined,
 			responsibleManualName: form.responsibleMode === 'manual' ? form.manualName.trim() : undefined,
@@ -621,9 +669,15 @@ export function AddAssetModal({ open, onOpenChange, mode = 'create', asset, onSa
 										<FieldLabel>Department</FieldLabel>
 										<Select
 											value={form.department}
-											onValueChange={(value) => update('department', value)}
+											onValueChange={(value) => {
+												if (value === ADD_DEPARTMENT_VALUE) {
+													setAddDepartmentOpen(true);
+													return;
+												}
+												update('department', value);
+											}}
 											disabled={readOnly}>
-											<SelectTrigger className={cn(controlClass, 'text-muted-foreground')}>
+											<SelectTrigger className={cn(controlClass, !form.department && 'text-muted-foreground')}>
 												<SelectValue placeholder="Select Department" />
 											</SelectTrigger>
 											<SelectContent>
@@ -634,21 +688,86 @@ export function AddAssetModal({ open, onOpenChange, mode = 'create', asset, onSa
 														{department.name}
 													</SelectItem>
 												))}
+												{departments.length > 0 && <SelectSeparator />}
+												{canCreateDepartment ? (
+													<SelectItem
+														value={ADD_DEPARTMENT_VALUE}
+														className="font-medium text-primary focus:text-primary">
+														<span className="flex items-center gap-2">
+															<Plus className="h-4 w-4" />
+															Add new department
+														</span>
+													</SelectItem>
+												) : (
+													<p className="px-2 py-1.5 text-xs text-muted-foreground">
+														Department not listed? Contact your admin to add it.
+													</p>
+												)}
+											</SelectContent>
+										</Select>
+										{canCreateDepartment && (
+											<AddDepartmentDialog
+												open={addDepartmentOpen}
+												onOpenChange={setAddDepartmentOpen}
+												onCreated={(created) => {
+													setDepartments((prev) =>
+														prev.some((d) => d.id === created.id)
+															? prev
+															: [...prev, { id: created.id, name: created.name }],
+													);
+													update('department', created.id);
+												}}
+											/>
+										)}
+									</div>
+
+									<div className="space-y-2">
+										<FieldLabel>Owner</FieldLabel>
+										<Select
+											value={form.ownership}
+											onValueChange={(value) =>
+												setForm((prev) => ({
+													...prev,
+													ownership: value as Ownership,
+													ownerName: value === 'church' ? '' : prev.ownerName,
+													ownerTouched: true,
+												}))
+											}
+											disabled={readOnly}>
+											<SelectTrigger className={controlClass}>
+												<SelectValue />
+											</SelectTrigger>
+											<SelectContent>
+												{OWNERSHIP_OPTIONS.map((option) => (
+													<SelectItem
+														key={option.value}
+														value={option.value}>
+														{option.label}
+													</SelectItem>
+												))}
 											</SelectContent>
 										</Select>
 									</div>
 
-									<div className="space-y-2">
-										<FieldLabel htmlFor="asset-owner">Owner</FieldLabel>
-										<Input
-											id="asset-owner"
-											disabled={readOnly}
-											value={form.owner}
-											onChange={(e) => update('owner', e.target.value)}
-											placeholder="Enter Owner's name"
-											className={controlClass}
-										/>
-									</div>
+									{form.ownership !== 'church' && (
+										<div className="col-start-3 space-y-2">
+											<FieldLabel
+												htmlFor="asset-owner-name"
+												required>
+												{OWNERSHIP_OPTIONS.find((o) => o.value === form.ownership)?.nameLabel}
+											</FieldLabel>
+											<Input
+												id="asset-owner-name"
+												disabled={readOnly}
+												value={form.ownerName}
+												onChange={(e) =>
+													setForm((prev) => ({ ...prev, ownerName: e.target.value, ownerTouched: true }))
+												}
+												placeholder={form.ownership === 'borrowed' ? 'Who is it borrowed from?' : 'Who is it leased from?'}
+												className={controlClass}
+											/>
+										</div>
+									)}
 								</div>
 							</>
 						)}
@@ -738,26 +857,47 @@ export function AddAssetModal({ open, onOpenChange, mode = 'create', asset, onSa
 
 								<div className="grid grid-cols-2 gap-4">
 									<div className="space-y-2">
-										<FieldLabel htmlFor="asset-location">Location</FieldLabel>
-										<Select
+										<div className="flex items-center gap-1.5">
+											<FieldLabel htmlFor="asset-location">Location</FieldLabel>
+											<TooltipProvider delayDuration={150}>
+												<Tooltip>
+													<TooltipTrigger asChild>
+														<button
+															type="button"
+															className="text-gray-400 hover:text-gray-600 focus:outline-none focus-visible:text-gray-600"
+															aria-label="About asset location">
+															<Info className="h-3.5 w-3.5" />
+														</button>
+													</TooltipTrigger>
+													<TooltipContent
+														side="top"
+														className="max-w-[260px] text-xs leading-relaxed">
+														Where this asset is kept or used, for example &quot;Main Auditorium&quot;, &quot;Store Room B&quot; or &quot;Pastor&apos;s
+														Office&quot;. Be specific so anyone can find it during a check. Type any place, or pick one of your saved locations.
+													</TooltipContent>
+												</Tooltip>
+											</TooltipProvider>
+										</div>
+										{/* Free text, with the church's saved locations offered as suggestions. */}
+										<Input
+											id="asset-location"
+											list="asset-location-suggestions"
 											value={form.location}
-											onValueChange={(value) => update('location', value)}
-											disabled={readOnly}>
-											<SelectTrigger
-												id="asset-location"
-												className={cn(controlClass, 'text-muted-foreground')}>
-												<SelectValue placeholder="Select Location" />
-											</SelectTrigger>
-											<SelectContent>
-												{locations.map((location) => (
-													<SelectItem
-														key={location.id}
-														value={location.name}>
-														{location.name}
-													</SelectItem>
-												))}
-											</SelectContent>
-										</Select>
+											onChange={(e) => update('location', e.target.value)}
+											placeholder="e.g. Main Auditorium"
+											maxLength={120}
+											autoComplete="off"
+											disabled={readOnly}
+											className={controlClass}
+										/>
+										<datalist id="asset-location-suggestions">
+											{locations.map((location) => (
+												<option
+													key={location.id}
+													value={location.name}
+												/>
+											))}
+										</datalist>
 									</div>
 
 									<div className="space-y-2">

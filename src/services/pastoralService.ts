@@ -74,6 +74,8 @@ export interface PastoralSettings {
   trackingMode: "SUNDAYS_ONLY" | "SUNDAYS_MIDWEEK" | "ALL_SERVICES";
   countSpecialEvents: boolean;
   countSmallTeams: boolean;
+  /** Guests with no attendance for this many days are archived (30-180, default 90). */
+  archiveAfterDays?: number;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

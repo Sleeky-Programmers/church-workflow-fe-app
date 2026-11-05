@@ -1,7 +1,12 @@
 import { trackAction } from "@/lib/usage-tracker";
 import { authenticatedFetch } from "@/lib/api";
 import { mapMember } from "@/mappers/member.mapper";
+import { MembershipStatus } from "@/lib/enums";
 import {
+  ArchivedGuest,
+  CsvImportReport,
+  FrequentGuest,
+  LimitResource,
   MemberLimitStatus,
   MemberProfile,
   NewMemberData,
@@ -39,10 +44,13 @@ function normalizeMemberPayload(data: Partial<NewMemberData>) {
     isBaptized: data.baptized,
     ministries: data.ministriesInvolved || undefined,
     volunteerPreferences: data.volunteersPreference || undefined,
+    // "No" clears the cell group (null), which guests must not have.
     cellGroupName:
       data.smallGroupMember === "Yes"
         ? data.smallGroupName || undefined
-        : undefined,
+        : data.smallGroupMember === "No"
+          ? null
+          : undefined,
   };
 }
 
@@ -51,7 +59,12 @@ export async function fetchMembers(
   limit = 10,
   search?: string,
   filter?: string,
-  facets?: { gender?: string; maritalStatus?: string; membershipStatus?: string },
+  facets?: {
+    gender?: string;
+    maritalStatus?: string;
+    membershipStatus?: string;
+    excludeStatus?: string;
+  },
 ): Promise<FetchMembersResponse> {
   const params = new URLSearchParams({
     page: String(page),
@@ -70,6 +83,8 @@ export async function fetchMembers(
     params.append("maritalStatus", facets.maritalStatus);
   if (facets?.membershipStatus)
     params.append("membershipStatus", facets.membershipStatus);
+  if (facets?.excludeStatus)
+    params.append("excludeStatus", facets.excludeStatus);
 
   const response = await authenticatedFetch<FetchMembersResponse>(
     `/members?${params}`,
@@ -82,6 +97,20 @@ export async function fetchMembers(
     data: response.data.map(mapMember),
     pagination: response.pagination,
   };
+}
+
+/**
+ * Member picker source for departments and small teams. Guests (Visitor)
+ * can't join groups, so they're left out.
+ */
+export async function fetchGroupEligibleMembers(
+  page = 1,
+  limit = 10,
+  search?: string,
+): Promise<FetchMembersResponse> {
+  return fetchMembers(page, limit, search, undefined, {
+    excludeStatus: MembershipStatus.VISITOR,
+  });
 }
 
 export async function fetchMemberById(id: string): Promise<MemberProfile> {
@@ -184,6 +213,44 @@ export function uploadMembersCsv(
   });
 }
 
+/** Validates an import file and returns the summary, without importing. */
+export async function previewMembersCsv(file: File): Promise<CsvImportReport> {
+  const formData = new FormData();
+  formData.append("file", file);
+  return authenticatedFetch<CsvImportReport>("/members/csv/preview", {
+    method: "POST",
+    body: formData,
+  });
+}
+
+export async function fetchFrequentGuests(): Promise<{
+  data: FrequentGuest[];
+  total: number;
+}> {
+  return authenticatedFetch("/members/frequent-guests", { method: "GET" });
+}
+
+export async function fetchArchivedGuests(
+  page = 1,
+  limit = 10,
+  search?: string,
+): Promise<{ data: ArchivedGuest[]; pagination: FetchMembersResponse["pagination"] }> {
+  const params = new URLSearchParams({ page: String(page), limit: String(limit) });
+  if (search) params.append("search", search);
+  return authenticatedFetch(`/members/archived?${params}`, { method: "GET" });
+}
+
+export async function exportArchivedGuestsCsv(): Promise<Blob> {
+  return authenticatedFetch<Blob>("/members/archived/export", {
+    method: "GET",
+    responseType: "blob",
+  });
+}
+
+export async function restoreArchivedGuest(id: string) {
+  return authenticatedFetch(`/members/${id}/restore`, { method: "POST" });
+}
+
 export async function deleteMember(id: string): Promise<void> {
   await authenticatedFetch(`/members/${id}`, {
     method: "DELETE",
@@ -198,10 +265,39 @@ export async function getMemberLimitStatus(): Promise<MemberLimitStatus> {
   return response.data;
 }
 
+/** Limit status for one resource: the member limit or the separate guest limit. */
+export async function getResourcePlanLimitStatus(
+  resource: LimitResource,
+): Promise<PlanLimitStatus> {
+  const status = await getMemberLimitStatus();
+  const usage = resource === "guest" ? status.guests : status.members;
+  if (!usage) {
+    return { resource, ...(await getMemberPlanLimitStatus()) };
+  }
+  return {
+    resource,
+    current: usage.current,
+    limit: usage.limit,
+    percentage: usage.percentage,
+    isOverLimit: usage.isOverLimit,
+    isNearLimit: usage.isNearLimit,
+    planName: status.planName,
+    // The grace period only applies to the member limit.
+    isWithinGracePeriod:
+      resource === "member" ? status.isWithinGracePeriod : false,
+    gracePeriodEnds: resource === "member" ? status.gracePeriodEnds : null,
+    daysRemaining: resource === "member" ? status.daysRemaining : null,
+  };
+}
+
+/** Stable reference for <LimitBanner fetchStatus> (an inline arrow would refetch every render). */
+export const getGuestPlanLimitStatus = () => getResourcePlanLimitStatus("guest");
+
 export async function getMemberPlanLimitStatus(): Promise<PlanLimitStatus> {
   const status = await getMemberLimitStatus();
 
   return {
+    resource: "member",
     current: status.currentMembers,
     limit: status.limit,
     percentage: status.percentage,
