@@ -226,6 +226,17 @@ export async function login(payload: LoginPayload) {
   });
 }
 
+/**
+ * Signs in with a one-time code from another of our apps (the Service
+ * Timer's "Open Church Workflow"). Same response as login.
+ */
+export async function redeemHandoff(code: string) {
+  return apiFetch<LoginResponse>("/auth/handoff/redeem", {
+    method: "POST",
+    body: JSON.stringify({ code }),
+  });
+}
+
 export async function googleAuth(idToken: string, token?: string) {
   const query = token ? `?token=${encodeURIComponent(token)}` : "";
 
