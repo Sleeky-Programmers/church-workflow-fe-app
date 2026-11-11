@@ -88,7 +88,9 @@ export function AssetDetail({ asset: initial }: { asset: Asset }) {
   const isDeleteConfirmed = deleteConfirmText.trim().toLowerCase() === "delete";
 
   const handleDelete = async () => {
-    if (!isDeleteConfirmed) return;
+    if (!isDeleteConfirmed) {
+      return;
+    }
 
     try {
       await deleteAsset(asset.id);
@@ -180,7 +182,9 @@ export function AssetDetail({ asset: initial }: { asset: Asset }) {
           <Button
             type="button"
             variant="outline"
-            onClick={() => setModal("edit")}
+            onClick={() => {
+              return setModal("edit");
+            }}
             className="h-10 rounded-lg border-gray-300 px-4 text-sm font-medium"
           >
             <Pencil className="mr-2 h-4 w-4" />
@@ -189,7 +193,9 @@ export function AssetDetail({ asset: initial }: { asset: Asset }) {
 
           <Button
             type="button"
-            onClick={() => setConfirmDelete(true)}
+            onClick={() => {
+              return setConfirmDelete(true);
+            }}
             className="h-10 rounded-lg bg-red-600 px-4 text-sm font-medium text-white-600 hover:bg-red-700"
           >
             <Trash2 className="mr-2 h-4 w-4" />
@@ -204,35 +210,46 @@ export function AssetDetail({ asset: initial }: { asset: Asset }) {
         aria-label="Asset sections"
         className="inline-flex w-full max-w-fit flex-wrap gap-1 rounded-xl bg-gray-100 p-1"
       >
-        {ASSET_TABS.map((key) => (
-          <button
-            key={key}
-            type="button"
-            role="tab"
-            aria-selected={tab === key}
-            onClick={() => setTab(key)}
-            className={cn(
-              "rounded-lg px-5 py-2 text-sm font-medium transition-colors",
-              tab === key
-                ? "bg-white text-gray-900 shadow-[0_1px_3px_rgba(0,0,0,0.12)]"
-                : "text-gray-500 hover:text-gray-800",
-            )}
-          >
-            {ASSET_TAB_LABELS[key]}
-          </button>
-        ))}
+        {ASSET_TABS.map((key) => {
+          return (
+            <button
+              key={key}
+              type="button"
+              role="tab"
+              aria-selected={tab === key}
+              onClick={() => {
+                return setTab(key);
+              }}
+              className={cn(
+                "rounded-lg px-5 py-2 text-sm font-medium transition-colors",
+                tab === key
+                  ? "bg-white text-gray-900 shadow-[0_1px_3px_rgba(0,0,0,0.12)]"
+                  : "text-gray-500 hover:text-gray-800",
+              )}
+            >
+              {ASSET_TAB_LABELS[key]}
+            </button>
+          );
+        })}
       </div>
 
       {/* Panels */}
       <div>
         {tab === "overview" && (
-          <OverviewTab asset={asset} onLogService={() => setLogService(true)} />
+          <OverviewTab
+            asset={asset}
+            onLogService={() => {
+              return setLogService(true);
+            }}
+          />
         )}
         {tab === "maintenance" && (
           <MaintenanceTab
             asset={asset}
             onChange={setAsset}
-            onLogService={() => setLogService(true)}
+            onLogService={() => {
+              return setLogService(true);
+            }}
           />
         )}
         {tab === "history" && <HistoryTab asset={asset} />}
@@ -248,7 +265,9 @@ export function AssetDetail({ asset: initial }: { asset: Asset }) {
 
       <AddAssetModal
         open={modal !== null}
-        onOpenChange={(open) => !open && setModal(null)}
+        onOpenChange={(open) => {
+          return !open && setModal(null);
+        }}
         mode={modal ?? "edit"}
         asset={asset}
         onSaved={handleSaved}
@@ -258,7 +277,9 @@ export function AssetDetail({ asset: initial }: { asset: Asset }) {
         open={confirmDelete}
         onOpenChange={(open) => {
           setConfirmDelete(open);
-          if (!open) setDeleteConfirmText("");
+          if (!open) {
+            setDeleteConfirmText("");
+          }
         }}
       >
         <AlertDialogContent className="max-w-md rounded-2xl bg-[#fff] p-6">
@@ -282,12 +303,10 @@ export function AssetDetail({ asset: initial }: { asset: Asset }) {
           </div>
 
           <p className="mt-4 text-sm leading-relaxed text-gray-500">
-            This will permanently delete the asset and all its records,
-            history, images, and maintenance data. This action cannot be
-            undone.{" "}
+            This will permanently delete the asset and all its records, history,
+            images, and maintenance data. This action cannot be undone.{" "}
             <span className="font-semibold text-gray-700">
-              Be careful - only grant this permission to trusted
-              administrators.
+              Be careful - only grant this permission to trusted administrators.
             </span>
           </p>
 
@@ -302,7 +321,9 @@ export function AssetDetail({ asset: initial }: { asset: Asset }) {
             <Input
               id="delete-confirm-input"
               value={deleteConfirmText}
-              onChange={(event) => setDeleteConfirmText(event.target.value)}
+              onChange={(event) => {
+                return setDeleteConfirmText(event.target.value);
+              }}
               placeholder='Type "Delete" to confirm'
               className="h-10 rounded-lg border-gray-300 bg-white text-sm shadow-none"
             />

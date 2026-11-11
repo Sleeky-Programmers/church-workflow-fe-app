@@ -16,19 +16,25 @@ const MAX_RECENTS = 6;
 
 export const useRecentStore = create<RecentStore>()(
   persist(
-    (set, get) => ({
-      recents: [],
+    (set, get) => {
+      return {
+        recents: [],
 
-      addRecent: (page) => {
-        const existing = get().recents.filter((r) => r.path !== page.path);
+        addRecent: (page) => {
+          const existing = get().recents.filter((r) => {
+            return r.path !== page.path;
+          });
 
-        set({
-          recents: [page, ...existing].slice(0, MAX_RECENTS),
-        });
-      },
+          set({
+            recents: [page, ...existing].slice(0, MAX_RECENTS),
+          });
+        },
 
-      clearRecents: () => set({ recents: [] }),
-    }),
+        clearRecents: () => {
+          return set({ recents: [] });
+        },
+      };
+    },
     {
       name: "recent-pages",
     },

@@ -1,4 +1,4 @@
-// components/features/dashboard/events/constants.ts
+// Components/features/dashboard/events/constants.ts
 
 import { format, parseISO } from "date-fns";
 
@@ -54,10 +54,18 @@ export function getEventRecurrenceOptions(date?: string) {
 function getWeekdayOrder(date: Date) {
   const dayOfMonth = Number(format(date, "d"));
   const order = Math.ceil(dayOfMonth / 7);
-  if (order === 1) return "first";
-  if (order === 2) return "second";
-  if (order === 3) return "third";
-  if (order === 4) return "fourth";
+  if (order === 1) {
+    return "first";
+  }
+  if (order === 2) {
+    return "second";
+  }
+  if (order === 3) {
+    return "third";
+  }
+  if (order === 4) {
+    return "fourth";
+  }
   return "fifth";
 }
 
@@ -67,7 +75,9 @@ export function formatRecurrenceLabel(
 ) {
   const options = getEventRecurrenceOptions(date);
   return (
-    options.find((option) => option.value === recurrence)?.label ?? recurrence
+    options.find((option) => {
+      return option.value === recurrence;
+    })?.label ?? recurrence
   );
 }
 
@@ -121,7 +131,8 @@ export const EVENT_REMINDER_LABEL_MAP: Record<EventReminderType, string> = {
 
 export function getEventTypeMeta(type: EventType) {
   return (
-    EVENT_TYPE_OPTIONS.find((option) => option.value === type) ??
-    EVENT_TYPE_OPTIONS[0]
+    EVENT_TYPE_OPTIONS.find((option) => {
+      return option.value === type;
+    }) ?? EVENT_TYPE_OPTIONS[0]
   );
 }

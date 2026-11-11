@@ -67,7 +67,7 @@ export function PlanLimitReachedModal({
   };
 
   // On the top plan (or when the next tier is sales-led) there's nothing to
-  // buy, so send them to the contact page instead.
+  // Buy, so send them to the contact page instead.
   const handleContact = () => {
     onOpenChange(false);
     router.push("/contact");
@@ -92,21 +92,25 @@ export function PlanLimitReachedModal({
 
           {features.length > 0 && (
             <div className="w-full space-y-2 rounded-lg bg-gray-50 p-3 text-left">
-              {features.map((feature) => (
-                <div key={feature} className="flex items-center gap-2">
-                  <Check className="h-4 w-4 shrink-0 text-green-500" />
-                  <Text variant="default" className="text-sm">
-                    {feature}
-                  </Text>
-                </div>
-              ))}
+              {features.map((feature) => {
+                return (
+                  <div key={feature} className="flex items-center gap-2">
+                    <Check className="h-4 w-4 shrink-0 text-green-500" />
+                    <Text variant="default" className="text-sm">
+                      {feature}
+                    </Text>
+                  </div>
+                );
+              })}
             </div>
           )}
 
           <div className="flex w-full gap-2 mt-2">
             <Button
               variant="outline"
-              onClick={() => onOpenChange(false)}
+              onClick={() => {
+                return onOpenChange(false);
+              }}
               className="flex-1"
             >
               Not Now

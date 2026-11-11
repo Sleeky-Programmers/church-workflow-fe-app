@@ -122,7 +122,9 @@ export default function SignupForm({
     }
   };
 
-  const onLogin = () => router.push(RouteConfig.auth.signIn);
+  const onLogin = () => {
+    return router.push(RouteConfig.auth.signIn);
+  };
 
   return (
     <div className="animate-fade-in">
@@ -138,108 +140,120 @@ export default function SignupForm({
             <FormField
               control={form.control}
               name="firstName"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>First Name</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Enter your first name" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
+              render={({ field }) => {
+                return (
+                  <FormItem>
+                    <FormLabel>First Name</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Enter your first name" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                );
+              }}
             />
             <FormField
               control={form.control}
               name="lastName"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Last Name</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Enter your last name" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
+              render={({ field }) => {
+                return (
+                  <FormItem>
+                    <FormLabel>Last Name</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Enter your last name" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                );
+              }}
             />
           </div>
 
           <FormField
             control={form.control}
             name="email"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Email</FormLabel>
-                <FormControl>
-                  <Input
-                    type="email"
-                    placeholder="example@gmail.com"
-                    {...field}
-                    disabled={!!preFilledEmail}
-                    readOnly={!!preFilledEmail}
-                    className={
-                      preFilledEmail ? "bg-gray-100 cursor-not-allowed" : ""
-                    }
-                  />
-                </FormControl>
-                {preFilledEmail && (
-                  <Text variant="muted" className="text-xs">
-                    Email address from your invitation
-                  </Text>
-                )}
-                <FormMessage />
-              </FormItem>
-            )}
+            render={({ field }) => {
+              return (
+                <FormItem>
+                  <FormLabel>Email</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="email"
+                      placeholder="example@gmail.com"
+                      {...field}
+                      disabled={!!preFilledEmail}
+                      readOnly={!!preFilledEmail}
+                      className={
+                        preFilledEmail ? "bg-gray-100 cursor-not-allowed" : ""
+                      }
+                    />
+                  </FormControl>
+                  {preFilledEmail && (
+                    <Text variant="muted" className="text-xs">
+                      Email address from your invitation
+                    </Text>
+                  )}
+                  <FormMessage />
+                </FormItem>
+              );
+            }}
           />
           <FormField
             control={form.control}
             name="password"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Password</FormLabel>
-                <FormControl>
-                  <div className="relative">
-                    <Input
-                      type={showPassword ? "text" : "password"}
-                      placeholder="Create a password"
-                      {...field}
-                    />
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2"
-                    >
-                      {showPassword ? <EyeOff /> : <Eye />}
-                    </Button>
-                  </div>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+            render={({ field }) => {
+              return (
+                <FormItem>
+                  <FormLabel>Password</FormLabel>
+                  <FormControl>
+                    <div className="relative">
+                      <Input
+                        type={showPassword ? "text" : "password"}
+                        placeholder="Create a password"
+                        {...field}
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => {
+                          return setShowPassword(!showPassword);
+                        }}
+                        className="absolute right-3 top-1/2 -translate-y-1/2"
+                      >
+                        {showPassword ? <EyeOff /> : <Eye />}
+                      </Button>
+                    </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              );
+            }}
           />
           <FormField
             control={form.control}
             name="agreeToTerms"
-            render={({ field }) => (
-              <FormItem className="flex flex-row items-start space-x-2 space-y-0">
-                <FormControl>
-                  <Checkbox
-                    checked={field.value}
-                    onCheckedChange={field.onChange}
-                  />
-                </FormControl>
-                <div className="space-y-1 leading-none">
-                  <FormLabel>
-                    I agree to the{" "}
-                    <Link href="/terms" external>
-                      Terms & Conditions
-                    </Link>
-                  </FormLabel>
-                  <FormMessage />
-                </div>
-              </FormItem>
-            )}
+            render={({ field }) => {
+              return (
+                <FormItem className="flex flex-row items-start space-x-2 space-y-0">
+                  <FormControl>
+                    <Checkbox
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </FormControl>
+                  <div className="space-y-1 leading-none">
+                    <FormLabel>
+                      I agree to the{" "}
+                      <Link href="/terms" external>
+                        Terms & Conditions
+                      </Link>
+                    </FormLabel>
+                    <FormMessage />
+                  </div>
+                </FormItem>
+              );
+            }}
           />
           <Button
             type="submit"

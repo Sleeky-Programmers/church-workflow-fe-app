@@ -29,10 +29,12 @@ import { MOCK_USERS } from "../user-data";
 import { SESSION_SCOPED_STORAGE_KEYS } from "../auth/storage-keys";
 
 function clearSessionScopedStorage() {
-  if (typeof window === "undefined") return;
-  SESSION_SCOPED_STORAGE_KEYS.forEach((key) =>
-    window.localStorage.removeItem(key),
-  );
+  if (typeof window === "undefined") {
+    return;
+  }
+  SESSION_SCOPED_STORAGE_KEYS.forEach((key) => {
+    return window.localStorage.removeItem(key);
+  });
 }
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -53,7 +55,7 @@ function isReadRequest(options: RequestInit) {
 }
 
 /**
- * fetch() with a timeout for reads only. Without it a stalled request hangs
+ * Fetch() with a timeout for reads only. Without it a stalled request hangs
  * the widget's spinner forever (or until the platform kills the function and
  * the browser reports an opaque "Failed to fetch"). Mutations are left alone:
  * aborting them client-side wouldn't stop the server, and long writes such as
@@ -64,7 +66,9 @@ async function fetchWithTimeout(url: string, init: RequestInit) {
     return fetch(url, init);
   }
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), READ_TIMEOUT_MS);
+  const timer = setTimeout(() => {
+    return controller.abort();
+  }, READ_TIMEOUT_MS);
   try {
     return await fetch(url, { ...init, signal: controller.signal });
   } catch (err) {
@@ -81,18 +85,21 @@ async function fetchWithTimeout(url: string, init: RequestInit) {
 }
 
 // Identical GETs fired at the same moment (e.g. two dashboard widgets both
-// asking for the giving trend) share one network request. Entries are dropped
-// as soon as the request settles, so this never serves stale data.
+// Asking for the giving trend) share one network request. Entries are dropped
+// As soon as the request settles, so this never serves stale data.
 const inFlightReads = new Map<string, Promise<unknown>>();
 
-function dedupeRead<T>(
-  key: string | null,
-  run: () => Promise<T>,
-): Promise<T> {
-  if (!key) return run();
+function dedupeRead<T>(key: string | null, run: () => Promise<T>): Promise<T> {
+  if (!key) {
+    return run();
+  }
   const existing = inFlightReads.get(key);
-  if (existing) return existing as Promise<T>;
-  const promise = run().finally(() => inFlightReads.delete(key));
+  if (existing) {
+    return existing as Promise<T>;
+  }
+  const promise = run().finally(() => {
+    return inFlightReads.delete(key);
+  });
   inFlightReads.set(key, promise);
   return promise;
 }
@@ -102,9 +109,15 @@ function readDedupeKey(
   endpoint: string,
   options: RequestInit & { responseType?: string },
 ): string | null {
-  if (typeof window === "undefined") return null;
-  if (!isReadRequest(options) || options.body || options.signal) return null;
-  if (options.responseType && options.responseType !== "json") return null;
+  if (typeof window === "undefined") {
+    return null;
+  }
+  if (!isReadRequest(options) || options.body || options.signal) {
+    return null;
+  }
+  if (options.responseType && options.responseType !== "json") {
+    return null;
+  }
   const token = localStorage.getItem("accessToken") || "";
   return `${kind}|${options.method || "GET"}|${endpoint}|${token}`;
 }
@@ -113,9 +126,9 @@ export async function authenticatedFetch<T>(
   endpoint: string,
   options: RequestInit & { responseType?: "json" | "blob" | "text" } = {},
 ): Promise<T> {
-  return dedupeRead(readDedupeKey("auth", endpoint, options), () =>
-    authenticatedFetchImpl<T>(endpoint, options),
-  );
+  return dedupeRead(readDedupeKey("auth", endpoint, options), () => {
+    return authenticatedFetchImpl<T>(endpoint, options);
+  });
 }
 
 async function authenticatedFetchImpl<T>(
@@ -129,13 +142,15 @@ async function authenticatedFetchImpl<T>(
 
   const isFormData = options.body instanceof FormData;
 
-  const getHeaders = (authToken: string) => ({
-    Authorization: `Bearer ${authToken}`,
-    ...(isFormData || options.responseType === "blob"
-      ? {}
-      : { "Content-Type": "application/json" }),
-    ...options.headers,
-  });
+  const getHeaders = (authToken: string) => {
+    return {
+      Authorization: `Bearer ${authToken}`,
+      ...(isFormData || options.responseType === "blob"
+        ? {}
+        : { "Content-Type": "application/json" }),
+      ...options.headers,
+    };
+  };
 
   const response = await fetchWithTimeout(`${BASE_URL}${endpoint}`, {
     ...options,
@@ -216,9 +231,9 @@ export async function apiFetch<T>(
   endpoint: string,
   options: RequestInit,
 ): Promise<T> {
-  return dedupeRead(readDedupeKey("api", endpoint, options), () =>
-    apiFetchImpl<T>(endpoint, options),
-  );
+  return dedupeRead(readDedupeKey("api", endpoint, options), () => {
+    return apiFetchImpl<T>(endpoint, options);
+  });
 }
 
 async function apiFetchImpl<T>(
@@ -341,7 +356,9 @@ export async function resetPassword(payload: ResetPasswordPayload) {
 
 export async function getCurrentUser() {
   const token = localStorage.getItem("accessToken");
-  if (!token) throw new Error("No auth token");
+  if (!token) {
+    throw new Error("No auth token");
+  }
 
   return apiFetch<any>("/admin", {
     method: "GET",
@@ -457,12 +474,14 @@ export async function fetchUsers(): Promise<User[]> {
 export async function fetchUserById(userId: string): Promise<User | null> {
   return new Promise((resolve) => {
     setTimeout(() => {
-      const user = MOCK_USERS.find((u) => u.id === userId);
+      const user = MOCK_USERS.find((u) => {
+        return u.id === userId;
+      });
       resolve(user || null);
     }, 300);
   });
 }
-export async function inviteUser(data: {
+export async function inviteUser(_data: {
   email: string;
   role: string;
 }): Promise<{ success: boolean; message: string }> {
@@ -486,7 +505,7 @@ export async function fetchPendingInvites(): Promise<PendingInvite[]> {
 export async function performUserAction(
   userId: string,
   action: UserAction,
-  additionalData?: Record<string, unknown>,
+  _additionalData?: Record<string, unknown>,
 ): Promise<{ success: boolean; message: string }> {
   return new Promise((resolve) => {
     setTimeout(() => {
@@ -510,7 +529,7 @@ export async function performUserAction(
 }
 
 export async function sendInvitation(
-  data: InviteFormData,
+  _data: InviteFormData,
 ): Promise<{ success: boolean; message: string }> {
   return new Promise((resolve) => {
     setTimeout(() => {
@@ -555,55 +574,6 @@ type PaginatedResponse<T> = {
   };
 };
 
-const SERVICE_DAY_MAP: Record<string, string> = {
-  SUNDAY: "Sunday",
-  MONDAY: "Monday",
-  TUESDAY: "Tuesday",
-  WEDNESDAY: "Wednesday",
-  THURSDAY: "Thursday",
-  FRIDAY: "Friday",
-  SATURDAY: "Saturday",
-};
-
-const DAY_NAME_ALIASES: Record<string, string> = {
-  SUNDAY: "Sunday",
-  SUN: "Sunday",
-  SUNDAYFULL: "Sunday",
-  MONDAY: "Monday",
-  MON: "Monday",
-  TUESDAY: "Tuesday",
-  TUE: "Tuesday",
-  TUES: "Tuesday",
-  WEDNESDAY: "Wednesday",
-  WED: "Wednesday",
-  THURSDAY: "Thursday",
-  THU: "Thursday",
-  THUR: "Thursday",
-  THURS: "Thursday",
-  FRIDAY: "Friday",
-  FRI: "Friday",
-  SATURDAY: "Saturday",
-  SAT: "Saturday",
-};
-
-function normalizeDayName(value?: string): string | undefined {
-  if (!value) return undefined;
-  const trimmed = value.trim();
-  if (!trimmed) return undefined;
-
-  const upper = trimmed.toUpperCase();
-  if (SERVICE_DAY_MAP[upper]) return SERVICE_DAY_MAP[upper];
-  if (DAY_NAME_ALIASES[upper]) return DAY_NAME_ALIASES[upper];
-
-  const capitalized =
-    trimmed.charAt(0).toUpperCase() + trimmed.slice(1).toLowerCase();
-  if (Object.values(SERVICE_DAY_MAP).includes(capitalized)) {
-    return capitalized;
-  }
-
-  return undefined;
-}
-
 export function getRefreshToken(): string | null {
   if (typeof window === "undefined") {
     return null;
@@ -612,10 +582,10 @@ export function getRefreshToken(): string | null {
 }
 
 // A single in-flight refresh shared by every caller. The refresh token is
-// rotated server-side on first use, so if parallel 401s each kicked off their
-// own refresh, the first would invalidate the token for all the others
+// Rotated server-side on first use, so if parallel 401s each kicked off their
+// Own refresh, the first would invalidate the token for all the others
 // ("Refresh failed" → spurious logout). De-duping them behind one promise is
-// what keeps a token expiry from randomly nuking the whole dashboard.
+// What keeps a token expiry from randomly nuking the whole dashboard.
 let inFlightRefresh: Promise<{
   accessToken: string;
   refreshToken: string;
@@ -656,15 +626,6 @@ export async function refreshAuthToken() {
 }
 
 function mapChurchServiceToRegular(service: ChurchServiceApi): RegularService {
-  const dayName = normalizeDayName(service.day);
-  const daysFromArray = Array.isArray((service as any).days)
-    ? (service as any).days
-        .map((day: string) => normalizeDayName(day))
-        .filter(Boolean)
-    : [];
-
-  const days =
-    dayName && daysFromArray.length === 0 ? [dayName] : daysFromArray;
   return {
     id: service._id,
     title: service.title,
@@ -711,11 +672,13 @@ export const mapToSpecialService = (
     recurrence: apiService.recurrence as any,
     eventType: apiService.eventType as any,
     daySchedules:
-      apiService.specialDays?.map((day) => ({
-        date: day.date,
-        startTime: day.startTime,
-        endTime: day.endTime ? day.endTime : "",
-      })) || [],
+      apiService.specialDays?.map((day) => {
+        return {
+          date: day.date,
+          startTime: day.startTime,
+          endTime: day.endTime ? day.endTime : "",
+        };
+      }) || [],
   };
 };
 
@@ -725,11 +688,12 @@ export async function fetchServices(_month: string): Promise<RegularService[]> {
   >("/church-services?page=1&limit=100", { method: "GET" });
 
   return (response.data || [])
-    .filter(
-      (service) =>
+    .filter((service) => {
+      return (
         typeof service.type === "string" &&
-        service.type.toUpperCase() === "REGULAR",
-    )
+        service.type.toUpperCase() === "REGULAR"
+      );
+    })
     .map(mapChurchServiceToRegular);
 }
 
@@ -749,11 +713,12 @@ export async function createSpecialServices(
   >("/church-services", { method: "POST" });
 
   return (response.data || [])
-    .filter(
-      (service) =>
+    .filter((service) => {
+      return (
         typeof service.type === "string" &&
-        service.type.toUpperCase() === "REGULAR",
-    )
+        service.type.toUpperCase() === "REGULAR"
+      );
+    })
     .map(mapChurchServiceToRegular);
 }
 
@@ -826,13 +791,15 @@ export async function fetchMembers(
   >(`/members?${query.toString()}`, { method: "GET" });
 
   const members =
-    response.data?.map((member) => ({
-      id: member._id,
-      name: member.fullName,
-      email: member.email || "",
-      initials: getInitials(member.fullName || ""),
-      gender: member.gender,
-    })) || [];
+    response.data?.map((member) => {
+      return {
+        id: member._id,
+        name: member.fullName,
+        email: member.email || "",
+        initials: getInitials(member.fullName || ""),
+        gender: member.gender,
+      };
+    }) || [];
 
   return {
     members,
@@ -883,8 +850,12 @@ export async function getAttendanceRecord(
   return {
     attendance: {
       attendees: raw.attendance
-        .map((record) => record.memberId)
-        .filter((id): id is string => Boolean(id)),
+        .map((record) => {
+          return record.memberId;
+        })
+        .filter((id): id is string => {
+          return Boolean(id);
+        }),
       recordedBy: raw.attendance[0]?.recordedBy || "",
     },
     stats: raw.stats || null,
@@ -1076,8 +1047,12 @@ export async function fetchSmallTeamReport(
   },
 ): Promise<SmallTeamReportResponse> {
   const query = new URLSearchParams();
-  if (params?.from) query.set("from", params.from);
-  if (params?.to) query.set("to", params.to);
+  if (params?.from) {
+    query.set("from", params.from);
+  }
+  if (params?.to) {
+    query.set("to", params.to);
+  }
   if (typeof params?.lowAttendanceThreshold === "number") {
     query.set("lowAttendanceThreshold", String(params.lowAttendanceThreshold));
   }
@@ -1118,8 +1093,12 @@ export async function fetchMemberAttendanceHistory(
   params?: { from?: string; to?: string },
 ): Promise<MemberAttendanceHistoryResponse> {
   const query = new URLSearchParams();
-  if (params?.from) query.set("from", params.from);
-  if (params?.to) query.set("to", params.to);
+  if (params?.from) {
+    query.set("from", params.from);
+  }
+  if (params?.to) {
+    query.set("to", params.to);
+  }
   const suffix = query.toString() ? `?${query.toString()}` : "";
 
   return authenticatedFetch<MemberAttendanceHistoryResponse>(

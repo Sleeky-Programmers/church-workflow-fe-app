@@ -30,7 +30,9 @@ export function PendingRequestsWidget() {
         setRequisitions([]);
         setPendingCount(0);
       })
-      .finally(() => setIsLoading(false));
+      .finally(() => {
+        return setIsLoading(false);
+      });
   }, []);
 
   return (
@@ -64,24 +66,26 @@ export function PendingRequestsWidget() {
           />
         ) : (
           <div className="space-y-3">
-            {requisitions.map((req) => (
-              <div
-                key={req.id}
-                className="flex items-center justify-between gap-3"
-              >
-                <div className="min-w-0">
-                  <Text className="text-sm font-semibold truncate">
-                    {req.title}
-                  </Text>
-                  <Span variant="muted" className="text-xs">
-                    {req.departmentName || "-"}
-                  </Span>
+            {requisitions.map((req) => {
+              return (
+                <div
+                  key={req.id}
+                  className="flex items-center justify-between gap-3"
+                >
+                  <div className="min-w-0">
+                    <Text className="text-sm font-semibold truncate">
+                      {req.title}
+                    </Text>
+                    <Span variant="muted" className="text-xs">
+                      {req.departmentName || "-"}
+                    </Span>
+                  </div>
+                  <span className="text-sm font-medium text-gray-900 shrink-0">
+                    {formatCurrency(req.amount, req.currency)}
+                  </span>
                 </div>
-                <span className="text-sm font-medium text-gray-900 shrink-0">
-                  {formatCurrency(req.amount, req.currency)}
-                </span>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>

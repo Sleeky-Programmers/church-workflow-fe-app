@@ -2,7 +2,6 @@ import {
   Activity,
   Calendar1,
   CalendarCheck2,
-  CalendarPlus,
   ChartPie,
   CheckCircle,
   DollarSign,
@@ -25,7 +24,6 @@ import {
   DepartmentRow,
   MemberAttendanceRecord,
   MemberProfile,
-  RegularService,
   Role,
 } from "@/types";
 
@@ -783,9 +781,9 @@ function generateMockAttendanceRecords(): MemberAttendanceRecord[] {
     });
   }
 
-  return records.sort(
-    (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
-  );
+  return records.sort((a, b) => {
+    return new Date(b.date).getTime() - new Date(a.date).getTime();
+  });
 }
 
 export const MOCK_MEMBERS_FULL: MemberProfile[] = Array.from(
@@ -863,12 +861,12 @@ export const MOCK_MEMBERS_FULL: MemberProfile[] = Array.from(
     const day = Math.floor(Math.random() * 28) + 1;
     const birthday = `${day}${getDaySuffix(day)} ${getMonthName(month)}, ${year}`;
     const attendanceRecords = generateMockAttendanceRecords();
-    const servicesAttended = attendanceRecords.filter(
-      (r) => r.status === "Present",
-    ).length;
-    const servicesMissed = attendanceRecords.filter(
-      (r) => r.status === "Absent",
-    ).length;
+    const servicesAttended = attendanceRecords.filter((r) => {
+      return r.status === "Present";
+    }).length;
+    const servicesMissed = attendanceRecords.filter((r) => {
+      return r.status === "Absent";
+    }).length;
     const attendanceRate = Math.round(
       (servicesAttended / (servicesAttended + servicesMissed)) * 100,
     );
@@ -908,14 +906,24 @@ export const MOCK_MEMBERS_FULL: MemberProfile[] = Array.from(
 );
 
 export const smallTeamMemberMap: Record<string, string[]> = {
-  "team-1": MOCK_MEMBERS_FULL.slice(0, 6).map((member) => member.id),
-  "team-2": MOCK_MEMBERS_FULL.slice(6, 16).map((member) => member.id),
-  "team-3": MOCK_MEMBERS_FULL.slice(16, 35).map((member) => member.id),
-  "team-4": MOCK_MEMBERS_FULL.slice(35, 50).map((member) => member.id),
+  "team-1": MOCK_MEMBERS_FULL.slice(0, 6).map((member) => {
+    return member.id;
+  }),
+  "team-2": MOCK_MEMBERS_FULL.slice(6, 16).map((member) => {
+    return member.id;
+  }),
+  "team-3": MOCK_MEMBERS_FULL.slice(16, 35).map((member) => {
+    return member.id;
+  }),
+  "team-4": MOCK_MEMBERS_FULL.slice(35, 50).map((member) => {
+    return member.id;
+  }),
 };
 
 function getDaySuffix(day: number): string {
-  if (day >= 11 && day <= 13) return "th";
+  if (day >= 11 && day <= 13) {
+    return "th";
+  }
   switch (day % 10) {
     case 1:
       return "st";

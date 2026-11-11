@@ -58,14 +58,21 @@ export default function EventsMobile({
 
       <div className="px-3 pt-4 space-y-4">
         <div className="flex gap-2">
-          <Button className="flex-1" onClick={() => onCreateEvent()}>
+          <Button
+            className="flex-1"
+            onClick={() => {
+              return onCreateEvent();
+            }}
+          >
             Create Event
           </Button>
 
           {churchServices.length > 0 && (
             <Button
               variant={showChurchServices ? "default" : "outline"}
-              onClick={() => setShowChurchServices(!showChurchServices)}
+              onClick={() => {
+                return setShowChurchServices(!showChurchServices);
+              }}
               className="flex-1"
             >
               {showChurchServices ? "Hide Services" : "Show Services"}
@@ -81,7 +88,12 @@ export default function EventsMobile({
                 Create your first event to get started
               </p>
 
-              <Button className="mt-4" onClick={() => onCreateEvent()}>
+              <Button
+                className="mt-4"
+                onClick={() => {
+                  return onCreateEvent();
+                }}
+              >
                 Create Event
               </Button>
             </CardContent>
@@ -100,7 +112,9 @@ export default function EventsMobile({
                 <Card
                   key={event.id}
                   className="rounded-2xl cursor-pointer hover:shadow-md transition-shadow"
-                  onClick={() => onSelectEvent(event)}
+                  onClick={() => {
+                    return onSelectEvent(event);
+                  }}
                 >
                   <CardContent className="p-4">
                     <div className="flex items-center justify-between mb-2">

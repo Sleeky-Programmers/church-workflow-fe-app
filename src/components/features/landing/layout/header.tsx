@@ -20,12 +20,18 @@ const navLinks = [
 export default function Header() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  const isAuthenticated = useAuthStore((s) => {
+    return s.isAuthenticated;
+  });
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 20);
+    const onScroll = () => {
+      return setScrolled(window.scrollY > 20);
+    };
     window.addEventListener("scroll", onScroll);
-    return () => window.removeEventListener("scroll", onScroll);
+    return () => {
+      return window.removeEventListener("scroll", onScroll);
+    };
   }, []);
 
   // Prevent body scroll when mobile menu is open
@@ -58,15 +64,17 @@ export default function Header() {
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-8">
-            {navLinks.map((item) => (
-              <Link
-                key={item.label}
-                href={item.href}
-                className="text-xs font-semibold tracking-widest text-gray-900 no-underline hover:text-blue-600 transition-colors"
-              >
-                {item.label}
-              </Link>
-            ))}
+            {navLinks.map((item) => {
+              return (
+                <Link
+                  key={item.label}
+                  href={item.href}
+                  className="text-xs font-semibold tracking-widest text-gray-900 no-underline hover:text-blue-600 transition-colors"
+                >
+                  {item.label}
+                </Link>
+              );
+            })}
           </nav>
 
           {/* Desktop Auth Buttons */}
@@ -96,7 +104,9 @@ export default function Header() {
           {/* Mobile Menu Button - Only shows when NOT logged in */}
           <button
             className="md:hidden p-2 z-50 relative"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            onClick={() => {
+              return setMobileMenuOpen(!mobileMenuOpen);
+            }}
             aria-label="Toggle menu"
           >
             <svg
@@ -121,7 +131,9 @@ export default function Header() {
             {/* Backdrop overlay */}
             <div
               className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 md:hidden"
-              onClick={() => setMobileMenuOpen(false)}
+              onClick={() => {
+                return setMobileMenuOpen(false);
+              }}
             />
 
             {/* Mobile Menu Panel - Centered Buttons */}
@@ -130,7 +142,9 @@ export default function Header() {
                 {/* Close button at top right */}
                 <button
                   className="absolute top-4 right-4 p-2 rounded-full hover:bg-gray-100 transition-colors"
-                  onClick={() => setMobileMenuOpen(false)}
+                  onClick={() => {
+                    return setMobileMenuOpen(false);
+                  }}
                   aria-label="Close menu"
                 >
                   <svg
@@ -173,7 +187,9 @@ export default function Header() {
                   {isAuthenticated ? (
                     <Link
                       href="/dashboard"
-                      onClick={() => setMobileMenuOpen(false)}
+                      onClick={() => {
+                        return setMobileMenuOpen(false);
+                      }}
                     >
                       <Button
                         variant="default"
@@ -186,7 +202,9 @@ export default function Header() {
                     <>
                       <Link
                         href="/auth/login"
-                        onClick={() => setMobileMenuOpen(false)}
+                        onClick={() => {
+                          return setMobileMenuOpen(false);
+                        }}
                       >
                         <Button
                           variant="outline"
@@ -197,7 +215,9 @@ export default function Header() {
                       </Link>
                       <Link
                         href="/auth/signup"
-                        onClick={() => setMobileMenuOpen(false)}
+                        onClick={() => {
+                          return setMobileMenuOpen(false);
+                        }}
                       >
                         <Button
                           variant="default"

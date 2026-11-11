@@ -15,13 +15,15 @@ import { fetchGivingMonthlyTrend } from "@/services/givingService";
 type MonthlyPoint = { month: string; income: number; expenses: number };
 
 function getDateRange(data: MonthlyPoint[]) {
-  if (!data.length) return "";
+  if (!data.length) {
+    return "";
+  }
   return `${data[0].month} - ${data[data.length - 1].month}`;
 }
 
 // Last 6 calendar months of the current year, ending at the current month -
-// the backend trend endpoints only return the current year, so a January
-// view just shows fewer months rather than wrapping into last year.
+// The backend trend endpoints only return the current year, so a January
+// View just shows fewer months rather than wrapping into last year.
 function lastSixMonths<T extends { month: string }>(points: T[]) {
   const currentMonthIndex = new Date().getMonth();
   const start = Math.max(0, currentMonthIndex - 5);
@@ -38,15 +40,15 @@ export function IncomeVsExpenses() {
       try {
         // Settled independently - a role with GIVING but not
         // GIVING_AND_EXPENSES access (or vice versa) should still see
-        // whichever series it's allowed to, not a blank chart.
+        // Whichever series it's allowed to, not a blank chart.
         const [givingResult, expenseResult] = await Promise.allSettled([
           fetchGivingMonthlyTrend(),
           fetchExpenseMonthlyTrend(),
         ]);
 
         // The giving trend can contain one point per currency per month -
-        // sum them together for this at-a-glance chart, which doesn't
-        // distinguish currencies.
+        // Sum them together for this at-a-glance chart, which doesn't
+        // Distinguish currencies.
         const givingByMonth: Record<string, number> = {};
         const givingMonthOrder: string[] = [];
         if (givingResult.status === "fulfilled") {
@@ -59,25 +61,33 @@ export function IncomeVsExpenses() {
           }
         }
         const giving = lastSixMonths(
-          givingMonthOrder.map((month) => ({
-            month,
-            totalAmount: givingByMonth[month],
-          })),
+          givingMonthOrder.map((month) => {
+            return {
+              month,
+              totalAmount: givingByMonth[month],
+            };
+          }),
         );
         const expenses = lastSixMonths(
           expenseResult.status === "fulfilled" ? expenseResult.value : [],
         );
         const months =
           giving.length >= expenses.length
-            ? giving.map((p) => p.month)
-            : expenses.map((p) => p.month);
+            ? giving.map((p) => {
+                return p.month;
+              })
+            : expenses.map((p) => {
+                return p.month;
+              });
 
         setData(
-          months.map((month, index) => ({
-            month,
-            income: giving[index]?.totalAmount || 0,
-            expenses: expenses[index]?.totalAmount || 0,
-          })),
+          months.map((month, index) => {
+            return {
+              month,
+              income: giving[index]?.totalAmount || 0,
+              expenses: expenses[index]?.totalAmount || 0,
+            };
+          }),
         );
       } catch {
         setData([]);

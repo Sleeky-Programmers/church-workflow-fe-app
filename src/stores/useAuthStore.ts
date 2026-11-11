@@ -18,30 +18,32 @@ type AuthStore = {
 
 export const useAuthStore = create<AuthStore>()(
   persist(
-    (set) => ({
-      user: null,
-      isAuthenticated: false,
-      setUser: (user) => {
-        if (user) {
-          identifyMixpanelUser(user.id, {
-            name: user.name,
-            email: user.email,
-            role: user.role,
+    (set) => {
+      return {
+        user: null,
+        isAuthenticated: false,
+        setUser: (user) => {
+          if (user) {
+            identifyMixpanelUser(user.id, {
+              name: user.name,
+              email: user.email,
+              role: user.role,
+            });
+          }
+          set({
+            user,
+            isAuthenticated: !!user,
           });
-        }
-        set({
-          user,
-          isAuthenticated: !!user,
-        });
-      },
-      logout: () => {
-        resetMixpanel();
-        set({
-          user: null,
-          isAuthenticated: false,
-        });
-      },
-    }),
+        },
+        logout: () => {
+          resetMixpanel();
+          set({
+            user: null,
+            isAuthenticated: false,
+          });
+        },
+      };
+    },
     {
       name: "auth-storage",
     },

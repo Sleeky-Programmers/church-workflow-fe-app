@@ -49,16 +49,22 @@ export default function GoogleSignupButton({
     );
 
     if (existing) {
-      const onLoad = () => setIsScriptReady(true);
+      const onLoad = () => {
+        return setIsScriptReady(true);
+      };
       existing.addEventListener("load", onLoad);
-      return () => existing.removeEventListener("load", onLoad);
+      return () => {
+        return existing.removeEventListener("load", onLoad);
+      };
     }
 
     const script = document.createElement("script");
     script.src = "https://accounts.google.com/gsi/client";
     script.async = true;
     script.defer = true;
-    script.onload = () => setIsScriptReady(true);
+    script.onload = () => {
+      return setIsScriptReady(true);
+    };
     document.head.appendChild(script);
   }, []);
 

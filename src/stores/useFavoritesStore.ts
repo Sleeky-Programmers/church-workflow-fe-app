@@ -15,23 +15,35 @@ type FavoritesStore = {
 
 export const useFavoritesStore = create<FavoritesStore>()(
   persist(
-    (set, get) => ({
-      favorites: [],
+    (set, get) => {
+      return {
+        favorites: [],
 
-      toggleFavorite: (page) => {
-        const exists = get().favorites.some((fav) => fav.path === page.path);
+        toggleFavorite: (page) => {
+          const exists = get().favorites.some((fav) => {
+            return fav.path === page.path;
+          });
 
-        set({
-          favorites: exists
-            ? get().favorites.filter((fav) => fav.path !== page.path)
-            : [...get().favorites, page],
-        });
-      },
+          set({
+            favorites: exists
+              ? get().favorites.filter((fav) => {
+                  return fav.path !== page.path;
+                })
+              : [...get().favorites, page],
+          });
+        },
 
-      isFavorite: (path) => get().favorites.some((fav) => fav.path === path),
+        isFavorite: (path) => {
+          return get().favorites.some((fav) => {
+            return fav.path === path;
+          });
+        },
 
-      clearFavorites: () => set({ favorites: [] }),
-    }),
+        clearFavorites: () => {
+          return set({ favorites: [] });
+        },
+      };
+    },
     {
       name: "favorites-pages",
     },

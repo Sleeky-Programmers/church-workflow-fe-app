@@ -1,6 +1,6 @@
 // DRAFT CONTENT - generic placeholder structure only. Not reviewed by counsel.
 // Shared by the /terms and /privacy pages and the billing checkout modal so
-// the text only lives in one place.
+// The text only lives in one place.
 export type LegalSection = { heading: string; body: string[] };
 
 export const termsSections: LegalSection[] = [

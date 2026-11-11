@@ -64,12 +64,24 @@ export async function createExpense(payload: CreateExpensePayload) {
 export async function fetchExpenses(params: ExpenseQueryParams) {
   const query = new URLSearchParams();
 
-  if (params.page) query.append("page", String(params.page));
-  if (params.limit) query.append("limit", String(params.limit));
-  if (params.startDate) query.append("startDate", params.startDate);
-  if (params.endDate) query.append("endDate", params.endDate);
-  if (params.category) query.append("category", params.category);
-  if (params.departmentId) query.append("departmentId", params.departmentId);
+  if (params.page) {
+    query.append("page", String(params.page));
+  }
+  if (params.limit) {
+    query.append("limit", String(params.limit));
+  }
+  if (params.startDate) {
+    query.append("startDate", params.startDate);
+  }
+  if (params.endDate) {
+    query.append("endDate", params.endDate);
+  }
+  if (params.category) {
+    query.append("category", params.category);
+  }
+  if (params.departmentId) {
+    query.append("departmentId", params.departmentId);
+  }
 
   return authenticatedFetch<{
     data: ExpenseResponse[];
@@ -82,8 +94,12 @@ export async function fetchExpenseSummary(params?: {
   endDate?: string;
 }) {
   const query = new URLSearchParams();
-  if (params?.startDate) query.append("startDate", params.startDate);
-  if (params?.endDate) query.append("endDate", params.endDate);
+  if (params?.startDate) {
+    query.append("startDate", params.startDate);
+  }
+  if (params?.endDate) {
+    query.append("endDate", params.endDate);
+  }
 
   return authenticatedFetch<ExpenseSummaryResponse>(
     `/expenses/summary?${query.toString()}`,

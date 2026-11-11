@@ -45,15 +45,6 @@ const RECURRENCE_MAP: Record<string, string> = {
   yearly: "ANNUALLY",
 };
 
-// Map event types
-const EVENT_TYPE_MAP: Record<string, string> = {
-  WORSHIP_SERVICE: "WORSHIP_SERVICE",
-  BIRTHDAY: "BIRTHDAY",
-  MEETING: "MEETING",
-  WEDDING_ANNIVERSARY: "WEDDING_ANNIVERSARY",
-  OTHERS: "OTHERS",
-};
-
 function listDates(startDate: string, endDate?: string): string[] {
   if (!startDate) {
     return [];
@@ -61,7 +52,9 @@ function listDates(startDate: string, endDate?: string): string[] {
   const start = new Date(startDate);
   const end = new Date(endDate || startDate);
 
-  if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) return [];
+  if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
+    return [];
+  }
 
   const normalizedEnd = end < start ? start : end;
   const dates: string[] = [];
@@ -96,10 +89,9 @@ export function CreateSpecialServiceModal({
     [],
   );
 
-  const dateRange = useMemo(
-    () => listDates(startDate, endDate || startDate),
-    [startDate, endDate],
-  );
+  const dateRange = useMemo(() => {
+    return listDates(startDate, endDate || startDate);
+  }, [startDate, endDate]);
 
   useEffect(() => {
     if (!dateRange.length) {
@@ -107,10 +99,14 @@ export function CreateSpecialServiceModal({
       return;
     }
 
-    setDaySchedules((prev) =>
-      dateRange.map((date, index) => {
-        const existing = prev.find((schedule) => schedule.date === date);
-        if (existing) return existing;
+    setDaySchedules((prev) => {
+      return dateRange.map((date, index) => {
+        const existing = prev.find((schedule) => {
+          return schedule.date === date;
+        });
+        if (existing) {
+          return existing;
+        }
 
         const first = prev[0];
         return {
@@ -124,8 +120,8 @@ export function CreateSpecialServiceModal({
               ? first?.endTime || DEFAULT_END_TIME
               : DEFAULT_END_TIME,
         };
-      }),
-    );
+      });
+    });
   }, [dateRange, applySameTime]);
 
   const updateScheduleTime = (
@@ -133,24 +129,28 @@ export function CreateSpecialServiceModal({
     field: "startTime" | "endTime",
     value: string,
   ) => {
-    setDaySchedules((prev) =>
-      prev.map((schedule) => {
-        if (schedule.date !== date) return schedule;
+    setDaySchedules((prev) => {
+      return prev.map((schedule) => {
+        if (schedule.date !== date) {
+          return schedule;
+        }
         return { ...schedule, [field]: value };
-      }),
-    );
+      });
+    });
 
     if (applySameTime && dateRange[0] === date) {
-      setDaySchedules((prev) =>
-        prev.map((schedule, index) =>
-          index === 0 ? schedule : { ...schedule, [field]: value },
-        ),
-      );
+      setDaySchedules((prev) => {
+        return prev.map((schedule, index) => {
+          return index === 0 ? schedule : { ...schedule, [field]: value };
+        });
+      });
     }
   };
 
   const convertTo12HourFormat = (time24: string) => {
-    if (!time24) return "";
+    if (!time24) {
+      return "";
+    }
     const [hours, minutes] = time24.split(":");
     const hour = parseInt(hours);
     const ampm = hour >= 12 ? "PM" : "AM";
@@ -159,7 +159,9 @@ export function CreateSpecialServiceModal({
   };
 
   const handleClose = () => {
-    if (isLoading) return;
+    if (isLoading) {
+      return;
+    }
     onOpenChange(false);
     setTitle("");
     setStartDate("");
@@ -213,19 +215,20 @@ export function CreateSpecialServiceModal({
           | "WEEKLY_MONDAY"
           | "MONTHLY_FIRST_MONDAY"
           | "ANNUALLY",
-        daySchedules: daySchedules.map((schedule) => ({
-          date: schedule.date,
-          startTime: convertTo12HourFormat(schedule.startTime),
-          endTime: schedule.endTime
-            ? convertTo12HourFormat(schedule.endTime)
-            : "",
-        })),
+        daySchedules: daySchedules.map((schedule) => {
+          return {
+            date: schedule.date,
+            startTime: convertTo12HourFormat(schedule.startTime),
+            endTime: schedule.endTime
+              ? convertTo12HourFormat(schedule.endTime)
+              : "",
+          };
+        }),
         eventType: eventType as any, // Add event type
       });
 
       handleClose();
-    } catch (error) {
-      console.error(error);
+    } catch {
     } finally {
       setIsLoading(false);
     }
@@ -260,7 +263,9 @@ export function CreateSpecialServiceModal({
             <Input
               placeholder="e.g. Anointing Service"
               value={title}
-              onChange={(e) => setTitle(e.target.value)}
+              onChange={(e) => {
+                return setTitle(e.target.value);
+              }}
               disabled={isLoading}
             />
           </div>
@@ -273,7 +278,9 @@ export function CreateSpecialServiceModal({
               <Input
                 type="date"
                 value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
+                onChange={(e) => {
+                  return setStartDate(e.target.value);
+                }}
                 disabled={isLoading}
               />
             </div>
@@ -283,7 +290,9 @@ export function CreateSpecialServiceModal({
                 type="date"
                 value={endDate}
                 min={startDate || undefined}
-                onChange={(e) => setEndDate(e.target.value)}
+                onChange={(e) => {
+                  return setEndDate(e.target.value);
+                }}
                 disabled={isLoading}
               />
             </div>
@@ -316,9 +325,11 @@ export function CreateSpecialServiceModal({
             <Label>Repeat</Label>
             <Select
               value={recurrence}
-              onValueChange={(value) =>
-                setRecurrence(value as "none" | "weekly" | "monthly" | "yearly")
-              }
+              onValueChange={(value) => {
+                return setRecurrence(
+                  value as "none" | "weekly" | "monthly" | "yearly",
+                );
+              }}
               disabled={isLoading}
             >
               <SelectTrigger>
@@ -336,64 +347,68 @@ export function CreateSpecialServiceModal({
           <div className="flex items-center gap-2">
             <Checkbox
               checked={applySameTime}
-              onCheckedChange={(checked) => setApplySameTime(Boolean(checked))}
+              onCheckedChange={(checked) => {
+                return setApplySameTime(Boolean(checked));
+              }}
               disabled={isLoading}
             />
             <Text>Apply the same time for others</Text>
           </div>
 
           <div className="space-y-3">
-            {daySchedules.map((schedule) => (
-              <div
-                key={schedule.date}
-                className="space-y-2 border rounded-lg p-3"
-              >
-                <div className="flex items-center gap-2 text-sm">
-                  <CalendarDays className="h-4 w-4" />
-                  {format(new Date(schedule.date), "do MMMM, yyyy")}
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  <div className="space-y-1">
-                    <Label>
-                      Start Time <Span variant="error">*</Span>
-                    </Label>
-                    <div className="relative">
-                      <Input
-                        type="time"
-                        value={schedule.startTime}
-                        onChange={(e) =>
-                          updateScheduleTime(
-                            schedule.date,
-                            "startTime",
-                            e.target.value,
-                          )
-                        }
-                        disabled={isLoading}
-                      />
-                      <Clock3 className="h-4 w-4 absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+            {daySchedules.map((schedule) => {
+              return (
+                <div
+                  key={schedule.date}
+                  className="space-y-2 border rounded-lg p-3"
+                >
+                  <div className="flex items-center gap-2 text-sm">
+                    <CalendarDays className="h-4 w-4" />
+                    {format(new Date(schedule.date), "do MMMM, yyyy")}
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div className="space-y-1">
+                      <Label>
+                        Start Time <Span variant="error">*</Span>
+                      </Label>
+                      <div className="relative">
+                        <Input
+                          type="time"
+                          value={schedule.startTime}
+                          onChange={(e) => {
+                            return updateScheduleTime(
+                              schedule.date,
+                              "startTime",
+                              e.target.value,
+                            );
+                          }}
+                          disabled={isLoading}
+                        />
+                        <Clock3 className="h-4 w-4 absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                      </div>
+                    </div>
+                    <div className="space-y-1">
+                      <Label>End Time</Label>
+                      <div className="relative">
+                        <Input
+                          type="time"
+                          value={schedule.endTime}
+                          onChange={(e) => {
+                            return updateScheduleTime(
+                              schedule.date,
+                              "endTime",
+                              e.target.value,
+                            );
+                          }}
+                          disabled={isLoading}
+                        />
+                        <Clock3 className="h-4 w-4 absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                      </div>
                     </div>
                   </div>
-                  <div className="space-y-1">
-                    <Label>End Time</Label>
-                    <div className="relative">
-                      <Input
-                        type="time"
-                        value={schedule.endTime}
-                        onChange={(e) =>
-                          updateScheduleTime(
-                            schedule.date,
-                            "endTime",
-                            e.target.value,
-                          )
-                        }
-                        disabled={isLoading}
-                      />
-                      <Clock3 className="h-4 w-4 absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                    </div>
-                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
 
           <div className="space-y-2">
@@ -410,7 +425,9 @@ export function CreateSpecialServiceModal({
             <Label>Description</Label>
             <textarea
               value={description}
-              onChange={(e) => setDescription(e.target.value)}
+              onChange={(e) => {
+                return setDescription(e.target.value);
+              }}
               placeholder="Add description"
               className="w-full min-h-24 rounded-md border border-input bg-background px-3 py-2 text-sm"
               disabled={isLoading}

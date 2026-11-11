@@ -72,14 +72,13 @@ export default function Table<T extends Record<string, any>>({
   onRowClick,
   className = "",
   minWidth,
-  selectedRowKeys,
+  selectedRowKeys: _selectedRowKeys,
 }: CustomTableProps<T>) {
   const [sort, setSort] = useState<SortState>({
     key: "timestamp",
     direction: "desc",
   });
 
-  const [internalSelected] = useState<string[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(defaultPageSize);
 
@@ -91,7 +90,9 @@ export default function Table<T extends Record<string, any>>({
     if (!rowKey) {
       return String(idx);
     }
-    if (typeof rowKey === "function") return rowKey(row);
+    if (typeof rowKey === "function") {
+      return rowKey(row);
+    }
     return String(row[rowKey]);
   };
 
@@ -113,7 +114,9 @@ export default function Table<T extends Record<string, any>>({
       return data.slice();
     }
 
-    const col = columns.find((c) => c.key === sort.key);
+    const col = columns.find((c) => {
+      return c.key === sort.key;
+    });
     if (!col || typeof col.accessor !== "string") {
       return data.slice();
     }
@@ -173,10 +176,6 @@ export default function Table<T extends Record<string, any>>({
     });
   };
 
-  const selectedKeys = Array.isArray(selectedRowKeys)
-    ? selectedRowKeys
-    : internalSelected;
-
   const visibleColumnCount = columns.length;
 
   const alignClass = (align?: Align) => {
@@ -196,17 +195,21 @@ export default function Table<T extends Record<string, any>>({
           <TableComponent className={`w-full table-fixed ${minWidth ?? ""}`}>
             <TableHeader>
               <TableRow>
-                {columns.map((col) => (
-                  <TableHead
-                    key={col.key}
-                    className={`px-4 font-semibold cursor-pointer select-none whitespace-nowrap ${alignClass(
-                      col.align,
-                    )}`}
-                    onClick={() => toggleSort(col)}
-                  >
-                    {col.header}
-                  </TableHead>
-                ))}
+                {columns.map((col) => {
+                  return (
+                    <TableHead
+                      key={col.key}
+                      className={`px-4 font-semibold cursor-pointer select-none whitespace-nowrap ${alignClass(
+                        col.align,
+                      )}`}
+                      onClick={() => {
+                        return toggleSort(col);
+                      }}
+                    >
+                      {col.header}
+                    </TableHead>
+                  );
+                })}
               </TableRow>
             </TableHeader>
 
@@ -246,22 +249,24 @@ export default function Table<T extends Record<string, any>>({
                         onRowClick?.(row);
                       }}
                     >
-                      {columns.map((col) => (
-                        <TableCell
-                          key={col.key}
-                          className={`px-4 align-top ${alignClass(
-                            col.align,
-                          )} overflow-hidden`}
-                        >
-                          <div
-                            className={`w-full ${
-                              col.contentClassName ?? "truncate"
-                            }`}
+                      {columns.map((col) => {
+                        return (
+                          <TableCell
+                            key={col.key}
+                            className={`px-4 align-top ${alignClass(
+                              col.align,
+                            )} overflow-hidden`}
                           >
-                            {getCellValue(col, row)}
-                          </div>
-                        </TableCell>
-                      ))}
+                            <div
+                              className={`w-full ${
+                                col.contentClassName ?? "truncate"
+                              }`}
+                            >
+                              {getCellValue(col, row)}
+                            </div>
+                          </TableCell>
+                        );
+                      })}
                     </TableRow>
                   );
                 })
@@ -277,17 +282,21 @@ export default function Table<T extends Record<string, any>>({
 
               <Select
                 value={String(pageSize)}
-                onValueChange={(v) => setPageSize(Number(v))}
+                onValueChange={(v) => {
+                  return setPageSize(Number(v));
+                }}
               >
                 <SelectTrigger className="w-[110px]">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {pageSizeOptions.map((size) => (
-                    <SelectItem key={size} value={String(size)}>
-                      {size} / page
-                    </SelectItem>
-                  ))}
+                  {pageSizeOptions.map((size) => {
+                    return (
+                      <SelectItem key={size} value={String(size)}>
+                        {size} / page
+                      </SelectItem>
+                    );
+                  })}
                 </SelectContent>
               </Select>
 
@@ -295,7 +304,11 @@ export default function Table<T extends Record<string, any>>({
                 <Button
                   variant="outline"
                   disabled={currentPage === 1}
-                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                  onClick={() => {
+                    return setCurrentPage((p) => {
+                      return Math.max(1, p - 1);
+                    });
+                  }}
                 >
                   Prev
                 </Button>
@@ -303,9 +316,11 @@ export default function Table<T extends Record<string, any>>({
                 <Button
                   variant="outline"
                   disabled={currentPage === totalPages}
-                  onClick={() =>
-                    setCurrentPage((p) => Math.min(totalPages, p + 1))
-                  }
+                  onClick={() => {
+                    return setCurrentPage((p) => {
+                      return Math.min(totalPages, p + 1);
+                    });
+                  }}
                 >
                   Next
                 </Button>

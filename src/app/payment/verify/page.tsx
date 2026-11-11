@@ -36,8 +36,8 @@ interface PaymentVerificationData {
 }
 
 // Landing point for the Paystack/Flutterwave post-payment redirect. If the
-// visitor still has a session, hand off to the full dashboard verify page;
-// otherwise verify and show the result here, with no dashboard assumed.
+// Visitor still has a session, hand off to the full dashboard verify page;
+// Otherwise verify and show the result here, with no dashboard assumed.
 export default function PublicPaymentVerifyPage() {
   return (
     <Suspense
@@ -73,7 +73,7 @@ function PublicPaymentVerifyContent() {
   const [paymentData, setPaymentData] =
     useState<PaymentVerificationData | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [isVerifying, setIsVerifying] = useState(false);
+  const [, setIsVerifying] = useState(false);
 
   const actualReference = txRef || reference;
 
@@ -175,8 +175,12 @@ function PublicPaymentVerifyContent() {
     }
   };
 
-  const handleSignIn = () => router.push(RouteConfig.auth.signIn);
-  const handleGoHome = () => router.push(RouteConfig.home);
+  const handleSignIn = () => {
+    return router.push(RouteConfig.auth.signIn);
+  };
+  const handleGoHome = () => {
+    return router.push(RouteConfig.home);
+  };
 
   const handleRetry = () => {
     setPaymentStatus("idle");

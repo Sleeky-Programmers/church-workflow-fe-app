@@ -1,5 +1,5 @@
 "use client";
-import { Plus, Users } from "lucide-react";
+import { Users } from "lucide-react";
 import { MemberProfile } from "@/types";
 import { EmptyState } from "@/components/features/dashboard/empty-state";
 import {
@@ -15,7 +15,6 @@ import { Text, Span } from "@/components/ui/typography/Text";
 import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { formatDate } from "@/utils/helpers";
-import { useRouter } from "next/navigation";
 type MembersTableProps = {
   members: MemberProfile[];
   onRowClick: (memberId: string) => void;
@@ -47,14 +46,13 @@ export function MembersTable({
   onSelectMember,
   onSelectAll,
   setIsDeleteModalOpen,
-  setIsFormatModalOpen,
-  isCsvUploading,
+  setIsFormatModalOpen: _setIsFormatModalOpen,
+  isCsvUploading: _isCsvUploading,
   searchActive,
 }: MembersTableProps) {
   const isMobile = useIsMobile();
   const currentPage = pagination?.page || 1;
   const totalPages = pagination?.totalPages || 1;
-  const router = useRouter();
   const allSelected =
     members.length > 0 && selectedMemberIds.length === members.length;
   const someSelected = selectedMemberIds.length > 0 && !allSelected;
@@ -67,7 +65,9 @@ export function MembersTable({
             <div className="flex items-center gap-3">
               <Checkbox
                 checked={someSelected ? "indeterminate" : allSelected}
-                onCheckedChange={(checked) => onSelectAll?.(checked === true)}
+                onCheckedChange={(checked) => {
+                  return onSelectAll?.(checked === true);
+                }}
               />
               <Text text="All Members" variant="default" />
             </div>
@@ -76,7 +76,9 @@ export function MembersTable({
                 variant="destructive"
                 size="sm"
                 className="h-8 px-4"
-                onClick={() => setIsDeleteModalOpen(true)}
+                onClick={() => {
+                  return setIsDeleteModalOpen(true);
+                }}
               >
                 <Text text="Remove" variant="default" />
               </Button>
@@ -85,35 +87,40 @@ export function MembersTable({
                 <Text text="Add" variant="default" />
               </Button>
             )}
-          </div>            {members.map((member) => (
+          </div>{" "}
+          {members.map((member) => {
+            return (
               <div
                 key={member.id}
                 className="flex items-center justify-between px-3 py-3 hover:bg-primary-50/50 transition-colors cursor-pointer"
               >
-              <div className="flex items-center gap-3 min-w-0">
-                <Checkbox
-                  checked={selectedMemberIds.includes(member.id)}
-                  onCheckedChange={(checked) =>
-                    onSelectMember?.(member.id, !!checked)
-                  }
-                />
-                <Text
-                  text={member.fullName}
-                  variant="default"
-                  className="truncate"
-                />
-              </div>
+                <div className="flex items-center gap-3 min-w-0">
+                  <Checkbox
+                    checked={selectedMemberIds.includes(member.id)}
+                    onCheckedChange={(checked) => {
+                      return onSelectMember?.(member.id, !!checked);
+                    }}
+                  />
+                  <Text
+                    text={member.fullName}
+                    variant="default"
+                    className="truncate"
+                  />
+                </div>
 
-              <Button
-                size="sm"
-                variant="outline"
-                className="h-8"
-                onClick={() => onRowClick(member.id)}
-              >
-                <Text text="View Profile" variant="default" />
-              </Button>
-            </div>
-          ))}
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="h-8"
+                  onClick={() => {
+                    return onRowClick(member.id);
+                  }}
+                >
+                  <Text text="View Profile" variant="default" />
+                </Button>
+              </div>
+            );
+          })}
         </div>
 
         {members.length === 0 && (
@@ -145,14 +152,18 @@ export function MembersTable({
               <Button
                 variant="outline"
                 disabled={!pagination.hasPreviousPage}
-                onClick={() => onPageChange(currentPage - 1)}
+                onClick={() => {
+                  return onPageChange(currentPage - 1);
+                }}
               >
                 <Text text="Previous" variant="default" />
               </Button>
               <Button
                 variant="outline"
                 disabled={!pagination.hasNextPage}
-                onClick={() => onPageChange(currentPage + 1)}
+                onClick={() => {
+                  return onPageChange(currentPage + 1);
+                }}
               >
                 <Text text="Next" variant="default" />
               </Button>
@@ -172,7 +183,9 @@ export function MembersTable({
               <TableHead>
                 <Checkbox
                   checked={someSelected ? "indeterminate" : allSelected}
-                  onCheckedChange={(checked) => onSelectAll?.(checked === true)}
+                  onCheckedChange={(checked) => {
+                    return onSelectAll?.(checked === true);
+                  }}
                 />
               </TableHead>
               <TableHead>
@@ -197,50 +210,61 @@ export function MembersTable({
           </TableHeader>
 
           <TableBody>
-            {members.map((member) => (
-              <TableRow
-                key={member.id}
-                className="cursor-pointer transition-colors hover:bg-primary-50/50"
-              >
-                <TableCell onClick={(e) => e.stopPropagation()}>
-                  <Checkbox
-                    checked={selectedMemberIds.includes(member.id)}
-                    onCheckedChange={(checked) =>
-                      onSelectMember?.(member.id, !!checked)
-                    }
-                  />
-                </TableCell>
-                <TableCell>
-                  <Text text={member.fullName} variant="default" />
-                </TableCell>
-                <TableCell>
-                  <Text text={formatDate(member.birthday)} variant="default" />
-                </TableCell>
-                <TableCell>
-                  <Text text={member.gender} variant="default" />
-                </TableCell>
-                <TableCell>
-                  <Text text={member.phone} variant="default" />
-                </TableCell>
-                <TableCell>
-                  <Text
-                    text={member.email}
-                    variant="default"
-                    className="truncate underline decoration-gray-300 underline-offset-2"
-                  />
-                </TableCell>
-                <TableCell>
-                  <Button
-                    onClick={() => onRowClick(member.id)}
-                    variant="outline"
-                    size="sm"
-                    className="transition-colors hover:border-primary-400 hover:text-primary-400 hover:bg-primary-50/40"
+            {members.map((member) => {
+              return (
+                <TableRow
+                  key={member.id}
+                  className="cursor-pointer transition-colors hover:bg-primary-50/50"
+                >
+                  <TableCell
+                    onClick={(e) => {
+                      return e.stopPropagation();
+                    }}
                   >
-                    <Text text="View Profile" variant="default" />
-                  </Button>
-                </TableCell>
-              </TableRow>
-            ))}
+                    <Checkbox
+                      checked={selectedMemberIds.includes(member.id)}
+                      onCheckedChange={(checked) => {
+                        return onSelectMember?.(member.id, !!checked);
+                      }}
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <Text text={member.fullName} variant="default" />
+                  </TableCell>
+                  <TableCell>
+                    <Text
+                      text={formatDate(member.birthday)}
+                      variant="default"
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <Text text={member.gender} variant="default" />
+                  </TableCell>
+                  <TableCell>
+                    <Text text={member.phone} variant="default" />
+                  </TableCell>
+                  <TableCell>
+                    <Text
+                      text={member.email}
+                      variant="default"
+                      className="truncate underline decoration-gray-300 underline-offset-2"
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <Button
+                      onClick={() => {
+                        return onRowClick(member.id);
+                      }}
+                      variant="outline"
+                      size="sm"
+                      className="transition-colors hover:border-primary-400 hover:text-primary-400 hover:bg-primary-50/40"
+                    >
+                      <Text text="View Profile" variant="default" />
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              );
+            })}
           </TableBody>
         </Table>
       </div>
@@ -277,14 +301,18 @@ export function MembersTable({
             <Button
               variant="outline"
               disabled={!pagination.hasPreviousPage}
-              onClick={() => onPageChange(currentPage - 1)}
+              onClick={() => {
+                return onPageChange(currentPage - 1);
+              }}
             >
               <Text text="Previous" variant="default" />
             </Button>
             <Button
               variant="outline"
               disabled={!pagination.hasNextPage}
-              onClick={() => onPageChange(currentPage + 1)}
+              onClick={() => {
+                return onPageChange(currentPage + 1);
+              }}
             >
               <Text text="Next" variant="default" />
             </Button>

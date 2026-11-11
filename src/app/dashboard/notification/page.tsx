@@ -35,8 +35,12 @@ export default function Notification() {
   const [filter, setFilter] = useState<FilterType>("all");
 
   const filteredNotifications = notifications.filter((n) => {
-    if (filter === "unread") return !n.isRead;
-    if (filter === "read") return n.isRead;
+    if (filter === "unread") {
+      return !n.isRead;
+    }
+    if (filter === "read") {
+      return n.isRead;
+    }
     return true;
   });
 
@@ -60,21 +64,23 @@ export default function Notification() {
     }
 
     const notificationPayload = allNotifications.data.map(
-      (notification: ApiNotification) => ({
-        _id: notification._id,
-        icon: notificationConfig[notification.type].icon,
-        title: notification.title,
-        description: notification.body,
-        type: notification.type,
-        isRead: notification.isRead,
-        iconBg: notificationConfig[notification.type].background,
-        iconColor: notificationConfig[notification.type].color,
-        date: new Date(notification.createdAt).toLocaleDateString("en-US", {
-          month: "short",
-          day: "numeric",
-          year: "numeric",
-        }),
-      }),
+      (notification: ApiNotification) => {
+        return {
+          _id: notification._id,
+          icon: notificationConfig[notification.type].icon,
+          title: notification.title,
+          description: notification.body,
+          type: notification.type,
+          isRead: notification.isRead,
+          iconBg: notificationConfig[notification.type].background,
+          iconColor: notificationConfig[notification.type].color,
+          date: new Date(notification.createdAt).toLocaleDateString("en-US", {
+            month: "short",
+            day: "numeric",
+            year: "numeric",
+          }),
+        };
+      },
     );
     setNotifications(notificationPayload);
     setPagination(allNotifications.pagination);
@@ -86,13 +92,15 @@ export default function Notification() {
     getAllNotifications();
 
     // Poll for new notifications - without this, items created after the page
-    // loaded (e.g. a subscription upgrade while browsing) only appear after a
-    // manual refresh.
+    // Loaded (e.g. a subscription upgrade while browsing) only appear after a
+    // Manual refresh.
     const interval = setInterval(() => {
       getAllNotifications();
     }, 30_000);
 
-    return () => clearInterval(interval);
+    return () => {
+      return clearInterval(interval);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -105,15 +113,15 @@ export default function Notification() {
           <Button
             variant="ghost"
             className="hidden sm:flex items-center gap-2"
-            onClick={() =>
-              setFilter(
+            onClick={() => {
+              return setFilter(
                 filter === "all"
                   ? "unread"
                   : filter === "unread"
                     ? "read"
                     : "all",
-              )
-            }
+              );
+            }}
           >
             {filter === "all" ? "All" : filter === "unread" ? "Unread" : "Read"}
             <ChevronDown className="w-4 h-4" />
@@ -154,7 +162,9 @@ export default function Notification() {
                 className={`flex items-center gap-4 p-3 rounded-lg cursor-pointer transition-colors
                     hover:bg-sky-50
                   `}
-                onClick={() => markAsRead(notification._id)}
+                onClick={() => {
+                  return markAsRead(notification._id);
+                }}
               >
                 <Span
                   className={`mt-2 w-2 h-2 rounded-full ${
@@ -213,34 +223,41 @@ export default function Notification() {
                     variant="outline"
                     size="icon"
                     disabled={!pagination.hasPreviousPage}
-                    onClick={() => getAllNotifications(currentPage - 1)}
+                    onClick={() => {
+                      return getAllNotifications(currentPage - 1);
+                    }}
                   >
                     <ChevronLeft className="w-4 h-4" />
                   </Button>
                 </PaginationItem>
 
-                {Array.from(
-                  { length: pagination.totalPages },
-                  (_, i) => i + 1,
-                ).map((page) => (
-                  <PaginationItem key={page}>
-                    <Button
-                      variant={currentPage === page ? "default" : "outline"}
-                      size="sm"
-                      onClick={() => getAllNotifications(page)}
-                      className="w-10"
-                    >
-                      {page}
-                    </Button>
-                  </PaginationItem>
-                ))}
+                {Array.from({ length: pagination.totalPages }, (_, i) => {
+                  return i + 1;
+                }).map((page) => {
+                  return (
+                    <PaginationItem key={page}>
+                      <Button
+                        variant={currentPage === page ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => {
+                          return getAllNotifications(page);
+                        }}
+                        className="w-10"
+                      >
+                        {page}
+                      </Button>
+                    </PaginationItem>
+                  );
+                })}
 
                 <PaginationItem>
                   <Button
                     variant="outline"
                     size="icon"
                     disabled={!pagination.hasNextPage}
-                    onClick={() => getAllNotifications(currentPage + 1)}
+                    onClick={() => {
+                      return getAllNotifications(currentPage + 1);
+                    }}
                   >
                     <ChevronRight className="w-4 h-4" />
                   </Button>

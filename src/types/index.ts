@@ -299,23 +299,23 @@ export type NewMemberData = AddMemberStep1Data &
   AddMemberStep2Data &
   AddMemberStep3Data;
 
-// export type ChurchEvent = {
-//   id: string;
-//   title: string;
-//   type: EventType;
-//   recurrence: EventRecurrence;
-//   date: string;
-//   startTime: string;
-//   endTime?: string;
-//   location?: string;
-//   description?: string;
-//   sendReminder: boolean;
-//   reminderType: EventReminderType;
-//   remindBeforeMinutes: number;
-//   colorClass: string;
+// Export type ChurchEvent = {
+//   Id: string;
+//   Title: string;
+//   Type: EventType;
+//   Recurrence: EventRecurrence;
+//   Date: string;
+//   StartTime: string;
+//   EndTime?: string;
+//   Location?: string;
+//   Description?: string;
+//   SendReminder: boolean;
+//   ReminderType: EventReminderType;
+//   RemindBeforeMinutes: number;
+//   ColorClass: string;
 // };
 
-// types/index.ts
+// Types/index.ts
 export type ChurchEvent = {
   id: string;
   title: string;
@@ -606,7 +606,7 @@ export interface UserLimitStatus {
 }
 
 // Generic shape consumed by the reusable plan-limit banner (LimitBanner),
-// so a single component can render member limits, user-seat limits, etc.
+// So a single component can render member limits, user-seat limits, etc.
 export interface PlanLimitStatus {
   resource?: LimitResource;
   current: number;

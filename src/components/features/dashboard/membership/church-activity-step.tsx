@@ -72,144 +72,158 @@ export function ChurchActivityStep({
           <FormField
             control={form.control}
             name="membershipStatus"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="mb-2">
-                  Membership Status <Span variant="error">*</Span>
-                </FormLabel>
-                <Select value={field.value} onValueChange={field.onChange}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value={MembershipStatus.MEMBER}>
-                      Member
-                    </SelectItem>
-                    <SelectItem value={MembershipStatus.VISITOR}>
-                      Visitor
-                    </SelectItem>
-                    <SelectItem value={MembershipStatus.VOLUNTEER}>
-                      Volunteer
-                    </SelectItem>
-                    <SelectItem value={MembershipStatus.WORKER}>
-                      Worker
-                    </SelectItem>
-                    <SelectItem value={MembershipStatus.LEADER}>
-                      Leader
-                    </SelectItem>
-                    <SelectItem value={MembershipStatus.CONVERT}>
-                      New Convert
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-                <p className="mt-1 text-xs text-gray-500">
-                  Visitors count towards your separate guest limit and can&apos;t
-                  join departments, small teams or cell groups.
-                </p>
-                <FormMessage />
-              </FormItem>
-            )}
+            render={({ field }) => {
+              return (
+                <FormItem>
+                  <FormLabel className="mb-2">
+                    Membership Status <Span variant="error">*</Span>
+                  </FormLabel>
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value={MembershipStatus.MEMBER}>
+                        Member
+                      </SelectItem>
+                      <SelectItem value={MembershipStatus.VISITOR}>
+                        Visitor
+                      </SelectItem>
+                      <SelectItem value={MembershipStatus.VOLUNTEER}>
+                        Volunteer
+                      </SelectItem>
+                      <SelectItem value={MembershipStatus.WORKER}>
+                        Worker
+                      </SelectItem>
+                      <SelectItem value={MembershipStatus.LEADER}>
+                        Leader
+                      </SelectItem>
+                      <SelectItem value={MembershipStatus.CONVERT}>
+                        New Convert
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <p className="mt-1 text-xs text-gray-500">
+                    Visitors count towards your separate guest limit and
+                    can&apos;t join departments, small teams or cell groups.
+                  </p>
+                  <FormMessage />
+                </FormItem>
+              );
+            }}
           />
 
           <FormField
             control={form.control}
             name="dateJoined"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="mb-2">Date Joined the Church</FormLabel>
-                <FormControl>
-                  <Input type="date" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+            render={({ field }) => {
+              return (
+                <FormItem>
+                  <FormLabel className="mb-2">Date Joined the Church</FormLabel>
+                  <FormControl>
+                    <Input type="date" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              );
+            }}
           />
 
           <FormField
             control={form.control}
             name="previousChurchMembership"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="mb-2">
-                  Previous Church Membership
-                </FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="Enter the previous church name"
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+            render={({ field }) => {
+              return (
+                <FormItem>
+                  <FormLabel className="mb-2">
+                    Previous Church Membership
+                  </FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="Enter the previous church name"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              );
+            }}
           />
 
           <FormField
             control={form.control}
             name="baptized"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="mb-2">
-                  Are you baptized? (Optional)
-                </FormLabel>
-                <Select
-                  value={field.value !== undefined ? String(field.value) : ""}
-                  onValueChange={(value) => field.onChange(value === "true")}
-                >
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="true">Yes</SelectItem>
-                    <SelectItem value="false">No</SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
+            render={({ field }) => {
+              return (
+                <FormItem>
+                  <FormLabel className="mb-2">
+                    Are you baptized? (Optional)
+                  </FormLabel>
+                  <Select
+                    value={field.value !== undefined ? String(field.value) : ""}
+                    onValueChange={(value) => {
+                      return field.onChange(value === "true");
+                    }}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="true">Yes</SelectItem>
+                      <SelectItem value="false">No</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              );
+            }}
           />
 
           <FormField
             control={form.control}
             name="ministriesInvolved"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="mb-2">Ministries Involved in</FormLabel>
-                <FormControl>
-                  <Input placeholder="e.g. Choir, Usher or none" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+            render={({ field }) => {
+              return (
+                <FormItem>
+                  <FormLabel className="mb-2">Ministries Involved in</FormLabel>
+                  <FormControl>
+                    <Input placeholder="e.g. Choir, Usher or none" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              );
+            }}
           />
 
           <FormField
             control={form.control}
             name="volunteersPreference"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="mb-2">Volunteer Preferences</FormLabel>
-                <Select value={field.value} onValueChange={field.onChange}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="Interested">Interested</SelectItem>
-                    <SelectItem value="Not Interested">
-                      Not Interested
-                    </SelectItem>
-                    <SelectItem value="Maybe Later">Maybe Later</SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
+            render={({ field }) => {
+              return (
+                <FormItem>
+                  <FormLabel className="mb-2">Volunteer Preferences</FormLabel>
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="Interested">Interested</SelectItem>
+                      <SelectItem value="Not Interested">
+                        Not Interested
+                      </SelectItem>
+                      <SelectItem value="Maybe Later">Maybe Later</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              );
+            }}
           />
         </div>
 

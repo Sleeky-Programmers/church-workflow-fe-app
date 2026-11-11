@@ -25,8 +25,8 @@ export default function RowActionsMenu({
   onDeleteRequest,
 }: Props) {
   // Deleting a department is an org-wide administrative action (matches the
-  // backend's FULL_ACCESS requirement) - not something a department head can
-  // do.
+  // Backend's FULL_ACCESS requirement) - not something a department head can
+  // Do.
   const canDelete = useHasAccess("DEPARTMENTS", "FULL_ACCESS");
 
   return (
@@ -36,7 +36,9 @@ export default function RowActionsMenu({
           variant="ghost"
           size="icon"
           className="relative z-10"
-          onClick={(e) => e.stopPropagation()}
+          onClick={(e) => {
+            return e.stopPropagation();
+          }}
         >
           <MoreVertical className="h-4 w-4 text-gray-500" />
         </Button>
@@ -45,17 +47,31 @@ export default function RowActionsMenu({
       <DropdownMenuContent
         align="end"
         className="w-40"
-        onClick={(e) => e.stopPropagation()}
+        onClick={(e) => {
+          return e.stopPropagation();
+        }}
       >
-        <DropdownMenuItem onClick={() => onEdit(row)}>Edit</DropdownMenuItem>
+        <DropdownMenuItem
+          onClick={() => {
+            return onEdit(row);
+          }}
+        >
+          Edit
+        </DropdownMenuItem>
 
-        <DropdownMenuItem onClick={() => onExport(row)}>
+        <DropdownMenuItem
+          onClick={() => {
+            return onExport(row);
+          }}
+        >
           Export
         </DropdownMenuItem>
 
         {canDelete && (
           <DropdownMenuItem
-            onClick={() => onDeleteRequest(row)}
+            onClick={() => {
+              return onDeleteRequest(row);
+            }}
             className="text-red-600"
           >
             Delete

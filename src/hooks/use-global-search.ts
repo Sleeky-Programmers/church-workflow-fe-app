@@ -19,13 +19,15 @@ type CacheEntry = { at: number; data: GlobalSearchResponse };
 
 // Module-level so results survive the palette closing and reopening.
 // A Map keeps insertion order, which gives a cheap LRU: re-insert on read,
-// evict the first key when full.
+// Evict the first key when full.
 const cache = new Map<string, CacheEntry>();
 let cacheScope: string | null = null;
 
 function readCache(key: string): GlobalSearchResponse | null {
   const entry = cache.get(key);
-  if (!entry) return null;
+  if (!entry) {
+    return null;
+  }
   if (Date.now() - entry.at > CACHE_TTL_MS) {
     cache.delete(key);
     return null;
@@ -40,7 +42,9 @@ function writeCache(key: string, data: GlobalSearchResponse) {
   cache.set(key, { at: Date.now(), data });
   while (cache.size > CACHE_SIZE) {
     const oldest = cache.keys().next().value;
-    if (oldest === undefined) break;
+    if (oldest === undefined) {
+      break;
+    }
     cache.delete(oldest);
   }
 }
@@ -79,8 +83,12 @@ const EMPTY: State = {
 export function useGlobalSearch(rawQuery: string, enabled = true) {
   const query = normalizeSearchQuery(rawQuery);
   const debounced = useDebounce(query, DEBOUNCE_MS);
-  const branchId = useUserStore((s) => s.activeBranchId);
-  const userId = useUserStore((s) => s.user?._id ?? null);
+  const branchId = useUserStore((s) => {
+    return s.activeBranchId;
+  });
+  const userId = useUserStore((s) => {
+    return s.user?._id ?? null;
+  });
   const scope = `${userId ?? "anon"}:${branchId ?? "none"}`;
 
   const [state, setState] = useState<State>(EMPTY);
@@ -93,7 +101,7 @@ export function useGlobalSearch(rawQuery: string, enabled = true) {
   }, [scope]);
 
   // Abort the in-flight request as soon as the input moves away from it,
-  // rather than waiting for the debounce to settle.
+  // Rather than waiting for the debounce to settle.
   useEffect(() => {
     if (
       controllerRef.current &&
@@ -116,7 +124,12 @@ export function useGlobalSearch(rawQuery: string, enabled = true) {
     const key = debounced.toLowerCase();
     const hit = readCache(key);
     if (hit) {
-      setState({ data: hit, settledQuery: debounced, fetching: false, error: null });
+      setState({
+        data: hit,
+        settledQuery: debounced,
+        fetching: false,
+        error: null,
+      });
       return;
     }
 
@@ -124,13 +137,22 @@ export function useGlobalSearch(rawQuery: string, enabled = true) {
     const controller = new AbortController();
     controllerRef.current = controller;
     inflightQueryRef.current = debounced;
-    setState((prev) => ({ ...prev, fetching: true, error: null }));
+    setState((prev) => {
+      return { ...prev, fetching: true, error: null };
+    });
 
     globalSearch(debounced, controller.signal)
       .then((res) => {
-        if (controller.signal.aborted) return;
+        if (controller.signal.aborted) {
+          return;
+        }
         writeCache(key, res);
-        setState({ data: res, settledQuery: debounced, fetching: false, error: null });
+        setState({
+          data: res,
+          settledQuery: debounced,
+          fetching: false,
+          error: null,
+        });
       })
       .catch((err: unknown) => {
         if (
@@ -153,7 +175,9 @@ export function useGlobalSearch(rawQuery: string, enabled = true) {
         }
       });
 
-    return () => controller.abort();
+    return () => {
+      return controller.abort();
+    };
   }, [debounced, enabled, scope]);
 
   const active = enabled && query.length >= GLOBAL_SEARCH_MIN_LENGTH;
@@ -164,8 +188,8 @@ export function useGlobalSearch(rawQuery: string, enabled = true) {
     isActive: active,
     // Still typing (debounce pending) or waiting on the network.
     isLoading: active && (!isCurrent || state.fetching),
-    results: isCurrent ? state.data?.results ?? null : null,
-    partial: isCurrent ? state.data?.partial ?? false : false,
+    results: isCurrent ? (state.data?.results ?? null) : null,
+    partial: isCurrent ? (state.data?.partial ?? false) : false,
     error: isCurrent ? state.error : null,
   };
 }

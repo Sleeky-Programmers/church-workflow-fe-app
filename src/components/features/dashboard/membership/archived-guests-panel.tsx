@@ -14,14 +14,15 @@ import {
 } from "@/services/memberService";
 import { ArchivedGuest } from "@/types";
 
-const day = (value?: string | null) =>
-  value
+const day = (value?: string | null) => {
+  return value
     ? new Date(value).toLocaleDateString(undefined, {
         day: "numeric",
         month: "short",
         year: "numeric",
       })
     : "—";
+};
 
 /**
  * Guests auto-archived for inactivity. They don't count towards the guest
@@ -152,32 +153,36 @@ export function ArchivedGuestsPanel({
                 </tr>
               </thead>
               <tbody>
-                {rows.map((guest) => (
-                  <tr key={guest._id} className="border-t border-gray-100">
-                    <td className="px-4 py-2 text-gray-900">
-                      {guest.fullName}
-                    </td>
-                    <td className="px-4 py-2 text-gray-700">
-                      {guest.phoneNumber || "—"}
-                    </td>
-                    <td className="px-4 py-2 text-gray-700">
-                      {day(guest.archivedAt)}
-                    </td>
-                    <td className="px-4 py-2 text-gray-700">
-                      {day(guest.deletesOn)}
-                    </td>
-                    <td className="px-4 py-2 text-right">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        disabled={busyId === guest._id}
-                        onClick={() => restore(guest)}
-                      >
-                        {busyId === guest._id ? "Restoring…" : "Restore"}
-                      </Button>
-                    </td>
-                  </tr>
-                ))}
+                {rows.map((guest) => {
+                  return (
+                    <tr key={guest._id} className="border-t border-gray-100">
+                      <td className="px-4 py-2 text-gray-900">
+                        {guest.fullName}
+                      </td>
+                      <td className="px-4 py-2 text-gray-700">
+                        {guest.phoneNumber || "—"}
+                      </td>
+                      <td className="px-4 py-2 text-gray-700">
+                        {day(guest.archivedAt)}
+                      </td>
+                      <td className="px-4 py-2 text-gray-700">
+                        {day(guest.deletesOn)}
+                      </td>
+                      <td className="px-4 py-2 text-right">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          disabled={busyId === guest._id}
+                          onClick={() => {
+                            return restore(guest);
+                          }}
+                        >
+                          {busyId === guest._id ? "Restoring…" : "Restore"}
+                        </Button>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
@@ -190,7 +195,11 @@ export function ArchivedGuestsPanel({
             size="sm"
             variant="outline"
             disabled={page <= 1}
-            onClick={() => setPage((p) => p - 1)}
+            onClick={() => {
+              return setPage((p) => {
+                return p - 1;
+              });
+            }}
           >
             Previous
           </Button>
@@ -201,7 +210,11 @@ export function ArchivedGuestsPanel({
             size="sm"
             variant="outline"
             disabled={page >= totalPages}
-            onClick={() => setPage((p) => p + 1)}
+            onClick={() => {
+              return setPage((p) => {
+                return p + 1;
+              });
+            }}
           >
             Next
           </Button>

@@ -2,7 +2,6 @@
 
 import { Search } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { MemberProfile } from "@/types";
 
@@ -51,7 +50,9 @@ export default function TeamsSearchBar({
           placeholder="Search by Small Team, Member"
           leftIcon={<Search className="w-4 h-4" />}
           value={query}
-          onChange={(e) => onQueryChange(e.target.value)}
+          onChange={(e) => {
+            return onQueryChange(e.target.value);
+          }}
           className="w-[300px]"
         />
       </div>

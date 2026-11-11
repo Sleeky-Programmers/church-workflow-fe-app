@@ -106,7 +106,9 @@ export function MemberSingleSelect({
   }, [options]);
 
   useEffect(() => {
-    const found = internalOptions.find((m) => m.id === value);
+    const found = internalOptions.find((m) => {
+      return m.id === value;
+    });
     if (found) {
       setSelectedOption(found);
     }
@@ -124,7 +126,9 @@ export function MemberSingleSelect({
       search: debouncedSearch,
     });
 
-    setInternalOptions((prev) => [...prev, ...response.data]);
+    setInternalOptions((prev) => {
+      return [...prev, ...response.data];
+    });
     setPage(next);
     setPagination(response.pagination ?? null);
   };
@@ -150,23 +154,25 @@ export function MemberSingleSelect({
             <CommandEmpty>No results</CommandEmpty>
 
             <CommandGroup>
-              {internalOptions.map((item) => (
-                <CommandItem
-                  key={item.id}
-                  onSelect={() => {
-                    onChange(item.id);
-                    setSelectedOption(item);
-                    setOpen(false);
-                  }}
-                >
-                  {item.fullName}
-                  <Check
-                    className={`ml-auto ${
-                      value === item.id ? "opacity-100" : "opacity-0"
-                    }`}
-                  />
-                </CommandItem>
-              ))}
+              {internalOptions.map((item) => {
+                return (
+                  <CommandItem
+                    key={item.id}
+                    onSelect={() => {
+                      onChange(item.id);
+                      setSelectedOption(item);
+                      setOpen(false);
+                    }}
+                  >
+                    {item.fullName}
+                    <Check
+                      className={`ml-auto ${
+                        value === item.id ? "opacity-100" : "opacity-0"
+                      }`}
+                    />
+                  </CommandItem>
+                );
+              })}
             </CommandGroup>
 
             {fetchOptions && (
@@ -176,7 +182,9 @@ export function MemberSingleSelect({
                     <div className="flex w-full items-center justify-between px-2">
                       <PaginationPrevious
                         onClick={async () => {
-                          if (pagination.page <= 1) return;
+                          if (pagination.page <= 1) {
+                            return;
+                          }
                           const p = pagination.page - 1;
                           const response = await fetchOptions({
                             page: p,
@@ -191,32 +199,36 @@ export function MemberSingleSelect({
 
                       <PaginationContent>
                         {Array.from({ length: pagination.totalPages }).map(
-                          (_, i) => (
-                            <PaginationItem key={i}>
-                              <PaginationLink
-                                isActive={pagination.page === i + 1}
-                                onClick={async () => {
-                                  const p = i + 1;
-                                  const response = await fetchOptions({
-                                    page: p,
-                                    limit: pagination.limit,
-                                    search: debouncedSearch,
-                                  });
-                                  setInternalOptions(response.data);
-                                  setPage(p);
-                                  setPagination(response.pagination ?? null);
-                                }}
-                              >
-                                {i + 1}
-                              </PaginationLink>
-                            </PaginationItem>
-                          ),
+                          (_, i) => {
+                            return (
+                              <PaginationItem key={i}>
+                                <PaginationLink
+                                  isActive={pagination.page === i + 1}
+                                  onClick={async () => {
+                                    const p = i + 1;
+                                    const response = await fetchOptions({
+                                      page: p,
+                                      limit: pagination.limit,
+                                      search: debouncedSearch,
+                                    });
+                                    setInternalOptions(response.data);
+                                    setPage(p);
+                                    setPagination(response.pagination ?? null);
+                                  }}
+                                >
+                                  {i + 1}
+                                </PaginationLink>
+                              </PaginationItem>
+                            );
+                          },
                         )}
                       </PaginationContent>
 
                       <PaginationNext
                         onClick={async () => {
-                          if (!pagination.hasNextPage) return;
+                          if (!pagination.hasNextPage) {
+                            return;
+                          }
                           const p = pagination.page + 1;
                           const response = await fetchOptions({
                             page: p,
@@ -317,7 +329,9 @@ export function MemberMultiSelect({
     const next = page + 1;
     const response = await fetchOptions(next, 10, debouncedSearch);
 
-    setInternalOptions((prev) => [...prev, ...response.data]);
+    setInternalOptions((prev) => {
+      return [...prev, ...response.data];
+    });
     setPage(next);
     setPagination(response.pagination ?? null);
   };
@@ -327,8 +341,12 @@ export function MemberMultiSelect({
       ? placeholder
       : value.length <= 2
         ? internalOptions
-            .filter((m) => value.includes(m.id))
-            .map((m) => m.fullName)
+            .filter((m) => {
+              return value.includes(m.id);
+            })
+            .map((m) => {
+              return m.fullName;
+            })
             .join(", ")
         : `${value.length} members selected`;
 
@@ -361,12 +379,14 @@ export function MemberMultiSelect({
                     key={member.id}
                     onSelect={() => {
                       const newIds = selected
-                        ? value.filter((id) => id !== member.id)
+                        ? value.filter((id) => {
+                            return id !== member.id;
+                          })
                         : [...value, member.id];
 
-                      const selectedMembers = internalOptions.filter((m) =>
-                        newIds.includes(m.id),
-                      );
+                      const selectedMembers = internalOptions.filter((m) => {
+                        return newIds.includes(m.id);
+                      });
 
                       onChange(newIds, selectedMembers);
                     }}
@@ -385,7 +405,9 @@ export function MemberMultiSelect({
                     <div className="flex w-full items-center justify-between px-2">
                       <PaginationPrevious
                         onClick={async () => {
-                          if (pagination.page <= 1) return;
+                          if (pagination.page <= 1) {
+                            return;
+                          }
                           const p = pagination.page - 1;
                           const response = await fetchOptions(
                             p,
@@ -400,32 +422,36 @@ export function MemberMultiSelect({
 
                       <PaginationContent>
                         {Array.from({ length: pagination.totalPages }).map(
-                          (_, i) => (
-                            <PaginationItem key={i}>
-                              <PaginationLink
-                                isActive={pagination.page === i + 1}
-                                onClick={async () => {
-                                  const p = i + 1;
-                                  const response = await fetchOptions(
-                                    p,
-                                    pagination.limit,
-                                    debouncedSearch,
-                                  );
-                                  setInternalOptions(response.data);
-                                  setPage(p);
-                                  setPagination(response.pagination ?? null);
-                                }}
-                              >
-                                {i + 1}
-                              </PaginationLink>
-                            </PaginationItem>
-                          ),
+                          (_, i) => {
+                            return (
+                              <PaginationItem key={i}>
+                                <PaginationLink
+                                  isActive={pagination.page === i + 1}
+                                  onClick={async () => {
+                                    const p = i + 1;
+                                    const response = await fetchOptions(
+                                      p,
+                                      pagination.limit,
+                                      debouncedSearch,
+                                    );
+                                    setInternalOptions(response.data);
+                                    setPage(p);
+                                    setPagination(response.pagination ?? null);
+                                  }}
+                                >
+                                  {i + 1}
+                                </PaginationLink>
+                              </PaginationItem>
+                            );
+                          },
                         )}
                       </PaginationContent>
 
                       <PaginationNext
                         onClick={async () => {
-                          if (!pagination.hasNextPage) return;
+                          if (!pagination.hasNextPage) {
+                            return;
+                          }
                           const p = pagination.page + 1;
                           const response = await fetchOptions(
                             p,

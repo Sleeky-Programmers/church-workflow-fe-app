@@ -1,18 +1,11 @@
 "use client";
 
 import { addMonths, format, subMonths } from "date-fns";
-import {
-  ChevronLeft,
-  ChevronRight,
-  Menu,
-  MoreVertical,
-  Plus,
-} from "lucide-react";
+import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
 import { useState } from "react";
 
 import MobileHeader from "@/components/layout/mobile-header";
 import { Button } from "@/components/ui/button";
-import { SidebarTrigger } from "@/components/ui/sidebar";
 import Heading from "@/components/ui/typography/Heading";
 import { Span, Text } from "@/components/ui/typography/Text";
 import { useHasAccess } from "@/lib/access-control";
@@ -151,13 +144,17 @@ export function MobileAttendanceView({
 
     // Check for regular services
     const hasRegularService = regularServices.some((service) => {
-      if (!service.day) return false;
+      if (!service.day) {
+        return false;
+      }
       return service.day.toUpperCase() === dayName.toUpperCase();
     });
 
     // Check for special services on this specific date
     const hasSpecialService = specialServices.some((service) => {
-      if (!service.daySchedules) return false;
+      if (!service.daySchedules) {
+        return false;
+      }
       return service.daySchedules.some((schedule) => {
         // Normalize both dates to compare just the date part
         const scheduleDate = new Date(schedule.date);
@@ -166,7 +163,9 @@ export function MobileAttendanceView({
       });
     });
 
-    if (!hasRegularService && !hasSpecialService) return "";
+    if (!hasRegularService && !hasSpecialService) {
+      return "";
+    }
     const color = SERVICE_COLOR_BY_DAY[dayName] || SERVICE_COLOR_BY_DAY.Sunday;
     return `${color.dayBg} ${color.dayText}`;
   };
@@ -213,7 +212,9 @@ export function MobileAttendanceView({
       }
     });
 
-    return items.sort((a, b) => a.startTime.localeCompare(b.startTime));
+    return items.sort((a, b) => {
+      return a.startTime.localeCompare(b.startTime);
+    });
   };
 
   const days = generateCalendarDays();
@@ -232,7 +233,9 @@ export function MobileAttendanceView({
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}
+            onClick={() => {
+              return setCurrentMonth(subMonths(currentMonth, 1));
+            }}
           >
             <ChevronLeft className="h-4 w-4" />
           </Button>
@@ -242,18 +245,25 @@ export function MobileAttendanceView({
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}
+            onClick={() => {
+              return setCurrentMonth(addMonths(currentMonth, 1));
+            }}
           >
             <ChevronRight className="h-4 w-4" />
           </Button>
         </div>
         <div>
           <div className="grid grid-cols-7 mb-2">
-            {["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"].map((day) => (
-              <div key={day} className="text-center text-xs text-gray-500 py-2">
-                {day}
-              </div>
-            ))}
+            {["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"].map((day) => {
+              return (
+                <div
+                  key={day}
+                  className="text-center text-xs text-gray-500 py-2"
+                >
+                  {day}
+                </div>
+              );
+            })}
           </div>
 
           <div className="grid grid-cols-7 gap-1">
@@ -268,7 +278,9 @@ export function MobileAttendanceView({
               return (
                 <button
                   key={index}
-                  onClick={() => setSelectedDate(day)}
+                  onClick={() => {
+                    return setSelectedDate(day);
+                  }}
                   className={`
                     aspect-square flex items-center justify-center text-sm rounded-lg
                     ${isToday ? "bg-primary-600 text-white font-semibold" : ""}
@@ -305,12 +317,14 @@ export function MobileAttendanceView({
                     <div className="w-full">
                       <div className="h-0.5 bg-primary-500 rounded-full mb-4" />
                       <div className="grid grid-cols-5 gap-2">
-                        {[...Array(15)].map((_, i) => (
-                          <div
-                            key={i}
-                            className={`h-4 rounded ${i === 2 || i === 6 || i === 11 ? "bg-primary-500" : i === 8 || i === 13 ? "bg-gray-900" : "bg-gray-200"}`}
-                          />
-                        ))}
+                        {[...Array(15)].map((_, i) => {
+                          return (
+                            <div
+                              key={i}
+                              className={`h-4 rounded ${i === 2 || i === 6 || i === 11 ? "bg-primary-500" : i === 8 || i === 13 ? "bg-gray-900" : "bg-gray-200"}`}
+                            />
+                          );
+                        })}
                       </div>
                       <div className="absolute bottom-2 right-2">
                         <div className="h-6 w-6 bg-primary-500 rounded-full flex items-center justify-center text-white text-xs">
@@ -399,12 +413,12 @@ export function MobileAttendanceView({
                       <>
                         <Button
                           size="sm"
-                          onClick={() =>
-                            onAddAttendance(
+                          onClick={() => {
+                            return onAddAttendance(
                               service.originalService as RegularService,
                               selectedDateString,
-                            )
-                          }
+                            );
+                          }}
                           className={`flex-1 ${hasAttendance ? "bg-secondary-600 hover:bg-secondary-700" : ""}`}
                         >
                           {hasAttendance ? "View Attendance" : "Add Attendance"}
@@ -413,12 +427,12 @@ export function MobileAttendanceView({
                           <Button
                             size="sm"
                             variant="outline"
-                            onClick={() =>
-                              onAddGivingRecord(
+                            onClick={() => {
+                              return onAddGivingRecord(
                                 service.originalService as RegularService,
                                 selectedDateString,
-                              )
-                            }
+                              );
+                            }}
                             className="flex-1"
                           >
                             Add Giving Record
@@ -430,14 +444,6 @@ export function MobileAttendanceView({
                       <Button
                         size="sm"
                         onClick={() => {
-                          console.log({
-                            originalService:
-                              service.originalService as SpecialServiceEvent,
-                            selectedDateString,
-                            onAddSpecialAttendance: onAddSpecialAttendance
-                              ? "true"
-                              : "false",
-                          });
                           onAddSpecialAttendance?.(
                             service.originalService as SpecialServiceEvent,
                             selectedDateString,

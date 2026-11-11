@@ -37,13 +37,16 @@ function Card({
 const HEAD_CLASS =
   "px-4 py-3 text-[11px] font-medium uppercase tracking-wide text-gray-400";
 
-const initialsOf = (name: string) =>
-  name
+const initialsOf = (name: string) => {
+  return name
     .split(" ")
-    .map((part) => part.charAt(0))
+    .map((part) => {
+      return part.charAt(0);
+    })
     .join("")
     .slice(0, 2)
     .toUpperCase();
+};
 
 export function MaintenanceTab({
   asset,
@@ -117,22 +120,24 @@ export function MaintenanceTab({
         </h2>
 
         <div className="mt-4 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {scheduleItems.map((item) => (
-            <div key={item.label} className="flex items-start gap-3">
-              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gray-100 text-gray-500">
-                <item.icon className="h-4 w-4" />
-              </span>
+          {scheduleItems.map((item) => {
+            return (
+              <div key={item.label} className="flex items-start gap-3">
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gray-100 text-gray-500">
+                  <item.icon className="h-4 w-4" />
+                </span>
 
-              <div className="min-w-0">
-                <p className="text-[11px] font-medium uppercase tracking-wide text-gray-400">
-                  {item.label}
-                </p>
-                <p className="mt-0.5 text-sm font-semibold text-gray-900">
-                  {item.value}
-                </p>
+                <div className="min-w-0">
+                  <p className="text-[11px] font-medium uppercase tracking-wide text-gray-400">
+                    {item.label}
+                  </p>
+                  <p className="mt-0.5 text-sm font-semibold text-gray-900">
+                    {item.value}
+                  </p>
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         <p className="mt-5 flex items-center gap-2 text-xs text-gray-400">
@@ -184,41 +189,45 @@ export function MaintenanceTab({
                   </td>
                 </tr>
               ) : (
-                asset.services.map((service, serviceIndex) => (
-                  <tr
-                    key={service.id}
-                    className="border-b border-gray-100 last:border-0"
-                  >
-                    <td className="px-4 py-4 text-sm text-gray-700">
-                      {service.date}
-                    </td>
+                asset.services.map((service, serviceIndex) => {
+                  return (
+                    <tr
+                      key={service.id}
+                      className="border-b border-gray-100 last:border-0"
+                    >
+                      <td className="px-4 py-4 text-sm text-gray-700">
+                        {service.date}
+                      </td>
 
-                    <td className="px-4 py-4">
-                      <div className="flex items-center gap-3">
-                        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-semibold text-white-600">
-                          {initialsOf(service.performedBy)}
-                        </span>
-                        <span className="text-sm font-medium text-gray-700">
-                          {service.performedBy}
-                        </span>
-                      </div>
-                    </td>
+                      <td className="px-4 py-4">
+                        <div className="flex items-center gap-3">
+                          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-semibold text-white-600">
+                            {initialsOf(service.performedBy)}
+                          </span>
+                          <span className="text-sm font-medium text-gray-700">
+                            {service.performedBy}
+                          </span>
+                        </div>
+                      </td>
 
-                    <td className="max-w-[360px] truncate px-4 py-4 text-sm text-gray-600">
-                      {service.notes}
-                    </td>
+                      <td className="max-w-[360px] truncate px-4 py-4 text-sm text-gray-600">
+                        {service.notes}
+                      </td>
 
-                    <td className="px-4 py-4 text-right">
-                      <button
-                        type="button"
-                        onClick={() => setDetailIndex(serviceIndex)}
-                        className="text-sm font-medium text-blue-600 transition-colors hover:text-blue-700"
-                      >
-                        View Details
-                      </button>
-                    </td>
-                  </tr>
-                ))
+                      <td className="px-4 py-4 text-right">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            return setDetailIndex(serviceIndex);
+                          }}
+                          className="text-sm font-medium text-blue-600 transition-colors hover:text-blue-700"
+                        >
+                          View Details
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>
@@ -244,7 +253,9 @@ export function MaintenanceTab({
               <label className="flex cursor-pointer items-center gap-3 text-sm text-gray-700">
                 <Checkbox
                   checked={upcoming}
-                  onCheckedChange={(value) => setUpcoming(value === true)}
+                  onCheckedChange={(value) => {
+                    return setUpcoming(value === true);
+                  }}
                 />
                 Upcoming ({Number(days) || 0} days before)
               </label>
@@ -252,7 +263,9 @@ export function MaintenanceTab({
               <label className="flex cursor-pointer items-center gap-3 text-sm text-gray-700">
                 <Checkbox
                   checked={due}
-                  onCheckedChange={(value) => setDue(value === true)}
+                  onCheckedChange={(value) => {
+                    return setDue(value === true);
+                  }}
                 />
                 Due
               </label>
@@ -260,7 +273,9 @@ export function MaintenanceTab({
               <label className="flex cursor-pointer items-center gap-3 text-sm text-gray-700">
                 <Checkbox
                   checked={overdue}
-                  onCheckedChange={(value) => setOverdue(value === true)}
+                  onCheckedChange={(value) => {
+                    return setOverdue(value === true);
+                  }}
                 />
                 Overdue
               </label>
@@ -278,7 +293,9 @@ export function MaintenanceTab({
                 type="number"
                 min={0}
                 value={days}
-                onChange={(event) => setDays(event.target.value)}
+                onChange={(event) => {
+                  return setDays(event.target.value);
+                }}
                 className="mt-2 h-10 w-28 rounded-lg border-gray-300 bg-white text-sm shadow-none"
               />
             </div>
@@ -287,43 +304,53 @@ export function MaintenanceTab({
               <p className="text-sm text-gray-700">Notify recipient</p>
 
               <div className="mt-2 space-y-2">
-                {recipients.map((recipient, index) => (
-                  <div
-                    key={`${recipient}-${index}`}
-                    className="flex items-center gap-3"
-                  >
-                    <Input
-                      value={recipient}
-                      onChange={(event) =>
-                        setRecipients((prev) =>
-                          prev.map((item, position) =>
-                            position === index ? event.target.value : item,
-                          ),
-                        )
-                      }
-                      className="h-10 w-full max-w-sm rounded-lg border-gray-300 bg-white text-sm shadow-none"
-                      aria-label={`Notify recipient ${index + 1}`}
-                    />
-                    {recipients.length > 1 && (
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setRecipients((prev) =>
-                            prev.filter((_, position) => position !== index),
-                          )
-                        }
-                        className="text-sm font-medium text-red-600 transition-colors hover:text-red-700"
-                      >
-                        Remove
-                      </button>
-                    )}
-                  </div>
-                ))}
+                {recipients.map((recipient, index) => {
+                  return (
+                    <div
+                      key={`${recipient}-${index}`}
+                      className="flex items-center gap-3"
+                    >
+                      <Input
+                        value={recipient}
+                        onChange={(event) => {
+                          return setRecipients((prev) => {
+                            return prev.map((item, position) => {
+                              return position === index
+                                ? event.target.value
+                                : item;
+                            });
+                          });
+                        }}
+                        className="h-10 w-full max-w-sm rounded-lg border-gray-300 bg-white text-sm shadow-none"
+                        aria-label={`Notify recipient ${index + 1}`}
+                      />
+                      {recipients.length > 1 && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            return setRecipients((prev) => {
+                              return prev.filter((_, position) => {
+                                return position !== index;
+                              });
+                            });
+                          }}
+                          className="text-sm font-medium text-red-600 transition-colors hover:text-red-700"
+                        >
+                          Remove
+                        </button>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
 
               <button
                 type="button"
-                onClick={() => setRecipients((prev) => [...prev, ""])}
+                onClick={() => {
+                  return setRecipients((prev) => {
+                    return [...prev, ""];
+                  });
+                }}
                 className="mt-3 text-sm font-medium text-blue-600 transition-colors hover:text-blue-700"
               >
                 Add another email
@@ -345,7 +372,9 @@ export function MaintenanceTab({
       {/* View Details drawer */}
       <ServiceRecordDrawer
         open={detailIndex !== null}
-        onOpenChange={(open) => !open && setDetailIndex(null)}
+        onOpenChange={(open) => {
+          return !open && setDetailIndex(null);
+        }}
         asset={asset}
         records={asset.services}
         index={detailIndex ?? 0}

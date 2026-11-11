@@ -23,8 +23,8 @@ import {
 } from "@/services/onlineGivingService";
 
 // Gateway is auto-selected from the chosen currency rather than exposed as
-// a separate picker - Paystack is used for NGN, Flutterwave for everything
-// else, mirroring the gateway split already used for subscription billing
+// A separate picker - Paystack is used for NGN, Flutterwave for everything
+// Else, mirroring the gateway split already used for subscription billing
 // (see src/app/payment/verify/page.tsx). Revisit if more gateways are added.
 function gatewayForCurrency(currencyCode: string): string {
   return currencyCode?.toUpperCase() === "NGN" ? "PAYSTACK" : "FLUTTERWAVE";
@@ -50,13 +50,17 @@ export default function GiveChurchPage() {
   const [submitError, setSubmitError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!churchSlug) return;
+    if (!churchSlug) {
+      return;
+    }
 
     fetchGivingOptions(churchSlug)
       .then((data) => {
         setOptions(data);
         setCurrencyCode(
-          data.currencies.find((c) => c.isDefault)?.code ||
+          data.currencies.find((c) => {
+            return c.isDefault;
+          })?.code ||
             data.currencies[0]?.code ||
             "",
         );
@@ -67,12 +71,16 @@ export default function GiveChurchPage() {
           error.message || "This giving link is unavailable right now.",
         );
       })
-      .finally(() => setIsLoading(false));
+      .finally(() => {
+        return setIsLoading(false);
+      });
   }, [churchSlug]);
 
   const handleAmountChange = (raw: string) => {
     const normalized = raw.replace(/,/g, "");
-    if (normalized !== "" && Number.isNaN(Number(normalized))) return;
+    if (normalized !== "" && Number.isNaN(Number(normalized))) {
+      return;
+    }
     setAmount(normalized);
   };
 
@@ -154,18 +162,22 @@ export default function GiveChurchPage() {
                 <SelectValue placeholder="Currency" />
               </SelectTrigger>
               <SelectContent>
-                {options.currencies.map((currency) => (
-                  <SelectItem key={currency.code} value={currency.code}>
-                    {currency.code}
-                  </SelectItem>
-                ))}
+                {options.currencies.map((currency) => {
+                  return (
+                    <SelectItem key={currency.code} value={currency.code}>
+                      {currency.code}
+                    </SelectItem>
+                  );
+                })}
               </SelectContent>
             </Select>
             <Input
               inputMode="decimal"
               placeholder="0.00"
               value={amount}
-              onChange={(e) => handleAmountChange(e.target.value)}
+              onChange={(e) => {
+                return handleAmountChange(e.target.value);
+              }}
               disabled={isSubmitting}
             />
           </div>
@@ -180,11 +192,13 @@ export default function GiveChurchPage() {
               <SelectValue placeholder="Select an offering type" />
             </SelectTrigger>
             <SelectContent>
-              {options.offeringTypes.map((type) => (
-                <SelectItem key={type.id} value={type.id}>
-                  {type.name}
-                </SelectItem>
-              ))}
+              {options.offeringTypes.map((type) => {
+                return (
+                  <SelectItem key={type.id} value={type.id}>
+                    {type.name}
+                  </SelectItem>
+                );
+              })}
             </SelectContent>
           </Select>
         </div>
@@ -196,7 +210,9 @@ export default function GiveChurchPage() {
           </label>
           <Input
             value={donorName}
-            onChange={(e) => setDonorName(e.target.value)}
+            onChange={(e) => {
+              return setDonorName(e.target.value);
+            }}
             placeholder="Full name"
             disabled={isSubmitting}
           />
@@ -212,7 +228,9 @@ export default function GiveChurchPage() {
           <Input
             type="email"
             value={donorEmail}
-            onChange={(e) => setDonorEmail(e.target.value)}
+            onChange={(e) => {
+              return setDonorEmail(e.target.value);
+            }}
             placeholder="you@example.com"
             disabled={isSubmitting}
           />

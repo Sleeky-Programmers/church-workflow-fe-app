@@ -65,7 +65,9 @@ export function ServiceDetailModal({
     return ["Service Attendance"];
   }, [service?.title]);
 
-  if (!service || !parsedDate) return null;
+  if (!service || !parsedDate) {
+    return null;
+  }
 
   return (
     <>
@@ -101,39 +103,46 @@ export function ServiceDetailModal({
             </div>
 
             <div className="space-y-5">
-              {sections.map((section) => (
-                <div key={section} className="space-y-3 border-t pt-4">
-                  <div className="text-lg font-semibold">{section}</div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div>
-                      <label className="text-sm">Male</label>
-                      <Input value={maleCount} readOnly />
-                    </div>
-                    <div>
-                      <label className="text-sm">Females</label>
-                      <Input value={femaleCount} readOnly />
-                    </div>
-                    <div>
-                      <label className="text-sm">First Time Members</label>
-                      <Input
-                        value={Math.max(Math.floor(attendanceCount * 0.05), 0)}
-                        readOnly
-                      />
-                    </div>
-                    <div className="flex items-end">
-                      <Button
-                        variant="outline"
-                        className="w-full"
-                        onClick={() => setIsOrderModalOpen(true)}
-                      >
-                        {canEditOrder
-                          ? "Manage Order of Service"
-                          : "View Order of Service"}
-                      </Button>
+              {sections.map((section) => {
+                return (
+                  <div key={section} className="space-y-3 border-t pt-4">
+                    <div className="text-lg font-semibold">{section}</div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                        <label className="text-sm">Male</label>
+                        <Input value={maleCount} readOnly />
+                      </div>
+                      <div>
+                        <label className="text-sm">Females</label>
+                        <Input value={femaleCount} readOnly />
+                      </div>
+                      <div>
+                        <label className="text-sm">First Time Members</label>
+                        <Input
+                          value={Math.max(
+                            Math.floor(attendanceCount * 0.05),
+                            0,
+                          )}
+                          readOnly
+                        />
+                      </div>
+                      <div className="flex items-end">
+                        <Button
+                          variant="outline"
+                          className="w-full"
+                          onClick={() => {
+                            return setIsOrderModalOpen(true);
+                          }}
+                        >
+                          {canEditOrder
+                            ? "Manage Order of Service"
+                            : "View Order of Service"}
+                        </Button>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         </DialogContent>

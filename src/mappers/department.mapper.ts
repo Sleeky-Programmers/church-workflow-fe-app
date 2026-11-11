@@ -1,4 +1,3 @@
-import { DepartmentResponse } from "@/services/departmentService";
 import { DepartmentRow } from "@/types";
 
 export function mapDepartmentToRow(dept: any): DepartmentRow {

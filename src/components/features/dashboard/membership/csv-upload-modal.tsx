@@ -2,13 +2,10 @@
 
 import {
   AlertCircle,
-  CheckCircle,
   Download,
   PauseCircle,
   PlayCircle,
-  UploadCloud,
   X,
-  XCircle,
 } from "lucide-react";
 import Link from "next/link";
 import Papa from "papaparse";
@@ -22,7 +19,6 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Progress } from "@/components/ui/progress";
 import Heading from "@/components/ui/typography/Heading";
 import { Span, Text } from "@/components/ui/typography/Text";
 import { cn } from "@/lib/utils";
@@ -36,10 +32,7 @@ import {
   TITLE_MAP,
 } from "@/lib/constant";
 import { MembershipStatus } from "@/lib/enums";
-import {
-  previewMembersCsv,
-  uploadMembersCsv,
-} from "@/services/memberService";
+import { previewMembersCsv, uploadMembersCsv } from "@/services/memberService";
 import {
   CsvImportReport,
   CsvImportRowError,
@@ -50,9 +43,9 @@ import { FileInputProps } from "@/types/index";
 import { csvMemberRowSchema } from "@/types/schema";
 
 // Human-readable labels for each field, keyed by the internal snake_case
-// name used for header matching. Used for the downloadable template and
-// for validation error messages shown to the user - the underlying
-// snake_case keys and the camelCase payload sent to the backend
+// Name used for header matching. Used for the downloadable template and
+// For validation error messages shown to the user - the underlying
+// Snake_case keys and the camelCase payload sent to the backend
 // (see `convertToCSV`) are unaffected.
 const FIELD_LABELS: Record<string, string> = {
   title: "Title",
@@ -78,16 +71,19 @@ const FIELD_LABELS: Record<string, string> = {
 
 const CSV_TEMPLATE_COLUMNS = Object.keys(FIELD_LABELS);
 
-const normalizeHeaderKey = (key: string) =>
-  key.toLowerCase().replace(/[\s_]/g, "");
+const normalizeHeaderKey = (key: string) => {
+  return key.toLowerCase().replace(/[\s_]/g, "");
+};
 
 /** Case/space-insensitive lookup; `aliases` covers older templates ("Membership Status"). */
 const getCsvValue = (row: any, field: string, aliases: string[] = []) => {
   for (const name of [field, ...aliases]) {
-    const key = Object.keys(row).find(
-      (k) => normalizeHeaderKey(k) === normalizeHeaderKey(name),
-    );
-    if (key !== undefined) return row[key];
+    const key = Object.keys(row).find((k) => {
+      return normalizeHeaderKey(k) === normalizeHeaderKey(name);
+    });
+    if (key !== undefined) {
+      return row[key];
+    }
   }
   return undefined;
 };
@@ -99,12 +95,15 @@ const STATUS_HELP = `Allowed values: ${CSV_STATUS_VALUES.join(", ")}`;
 /** Maps a sheet value to a status, or null if blank/unknown. Never guesses. */
 const parseStatus = (value: unknown): MembershipStatus | null => {
   const raw = value?.toString().trim().toLowerCase();
-  if (!raw) return null;
+  if (!raw) {
+    return null;
+  }
   return MEMBERSHIP_MAP[raw] ?? MEMBERSHIP_MAP[raw.replace(/_/g, " ")] ?? null;
 };
 
-const formatRoom = (room: number | null) =>
-  room === null ? "unlimited" : room.toLocaleString();
+const formatRoom = (room: number | null) => {
+  return room === null ? "unlimited" : room.toLocaleString();
+};
 
 type PendingImport = {
   file: File;
@@ -113,14 +112,14 @@ type PendingImport = {
 };
 
 // Android's native file pickers (Google Files, Samsung My Files, Downloads
-// app, etc.) filter by the MIME type the OS indexed for a file, not by the
+// App, etc.) filter by the MIME type the OS indexed for a file, not by the
 // ".csv" extension itself - and CSVs downloaded on Android are inconsistently
-// tagged across devices/apps (rarely the canonical "text/csv"). Listing only
+// Tagged across devices/apps (rarely the canonical "text/csv"). Listing only
 // ".csv" greys the file out or hides it entirely on many Android pickers,
-// even though the same file selects fine on iOS/desktop. Widening this to
-// every MIME type Android commonly (mis)assigns to CSVs fixes that - content
-// is still fully validated after selection (see validateCsvData below), so
-// a broader filter can't let anything genuinely invalid through unnoticed.
+// Even though the same file selects fine on iOS/desktop. Widening this to
+// Every MIME type Android commonly (mis)assigns to CSVs fixes that - content
+// Is still fully validated after selection (see validateCsvData below), so
+// A broader filter can't let anything genuinely invalid through unnoticed.
 const CSV_ACCEPT =
   ".csv,text/csv,text/comma-separated-values,text/x-csv,text/x-comma-separated-values,application/vnd.ms-excel,application/csv,application/x-csv,text/plain,application/octet-stream";
 
@@ -136,35 +135,40 @@ export function CsvUploadModal({
 
   const handleRemoveFile = (file: UploadFile) => {
     file.controller?.abort();
-    setFiles((prev) => prev.filter((f) => f.file !== file.file));
+    setFiles((prev) => {
+      return prev.filter((f) => {
+        return f.file !== file.file;
+      });
+    });
   };
 
   const handlePauseResume = (file: UploadFile) => {
     if (file.status === "uploading") {
       file.controller?.abort();
-      setFiles((prev) =>
-        prev.map((f) =>
-          f.file === file.file ? { ...f, status: "paused" } : f,
-        ),
-      );
+      setFiles((prev) => {
+        return prev.map((f) => {
+          return f.file === file.file ? { ...f, status: "paused" } : f;
+        });
+      });
     } else if (file.status === "paused") {
       handleUpload(file.file);
-      setFiles((prev) =>
-        prev.map((f) =>
-          f.file === file.file ? { ...f, status: "uploading" } : f,
-        ),
-      );
+      setFiles((prev) => {
+        return prev.map((f) => {
+          return f.file === file.file ? { ...f, status: "uploading" } : f;
+        });
+      });
     }
   };
 
   const normalizeRow = (row: any) => {
     // Helper to get value case-insensitively
     const getValue = (field: string) => {
-      const key = Object.keys(row).find(
-        (k) =>
+      const key = Object.keys(row).find((k) => {
+        return (
           k.toLowerCase().replace(/[\s_]/g, "") ===
-          field.toLowerCase().replace(/[\s_]/g, ""),
-      );
+          field.toLowerCase().replace(/[\s_]/g, "")
+        );
+      });
       return key ? row[key] : undefined;
     };
 
@@ -191,8 +195,8 @@ export function CsvUploadModal({
 
     // Return object with camelCase keys that backend expects.
     // Title accepts free text now (see CreateMemberDto) - a cell that
-    // doesn't match a known abbreviation is passed through as-is instead of
-    // silently defaulting to "Mr.".
+    // Doesn't match a known abbreviation is passed through as-is instead of
+    // Silently defaulting to "Mr.".
     const rawTitle = title?.toString().trim();
     return {
       title: (rawTitle && TITLE_MAP[rawTitle.toLowerCase()]) || rawTitle || "",
@@ -218,7 +222,9 @@ export function CsvUploadModal({
       educationalBackground: educationalBackground?.toString().trim() || null,
       // Never defaulted: a blank/invalid status is reported as a row error.
       membershipStatus:
-        parseStatus(membershipStatus) ?? membershipStatus?.toString().trim() ?? "",
+        parseStatus(membershipStatus) ??
+        membershipStatus?.toString().trim() ??
+        "",
       dateJoined:
         dateJoined && typeof dateJoined === "string" && dateJoined.trim()
           ? new Date(dateJoined).toISOString().split("T")[0]
@@ -255,19 +261,26 @@ export function CsvUploadModal({
       ["status", STATUS_ALIASES],
     ];
     const missingHeaders = requiredHeaders
-      .filter(
-        ([req, aliases]) =>
-          ![req, ...aliases].some((name) =>
-            headers.some(
-              (h) => normalizeHeaderKey(h) === normalizeHeaderKey(name),
-            ),
-          ),
-      )
-      .map(([req]) => req);
+      .filter(([req, aliases]) => {
+        return ![req, ...aliases].some((name) => {
+          return headers.some((h) => {
+            return normalizeHeaderKey(h) === normalizeHeaderKey(name);
+          });
+        });
+      })
+      .map(([req]) => {
+        return req;
+      });
 
     if (missingHeaders.length > 0) {
       errors.push(
-        `Missing required columns: ${missingHeaders.map((h) => FIELD_LABELS[h] || h).join(", ")}. Download the latest template, which has a Status column.`,
+        `Missing required columns: ${missingHeaders
+          .map((h) => {
+            return FIELD_LABELS[h] || h;
+          })
+          .join(
+            ", ",
+          )}. Download the latest template, which has a Status column.`,
       );
       return { isValid: false, errors, rowErrors };
     }
@@ -282,10 +295,9 @@ export function CsvUploadModal({
       const isEmptyRow =
         !row ||
         Object.keys(row).length === 0 ||
-        Object.values(row).every(
-          (value) =>
-            !value || (typeof value === "string" && value.trim() === ""),
-        );
+        Object.values(row).every((value) => {
+          return !value || (typeof value === "string" && value.trim() === "");
+        });
 
       // If we encounter an empty row, stop processing further rows
       if (isEmptyRow) {
@@ -295,11 +307,12 @@ export function CsvUploadModal({
 
       // Get values using case-insensitive key matching
       const getValue = (field: string) => {
-        const key = Object.keys(row).find(
-          (k) =>
+        const key = Object.keys(row).find((k) => {
+          return (
             k.toLowerCase().replace(/[\s_]/g, "") ===
-            field.toLowerCase().replace(/[\s_]/g, ""),
-        );
+            field.toLowerCase().replace(/[\s_]/g, "")
+          );
+        });
         return key ? row[key] : undefined;
       };
 
@@ -361,12 +374,14 @@ export function CsvUploadModal({
 
   // Helper function to convert normalized data to CSV
   const convertToCSV = (data: any[]): string => {
-    if (data.length === 0) return "";
+    if (data.length === 0) {
+      return "";
+    }
 
     // Fixed camelCase headers the backend expects. This list is always
-    // used here regardless of how the uploaded file's own headers were
-    // labeled (human-readable, snake_case, etc.) - normalizeRow() already
-    // mapped every row to these exact keys before we get here.
+    // Used here regardless of how the uploaded file's own headers were
+    // Labeled (human-readable, snake_case, etc.) - normalizeRow() already
+    // Mapped every row to these exact keys before we get here.
     const headers = [
       "title",
       "fullName",
@@ -395,7 +410,7 @@ export function CsvUploadModal({
     // Add data rows
     for (const row of data) {
       const values = headers.map((header) => {
-        let value = row[header];
+        const value = row[header];
 
         // Handle null/undefined values
         if (value === null || value === undefined) {
@@ -429,10 +444,13 @@ export function CsvUploadModal({
   const [localErrors, setLocalErrors] = useState<CsvImportRowError[]>([]);
   const [importing, setImporting] = useState(false);
 
-  const setFileState = (file: File, patch: Partial<UploadFile>) =>
-    setFiles((prev) =>
-      prev.map((f) => (f.file === file ? { ...f, ...patch } : f)),
-    );
+  const setFileState = (file: File, patch: Partial<UploadFile>) => {
+    return setFiles((prev) => {
+      return prev.map((f) => {
+        return f.file === file ? { ...f, ...patch } : f;
+      });
+    });
+  };
 
   /**
    * Step 1: read and check the file locally, then ask the server for the
@@ -445,27 +463,32 @@ export function CsvUploadModal({
     setFiles([{ file, progress: 10, status: "uploading", controller }]);
 
     try {
-      const parsed = await new Promise<any[]>((resolve, reject) =>
-        Papa.parse(file, {
+      const parsed = await new Promise<any[]>((resolve, reject) => {
+        return Papa.parse(file, {
           header: true,
           skipEmptyLines: true,
-          transformHeader: (header) =>
-            header.trim().toLowerCase().replace(/\s/g, "_"),
-          complete: (results) => resolve(results.data as any[]),
-          error: (err) => reject(err),
-        }),
-      );
+          transformHeader: (header) => {
+            return header.trim().toLowerCase().replace(/\s/g, "_");
+          },
+          complete: (results) => {
+            return resolve(results.data as any[]);
+          },
+          error: (err) => {
+            return reject(err);
+          },
+        });
+      });
 
       // Only keep rows before the first empty row
-      const firstEmpty = parsed.findIndex(
-        (row) =>
+      const firstEmpty = parsed.findIndex((row) => {
+        return (
           !row ||
           Object.keys(row).length === 0 ||
-          Object.values(row).every(
-            (value) =>
-              !value || (typeof value === "string" && value.trim() === ""),
-          ),
-      );
+          Object.values(row).every((value) => {
+            return !value || (typeof value === "string" && value.trim() === "");
+          })
+        );
+      });
       const cleanedData =
         firstEmpty === -1 ? parsed : parsed.slice(0, firstEmpty);
 
@@ -534,7 +557,9 @@ export function CsvUploadModal({
 
   /** Step 2: import, only after the church has seen the summary. */
   const handleConfirmImport = async () => {
-    if (!pending?.report.canImport) return;
+    if (!pending?.report.canImport) {
+      return;
+    }
     const { file, normalizedFile } = pending;
     const controller = new AbortController();
     setImporting(true);
@@ -544,7 +569,9 @@ export function CsvUploadModal({
       const result = await uploadMembersCsv(normalizedFile, {
         token,
         signal: controller.signal,
-        onProgress: (progress) => setFileState(file, { progress }),
+        onProgress: (progress) => {
+          return setFileState(file, { progress });
+        },
       });
 
       setFileState(file, {
@@ -565,7 +592,9 @@ export function CsvUploadModal({
           : `${insertedCount} people imported.`,
       });
       onSuccess(insertedCount);
-      setTimeout(() => handleClose(), 1500);
+      setTimeout(() => {
+        return handleClose();
+      }, 1500);
     } catch (err: any) {
       // A rejected import returns the same report shape as the preview.
       const body = err && typeof err === "object" ? err : {};
@@ -598,8 +627,14 @@ export function CsvUploadModal({
   };
 
   const report = pending?.report;
-  const reportErrors = localErrors.length ? localErrors : report?.errors ?? [];
-  const isBusy = importing || files.some((f) => f.status === "uploading");
+  const reportErrors = localErrors.length
+    ? localErrors
+    : (report?.errors ?? []);
+  const isBusy =
+    importing ||
+    files.some((f) => {
+      return f.status === "uploading";
+    });
 
   return (
     <Dialog
@@ -643,13 +678,9 @@ export function CsvUploadModal({
             onPauseResume={handlePauseResume}
           />
 
-          {report && (
-            <ImportSummary report={report} />
-          )}
+          {report && <ImportSummary report={report} />}
 
-          {reportErrors.length > 0 && (
-            <RowErrorTable errors={reportErrors} />
-          )}
+          {reportErrors.length > 0 && <RowErrorTable errors={reportErrors} />}
         </div>
 
         <div className="mt-4 sm:mt-6 flex flex-col-reverse sm:flex-row gap-2">
@@ -659,7 +690,9 @@ export function CsvUploadModal({
             disabled={isBusy}
             className="w-full sm:flex-1 h-11 rounded-lg text-sm font-semibold"
           >
-            {files.some((f) => f.status === "success") && !report?.canImport
+            {files.some((f) => {
+              return f.status === "success";
+            }) && !report?.canImport
               ? "Done"
               : "Cancel"}
           </Button>
@@ -749,17 +782,19 @@ function RowErrorTable({ errors }: { errors: CsvImportRowError[] }) {
             </tr>
           </thead>
           <tbody>
-            {errors.map((e, i) => (
-              <tr key={`${e.row}-${i}`} className="border-t border-gray-100">
-                <td className="px-3 py-2 align-top text-gray-900">{e.row}</td>
-                <td className="px-3 py-2 align-top text-gray-700">
-                  {e.column ?? "—"}
-                </td>
-                <td className="px-3 py-2 align-top text-gray-700">
-                  {e.reason}
-                </td>
-              </tr>
-            ))}
+            {errors.map((e, i) => {
+              return (
+                <tr key={`${e.row}-${i}`} className="border-t border-gray-100">
+                  <td className="px-3 py-2 align-top text-gray-900">{e.row}</td>
+                  <td className="px-3 py-2 align-top text-gray-700">
+                    {e.column ?? "—"}
+                  </td>
+                  <td className="px-3 py-2 align-top text-gray-700">
+                    {e.reason}
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>
@@ -782,7 +817,9 @@ export function FileInput({
     if (!selectedFiles) {
       return;
     }
-    Array.from(selectedFiles).forEach((file) => onUpload(file));
+    Array.from(selectedFiles).forEach((file) => {
+      return onUpload(file);
+    });
     e.target.value = "";
   };
 
@@ -791,23 +828,14 @@ export function FileInput({
     if (!e.dataTransfer.files) {
       return;
     }
-    Array.from(e.dataTransfer.files).forEach((file) => onUpload(file));
+    Array.from(e.dataTransfer.files).forEach((file) => {
+      return onUpload(file);
+    });
   };
 
   const handleCancel = (file: UploadFile) => {
     file.controller?.abort();
     onRemove(file);
-  };
-
-  const getStatusIcon = (status: UploadFile["status"]) => {
-    switch (status) {
-      case "success":
-        return <CheckCircle className="w-4 h-4 text-green-500" />;
-      case "error":
-        return <XCircle className="w-4 h-4 text-red-500" />;
-      default:
-        return null;
-    }
   };
 
   const getStatusColor = (status: UploadFile["status"]) => {
@@ -823,7 +851,9 @@ export function FileInput({
     }
   };
 
-  const csvContent = `${CSV_TEMPLATE_COLUMNS.map((key) => FIELD_LABELS[key]).join(",")}
+  const csvContent = `${CSV_TEMPLATE_COLUMNS.map((key) => {
+    return FIELD_LABELS[key];
+  }).join(",")}
 MR.,Chinedu Okafor,MALE,3/14/1988,MARRIED,6/20/2015,,,0803 123 4567,chinedu.okafor@example.com,Accountant,Bachelor,Member,7/15/2022,,TRUE,Choir,Ushering,Lekki Cell
 MRS.,Funmilayo Adeyemi,FEMALE,9/2/1993,MARRIED,11/12/2019,,,0806 234 5678,funmilayo.adeyemi@example.com,Nurse,HND,Visitor,10/5/2026,,FALSE,,,`;
 
@@ -864,8 +894,8 @@ MRS.,Funmilayo Adeyemi,FEMALE,9/2/1993,MARRIED,11/12/2019,,,0806 234 5678,funmil
               <b>Gender</b> (Male or Female) and <b>Status</b>.
             </li>
             <li>
-              Status must be one of: {CSV_STATUS_VALUES.join(", ")}. Rows with
-              a blank or unknown status are rejected, never guessed.
+              Status must be one of: {CSV_STATUS_VALUES.join(", ")}. Rows with a
+              blank or unknown status are rejected, never guessed.
             </li>
             <li>
               Visitors count towards your guest limit. Everyone else counts
@@ -877,9 +907,8 @@ MRS.,Funmilayo Adeyemi,FEMALE,9/2/1993,MARRIED,11/12/2019,,,0806 234 5678,funmil
             </li>
             <li>Dates use month/day/year, for example 7/15/2022.</li>
             <li>
-              You&apos;ll see a summary before anything is imported. If any
-              row is rejected, or the file goes over a limit, nothing is
-              imported.
+              You&apos;ll see a summary before anything is imported. If any row
+              is rejected, or the file goes over a limit, nothing is imported.
             </li>
           </ul>
         </div>
@@ -890,8 +919,12 @@ MRS.,Funmilayo Adeyemi,FEMALE,9/2/1993,MARRIED,11/12/2019,,,0806 234 5678,funmil
         <Text className="mb-2 font-semibold text-gray-900">Upload file</Text>
 
         <div
-          onClick={() => inputRef.current?.click()}
-          onDragOver={(e) => e.preventDefault()}
+          onClick={() => {
+            return inputRef.current?.click();
+          }}
+          onDragOver={(e) => {
+            return e.preventDefault();
+          }}
           onDrop={handleDrop}
           className="border border-dashed border-gray-300 rounded-lg py-7 text-center cursor-pointer hover:border-blue-400 hover:bg-blue-50/40 transition-all duration-200"
         >
@@ -916,84 +949,90 @@ MRS.,Funmilayo Adeyemi,FEMALE,9/2/1993,MARRIED,11/12/2019,,,0806 234 5678,funmil
           <Text className="font-semibold text-gray-900">Uploaded files</Text>
 
           <div className="mt-2 space-y-4 max-h-64 overflow-y-auto">
-            {files.map((file, index) => (
-              <div key={index} className="space-y-1.5">
-                <div className="flex items-center justify-between gap-2">
-                  <Span className="font-semibold text-gray-900 truncate">
-                    {file.file.name}
-                  </Span>
-                  <Span className="font-semibold text-gray-900 shrink-0">
-                    {Math.round(file.progress)}%
-                  </Span>
-                </div>
-
-                <div className="flex items-center gap-3">
-                  <div className="flex-1 h-2 rounded-full bg-gray-200 overflow-hidden">
-                    <div
-                      className={cn(
-                        "h-full rounded-full transition-all duration-300",
-                        getStatusColor(file.status),
-                      )}
-                      style={{ width: `${Math.max(file.progress, 4)}%` }}
-                    />
+            {files.map((file, index) => {
+              return (
+                <div key={index} className="space-y-1.5">
+                  <div className="flex items-center justify-between gap-2">
+                    <Span className="font-semibold text-gray-900 truncate">
+                      {file.file.name}
+                    </Span>
+                    <Span className="font-semibold text-gray-900 shrink-0">
+                      {Math.round(file.progress)}%
+                    </Span>
                   </div>
 
-                  {(file.status === "uploading" ||
-                    file.status === "paused") && (
-                    <button
-                      onClick={() => onPauseResume(file)}
-                      className="text-gray-700 hover:text-gray-900 shrink-0"
-                      aria-label={
-                        file.status === "paused" ? "Resume" : "Pause"
-                      }
-                    >
-                      {file.status === "paused" ? (
-                        <PlayCircle className="w-5 h-5" />
-                      ) : (
-                        <PauseCircle className="w-5 h-5" />
-                      )}
-                    </button>
-                  )}
+                  <div className="flex items-center gap-3">
+                    <div className="flex-1 h-2 rounded-full bg-gray-200 overflow-hidden">
+                      <div
+                        className={cn(
+                          "h-full rounded-full transition-all duration-300",
+                          getStatusColor(file.status),
+                        )}
+                        style={{ width: `${Math.max(file.progress, 4)}%` }}
+                      />
+                    </div>
 
-                  {file.status !== "success" && (
-                    <button
-                      onClick={() => handleCancel(file)}
-                      className="text-gray-700 hover:text-red-500 shrink-0"
-                      aria-label="Remove file"
-                    >
-                      <X className="w-5 h-5" />
-                    </button>
-                  )}
-                </div>
+                    {(file.status === "uploading" ||
+                      file.status === "paused") && (
+                      <button
+                        onClick={() => {
+                          return onPauseResume(file);
+                        }}
+                        className="text-gray-700 hover:text-gray-900 shrink-0"
+                        aria-label={
+                          file.status === "paused" ? "Resume" : "Pause"
+                        }
+                      >
+                        {file.status === "paused" ? (
+                          <PlayCircle className="w-5 h-5" />
+                        ) : (
+                          <PauseCircle className="w-5 h-5" />
+                        )}
+                      </button>
+                    )}
 
-                {file.status === "uploading" && (
-                  <Text className="text-xs text-gray-500">Working…</Text>
-                )}
-                {file.status === "paused" && (
-                  <Text className="text-xs text-gray-500">Paused</Text>
-                )}
-                {file.status === "error" && (
-                  <div>
-                    <Text className="text-xs text-red-500 font-medium">
-                      Needs attention
-                    </Text>
-                    {file.error && (
-                      <Text className="text-xs text-gray-500 mt-0.5">
-                        {file.error}
-                        {"errorDetails" in file && file.errorDetails
-                          ? ` - ${file.errorDetails}`
-                          : ""}
-                      </Text>
+                    {file.status !== "success" && (
+                      <button
+                        onClick={() => {
+                          return handleCancel(file);
+                        }}
+                        className="text-gray-700 hover:text-red-500 shrink-0"
+                        aria-label="Remove file"
+                      >
+                        <X className="w-5 h-5" />
+                      </button>
                     )}
                   </div>
-                )}
-                {file.status === "success" && (
-                  <Text className="text-xs text-primary-400 font-medium">
-                    File checked
-                  </Text>
-                )}
-              </div>
-            ))}
+
+                  {file.status === "uploading" && (
+                    <Text className="text-xs text-gray-500">Working…</Text>
+                  )}
+                  {file.status === "paused" && (
+                    <Text className="text-xs text-gray-500">Paused</Text>
+                  )}
+                  {file.status === "error" && (
+                    <div>
+                      <Text className="text-xs text-red-500 font-medium">
+                        Needs attention
+                      </Text>
+                      {file.error && (
+                        <Text className="text-xs text-gray-500 mt-0.5">
+                          {file.error}
+                          {"errorDetails" in file && file.errorDetails
+                            ? ` - ${file.errorDetails}`
+                            : ""}
+                        </Text>
+                      )}
+                    </div>
+                  )}
+                  {file.status === "success" && (
+                    <Text className="text-xs text-primary-400 font-medium">
+                      File checked
+                    </Text>
+                  )}
+                </div>
+              );
+            })}
           </div>
         </div>
       )}

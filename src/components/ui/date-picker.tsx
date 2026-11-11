@@ -4,7 +4,11 @@ import { format, isValid, parseISO } from "date-fns";
 import { CalendarDays } from "lucide-react";
 
 import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 
 export interface DatePickerProps {
@@ -68,7 +72,9 @@ export function DatePicker({
           selected={selected}
           defaultMonth={selected}
           disabled={disabledDays.length ? disabledDays : undefined}
-          onSelect={(date) => onChange(date ? format(date, "yyyy-MM-dd") : "")}
+          onSelect={(date) => {
+            return onChange(date ? format(date, "yyyy-MM-dd") : "");
+          }}
         />
       </PopoverContent>
     </Popover>

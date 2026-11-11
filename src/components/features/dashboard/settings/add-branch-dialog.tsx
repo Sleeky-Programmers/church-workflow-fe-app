@@ -108,7 +108,9 @@ export function AddBranchDialog({ onSaved }: Props) {
             <Input
               placeholder="e.g. East Campus"
               value={name}
-              onChange={(e) => setName(e.target.value)}
+              onChange={(e) => {
+                return setName(e.target.value);
+              }}
               disabled={isSaving}
             />
           </div>
@@ -118,7 +120,9 @@ export function AddBranchDialog({ onSaved }: Props) {
             <Input
               placeholder="e.g. East"
               value={alias}
-              onChange={(e) => setAlias(e.target.value)}
+              onChange={(e) => {
+                return setAlias(e.target.value);
+              }}
               disabled={isSaving}
             />
           </div>
@@ -127,7 +131,9 @@ export function AddBranchDialog({ onSaved }: Props) {
             <Label>Address (optional)</Label>
             <Input
               value={address}
-              onChange={(e) => setAddress(e.target.value)}
+              onChange={(e) => {
+                return setAddress(e.target.value);
+              }}
               disabled={isSaving}
             />
           </div>
@@ -137,7 +143,9 @@ export function AddBranchDialog({ onSaved }: Props) {
               <Label>State (optional)</Label>
               <Input
                 value={state}
-                onChange={(e) => setState(e.target.value)}
+                onChange={(e) => {
+                  return setState(e.target.value);
+                }}
                 disabled={isSaving}
               />
             </div>
@@ -145,7 +153,9 @@ export function AddBranchDialog({ onSaved }: Props) {
               <Label>Country (optional)</Label>
               <Input
                 value={country}
-                onChange={(e) => setCountry(e.target.value)}
+                onChange={(e) => {
+                  return setCountry(e.target.value);
+                }}
                 disabled={isSaving}
               />
             </div>

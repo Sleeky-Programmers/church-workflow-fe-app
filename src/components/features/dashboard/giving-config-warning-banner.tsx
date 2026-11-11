@@ -7,12 +7,23 @@ import { useEffect, useState } from "react";
 import { fetchGivingConfigStatus } from "@/services/givingConfigService";
 
 const MISSING_ITEMS: {
-  key: "hasDefaultCurrency" | "hasDefaultOfferingType" | "hasActivePaymentMethod";
+  key:
+    | "hasDefaultCurrency"
+    | "hasDefaultOfferingType"
+    | "hasActivePaymentMethod";
   label: string;
   tab: string;
 }[] = [
-  { key: "hasDefaultCurrency", label: "Offering Currency", tab: "offering-currency" },
-  { key: "hasDefaultOfferingType", label: "Offering Type", tab: "offering-type" },
+  {
+    key: "hasDefaultCurrency",
+    label: "Offering Currency",
+    tab: "offering-currency",
+  },
+  {
+    key: "hasDefaultOfferingType",
+    label: "Offering Type",
+    tab: "offering-type",
+  },
   {
     key: "hasActivePaymentMethod",
     label: "Offering Payment Method",
@@ -29,20 +40,33 @@ export function GivingConfigWarningBanner() {
   useEffect(() => {
     fetchGivingConfigStatus()
       .then((status) => {
-        setMissing(MISSING_ITEMS.filter((item) => !status[item.key]));
+        setMissing(
+          MISSING_ITEMS.filter((item) => {
+            return !status[item.key];
+          }),
+        );
       })
       .catch(() => {})
-      .finally(() => setIsLoaded(true));
+      .finally(() => {
+        return setIsLoaded(true);
+      });
   }, []);
 
-  if (!isLoaded || !missing.length || dismissed) return null;
+  if (!isLoaded || !missing.length || dismissed) {
+    return null;
+  }
 
   return (
     <div className="flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3">
       <AlertTriangle className="h-5 w-5 shrink-0 text-amber-600 mt-0.5" />
       <div className="flex-1 text-sm text-amber-800">
         <p className="font-semibold">
-          {missing.map((item) => item.label).join(", ")} have not been set.
+          {missing
+            .map((item) => {
+              return item.label;
+            })
+            .join(", ")}{" "}
+          have not been set.
         </p>
         <p className="mt-0.5">
           Configure them in{" "}
@@ -57,7 +81,9 @@ export function GivingConfigWarningBanner() {
       </div>
       <button
         type="button"
-        onClick={() => setDismissed(true)}
+        onClick={() => {
+          return setDismissed(true);
+        }}
         className="shrink-0 rounded p-0.5 text-amber-700/70 hover:bg-amber-100 hover:text-amber-900"
         aria-label="Dismiss"
       >

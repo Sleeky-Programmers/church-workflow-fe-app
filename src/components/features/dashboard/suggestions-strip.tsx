@@ -21,7 +21,9 @@ export function SuggestionsStrip() {
   const isHome = pathname === HOME;
 
   const visible = (ctx?.fallback ?? []).slice(0, isHome ? 4 : 2);
-  if (!ctx || !visible.length) return null;
+  if (!ctx || !visible.length) {
+    return null;
+  }
 
   return (
     <section
@@ -42,45 +44,49 @@ export function SuggestionsStrip() {
             : "flex flex-col gap-1.5",
         )}
       >
-        {visible.map((s) => (
-          <div
-            key={s.id}
-            className={cn(
-              "group relative flex items-center gap-3 rounded-2xl border border-blue-100 bg-white shadow-sm",
-              isHome ? "p-4" : "px-4 py-2",
-            )}
-          >
-            <Link href={s.href} className="min-w-0 flex-1">
-              <p className="truncate text-sm font-semibold text-gray-900">
-                {s.title}
-              </p>
-              <p
-                className={cn(
-                  "text-xs text-gray-500",
-                  isHome ? "mt-0.5" : "truncate",
-                )}
-              >
-                {s.message}
-              </p>
-            </Link>
+        {visible.map((s) => {
+          return (
+            <div
+              key={s.id}
+              className={cn(
+                "group relative flex items-center gap-3 rounded-2xl border border-blue-100 bg-white shadow-sm",
+                isHome ? "p-4" : "px-4 py-2",
+              )}
+            >
+              <Link href={s.href} className="min-w-0 flex-1">
+                <p className="truncate text-sm font-semibold text-gray-900">
+                  {s.title}
+                </p>
+                <p
+                  className={cn(
+                    "text-xs text-gray-500",
+                    isHome ? "mt-0.5" : "truncate",
+                  )}
+                >
+                  {s.message}
+                </p>
+              </Link>
 
-            <Link
-              href={s.href}
-              aria-label={`Open ${s.title}`}
-              className="shrink-0 rounded-full p-1.5 text-primary-600 hover:bg-blue-50"
-            >
-              <ArrowRight className="h-4 w-4" />
-            </Link>
-            <button
-              type="button"
-              onClick={() => ctx.dismiss(s.id)}
-              aria-label="Dismiss suggestion"
-              className="shrink-0 rounded-full p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
-            >
-              <X className="h-4 w-4" />
-            </button>
-          </div>
-        ))}
+              <Link
+                href={s.href}
+                aria-label={`Open ${s.title}`}
+                className="shrink-0 rounded-full p-1.5 text-primary-600 hover:bg-blue-50"
+              >
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+              <button
+                type="button"
+                onClick={() => {
+                  return ctx.dismiss(s.id);
+                }}
+                aria-label="Dismiss suggestion"
+                className="shrink-0 rounded-full p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+          );
+        })}
       </div>
     </section>
   );

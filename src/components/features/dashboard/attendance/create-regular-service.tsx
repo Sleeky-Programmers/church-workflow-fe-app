@@ -76,7 +76,9 @@ export function CreateRegularServiceModal({
 
   const clearError = (field: string) => {
     setErrors((prev) => {
-      if (!prev[field]) return prev;
+      if (!prev[field]) {
+        return prev;
+      }
       const next = { ...prev };
       delete next[field];
       return next;
@@ -84,22 +86,30 @@ export function CreateRegularServiceModal({
   };
 
   const handleDayToggle = (day: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      day,
-    }));
+    setFormData((prev) => {
+      return {
+        ...prev,
+        day,
+      };
+    });
     clearError("day");
   };
 
   const handleAddService = () => {
     const nextErrors: Record<string, string> = {};
 
-    if (!formData.title.trim())
+    if (!formData.title.trim()) {
       nextErrors.title = "Please enter a service name";
-    if (formData.day.length === 0)
+    }
+    if (formData.day.length === 0) {
       nextErrors.day = "Please select at least one day";
-    if (!formData.startTime) nextErrors.startTime = "Please set a start time";
-    if (!formData.endTime) nextErrors.endTime = "Please set an end time";
+    }
+    if (!formData.startTime) {
+      nextErrors.startTime = "Please set a start time";
+    }
+    if (!formData.endTime) {
+      nextErrors.endTime = "Please set an end time";
+    }
     if (
       formData.startTime &&
       formData.endTime &&
@@ -114,7 +124,9 @@ export function CreateRegularServiceModal({
     }
 
     setErrors({});
-    setServices((prev) => [...prev, { ...formData }]);
+    setServices((prev) => {
+      return [...prev, { ...formData }];
+    });
 
     setFormData({
       id: "",
@@ -129,7 +141,11 @@ export function CreateRegularServiceModal({
   };
 
   const handleRemoveService = (index: number) => {
-    setServices((prev) => prev.filter((_, i) => i !== index));
+    setServices((prev) => {
+      return prev.filter((_, i) => {
+        return i !== index;
+      });
+    });
   };
 
   const handleCreateServices = async () => {
@@ -151,7 +167,6 @@ export function CreateRegularServiceModal({
           const dayEnum = SERVICE_DAY_ENUM_MAP[day];
 
           if (!dayEnum) {
-            console.error(`Invalid day: ${day}`);
             continue;
           }
 
@@ -167,7 +182,7 @@ export function CreateRegularServiceModal({
       }
 
       // Parent owns the actual API call(s) and the resulting toast/refetch,
-      // matching the special-service and event creation flows.
+      // Matching the special-service and event creation flows.
       await onCreateServices(pending);
 
       onOpenChange(false);
@@ -182,7 +197,7 @@ export function CreateRegularServiceModal({
         location: "",
         frequency: "weekly",
       });
-    } catch (error) {
+    } catch {
       // Parent already surfaces an error toast; keep the modal open to retry.
     } finally {
       setIsCreating(false);
@@ -236,7 +251,9 @@ export function CreateRegularServiceModal({
               on the same day. This ensures accurate and organized attendance
               records.
               <Button
-                onClick={() => setShowTooltip(false)}
+                onClick={() => {
+                  return setShowTooltip(false);
+                }}
                 className="absolute top-2 right-2 text-white hover:text-gray-200"
               >
                 <X className="h-3 w-3" />
@@ -253,8 +270,12 @@ export function CreateRegularServiceModal({
                 type="button"
                 variant="ghost"
                 size="icon"
-                onMouseEnter={() => setShowTooltip(true)}
-                onMouseLeave={() => setShowTooltip(false)}
+                onMouseEnter={() => {
+                  return setShowTooltip(true);
+                }}
+                onMouseLeave={() => {
+                  return setShowTooltip(false);
+                }}
                 className="text-primary-600"
               >
                 <Info className="h-4 w-4" />
@@ -265,10 +286,12 @@ export function CreateRegularServiceModal({
               placeholder="e.g. Sunday First Service, Sunday Second Service, Bible Study, e.t.c."
               value={formData.title}
               onChange={(e) => {
-                setFormData((prev) => ({
-                  ...prev,
-                  title: e.target.value,
-                }));
+                setFormData((prev) => {
+                  return {
+                    ...prev,
+                    title: e.target.value,
+                  };
+                });
                 clearError("title");
               }}
               className={errors.title ? "border-destructive-600" : ""}
@@ -278,20 +301,24 @@ export function CreateRegularServiceModal({
 
           <div className="space-y-2">
             <div className="grid grid-cols-4 sm:grid-cols-7 gap-2">
-              {daysOfWeek.map((day) => (
-                <Button
-                  key={day.short}
-                  type="button"
-                  variant={
-                    formData.day.includes(day.full) ? "default" : "outline"
-                  }
-                  size="sm"
-                  onClick={() => handleDayToggle(day.full)}
-                  className="w-full"
-                >
-                  {day.short}
-                </Button>
-              ))}
+              {daysOfWeek.map((day) => {
+                return (
+                  <Button
+                    key={day.short}
+                    type="button"
+                    variant={
+                      formData.day.includes(day.full) ? "default" : "outline"
+                    }
+                    size="sm"
+                    onClick={() => {
+                      return handleDayToggle(day.full);
+                    }}
+                    className="w-full"
+                  >
+                    {day.short}
+                  </Button>
+                );
+              })}
             </div>
             {errors.day ? <Text variant="error">{errors.day}</Text> : null}
           </div>
@@ -306,10 +333,12 @@ export function CreateRegularServiceModal({
                 type="time"
                 value={formData.startTime}
                 onChange={(e) => {
-                  setFormData((prev) => ({
-                    ...prev,
-                    startTime: e.target.value,
-                  }));
+                  setFormData((prev) => {
+                    return {
+                      ...prev,
+                      startTime: e.target.value,
+                    };
+                  });
                   clearError("startTime");
                 }}
                 className={errors.startTime ? "border-destructive-600" : ""}
@@ -327,10 +356,12 @@ export function CreateRegularServiceModal({
                 type="time"
                 value={formData.endTime}
                 onChange={(e) => {
-                  setFormData((prev) => ({
-                    ...prev,
-                    endTime: e.target.value,
-                  }));
+                  setFormData((prev) => {
+                    return {
+                      ...prev,
+                      endTime: e.target.value,
+                    };
+                  });
                   clearError("endTime");
                 }}
                 className={errors.endTime ? "border-destructive-600" : ""}
@@ -345,9 +376,11 @@ export function CreateRegularServiceModal({
             <Label>Location</Label>
             <LocationCombobox
               value={formData.location}
-              onChange={(value) =>
-                setFormData((prev) => ({ ...prev, location: value }))
-              }
+              onChange={(value) => {
+                return setFormData((prev) => {
+                  return { ...prev, location: value };
+                });
+              }}
               placeholder="e.g. Main Auditorium"
             />
           </div>
@@ -359,35 +392,39 @@ export function CreateRegularServiceModal({
 
           {services.length > 0 && (
             <div className="space-y-2 pt-2">
-              {services.map((service, index) => (
-                <div
-                  key={index}
-                  className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border"
-                >
-                  <div className="flex-1">
-                    <Text variant="default">{service.title}</Text>
-                    <Text variant="muted">
-                      {service.day} - {service.startTime}
-                      {service.endTime && ` - ${service.endTime}`}
-                      {service.location && ` - ${service.location}`}
-                    </Text>
+              {services.map((service, index) => {
+                return (
+                  <div
+                    key={index}
+                    className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border"
+                  >
+                    <div className="flex-1">
+                      <Text variant="default">{service.title}</Text>
+                      <Text variant="muted">
+                        {service.day} - {service.startTime}
+                        {service.endTime && ` - ${service.endTime}`}
+                        {service.location && ` - ${service.location}`}
+                      </Text>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Span className="text-xs bg-primary-100 text-primary-700 px-2 py-1 rounded">
+                        Weekly
+                      </Span>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => {
+                          return handleRemoveService(index);
+                        }}
+                        className="h-8 w-8 text-destructive-600 hover:text-destructive-700 hover:bg-destructive-50"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Span className="text-xs bg-primary-100 text-primary-700 px-2 py-1 rounded">
-                      Weekly
-                    </Span>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => handleRemoveService(index)}
-                      className="h-8 w-8 text-destructive-600 hover:text-destructive-700 hover:bg-destructive-50"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
           <Button

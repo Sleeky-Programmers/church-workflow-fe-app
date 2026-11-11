@@ -17,9 +17,15 @@ export function RecentActivityWidget() {
 
   useEffect(() => {
     fetchNotifications()
-      .then((res) => setNotifications((res.data || []).slice(0, 5)))
-      .catch(() => setNotifications([]))
-      .finally(() => setIsLoading(false));
+      .then((res) => {
+        return setNotifications((res.data || []).slice(0, 5));
+      })
+      .catch(() => {
+        return setNotifications([]);
+      })
+      .finally(() => {
+        return setIsLoading(false);
+      });
   }, []);
 
   return (

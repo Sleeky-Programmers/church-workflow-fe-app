@@ -45,7 +45,9 @@ export default function AccountSettingsPage() {
       try {
         const [settings, deletionSchedule] = await Promise.all([
           fetchAccountSettings(),
-          getDeletionSchedule().catch(() => null),
+          getDeletionSchedule().catch(() => {
+            return null;
+          }),
         ]);
 
         if (settings) {
@@ -77,7 +79,7 @@ export default function AccountSettingsPage() {
       }
     }
     loadSettings();
-  }, []);
+  }, [toast]);
 
   const handlePrivacyToggle = async (key: keyof PrivacySettings) => {
     const newPrivacy = {
@@ -190,7 +192,9 @@ export default function AccountSettingsPage() {
             <Switch
               id="birthday-calendar"
               checked={privacy.birthdayCalendar}
-              onCheckedChange={() => handlePrivacyToggle("birthdayCalendar")}
+              onCheckedChange={() => {
+                return handlePrivacyToggle("birthdayCalendar");
+              }}
             />
           </div>
 
@@ -207,7 +211,9 @@ export default function AccountSettingsPage() {
             <Switch
               id="birthday-reminders"
               checked={privacy.birthdayReminders}
-              onCheckedChange={() => handlePrivacyToggle("birthdayReminders")}
+              onCheckedChange={() => {
+                return handlePrivacyToggle("birthdayReminders");
+              }}
             />
           </div>
           <div className="flex items-center justify-between py-2">
@@ -223,7 +229,9 @@ export default function AccountSettingsPage() {
             <Switch
               id="email-alerts"
               checked={privacy.emailAlerts}
-              onCheckedChange={() => handlePrivacyToggle("emailAlerts")}
+              onCheckedChange={() => {
+                return handlePrivacyToggle("emailAlerts");
+              }}
             />
           </div>
         </div>
@@ -238,7 +246,9 @@ export default function AccountSettingsPage() {
               <Span className="h-2 w-2 rounded-full bg-primary-600 flex-shrink-0 mt-2" />
               <Button
                 variant="outline"
-                onClick={() => setIsScheduleDialogOpen(true)}
+                onClick={() => {
+                  return setIsScheduleDialogOpen(true);
+                }}
                 className="border-destructive-300 text-destructive-600 hover:bg-red-50"
               >
                 Delete Account

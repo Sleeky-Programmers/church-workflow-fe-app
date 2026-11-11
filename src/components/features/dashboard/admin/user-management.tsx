@@ -30,13 +30,18 @@ import { getPlans } from "@/services/billingService";
 import { useUserStore } from "@/stores/useUserStore";
 
 // Add a "isCurrentUser" flag to each mapped user so the table can highlight
-// the signed-in admin's own row and lock its actions.
+// The signed-in admin's own row and lock its actions.
 import { Plan, PlanLimitStatus } from "@/types";
 import { User, UserAction } from "@/types/user";
+import { useLatest } from "@/hooks/use-latest";
 
 export function UserManagementPage() {
-  const accessScope = useUserStore((state) => state.accessScope);
-  const currentUser = useUserStore((state) => state.user);
+  const accessScope = useUserStore((state) => {
+    return state.accessScope;
+  });
+  const currentUser = useUserStore((state) => {
+    return state.user;
+  });
   const canManageBranchAccess = accessScope === "ORG_WIDE";
 
   const [users, setUsers] = useState<User[]>([]);
@@ -61,8 +66,7 @@ export function UserManagementPage() {
       const status = await getUserPlanLimitStatus();
       setLimitStatus(status);
       return status;
-    } catch (error) {
-      console.error("Failed to load user limit status:", error);
+    } catch {
       return null;
     }
   }, []);
@@ -74,8 +78,12 @@ export function UserManagementPage() {
   useEffect(() => {
     getPlans()
       .then(setPlans)
-      .catch((error) => console.error("Failed to load plans:", error))
-      .finally(() => setPlansLoaded(true));
+      .catch(() => {
+        return undefined;
+      })
+      .finally(() => {
+        return setPlansLoaded(true);
+      });
   }, []);
 
   const nextPlan = getNextPlan(limitStatus?.planName ?? null, plans);
@@ -89,10 +97,6 @@ export function UserManagementPage() {
     }
     setIsInviteDialogOpen(true);
   };
-
-  useEffect(() => {
-    loadUsers();
-  }, []);
 
   const loadUsers: any = async () => {
     setIsLoading(true);
@@ -109,7 +113,9 @@ export function UserManagementPage() {
           typeof invite.churchRole === "string"
             ? invite.churchRole
             : invite.churchRole?._id;
-        const roleObj = rolesData.find((r: any) => r._id === roleId);
+        const roleObj = rolesData.find((r: any) => {
+          return r._id === roleId;
+        });
 
         return {
           id: invite._id,
@@ -140,6 +146,12 @@ export function UserManagementPage() {
       setIsLoading(false);
     }
   };
+
+  const loadUsersRef = useLatest(loadUsers);
+
+  useEffect(() => {
+    loadUsersRef.current();
+  }, [loadUsersRef]);
 
   const handleInviteUser = async (data: {
     email: string;
@@ -185,7 +197,9 @@ export function UserManagementPage() {
   };
 
   const handleActionSelect = async (userId: string, action: UserAction) => {
-    const user = users.find((u) => u.id === userId);
+    const user = users.find((u) => {
+      return u.id === userId;
+    });
     if (!user) {
       return;
     }
@@ -210,19 +224,18 @@ export function UserManagementPage() {
 
     setIsActionLoading(true);
     try {
-      let result;
       switch (action) {
         case "suspend":
-          result = await updateAdminStatus(userId, AdminOption.SUSPEND);
+          await updateAdminStatus(userId, AdminOption.SUSPEND);
           break;
         case "restore":
-          result = await updateAdminStatus(userId, AdminOption.RESTORE);
+          await updateAdminStatus(userId, AdminOption.RESTORE);
           break;
         case "delete_invitation":
-          result = await deleteAdminInvite(userId);
+          await deleteAdminInvite(userId);
           break;
         case "resend_invite":
-          result = await resendAdminInvite(userId);
+          await resendAdminInvite(userId);
           break;
         default:
           throw new Error("Action not supported locally yet");
@@ -301,9 +314,7 @@ export function UserManagementPage() {
     try {
       const rolesData = await fetchRoles();
       setRoles(rolesData);
-    } catch (error) {
-      console.error("Failed to refetch roles:", error);
-    }
+    } catch {}
   };
 
   return (

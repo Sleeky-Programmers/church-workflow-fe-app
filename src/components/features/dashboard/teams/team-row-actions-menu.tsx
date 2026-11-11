@@ -37,8 +37,8 @@ export default function TeamRowActionsMenu({
   onDeleteRequest,
 }: TeamRowActionsMenuProps) {
   // Deleting a team is an org-wide administrative action (matches the
-  // backend's FULL_ACCESS requirement on DELETE /small-teams/:id) - not
-  // something a team's own leader can do.
+  // Backend's FULL_ACCESS requirement on DELETE /small-teams/:id) - not
+  // Something a team's own leader can do.
   const canDelete = useHasAccess("SMALL_TEAMS", "FULL_ACCESS");
 
   return (
@@ -47,38 +47,56 @@ export default function TeamRowActionsMenu({
         <Button
           variant="ghost"
           size="icon"
-          onClick={(e) => e.stopPropagation()}
+          onClick={(e) => {
+            return e.stopPropagation();
+          }}
         >
           <MoreVertical className="h-4 w-4 text-gray-500" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" sideOffset={6} className="w-52">
-        <DropdownMenuItem className="gap-2" onClick={() => onEdit(row)}>
+        <DropdownMenuItem
+          className="gap-2"
+          onClick={() => {
+            return onEdit(row);
+          }}
+        >
           <Pencil className="h-4 w-4" />
           <Text variant="default">Edit Team</Text>
         </DropdownMenuItem>
         <DropdownMenuItem
           className="gap-2"
-          onClick={() => onManageMembers(row)}
+          onClick={() => {
+            return onManageMembers(row);
+          }}
         >
           <Users className="h-4 w-4" />
           <Text variant="default">Manage Members</Text>
         </DropdownMenuItem>
         <DropdownMenuItem
           className="gap-2"
-          onClick={() => onMarkAttendance(row)}
+          onClick={() => {
+            return onMarkAttendance(row);
+          }}
         >
           <CalendarCheck className="h-4 w-4" />
           <Text variant="default">Mark Attendance</Text>
         </DropdownMenuItem>
-        <DropdownMenuItem className="gap-2" onClick={() => onViewReport(row)}>
+        <DropdownMenuItem
+          className="gap-2"
+          onClick={() => {
+            return onViewReport(row);
+          }}
+        >
           <BarChart3 className="h-4 w-4" />
           <Text variant="default">View Report</Text>
         </DropdownMenuItem>
         {canDelete && (
           <DropdownMenuItem
             className="gap-2"
-            onClick={() => onDeleteRequest(row)}
+            onClick={() => {
+              return onDeleteRequest(row);
+            }}
           >
             <Trash2 className="h-4 w-4 text-destructive-600" />
             <Text variant="error">Delete Team</Text>

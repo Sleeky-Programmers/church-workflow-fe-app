@@ -12,9 +12,9 @@ type UserDetailsPermissionsViewProps = {
   rolePermissions: RolePermissionsType;
   // Known for role-management contexts (viewing a role from Roles &
   // Permissions) - drives which explanatory copy renders. Omit for contexts
-  // where "system vs custom" isn't the relevant framing (e.g. previewing a
-  // role while inviting someone, or viewing a specific user's inherited
-  // permissions) and pass headerNote instead.
+  // Where "system vs custom" isn't the relevant framing (e.g. previewing a
+  // Role while inviting someone, or viewing a specific user's inherited
+  // Permissions) and pass headerNote instead.
   roleType?: "system" | "custom";
   // Shown only when roleType === "custom" - switches the caller to edit mode.
   onEditRole?: () => void;
@@ -52,14 +52,16 @@ export function UserDetailsPermissionsView({
 
       <div className="space-y-6">
         {MODULE_PERMISSIONS.map((moduleDef) => {
-          const matchedPerm = rolePermissions.permissions.find(
-            (p) => p.module === moduleDef.module,
-          );
+          const matchedPerm = rolePermissions.permissions.find((p) => {
+            return p.module === moduleDef.module;
+          });
           const level: PermissionLevel = matchedPerm
             ? (matchedPerm.level as PermissionLevel)
             : "no_access";
 
-          if (level === "no_access") return null;
+          if (level === "no_access") {
+            return null;
+          }
 
           return (
             <PermissionModuleSelector
@@ -72,7 +74,9 @@ export function UserDetailsPermissionsView({
         })}
 
         {rolePermissions.permissions.length === 0 ||
-        rolePermissions.permissions.every((p) => p.level === "no_access") ? (
+        rolePermissions.permissions.every((p) => {
+          return p.level === "no_access";
+        }) ? (
           <div className="text-gray-500 py-4 italic">
             No specific permissions granted yet.
           </div>

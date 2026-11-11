@@ -2,7 +2,7 @@
 
 import { format } from "date-fns";
 import { Plus } from "lucide-react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
 import { BatchStatusBadge } from "@/components/features/dashboard/finance/giving/batch-status-badge";
@@ -56,7 +56,6 @@ type ServiceOption = { id: string; title: string };
 export default function GivingBatchDetailPage() {
   const params = useParams();
   const id = Array.isArray(params?.id) ? params.id[0] : params?.id || "";
-  const router = useRouter();
   const { toast } = useToast();
   const canManage = useHasAccess("GIVING", "MANAGE");
   const canFullAccess = useHasAccess("GIVING", "FULL_ACCESS");
@@ -83,18 +82,25 @@ export default function GivingBatchDetailPage() {
   const load = async () => {
     setIsLoading(true);
     try {
-      const [batchData, servicesData, offeringTypesData, currenciesData, paymentMethodsData] =
-        await Promise.all([
-          fetchGivingBatch(id),
-          fetchAllServices(format(new Date(), "yyyy-MM")),
-          fetchOfferingTypes(),
-          fetchCurrencies(),
-          fetchPaymentMethods(),
-        ]);
+      const [
+        batchData,
+        servicesData,
+        offeringTypesData,
+        currenciesData,
+        paymentMethodsData,
+      ] = await Promise.all([
+        fetchGivingBatch(id),
+        fetchAllServices(format(new Date(), "yyyy-MM")),
+        fetchOfferingTypes(),
+        fetchCurrencies(),
+        fetchPaymentMethods(),
+      ]);
 
       setBatch(batchData);
       setServices(
-        servicesData.map((s: any) => ({ id: s._id, title: s.title })),
+        servicesData.map((s: any) => {
+          return { id: s._id, title: s.title };
+        }),
       );
       setOfferingTypes(offeringTypesData);
       setCurrencies(currenciesData);
@@ -104,13 +110,15 @@ export default function GivingBatchDetailPage() {
       setCountedWith(batchData.countedWith || "");
       setNotes(batchData.notes || "");
       setEntries(
-        (batchData.entries || []).map((entry) => ({
-          offeringTypeId: entry.offeringTypeId,
-          currencyCode: entry.currencyCode,
-          amount: entry.amount,
-          paymentMethod: entry.paymentMethod,
-          note: entry.note,
-        })),
+        (batchData.entries || []).map((entry) => {
+          return {
+            offeringTypeId: entry.offeringTypeId,
+            currencyCode: entry.currencyCode,
+            amount: entry.amount,
+            paymentMethod: entry.paymentMethod,
+            note: entry.note,
+          };
+        }),
       );
       setIsEditing(batchData.status === "draft");
     } catch (error: any) {
@@ -129,23 +137,28 @@ export default function GivingBatchDetailPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
-  const activeOfferingTypes = useMemo(
-    () => offeringTypes.filter((t) => t.isActive),
-    [offeringTypes],
-  );
-  const activeCurrencies = useMemo(
-    () => currencies.filter((c) => c.isActive),
-    [currencies],
-  );
-  const activePaymentMethods = useMemo(
-    () => paymentMethods.filter((m) => m.isActive),
-    [paymentMethods],
-  );
+  const activeOfferingTypes = useMemo(() => {
+    return offeringTypes.filter((t) => {
+      return t.isActive;
+    });
+  }, [offeringTypes]);
+  const activeCurrencies = useMemo(() => {
+    return currencies.filter((c) => {
+      return c.isActive;
+    });
+  }, [currencies]);
+  const activePaymentMethods = useMemo(() => {
+    return paymentMethods.filter((m) => {
+      return m.isActive;
+    });
+  }, [paymentMethods]);
 
   const totalsByCurrency = useMemo(() => {
     const totals: Record<string, number> = {};
     for (const entry of entries) {
-      if (!entry.currencyCode) continue;
+      if (!entry.currencyCode) {
+        continue;
+      }
       totals[entry.currencyCode] =
         (totals[entry.currencyCode] || 0) + (entry.amount || 0);
     }
@@ -154,41 +167,56 @@ export default function GivingBatchDetailPage() {
 
   const handleAddEntry = () => {
     const defaultCurrency =
-      activeCurrencies.find((c) => c.isDefault)?.code ||
+      activeCurrencies.find((c) => {
+        return c.isDefault;
+      })?.code ||
       activeCurrencies[0]?.code ||
       "NGN";
-    setEntries((prev) => [
-      ...prev,
-      {
-        offeringTypeId:
-          activeOfferingTypes.find((t) => t.isDefault)?.id ||
-          activeOfferingTypes[0]?.id ||
-          "",
-        currencyCode: defaultCurrency,
-        amount: 0,
-        paymentMethod: activePaymentMethods[0]?.code || "",
-      },
-    ]);
+    setEntries((prev) => {
+      return [
+        ...prev,
+        {
+          offeringTypeId:
+            activeOfferingTypes.find((t) => {
+              return t.isDefault;
+            })?.id ||
+            activeOfferingTypes[0]?.id ||
+            "",
+          currencyCode: defaultCurrency,
+          amount: 0,
+          paymentMethod: activePaymentMethods[0]?.code || "",
+        },
+      ];
+    });
   };
 
   const handleEntryChange = (index: number, entry: GivingBatchEntryPayload) => {
-    setEntries((prev) => prev.map((e, i) => (i === index ? entry : e)));
+    setEntries((prev) => {
+      return prev.map((e, i) => {
+        return i === index ? entry : e;
+      });
+    });
   };
 
   const handleRemoveEntry = (index: number) => {
-    setEntries((prev) => prev.filter((_, i) => i !== index));
+    setEntries((prev) => {
+      return prev.filter((_, i) => {
+        return i !== index;
+      });
+    });
   };
 
   const isFormValid =
     date &&
     entries.length > 0 &&
-    entries.every(
-      (entry) =>
+    entries.every((entry) => {
+      return (
         entry.offeringTypeId &&
         entry.currencyCode &&
         entry.paymentMethod &&
-        entry.amount > 0,
-    );
+        entry.amount > 0
+      );
+    });
 
   const persistChanges = async (reason?: string) => {
     if (!batch || !isFormValid) {
@@ -228,7 +256,9 @@ export default function GivingBatchDetailPage() {
   };
 
   const handleSaveEdit = () => {
-    if (!batch) return;
+    if (!batch) {
+      return;
+    }
     if (batch.status === "confirmed") {
       setEditReasonDialogOpen(true);
       return;
@@ -237,7 +267,9 @@ export default function GivingBatchDetailPage() {
   };
 
   const handleSubmit = async () => {
-    if (!batch) return;
+    if (!batch) {
+      return;
+    }
     setIsActionLoading(true);
     try {
       const updated = await submitGivingBatch(batch.id);
@@ -259,7 +291,9 @@ export default function GivingBatchDetailPage() {
   };
 
   const handleConfirm = async () => {
-    if (!batch) return;
+    if (!batch) {
+      return;
+    }
     setIsActionLoading(true);
     try {
       const updated = await confirmGivingBatch(batch.id);
@@ -277,7 +311,9 @@ export default function GivingBatchDetailPage() {
   };
 
   const handleVoid = async (reason: string) => {
-    if (!batch) return;
+    if (!batch) {
+      return;
+    }
     setIsActionLoading(true);
     try {
       const updated = await voidGivingBatch(batch.id, reason);
@@ -324,7 +360,12 @@ export default function GivingBatchDetailPage() {
 
         <div className="flex items-center gap-2">
           {canEditBatch && !isEditing && (
-            <Button variant="outline" onClick={() => setIsEditing(true)}>
+            <Button
+              variant="outline"
+              onClick={() => {
+                return setIsEditing(true);
+              }}
+            >
               Edit
             </Button>
           )}
@@ -341,7 +382,9 @@ export default function GivingBatchDetailPage() {
           {canFullAccess && batch.status !== "voided" && (
             <Button
               variant="destructive"
-              onClick={() => setVoidDialogOpen(true)}
+              onClick={() => {
+                return setVoidDialogOpen(true);
+              }}
               disabled={isActionLoading}
             >
               Void
@@ -365,17 +408,20 @@ export default function GivingBatchDetailPage() {
               <SelectTrigger>
                 <SelectValue
                   placeholder={
-                    services.find((s) => s.id === batch.churchServiceId)
-                      ?.title || batch.serviceTitle
+                    services.find((s) => {
+                      return s.id === batch.churchServiceId;
+                    })?.title || batch.serviceTitle
                   }
                 />
               </SelectTrigger>
               <SelectContent>
-                {services.map((service) => (
-                  <SelectItem key={service.id} value={service.id}>
-                    {service.title}
-                  </SelectItem>
-                ))}
+                {services.map((service) => {
+                  return (
+                    <SelectItem key={service.id} value={service.id}>
+                      {service.title}
+                    </SelectItem>
+                  );
+                })}
               </SelectContent>
             </Select>
           ) : (
@@ -399,7 +445,9 @@ export default function GivingBatchDetailPage() {
           {isEditing ? (
             <Input
               value={countedWith}
-              onChange={(e) => setCountedWith(e.target.value)}
+              onChange={(e) => {
+                return setCountedWith(e.target.value);
+              }}
             />
           ) : (
             <Text>{batch.countedWith || "-"}</Text>
@@ -420,43 +468,51 @@ export default function GivingBatchDetailPage() {
 
         {isEditing ? (
           <div className="space-y-3">
-            {entries.map((entry, index) => (
-              <EntryLine
-                key={index}
-                entry={entry}
-                offeringTypes={activeOfferingTypes}
-                currencies={activeCurrencies}
-                paymentMethods={activePaymentMethods}
-                onChange={(next) => handleEntryChange(index, next)}
-                onRemove={() => handleRemoveEntry(index)}
-                canRemove={entries.length > 1}
-                disabled={isActionLoading}
-              />
-            ))}
+            {entries.map((entry, index) => {
+              return (
+                <EntryLine
+                  key={index}
+                  entry={entry}
+                  offeringTypes={activeOfferingTypes}
+                  currencies={activeCurrencies}
+                  paymentMethods={activePaymentMethods}
+                  onChange={(next) => {
+                    return handleEntryChange(index, next);
+                  }}
+                  onRemove={() => {
+                    return handleRemoveEntry(index);
+                  }}
+                  canRemove={entries.length > 1}
+                  disabled={isActionLoading}
+                />
+              );
+            })}
           </div>
         ) : (
           <div className="divide-y">
-            {(batch.entries || []).map((entry, index) => (
-              <div
-                key={entry.id || index}
-                className="flex items-center justify-between py-2 text-sm"
-              >
-                <div>
-                  <span className="font-medium">
-                    {entry.offeringTypeName || entry.offeringTypeId}
+            {(batch.entries || []).map((entry, index) => {
+              return (
+                <div
+                  key={entry.id || index}
+                  className="flex items-center justify-between py-2 text-sm"
+                >
+                  <div>
+                    <span className="font-medium">
+                      {entry.offeringTypeName || entry.offeringTypeId}
+                    </span>
+                    <span className="text-gray-400 ml-2">
+                      {entry.paymentMethod}
+                    </span>
+                    {entry.note && (
+                      <span className="text-gray-400 ml-2">- {entry.note}</span>
+                    )}
+                  </div>
+                  <span className="font-semibold">
+                    {formatCurrency(entry.amount, entry.currencyCode)}
                   </span>
-                  <span className="text-gray-400 ml-2">
-                    {entry.paymentMethod}
-                  </span>
-                  {entry.note && (
-                    <span className="text-gray-400 ml-2">- {entry.note}</span>
-                  )}
                 </div>
-                <span className="font-semibold">
-                  {formatCurrency(entry.amount, entry.currencyCode)}
-                </span>
-              </div>
-            ))}
+              );
+            })}
             {!(batch.entries || []).length && (
               <Text variant="muted" className="text-sm py-2">
                 No entries recorded.
@@ -466,14 +522,16 @@ export default function GivingBatchDetailPage() {
         )}
 
         <div className="flex flex-wrap items-center gap-4 pt-2 border-t">
-          {Object.entries(totalsByCurrency).map(([code, amount]) => (
-            <div key={code} className="text-sm">
-              <span className="text-gray-500">Total {code}: </span>
-              <span className="font-semibold">
-                {formatCurrency(amount, code)}
-              </span>
-            </div>
-          ))}
+          {Object.entries(totalsByCurrency).map(([code, amount]) => {
+            return (
+              <div key={code} className="text-sm">
+                <span className="text-gray-500">Total {code}: </span>
+                <span className="font-semibold">
+                  {formatCurrency(amount, code)}
+                </span>
+              </div>
+            );
+          })}
         </div>
       </div>
 
@@ -483,7 +541,9 @@ export default function GivingBatchDetailPage() {
           <Textarea
             rows={3}
             value={notes}
-            onChange={(e) => setNotes(e.target.value)}
+            onChange={(e) => {
+              return setNotes(e.target.value);
+            }}
           />
         ) : (
           <Text variant="muted">{batch.notes || "No notes"}</Text>
@@ -530,13 +590,17 @@ export default function GivingBatchDetailPage() {
             <Textarea
               rows={3}
               value={editReason}
-              onChange={(e) => setEditReason(e.target.value)}
+              onChange={(e) => {
+                return setEditReason(e.target.value);
+              }}
               placeholder="e.g. Correcting a miscounted entry"
             />
           </div>
           <DialogFooter>
             <Button
-              onClick={() => persistChanges(editReason.trim())}
+              onClick={() => {
+                return persistChanges(editReason.trim());
+              }}
               disabled={!editReason.trim() || isActionLoading}
             >
               {isActionLoading ? "Saving..." : "Save Changes"}

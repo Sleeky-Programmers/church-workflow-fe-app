@@ -6,8 +6,8 @@ import { Text } from "@/components/ui/typography/Text";
 import { termsSections } from "@/lib/legal-content";
 
 // DRAFT PAGE - generic placeholder structure only. Do not treat as a
-// finished legal document: it has not been reviewed by counsel and must be
-// replaced with real, reviewed content before this is unindexed (see
+// Finished legal document: it has not been reviewed by counsel and must be
+// Replaced with real, reviewed content before this is unindexed (see
 // `noIndex` below) or relied upon for compliance purposes.
 export const metadata = generateSeoMetadata({
   title: "Terms of Service | Church Workflow",
@@ -39,24 +39,28 @@ export default function TermsOfServicePage() {
         </Text>
 
         <div className="space-y-8">
-          {sections.map((section) => (
-            <article key={section.heading}>
-              <Heading level={2} className="text-xl font-bold mb-3">
-                {section.heading}
-              </Heading>
-              <div className="space-y-2">
-                {section.body.map((paragraph) => (
-                  <Text
-                    key={paragraph}
-                    variant="muted"
-                    className="text-sm leading-relaxed"
-                  >
-                    {paragraph}
-                  </Text>
-                ))}
-              </div>
-            </article>
-          ))}
+          {sections.map((section) => {
+            return (
+              <article key={section.heading}>
+                <Heading level={2} className="text-xl font-bold mb-3">
+                  {section.heading}
+                </Heading>
+                <div className="space-y-2">
+                  {section.body.map((paragraph) => {
+                    return (
+                      <Text
+                        key={paragraph}
+                        variant="muted"
+                        className="text-sm leading-relaxed"
+                      >
+                        {paragraph}
+                      </Text>
+                    );
+                  })}
+                </div>
+              </article>
+            );
+          })}
         </div>
       </section>
 

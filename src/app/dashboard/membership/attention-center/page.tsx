@@ -21,9 +21,8 @@ import {
   UserCheck,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { motion } from "framer-motion";
 import {
-  fadeUp,
   fadeUpBounce,
   staggerContainer,
   hoverLift,
@@ -53,7 +52,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import Heading from "@/components/ui/typography/Heading";
-import { useIsMobile } from "@/hooks/use-mobile";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import {
@@ -213,50 +211,56 @@ function AlertCard({
 
         {alert.notes.length > 0 && (
           <div className="mt-3 flex flex-col gap-2">
-            {alert.notes.map((note, index) => (
-              <div
-                key={note.id}
-                className="rounded-lg bg-gray-50 border border-gray-100 px-3 py-2"
-              >
-                <p className="text-xs text-gray-700">
-                  {note.body}
-                  {note.updatedAt && (
-                    <span className="text-gray-400 italic"> (edited)</span>
-                  )}
-                </p>
-                <div className="flex items-center justify-between gap-2 mt-1">
-                  <p className="text-[11px] text-gray-400">
-                    {note.kind === "resolve-outcome" && (
-                      <span className="text-green-600 font-medium">
-                        Outcome ·{" "}
-                      </span>
+            {alert.notes.map((note, index) => {
+              return (
+                <div
+                  key={note.id}
+                  className="rounded-lg bg-gray-50 border border-gray-100 px-3 py-2"
+                >
+                  <p className="text-xs text-gray-700">
+                    {note.body}
+                    {note.updatedAt && (
+                      <span className="text-gray-400 italic"> (edited)</span>
                     )}
-                    {note.authorName} ·{" "}
-                    {new Date(note.createdAt).toLocaleDateString(undefined, {
-                      month: "short",
-                      day: "numeric",
-                      year: "numeric",
-                    })}
                   </p>
-                  {note.kind !== "resolve-outcome" && (
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => onEditNote(index, note.body)}
-                        className="text-[11px] font-medium text-gray-500 hover:text-primary-400"
-                      >
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => onDeleteNote(index)}
-                        className="text-[11px] font-medium text-gray-400 hover:text-red-500"
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  )}
+                  <div className="flex items-center justify-between gap-2 mt-1">
+                    <p className="text-[11px] text-gray-400">
+                      {note.kind === "resolve-outcome" && (
+                        <span className="text-green-600 font-medium">
+                          Outcome ·{" "}
+                        </span>
+                      )}
+                      {note.authorName} ·{" "}
+                      {new Date(note.createdAt).toLocaleDateString(undefined, {
+                        month: "short",
+                        day: "numeric",
+                        year: "numeric",
+                      })}
+                    </p>
+                    {note.kind !== "resolve-outcome" && (
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => {
+                            return onEditNote(index, note.body);
+                          }}
+                          className="text-[11px] font-medium text-gray-500 hover:text-primary-400"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => {
+                            return onDeleteNote(index);
+                          }}
+                          className="text-[11px] font-medium text-gray-400 hover:text-red-500"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
 
@@ -272,7 +276,11 @@ function AlertCard({
           {/* Contact menu - call / email / WhatsApp depending on data on file */}
           <div className="relative">
             <button
-              onClick={() => setContactOpen((v) => !v)}
+              onClick={() => {
+                return setContactOpen((v) => {
+                  return !v;
+                });
+              }}
               disabled={!hasPhone && !hasEmail}
               className={cn(
                 "flex items-center gap-1.5 px-2.5 py-1.5 rounded-md border border-gray-200 text-xs font-medium text-gray-700 transition-colors",
@@ -292,13 +300,17 @@ function AlertCard({
               <>
                 <div
                   className="fixed inset-0 z-10"
-                  onClick={() => setContactOpen(false)}
+                  onClick={() => {
+                    return setContactOpen(false);
+                  }}
                 />
                 <div className="absolute left-0 top-full mt-1 z-20 w-44 rounded-lg border border-gray-200 bg-popover shadow-lg py-1">
                   {hasPhone && (
                     <a
                       href={`tel:${alert.memberPhone}`}
-                      onClick={() => setContactOpen(false)}
+                      onClick={() => {
+                        return setContactOpen(false);
+                      }}
                       className="flex items-center gap-2 px-3 py-2 text-xs text-gray-700 hover:bg-gray-50"
                     >
                       <Phone className="h-3.5 w-3.5 text-gray-400" />
@@ -310,7 +322,9 @@ function AlertCard({
                       href={`https://wa.me/${waNumber}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      onClick={() => setContactOpen(false)}
+                      onClick={() => {
+                        return setContactOpen(false);
+                      }}
                       className="flex items-center gap-2 px-3 py-2 text-xs text-gray-700 hover:bg-gray-50"
                     >
                       <MessageCircle className="h-3.5 w-3.5 text-green-500" />
@@ -320,7 +334,9 @@ function AlertCard({
                   {hasEmail && (
                     <a
                       href={`mailto:${alert.memberEmail}`}
-                      onClick={() => setContactOpen(false)}
+                      onClick={() => {
+                        return setContactOpen(false);
+                      }}
                       className="flex items-center gap-2 px-3 py-2 text-xs text-gray-700 hover:bg-gray-50"
                     >
                       <Mail className="h-3.5 w-3.5 text-gray-400" />
@@ -356,7 +372,9 @@ function AlertCard({
             </button>
           ) : (
             <button
-              onClick={() => onResolve("")}
+              onClick={() => {
+                return onResolve("");
+              }}
               disabled={busy}
               className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium text-green-600 hover:bg-green-50 transition-colors"
             >
@@ -371,7 +389,6 @@ function AlertCard({
 }
 
 export default function AttentionCenterPage() {
-  const isMobile = useIsMobile();
   const { toast } = useToast();
   const [alerts, setAlerts] = useState<PastoralAlert[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -382,7 +399,7 @@ export default function AttentionCenterPage() {
   const [currentPage, setCurrentPage] = useState(1);
 
   // Dialog state: null = closed. noteTarget carries { alert, editIndex, initialBody }
-  // so the same dialog handles add and edit.
+  // So the same dialog handles add and edit.
   const [noteTarget, setNoteTarget] = useState<{
     alert: PastoralAlert;
     editIndex: number | null;
@@ -394,11 +411,17 @@ export default function AttentionCenterPage() {
   const [outcomeNote, setOutcomeNote] = useState("");
 
   const load = (silent = false) => {
-    if (!silent) setIsLoading(true);
+    if (!silent) {
+      setIsLoading(true);
+    }
     fetchPastoralAlerts({ includeResolved: true })
       .then(setAlerts)
-      .catch(() => toast({ title: "Failed to load alerts" }))
-      .finally(() => setIsLoading(false));
+      .catch(() => {
+        return toast({ title: "Failed to load alerts" });
+      })
+      .finally(() => {
+        return setIsLoading(false);
+      });
   };
 
   useEffect(() => {
@@ -414,19 +437,24 @@ export default function AttentionCenterPage() {
     return map;
   }, [alerts]);
 
-  const filtered = useMemo(
-    () => (tab === "all" ? alerts : alerts.filter((a) => a.category === tab)),
-    [alerts, tab],
-  );
+  const filtered = useMemo(() => {
+    return tab === "all"
+      ? alerts
+      : alerts.filter((a) => {
+          return a.category === tab;
+        });
+  }, [alerts, tab]);
 
-  const visible = useMemo(
-    () =>
-      showResolved ? filtered : filtered.filter((a) => !a.resolved),
-    [filtered, showResolved],
-  );
+  const visible = useMemo(() => {
+    return showResolved
+      ? filtered
+      : filtered.filter((a) => {
+          return !a.resolved;
+        });
+  }, [filtered, showResolved]);
 
   // Reset to page 1 whenever the active tab or resolved-filter changes so a
-  // deep page number from a previous view never leaves the list looking empty.
+  // Deep page number from a previous view never leaves the list looking empty.
   useEffect(() => {
     setCurrentPage(1);
   }, [tab, showResolved]);
@@ -434,14 +462,14 @@ export default function AttentionCenterPage() {
   const totalPages = Math.max(1, Math.ceil(visible.length / pageSize));
 
   useEffect(() => {
-    if (currentPage > totalPages) setCurrentPage(totalPages);
+    if (currentPage > totalPages) {
+      setCurrentPage(totalPages);
+    }
   }, [currentPage, totalPages]);
 
-  const paginated = useMemo(
-    () =>
-      visible.slice((currentPage - 1) * pageSize, currentPage * pageSize),
-    [visible, currentPage, pageSize],
-  );
+  const paginated = useMemo(() => {
+    return visible.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+  }, [visible, currentPage, pageSize]);
 
   const withBusy = async (id: string, fn: () => Promise<void>) => {
     setBusyId(id);
@@ -452,15 +480,15 @@ export default function AttentionCenterPage() {
     }
   };
 
-  const handleResolve = (alert: PastoralAlert, outcome: string) =>
-    withBusy(alert.alertId, async () => {
+  const handleResolve = (alert: PastoralAlert, outcome: string) => {
+    return withBusy(alert.alertId, async () => {
       try {
         await setAlertResolved(alert.alertId, true, outcome);
-        setAlerts((prev) =>
-          prev.map((a) =>
-            a.alertId === alert.alertId ? { ...a, resolved: true } : a,
-          ),
-        );
+        setAlerts((prev) => {
+          return prev.map((a) => {
+            return a.alertId === alert.alertId ? { ...a, resolved: true } : a;
+          });
+        });
         toast({ title: `Alert for ${alert.memberName} resolved` });
         setResolveTarget(null);
         setOutcomeNote("");
@@ -468,46 +496,53 @@ export default function AttentionCenterPage() {
         toast({ title: "Failed to resolve alert", variant: "destructive" });
       }
     });
+  };
 
-  const handleUnresolve = (alert: PastoralAlert) =>
-    withBusy(alert.alertId, async () => {
+  const handleUnresolve = (alert: PastoralAlert) => {
+    return withBusy(alert.alertId, async () => {
       try {
         await setAlertResolved(alert.alertId, false);
-        setAlerts((prev) =>
-          prev.map((a) =>
-            a.alertId === alert.alertId ? { ...a, resolved: false } : a,
-          ),
-        );
+        setAlerts((prev) => {
+          return prev.map((a) => {
+            return a.alertId === alert.alertId ? { ...a, resolved: false } : a;
+          });
+        });
       } catch {
         toast({ title: "Failed to unresolve alert", variant: "destructive" });
       }
     });
+  };
 
-  const handleMarkRead = (alert: PastoralAlert) =>
-    withBusy(alert.alertId, async () => {
+  const handleMarkRead = (alert: PastoralAlert) => {
+    return withBusy(alert.alertId, async () => {
       try {
         await setAlertRead(alert.alertId, true);
-        setAlerts((prev) =>
-          prev.map((a) =>
-            a.alertId === alert.alertId ? { ...a, read: true } : a,
-          ),
-        );
+        setAlerts((prev) => {
+          return prev.map((a) => {
+            return a.alertId === alert.alertId ? { ...a, read: true } : a;
+          });
+        });
       } catch {
         toast({ title: "Failed to mark as read", variant: "destructive" });
       }
     });
+  };
 
   const handleNoteSubmit = async (body: string) => {
-    if (!noteTarget) return;
+    if (!noteTarget) {
+      return;
+    }
     const { alert, editIndex } = noteTarget;
     try {
       const notes =
         editIndex !== null
           ? await updateAlertNote(alert.alertId, editIndex, body)
           : await addAlertNote(alert.alertId, body);
-      setAlerts((prev) =>
-        prev.map((a) => (a.alertId === alert.alertId ? { ...a, notes } : a)),
-      );
+      setAlerts((prev) => {
+        return prev.map((a) => {
+          return a.alertId === alert.alertId ? { ...a, notes } : a;
+        });
+      });
       toast({ title: editIndex !== null ? "Note updated" : "Note added" });
     } catch {
       toast({
@@ -517,20 +552,25 @@ export default function AttentionCenterPage() {
     }
   };
 
-  const handleDeleteNote = (alert: PastoralAlert, index: number) =>
-    withBusy(alert.alertId, async () => {
+  const handleDeleteNote = (alert: PastoralAlert, index: number) => {
+    return withBusy(alert.alertId, async () => {
       try {
         const notes = await deleteAlertNote(alert.alertId, index);
-        setAlerts((prev) =>
-          prev.map((a) => (a.alertId === alert.alertId ? { ...a, notes } : a)),
-        );
+        setAlerts((prev) => {
+          return prev.map((a) => {
+            return a.alertId === alert.alertId ? { ...a, notes } : a;
+          });
+        });
         toast({ title: "Note deleted" });
       } catch {
         toast({ title: "Failed to delete note", variant: "destructive" });
       }
     });
+  };
 
-  const activeTabMeta = TABS.find((t) => t.key === tab);
+  const activeTabMeta = TABS.find((t) => {
+    return t.key === tab;
+  });
 
   return (
     <div className="min-h-screen bg-gray-50 pb-10">
@@ -546,29 +586,37 @@ export default function AttentionCenterPage() {
         {/* Tabs + Show Resolved */}
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex flex-wrap gap-1.5">
-            {TABS.map(({ key, label, icon: Icon }) => (
-              <motion.button
-                key={key}
-                onClick={() => setTab(key)}
-                whileHover={tab === key ? undefined : { y: -1 }}
-                whileTap={{ scale: 0.97 }}
-                transition={hoverSpring}
-                className={cn(
-                  "flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-medium transition-colors",
-                  tab === key
-                    ? "bg-white text-gray-900 border-gray-300 shadow-sm"
-                    : "bg-gray-100 text-gray-500 border-transparent hover:bg-white hover:text-gray-800 hover:border-gray-200",
-                )}
-              >
-                <Icon className="h-3.5 w-3.5" />
-                {label}
-                {counts[key] ? ` (${counts[key]})` : ""}
-              </motion.button>
-            ))}
+            {TABS.map(({ key, label, icon: Icon }) => {
+              return (
+                <motion.button
+                  key={key}
+                  onClick={() => {
+                    return setTab(key);
+                  }}
+                  whileHover={tab === key ? undefined : { y: -1 }}
+                  whileTap={{ scale: 0.97 }}
+                  transition={hoverSpring}
+                  className={cn(
+                    "flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-medium transition-colors",
+                    tab === key
+                      ? "bg-white text-gray-900 border-gray-300 shadow-sm"
+                      : "bg-gray-100 text-gray-500 border-transparent hover:bg-white hover:text-gray-800 hover:border-gray-200",
+                  )}
+                >
+                  <Icon className="h-3.5 w-3.5" />
+                  {label}
+                  {counts[key] ? ` (${counts[key]})` : ""}
+                </motion.button>
+              );
+            })}
           </div>
 
           <button
-            onClick={() => setShowResolved((v) => !v)}
+            onClick={() => {
+              return setShowResolved((v) => {
+                return !v;
+              });
+            }}
             className={cn(
               "flex items-center gap-1.5 text-xs font-medium shrink-0 transition-colors",
               showResolved
@@ -606,41 +654,49 @@ export default function AttentionCenterPage() {
             animate="visible"
             className="flex flex-col gap-3"
           >
-            {paginated.map((alert) => (
-              <motion.div
-                key={alert.alertId}
-                variants={fadeUpBounce}
-                layout
-                whileHover={hoverLift}
-                transition={hoverSpring}
-              >
-                <AlertCard
-                  alert={alert}
-                  busy={busyId === alert.alertId}
-                  onResolve={() => {
-                    setOutcomeNote("");
-                    setResolveTarget(alert);
-                  }}
-                  onUnresolve={() => handleUnresolve(alert)}
-                  onMarkRead={() => handleMarkRead(alert)}
-                  onAddNote={() =>
-                    setNoteTarget({
-                      alert,
-                      editIndex: null,
-                      initialBody: "",
-                    })
-                  }
-                  onEditNote={(index, currentBody) =>
-                    setNoteTarget({
-                      alert,
-                      editIndex: index,
-                      initialBody: currentBody,
-                    })
-                  }
-                  onDeleteNote={(index) => handleDeleteNote(alert, index)}
-                />
-              </motion.div>
-            ))}
+            {paginated.map((alert) => {
+              return (
+                <motion.div
+                  key={alert.alertId}
+                  variants={fadeUpBounce}
+                  layout
+                  whileHover={hoverLift}
+                  transition={hoverSpring}
+                >
+                  <AlertCard
+                    alert={alert}
+                    busy={busyId === alert.alertId}
+                    onResolve={() => {
+                      setOutcomeNote("");
+                      setResolveTarget(alert);
+                    }}
+                    onUnresolve={() => {
+                      return handleUnresolve(alert);
+                    }}
+                    onMarkRead={() => {
+                      return handleMarkRead(alert);
+                    }}
+                    onAddNote={() => {
+                      return setNoteTarget({
+                        alert,
+                        editIndex: null,
+                        initialBody: "",
+                      });
+                    }}
+                    onEditNote={(index, currentBody) => {
+                      return setNoteTarget({
+                        alert,
+                        editIndex: index,
+                        initialBody: currentBody,
+                      });
+                    }}
+                    onDeleteNote={(index) => {
+                      return handleDeleteNote(alert, index);
+                    }}
+                  />
+                </motion.div>
+              );
+            })}
           </motion.div>
         )}
 
@@ -661,11 +717,13 @@ export default function AttentionCenterPage() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {[10, 25].map((size) => (
-                    <SelectItem key={size} value={String(size)}>
-                      {size}
-                    </SelectItem>
-                  ))}
+                  {[10, 25].map((size) => {
+                    return (
+                      <SelectItem key={size} value={String(size)}>
+                        {size}
+                      </SelectItem>
+                    );
+                  })}
                 </SelectContent>
               </Select>
               <span className="text-xs text-gray-400 whitespace-nowrap">
@@ -679,9 +737,11 @@ export default function AttentionCenterPage() {
                 <PaginationContent>
                   <PaginationItem>
                     <button
-                      onClick={() =>
-                        setCurrentPage((p) => Math.max(1, p - 1))
-                      }
+                      onClick={() => {
+                        return setCurrentPage((p) => {
+                          return Math.max(1, p - 1);
+                        });
+                      }}
                       disabled={currentPage === 1}
                       className={cn(
                         "flex items-center justify-center h-8 w-8 rounded-md border border-gray-200 text-gray-500 transition-colors",
@@ -694,11 +754,15 @@ export default function AttentionCenterPage() {
                     </button>
                   </PaginationItem>
 
-                  {Array.from({ length: totalPages }, (_, i) => i + 1).map(
-                    (page) => (
+                  {Array.from({ length: totalPages }, (_, i) => {
+                    return i + 1;
+                  }).map((page) => {
+                    return (
                       <PaginationItem key={page}>
                         <button
-                          onClick={() => setCurrentPage(page)}
+                          onClick={() => {
+                            return setCurrentPage(page);
+                          }}
                           className={cn(
                             "flex items-center justify-center h-8 w-8 rounded-md text-xs font-medium border transition-colors",
                             currentPage === page
@@ -709,14 +773,16 @@ export default function AttentionCenterPage() {
                           {page}
                         </button>
                       </PaginationItem>
-                    ),
-                  )}
+                    );
+                  })}
 
                   <PaginationItem>
                     <button
-                      onClick={() =>
-                        setCurrentPage((p) => Math.min(totalPages, p + 1))
-                      }
+                      onClick={() => {
+                        return setCurrentPage((p) => {
+                          return Math.min(totalPages, p + 1);
+                        });
+                      }}
                       disabled={currentPage === totalPages}
                       className={cn(
                         "flex items-center justify-center h-8 w-8 rounded-md border border-gray-200 text-gray-500 transition-colors",
@@ -740,7 +806,9 @@ export default function AttentionCenterPage() {
           open
           memberName={noteTarget.alert.memberName}
           initialBody={noteTarget.initialBody}
-          onClose={() => setNoteTarget(null)}
+          onClose={() => {
+            return setNoteTarget(null);
+          }}
           onSubmit={async (body) => {
             await handleNoteSubmit(body);
             setNoteTarget(null);
@@ -752,7 +820,9 @@ export default function AttentionCenterPage() {
       {resolveTarget && (
         <Dialog
           open
-          onOpenChange={(next) => !next && setResolveTarget(null)}
+          onOpenChange={(next) => {
+            return !next && setResolveTarget(null);
+          }}
         >
           <DialogContent className="sm:max-w-md">
             <DialogHeader>
@@ -760,14 +830,16 @@ export default function AttentionCenterPage() {
                 Resolve alert for {resolveTarget.memberName}
               </DialogTitle>
               <DialogDescription className="text-sm text-gray-500">
-                Add a quick outcome note - it's saved to this alert's history
-                so the team knows what happened.
+                Add a quick outcome note - it&apos;s saved to this alert&apos;s
+                history so the team knows what happened.
               </DialogDescription>
             </DialogHeader>
 
             <textarea
               value={outcomeNote}
-              onChange={(e) => setOutcomeNote(e.target.value)}
+              onChange={(e) => {
+                return setOutcomeNote(e.target.value);
+              }}
               rows={4}
               placeholder="e.g. Visited on Sunday - doing well, will join a small team…"
               className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-100 resize-none"
@@ -776,13 +848,19 @@ export default function AttentionCenterPage() {
             <div className="flex justify-end gap-2 mt-2">
               <Button
                 variant="outline"
-                onClick={() => setResolveTarget(null)}
+                onClick={() => {
+                  return setResolveTarget(null);
+                }}
               >
                 Cancel
               </Button>
               <Button
-                onClick={() => handleResolve(resolveTarget, outcomeNote)}
-                disabled={!outcomeNote.trim() || busyId === resolveTarget.alertId}
+                onClick={() => {
+                  return handleResolve(resolveTarget, outcomeNote);
+                }}
+                disabled={
+                  !outcomeNote.trim() || busyId === resolveTarget.alertId
+                }
                 className="bg-green-600 hover:bg-green-700"
               >
                 {busyId === resolveTarget.alertId ? "Resolving…" : "Resolve"}

@@ -51,16 +51,13 @@ export default function HowItWorksSection() {
       id="how-it-works"
       className="relative bg-white py-20 px-6 overflow-hidden"
     >
-      <img
-        loading="lazy"
-        decoding="async"
+      <Image
         src="/assets/icons/star.svg"
         alt=""
         aria-hidden="true"
         width={32}
         height={32}
-        className="absolute top-10 right-16 select-none pointer-events-none"
-      />
+        className="absolute top-10 right-16 select-none pointer-events-none" />
 
       <div className="max-w-3xl mx-auto text-center mb-20">
         <Heading
@@ -69,72 +66,68 @@ export default function HowItWorksSection() {
         >
           <span className="relative inline-block text-[#0C5FB3]">
             How Church Workflow Works
-            <img
-              loading="lazy"
-              decoding="async"
+            <Image
               src="/assets/icons/wave.svg"
               alt=""
               aria-hidden="true"
-              className="absolute -bottom-5 left-0 w-full h-auto"
-            />
+              className="absolute -bottom-5 left-0 w-full h-auto" width={0} height={0} sizes="100vw" />
           </span>
         </Heading>
       </div>
 
       <div className="max-w-6xl mx-auto flex flex-col gap-24">
-        {steps.map((step, index) => (
-          <div
-            key={index}
-            className={`flex flex-col md:flex-row items-center gap-12 ${
-              step.imageLeft ? "md:flex-row-reverse" : ""
-            }`}
-          >
-            <div className="flex-1 flex flex-col gap-4">
-              <Text
-                variant="muted"
-                className="text-xs font-bold tracking-widest uppercase text-[#FF5F00]"
-              >
-                {step.step}
-              </Text>
+        {steps.map((step, index) => {
+          return (
+            <div
+              key={index}
+              className={`flex flex-col md:flex-row items-center gap-12 ${
+                step.imageLeft ? "md:flex-row-reverse" : ""
+              }`}
+            >
+              <div className="flex-1 flex flex-col gap-4">
+                <Text
+                  variant="muted"
+                  className="text-xs font-bold tracking-widest uppercase text-[#FF5F00]"
+                >
+                  {step.step}
+                </Text>
 
-              <Heading
-                level={2}
-                className="text-[48px] font-black leading-tight text-gray-900"
-              >
-                {step.title}
-              </Heading>
+                <Heading
+                  level={2}
+                  className="text-[48px] font-black leading-tight text-gray-900"
+                >
+                  {step.title}
+                </Heading>
 
-              <Text
-                variant="muted"
-                className="text-sm leading-relaxed max-w-sm"
-              >
-                {step.description}
-              </Text>
+                <Text
+                  variant="muted"
+                  className="text-sm leading-relaxed max-w-sm"
+                >
+                  {step.description}
+                </Text>
+              </div>
+
+              <div className="flex-1 relative">
+                <Image
+                  src="/assets/icons/star.svg"
+                  alt=""
+                  aria-hidden="true"
+                  width={28}
+                  height={28}
+                  className={`absolute -top-6 select-none pointer-events-none ${
+                    step.imageLeft ? "right-4" : "left-4"
+                  }`} />
+                <Image
+                  src={step.image}
+                  alt={step.step}
+                  width={520}
+                  height={360}
+                  className="w-full h-auto object-contain drop-shadow-xl"
+                />
+              </div>
             </div>
-
-            <div className="flex-1 relative">
-              <img
-                loading="lazy"
-                decoding="async"
-                src="/assets/icons/star.svg"
-                alt=""
-                aria-hidden="true"
-                width={28}
-                height={28}
-                className={`absolute -top-6 select-none pointer-events-none ${
-                  step.imageLeft ? "right-4" : "left-4"
-                }`}
-              />
-              <Image
-                src={step.image}
-                alt={step.step}
-                width={520}
-                height={360}
-                className="w-full h-auto object-contain drop-shadow-xl"
-              />
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </section>
   );

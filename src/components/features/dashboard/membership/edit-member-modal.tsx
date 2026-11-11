@@ -80,7 +80,12 @@ export function EditMemberModal({ member, onClose, onSave }: Props) {
       className="fixed inset-0 bg-black/40 flex items-center justify-center z-50"
       onClick={onClose}
     >
-      <div className="w-full max-w-3xl" onClick={(e) => e.stopPropagation()}>
+      <div
+        className="w-full max-w-3xl"
+        onClick={(e) => {
+          return e.stopPropagation();
+        }}
+      >
         <Card className="p-6 space-y-6 max-h-[90vh] overflow-y-auto">
           <div>
             <Heading level={2}>Edit Member Profile</Heading>
@@ -93,75 +98,85 @@ export function EditMemberModal({ member, onClose, onSave }: Props) {
                 <FormField
                   control={form.control}
                   name="title"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Title</FormLabel>
-                      <FormControl>
-                        <TitleCombobox
-                          value={field.value}
-                          onChange={field.onChange}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+                  render={({ field }) => {
+                    return (
+                      <FormItem>
+                        <FormLabel>Title</FormLabel>
+                        <FormControl>
+                          <TitleCombobox
+                            value={field.value}
+                            onChange={field.onChange}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    );
+                  }}
                 />
 
                 <FormField
                   control={form.control}
                   name="fullName"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>
-                        Full Name <Span variant="error">*</Span>
-                      </FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+                  render={({ field }) => {
+                    return (
+                      <FormItem>
+                        <FormLabel>
+                          Full Name <Span variant="error">*</Span>
+                        </FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    );
+                  }}
                 />
 
                 <FormField
                   control={form.control}
                   name="gender"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>
-                        Gender <Span variant="error">*</Span>
-                      </FormLabel>
-                      <Select
-                        value={field.value}
-                        onValueChange={field.onChange}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value={Gender.MALE}>Male</SelectItem>
-                          <SelectItem value={Gender.FEMALE}>Female</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+                  render={({ field }) => {
+                    return (
+                      <FormItem>
+                        <FormLabel>
+                          Gender <Span variant="error">*</Span>
+                        </FormLabel>
+                        <Select
+                          value={field.value}
+                          onValueChange={field.onChange}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value={Gender.MALE}>Male</SelectItem>
+                            <SelectItem value={Gender.FEMALE}>
+                              Female
+                            </SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    );
+                  }}
                 />
 
                 <FormField
                   control={form.control}
                   name="birthday"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Birthday</FormLabel>
-                      <FormControl>
-                        <Input type="date" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+                  render={({ field }) => {
+                    return (
+                      <FormItem>
+                        <FormLabel>Birthday</FormLabel>
+                        <FormControl>
+                          <Input type="date" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    );
+                  }}
                 />
               </div>
 
@@ -171,43 +186,49 @@ export function EditMemberModal({ member, onClose, onSave }: Props) {
                   <FormField
                     control={form.control}
                     name="email"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Email</FormLabel>
-                        <FormControl>
-                          <Input {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
+                    render={({ field }) => {
+                      return (
+                        <FormItem>
+                          <FormLabel>Email</FormLabel>
+                          <FormControl>
+                            <Input {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      );
+                    }}
                   />
 
                   <FormField
                     control={form.control}
                     name="phone"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Phone</FormLabel>
-                        <FormControl>
-                          <Input {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
+                    render={({ field }) => {
+                      return (
+                        <FormItem>
+                          <FormLabel>Phone</FormLabel>
+                          <FormControl>
+                            <Input {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      );
+                    }}
                   />
 
                   <FormField
                     control={form.control}
                     name="address"
-                    render={({ field }) => (
-                      <FormItem className="col-span-2">
-                        <FormLabel>Address</FormLabel>
-                        <FormControl>
-                          <Input {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
+                    render={({ field }) => {
+                      return (
+                        <FormItem className="col-span-2">
+                          <FormLabel>Address</FormLabel>
+                          <FormControl>
+                            <Input {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      );
+                    }}
                   />
                 </div>
               </div>
@@ -219,110 +240,118 @@ export function EditMemberModal({ member, onClose, onSave }: Props) {
                   <FormField
                     control={form.control}
                     name="membershipStatus"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Membership Status</FormLabel>
-                        <Select
-                          value={field.value}
-                          onValueChange={field.onChange}
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value={MembershipStatus.MEMBER}>
-                              Member
-                            </SelectItem>
-                            <SelectItem value={MembershipStatus.VISITOR}>
-                              Visitor
-                            </SelectItem>
-                            <SelectItem value={MembershipStatus.VOLUNTEER}>
-                              Volunteer
-                            </SelectItem>
-                            <SelectItem value={MembershipStatus.WORKER}>
-                              Worker
-                            </SelectItem>
-                            <SelectItem value={MembershipStatus.LEADER}>
-                              Leader
-                            </SelectItem>
-                            <SelectItem value={MembershipStatus.CONVERT}>
-                              New Convert
-                            </SelectItem>
-                          </SelectContent>
-                        </Select>
-                        {field.value === MembershipStatus.VISITOR && (
-                          <p className="mt-1 text-xs text-gray-500">
-                            Guests count towards your guest limit and
-                            can&apos;t be in departments, small teams or cell
-                            groups.
-                          </p>
-                        )}
-                        <FormMessage />
-                      </FormItem>
-                    )}
+                    render={({ field }) => {
+                      return (
+                        <FormItem>
+                          <FormLabel>Membership Status</FormLabel>
+                          <Select
+                            value={field.value}
+                            onValueChange={field.onChange}
+                          >
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value={MembershipStatus.MEMBER}>
+                                Member
+                              </SelectItem>
+                              <SelectItem value={MembershipStatus.VISITOR}>
+                                Visitor
+                              </SelectItem>
+                              <SelectItem value={MembershipStatus.VOLUNTEER}>
+                                Volunteer
+                              </SelectItem>
+                              <SelectItem value={MembershipStatus.WORKER}>
+                                Worker
+                              </SelectItem>
+                              <SelectItem value={MembershipStatus.LEADER}>
+                                Leader
+                              </SelectItem>
+                              <SelectItem value={MembershipStatus.CONVERT}>
+                                New Convert
+                              </SelectItem>
+                            </SelectContent>
+                          </Select>
+                          {field.value === MembershipStatus.VISITOR && (
+                            <p className="mt-1 text-xs text-gray-500">
+                              Guests count towards your guest limit and
+                              can&apos;t be in departments, small teams or cell
+                              groups.
+                            </p>
+                          )}
+                          <FormMessage />
+                        </FormItem>
+                      );
+                    }}
                   />
 
                   <FormField
                     control={form.control}
                     name="dateJoined"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Date Joined</FormLabel>
-                        <FormControl>
-                          <Input type="date" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
+                    render={({ field }) => {
+                      return (
+                        <FormItem>
+                          <FormLabel>Date Joined</FormLabel>
+                          <FormControl>
+                            <Input type="date" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      );
+                    }}
                   />
 
                   <FormField
                     control={form.control}
                     name="baptized"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Baptized</FormLabel>
-                        <Select
-                          value={
-                            field.value === true
-                              ? "true"
-                              : field.value === false
-                                ? "false"
-                                : ""
-                          }
-                          onValueChange={(val) =>
-                            field.onChange(val === "true")
-                          }
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="true">Yes</SelectItem>
-                            <SelectItem value="false">No</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
+                    render={({ field }) => {
+                      return (
+                        <FormItem>
+                          <FormLabel>Baptized</FormLabel>
+                          <Select
+                            value={
+                              field.value === true
+                                ? "true"
+                                : field.value === false
+                                  ? "false"
+                                  : ""
+                            }
+                            onValueChange={(val) => {
+                              return field.onChange(val === "true");
+                            }}
+                          >
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="true">Yes</SelectItem>
+                              <SelectItem value="false">No</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      );
+                    }}
                   />
 
                   <FormField
                     control={form.control}
                     name="volunteersPreference"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Volunteer Preference</FormLabel>
-                        <FormControl>
-                          <Input {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
+                    render={({ field }) => {
+                      return (
+                        <FormItem>
+                          <FormLabel>Volunteer Preference</FormLabel>
+                          <FormControl>
+                            <Input {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      );
+                    }}
                   />
                 </div>
               </div>

@@ -65,7 +65,9 @@ const MONTHS = [
   "November",
   "December",
 ];
-const TIME_SLOTS = Array.from({ length: 18 }, (_, i) => i + 1);
+const TIME_SLOTS = Array.from({ length: 18 }, (_, i) => {
+  return i + 1;
+});
 
 function parseHour(value: string): number {
   const input = value.trim().toLowerCase();
@@ -74,21 +76,22 @@ function parseHour(value: string): number {
   if (ampmMatch) {
     let hour = Number(ampmMatch[1]);
     const suffix = ampmMatch[3];
-    if (suffix === "pm" && hour < 12) hour += 12;
-    if (suffix === "am" && hour === 12) hour = 0;
+    if (suffix === "pm" && hour < 12) {
+      hour += 12;
+    }
+    if (suffix === "am" && hour === 12) {
+      hour = 0;
+    }
     return hour;
   }
 
   const hhmmMatch = input.match(/^(\d{1,2})(?::(\d{2}))$/);
-  if (hhmmMatch) return Number(hhmmMatch[1]);
+  if (hhmmMatch) {
+    return Number(hhmmMatch[1]);
+  }
 
   const numeric = Number(input);
   return Number.isNaN(numeric) ? 0 : numeric;
-}
-
-function isServiceOnDate(service: RegularService, date: Date): boolean {
-  const dateDayName = format(date, "EEEE").toUpperCase();
-  return service.day ? service.day.includes(dateDayName) : false;
 }
 
 function getServicesForDate(
@@ -97,7 +100,9 @@ function getServicesForDate(
 ): RegularService[] {
   const dateDayName = format(date, "EEEE").toUpperCase(); // "SUNDAY", "MONDAY", etc.
   return services.filter((service) => {
-    if (!service.day) return false;
+    if (!service.day) {
+      return false;
+    }
     // Handle both string and array of days
     if (typeof service.day === "string") {
       return service.day.toUpperCase() === dateDayName;
@@ -134,7 +139,9 @@ function getSpecialServicesForDate(
   services: SpecialServiceEvent[],
   date: Date,
 ): SpecialServiceEvent[] {
-  return services.filter((service) => isSpecialServiceOnDate(service, date));
+  return services.filter((service) => {
+    return isSpecialServiceOnDate(service, date);
+  });
 }
 
 export function CalendarGrid({
@@ -165,22 +172,24 @@ export function CalendarGrid({
   const filteredRegularServices = useMemo(() => {
     let next = services;
 
-    if (selectedType === "special") next = [];
+    if (selectedType === "special") {
+      next = [];
+    }
 
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
-      next = next.filter(
-        (service) =>
+      next = next.filter((service) => {
+        return (
           service.title.toLowerCase().includes(query) ||
-          (service.location || "").toLowerCase().includes(query),
-      );
+          (service.location || "").toLowerCase().includes(query)
+        );
+      });
     }
 
     if (filterServiceId !== "all") {
-      next = next.filter(
-        (service, index) =>
-          (service.id || `service-option-${index}`) === filterServiceId,
-      );
+      next = next.filter((service, index) => {
+        return (service.id || `service-option-${index}`) === filterServiceId;
+      });
     }
 
     if (filterDate) {
@@ -194,19 +203,24 @@ export function CalendarGrid({
   const filteredSpecialServices = useMemo(() => {
     let next = specialServices;
 
-    if (selectedType === "regular") next = [];
+    if (selectedType === "regular") {
+      next = [];
+    }
 
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
-      next = next.filter(
-        (service) =>
+      next = next.filter((service) => {
+        return (
           service.title.toLowerCase().includes(query) ||
-          (service.location || "").toLowerCase().includes(query),
-      );
+          (service.location || "").toLowerCase().includes(query)
+        );
+      });
     }
 
     if (filterServiceId !== "all") {
-      next = next.filter((service) => service.id === filterServiceId);
+      next = next.filter((service) => {
+        return service.id === filterServiceId;
+      });
     }
 
     if (filterDate) {
@@ -220,17 +234,23 @@ export function CalendarGrid({
   const calendarDays = useMemo(() => {
     const days = generateCalendarDays(currentMonth);
     // Extract just the date objects from CalendarDay array
-    const dateObjects = days.map((day) => day.date);
+    const dateObjects = days.map((day) => {
+      return day.date;
+    });
     return mapServicesToCalendar(dateObjects, filteredRegularServices);
   }, [currentMonth, filteredRegularServices]);
 
   const weekDays = useMemo(() => {
     const start = startOfWeek(currentMonth, { weekStartsOn: 0 });
-    return Array.from({ length: 7 }, (_, i) => addDays(start, i));
+    return Array.from({ length: 7 }, (_, i) => {
+      return addDays(start, i);
+    });
   }, [currentMonth]);
 
   const infoServices = useMemo(() => {
-    if (!infoDate) return [];
+    if (!infoDate) {
+      return [];
+    }
     return getServicesForDate(filteredRegularServices, infoDate);
   }, [infoDate, filteredRegularServices]);
 
@@ -239,9 +259,13 @@ export function CalendarGrid({
   }, [currentMonth]);
 
   useEffect(() => {
-    if (!filterDate) return;
+    if (!filterDate) {
+      return;
+    }
     const date = new Date(filterDate);
-    if (!Number.isNaN(date.getTime())) setCurrentMonth(date);
+    if (!Number.isNaN(date.getTime())) {
+      setCurrentMonth(date);
+    }
   }, [filterDate]);
 
   const openInfoModal = (date: Date) => {
@@ -252,9 +276,15 @@ export function CalendarGrid({
     setIsInfoModalOpen(true);
   };
 
-  const handleToday = () => setCurrentMonth(new Date());
-  const handlePrevMonth = () => setCurrentMonth(subMonths(currentMonth, 1));
-  const handleNextMonth = () => setCurrentMonth(addMonths(currentMonth, 1));
+  const handleToday = () => {
+    return setCurrentMonth(new Date());
+  };
+  const handlePrevMonth = () => {
+    return setCurrentMonth(subMonths(currentMonth, 1));
+  };
+  const handleNextMonth = () => {
+    return setCurrentMonth(addMonths(currentMonth, 1));
+  };
 
   const handleMonthSelect = (monthName: string) => {
     setSelectedMonth(monthName);
@@ -276,125 +306,151 @@ export function CalendarGrid({
       const first = new Date(year, month, 1);
       const start = startOfWeek(startOfMonth(first), { weekStartsOn: 0 });
       const end = endOfMonth(first);
-      const days = Array.from({ length: 42 }, (_, i) => addDays(start, i));
+      const days = Array.from({ length: 42 }, (_, i) => {
+        return addDays(start, i);
+      });
       return { month: first, days, end };
     });
 
     return (
       <div className="grid grid-cols-4 gap-6 p-4">
-        {months.map(({ month, days, end }) => (
-          <div key={format(month, "MMMM")} className="space-y-2">
-            <Text className="text-base font-semibold">
-              {format(month, "MMMM")}
-            </Text>
-            <div className="grid grid-cols-7 text-[10px] text-muted-foreground">
-              {WEEKDAY_HEADERS.map((day) => (
-                <div key={day} className="text-center py-1">
-                  {day[0]}
-                </div>
-              ))}
+        {months.map(({ month, days, end }) => {
+          return (
+            <div key={format(month, "MMMM")} className="space-y-2">
+              <Text className="text-base font-semibold">
+                {format(month, "MMMM")}
+              </Text>
+              <div className="grid grid-cols-7 text-[10px] text-muted-foreground">
+                {WEEKDAY_HEADERS.map((day) => {
+                  return (
+                    <div key={day} className="text-center py-1">
+                      {day[0]}
+                    </div>
+                  );
+                })}
+              </div>
+              <div className="grid grid-cols-7 gap-1">
+                {days.map((day) => {
+                  const hasRegular =
+                    getServicesForDate(filteredRegularServices, day).length > 0;
+                  const hasSpecial =
+                    getSpecialServicesForDate(filteredSpecialServices, day)
+                      .length > 0;
+                  const hasService = hasRegular || hasSpecial;
+                  const isInMonth = isSameMonth(day, month);
+                  const isAfterMonth = day > end;
+                  return (
+                    <button
+                      key={day.toISOString()}
+                      type="button"
+                      onClick={() => {
+                        return openInfoModal(day);
+                      }}
+                      className={`h-6 w-6 rounded text-xs ${
+                        hasService
+                          ? "bg-primary/10 text-primary font-medium"
+                          : ""
+                      } ${!isInMonth || isAfterMonth ? "text-muted-foreground/40" : "text-foreground"}`}
+                    >
+                      {format(day, "d")}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
-            <div className="grid grid-cols-7 gap-1">
-              {days.map((day) => {
-                const hasRegular =
-                  getServicesForDate(filteredRegularServices, day).length > 0;
-                const hasSpecial =
-                  getSpecialServicesForDate(filteredSpecialServices, day)
-                    .length > 0;
-                const hasService = hasRegular || hasSpecial;
-                const isInMonth = isSameMonth(day, month);
-                const isAfterMonth = day > end;
-                return (
-                  <button
-                    key={day.toISOString()}
-                    type="button"
-                    onClick={() => openInfoModal(day)}
-                    className={`h-6 w-6 rounded text-xs ${
-                      hasService ? "bg-primary/10 text-primary font-medium" : ""
-                    } ${!isInMonth || isAfterMonth ? "text-muted-foreground/40" : "text-foreground"}`}
-                  >
-                    {format(day, "d")}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     );
   };
 
-  const renderWeekView = () => (
-    <div className="p-4">
-      <div className="grid grid-cols-8 border-b">
-        <div />
-        {weekDays.map((day) => (
-          <button
-            key={day.toISOString()}
-            type="button"
-            onClick={() => openInfoModal(day)}
-            className="text-center py-2 border-l text-sm font-medium hover:bg-accent"
-          >
-            <div className="text-xs text-muted-foreground">
-              {format(day, "EEE")}
-            </div>
-            <div>{format(day, "d")}</div>
-          </button>
-        ))}
-      </div>
-
-      {TIME_SLOTS.map((slot) => (
-        <div key={slot} className="grid grid-cols-8 min-h-10 border-b">
-          <div className="text-xs text-muted-foreground py-1">
-            {format(new Date(2024, 0, 1, slot), "ha")}
-          </div>
+  const renderWeekView = () => {
+    return (
+      <div className="p-4">
+        <div className="grid grid-cols-8 border-b">
+          <div />
           {weekDays.map((day) => {
-            const regularAtTime = getServicesForDate(
-              filteredRegularServices,
-              day,
-            ).filter((service) => parseHour(service.startTime) === slot);
-
-            const specialAtTime = getSpecialServicesForDate(
-              filteredSpecialServices,
-              day,
-            ).filter((service) => {
-              const schedule =
-                service.daySchedules.find(
-                  (item) => item.date === format(day, "yyyy-MM-dd"),
-                ) || service.daySchedules[0];
-              return parseHour(schedule?.startTime || "") === slot;
-            });
-
             return (
               <button
-                key={`${day.toISOString()}-${slot}`}
+                key={day.toISOString()}
                 type="button"
-                onClick={() => openInfoModal(day)}
-                className="border-l px-1 text-left hover:bg-accent"
+                onClick={() => {
+                  return openInfoModal(day);
+                }}
+                className="text-center py-2 border-l text-sm font-medium hover:bg-accent"
               >
-                {regularAtTime.map((service) => (
-                  <div
-                    key={service.id}
-                    className="text-xs bg-secondary/10 text-secondary rounded px-1 py-0.5 my-0.5 truncate"
-                  >
-                    {service.title}
-                  </div>
-                ))}
-                {specialAtTime.map((service) => (
-                  <div
-                    key={service.id}
-                    className="text-xs bg-primary/10 text-primary rounded px-1 py-0.5 my-0.5 truncate"
-                  >
-                    {service.title} (Special)
-                  </div>
-                ))}
+                <div className="text-xs text-muted-foreground">
+                  {format(day, "EEE")}
+                </div>
+                <div>{format(day, "d")}</div>
               </button>
             );
           })}
         </div>
-      ))}
-    </div>
-  );
+
+        {TIME_SLOTS.map((slot) => {
+          return (
+            <div key={slot} className="grid grid-cols-8 min-h-10 border-b">
+              <div className="text-xs text-muted-foreground py-1">
+                {format(new Date(2024, 0, 1, slot), "ha")}
+              </div>
+              {weekDays.map((day) => {
+                const regularAtTime = getServicesForDate(
+                  filteredRegularServices,
+                  day,
+                ).filter((service) => {
+                  return parseHour(service.startTime) === slot;
+                });
+
+                const specialAtTime = getSpecialServicesForDate(
+                  filteredSpecialServices,
+                  day,
+                ).filter((service) => {
+                  const schedule =
+                    service.daySchedules.find((item) => {
+                      return item.date === format(day, "yyyy-MM-dd");
+                    }) || service.daySchedules[0];
+                  return parseHour(schedule?.startTime || "") === slot;
+                });
+
+                return (
+                  <button
+                    key={`${day.toISOString()}-${slot}`}
+                    type="button"
+                    onClick={() => {
+                      return openInfoModal(day);
+                    }}
+                    className="border-l px-1 text-left hover:bg-accent"
+                  >
+                    {regularAtTime.map((service) => {
+                      return (
+                        <div
+                          key={service.id}
+                          className="text-xs bg-secondary/10 text-secondary rounded px-1 py-0.5 my-0.5 truncate"
+                        >
+                          {service.title}
+                        </div>
+                      );
+                    })}
+                    {specialAtTime.map((service) => {
+                      return (
+                        <div
+                          key={service.id}
+                          className="text-xs bg-primary/10 text-primary rounded px-1 py-0.5 my-0.5 truncate"
+                        >
+                          {service.title} (Special)
+                        </div>
+                      );
+                    })}
+                  </button>
+                );
+              })}
+            </div>
+          );
+        })}
+      </div>
+    );
+  };
 
   return (
     <>
@@ -439,11 +495,13 @@ export function CalendarGrid({
                 <SelectValue placeholder="Month" />
               </SelectTrigger>
               <SelectContent>
-                {MONTHS.map((month) => (
-                  <SelectItem key={month} value={month}>
-                    {month}
-                  </SelectItem>
-                ))}
+                {MONTHS.map((month) => {
+                  return (
+                    <SelectItem key={month} value={month}>
+                      {month}
+                    </SelectItem>
+                  );
+                })}
               </SelectContent>
             </Select>
 
@@ -482,31 +540,35 @@ export function CalendarGrid({
         {viewMode === "month" && (
           <div>
             <div className="grid grid-cols-7 bg-muted/30">
-              {DAY_HEADERS.map((day) => (
-                <div
-                  key={day}
-                  className="p-2 text-center text-xs font-medium text-muted-foreground border-b"
-                >
-                  {day}
-                </div>
-              ))}
+              {DAY_HEADERS.map((day) => {
+                return (
+                  <div
+                    key={day}
+                    className="p-2 text-center text-xs font-medium text-muted-foreground border-b"
+                  >
+                    {day}
+                  </div>
+                );
+              })}
             </div>
             <div className="grid grid-cols-7">
-              {calendarDays.map((day, index) => (
-                <CalendarDayCell
-                  key={index}
-                  day={day}
-                  specialServices={getSpecialServicesForDate(
-                    filteredSpecialServices,
-                    day.date,
-                  )}
-                  givingTotals={givingTotals}
-                  onAddAttendance={onAddAttendance}
-                  onViewServiceDetails={onViewServiceDetails}
-                  onAddSpecialAttendance={onAddSpecialAttendance}
-                  onAddGivingRecord={onAddGivingRecord}
-                />
-              ))}
+              {calendarDays.map((day, index) => {
+                return (
+                  <CalendarDayCell
+                    key={index}
+                    day={day}
+                    specialServices={getSpecialServicesForDate(
+                      filteredSpecialServices,
+                      day.date,
+                    )}
+                    givingTotals={givingTotals}
+                    onAddAttendance={onAddAttendance}
+                    onViewServiceDetails={onViewServiceDetails}
+                    onAddSpecialAttendance={onAddSpecialAttendance}
+                    onAddGivingRecord={onAddGivingRecord}
+                  />
+                );
+              })}
             </div>
           </div>
         )}
@@ -528,7 +590,9 @@ export function CalendarGrid({
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={() => setIsInfoModalOpen(false)}
+                onClick={() => {
+                  return setIsInfoModalOpen(false);
+                }}
               >
                 <X className="h-4 w-4" />
               </Button>
@@ -538,33 +602,44 @@ export function CalendarGrid({
             {infoServices.length === 0 && infoSpecialServices.length === 0 && (
               <Text variant="muted">No services on this date.</Text>
             )}
-            {infoServices.map((service) => (
-              <button
-                key={service.id}
-                type="button"
-                className="w-full text-left rounded-md border p-2 hover:bg-accent"
-                onClick={() => {
-                  if (!infoDate) return;
-                  onViewServiceDetails(service, format(infoDate, "yyyy-MM-dd"));
-                  setIsInfoModalOpen(false);
-                }}
-              >
-                <Text className="font-medium">{service.title}</Text>
-                <Text variant="muted">
-                  {service.startTime}
-                  {service.endTime ? ` - ${service.endTime}` : ""}
-                </Text>
-              </button>
-            ))}
-            {infoSpecialServices.map((service) => (
-              <div
-                key={service.id}
-                className="w-full rounded-md border p-2 bg-primary/5"
-              >
-                <Text className="font-medium">{service.title} (Special)</Text>
-                <Text variant="muted">{service.location || "No location"}</Text>
-              </div>
-            ))}
+            {infoServices.map((service) => {
+              return (
+                <button
+                  key={service.id}
+                  type="button"
+                  className="w-full text-left rounded-md border p-2 hover:bg-accent"
+                  onClick={() => {
+                    if (!infoDate) {
+                      return;
+                    }
+                    onViewServiceDetails(
+                      service,
+                      format(infoDate, "yyyy-MM-dd"),
+                    );
+                    setIsInfoModalOpen(false);
+                  }}
+                >
+                  <Text className="font-medium">{service.title}</Text>
+                  <Text variant="muted">
+                    {service.startTime}
+                    {service.endTime ? ` - ${service.endTime}` : ""}
+                  </Text>
+                </button>
+              );
+            })}
+            {infoSpecialServices.map((service) => {
+              return (
+                <div
+                  key={service.id}
+                  className="w-full rounded-md border p-2 bg-primary/5"
+                >
+                  <Text className="font-medium">{service.title} (Special)</Text>
+                  <Text variant="muted">
+                    {service.location || "No location"}
+                  </Text>
+                </div>
+              );
+            })}
           </div>
         </DialogContent>
       </Dialog>

@@ -120,7 +120,7 @@ function isLeapYear(year: number) {
 
 // Builds a birthday occurrence for a given year, folding 29 Feb back to
 // 28 Feb in years that aren't leap years instead of letting it roll over
-// into March (JS Date's default behavior for Date(year, 1, 29)).
+// Into March (JS Date's default behavior for Date(year, 1, 29)).
 export function birthdayInYear(year: number, month: number, day: number) {
   const isFeb29 = month === 1 && day === 29;
   const resolvedDay = isFeb29 && !isLeapYear(year) ? 28 : day;
@@ -188,12 +188,16 @@ export function sortBirthdaysByNearest<T extends { date: string }>(
   birthdays: T[],
 ) {
   return birthdays
-    .map((b) => ({ ...b, nextDate: getNextBirthdayDate(b.date) }))
-    .sort((a, b) => a.nextDate.getTime() - b.nextDate.getTime());
+    .map((b) => {
+      return { ...b, nextDate: getNextBirthdayDate(b.date) };
+    })
+    .sort((a, b) => {
+      return a.nextDate.getTime() - b.nextDate.getTime();
+    });
 }
 
-export const formatDateTime12h = (value: string | number | Date) =>
-  new Date(value).toLocaleString([], {
+export const formatDateTime12h = (value: string | number | Date) => {
+  return new Date(value).toLocaleString([], {
     year: "numeric",
     month: "2-digit",
     day: "2-digit",
@@ -201,10 +205,11 @@ export const formatDateTime12h = (value: string | number | Date) =>
     minute: "2-digit",
     hour12: true,
   });
+};
 
 // All module values the backend can write to the activity log
 // (ModuleSections enum in the API). Kept in the order they should
-// appear in the activity-log filter dropdown.
+// Appear in the activity-log filter dropdown.
 export const ACTIVITY_MODULES = [
   "MEMBERS",
   "GIVING",
@@ -244,13 +249,17 @@ export function formatModuleLabel(module: string): string {
     module
       .toLowerCase()
       .split(/[_\s]+/)
-      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .map((word) => {
+        return word.charAt(0).toUpperCase() + word.slice(1);
+      })
       .join(" ")
   );
 }
 
 export function getAvailableActions(status: UserStatus) {
-  return USER_ACTION_ITEMS.filter((action) => action.showFor.includes(status));
+  return USER_ACTION_ITEMS.filter((action) => {
+    return action.showFor.includes(status);
+  });
 }
 
 export function getStatusBadgeClasses(status: UserStatus): string {
@@ -287,7 +296,9 @@ export function capitalize(str: string): string {
 }
 
 export function convertTo12Hour(time: string) {
-  if (!time) return "";
+  if (!time) {
+    return "";
+  }
 
   const [hour, minute] = time.split(":");
   const hours = Number(hour);
@@ -304,13 +315,15 @@ export function generateCalendarDays(date: Date): CalendarDay[] {
 
   const days = eachDayOfInterval({ start, end });
 
-  return days.map((day) => ({
-    date: day,
-    dateString: format(day, "yyyy-MM-dd"),
-    isToday: isToday(day),
-    isCurrentMonth: isSameMonth(day, date),
-    services: [],
-  }));
+  return days.map((day) => {
+    return {
+      date: day,
+      dateString: format(day, "yyyy-MM-dd"),
+      isToday: isToday(day),
+      isCurrentMonth: isSameMonth(day, date),
+      services: [],
+    };
+  });
 }
 
 export function getServicesForDate(
@@ -319,9 +332,9 @@ export function getServicesForDate(
 ): RegularService[] {
   const dayName = format(date, "EEEE");
 
-  return services.filter((service) =>
-    service.day ? service.day.includes(dayName) : "",
-  );
+  return services.filter((service) => {
+    return service.day ? service.day.includes(dayName) : "";
+  });
 }
 
 export function mapServicesToCalendar(
@@ -334,14 +347,16 @@ export function mapServicesToCalendar(
 
     // Filter services for this specific date
     const servicesForDate = services.filter((service) => {
-      if (!service.day) return false;
+      if (!service.day) {
+        return false;
+      }
 
       // Handle both string and array
       if (typeof service.day === "string") {
         return service.day.toUpperCase() === dayName;
       }
-      // if (Array.isArray(service.day)) {
-      //   return service.day.some(d => d.toUpperCase() === dayName);
+      // If (Array.isArray(service.day)) {
+      //   Return service.day.some(d => d.toUpperCase() === dayName);
       // }
       return false;
     });
@@ -359,12 +374,18 @@ export function getAttendanceCount(
   service: RegularService,
   date: string,
 ): number | null {
-  const record = service.attendanceRecords?.find((r) => r.date === date);
+  const record = service.attendanceRecords?.find((r) => {
+    return r.date === date;
+  });
   return record ? record.presentMembers.length : null;
 }
 
 export function hasAttendance(service: RegularService, date: string): boolean {
-  return service.attendanceRecords?.some((r) => r.date === date) || false;
+  return (
+    service.attendanceRecords?.some((r) => {
+      return r.date === date;
+    }) || false
+  );
 }
 
 export function formatTimeRange(startTime: string, endTime?: string): string {
@@ -451,6 +472,8 @@ export const toUpperCaseStatus = (status: any): string => {
 };
 
 export const toSentenceCase = (string: string): string => {
-  if (!string) return "current";
+  if (!string) {
+    return "current";
+  }
   return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
 };

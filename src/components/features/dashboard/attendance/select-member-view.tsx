@@ -57,11 +57,12 @@ export function SelectMembersView({
     }
 
     const query = searchQuery.toLowerCase();
-    return members.filter(
-      (member) =>
+    return members.filter((member) => {
+      return (
         member.name.toLowerCase().includes(query) ||
-        member.email.toLowerCase().includes(query),
-    );
+        member.email.toLowerCase().includes(query)
+      );
+    });
   }, [members, searchQuery]);
 
   const totalPages = Math.max(1, Math.ceil(filteredMembers.length / pageSize));
@@ -122,7 +123,9 @@ export function SelectMembersView({
           <Input
             placeholder="Select or search"
             value={searchQuery}
-            onChange={(e) => onSearchChange(e.target.value)}
+            onChange={(e) => {
+              return onSearchChange(e.target.value);
+            }}
             className="pl-9"
           />
         </div>
@@ -135,26 +138,28 @@ export function SelectMembersView({
           </div>
         ) : (
           <div className="p-4">
-            {paginatedMembers.map((member) => (
-              <MemberListItem
-                key={member.id}
-                member={member}
-                mode={
-                  mode === "present"
-                    ? editable
-                      ? "view-present"
-                      : "readonly-present"
-                    : mode === "absent"
+            {paginatedMembers.map((member) => {
+              return (
+                <MemberListItem
+                  key={member.id}
+                  member={member}
+                  mode={
+                    mode === "present"
                       ? editable
-                        ? "view-absent"
-                        : "readonly-absent"
-                      : "select"
-                }
-                isSelected={selectedMembers.includes(member.id)}
-                onSelect={editable ? onToggleMember : undefined}
-                onRemove={editable ? onRemoveMember : undefined}
-              />
-            ))}
+                        ? "view-present"
+                        : "readonly-present"
+                      : mode === "absent"
+                        ? editable
+                          ? "view-absent"
+                          : "readonly-absent"
+                        : "select"
+                  }
+                  isSelected={selectedMembers.includes(member.id)}
+                  onSelect={editable ? onToggleMember : undefined}
+                  onRemove={editable ? onRemoveMember : undefined}
+                />
+              );
+            })}
           </div>
         )}
       </div>
@@ -164,7 +169,9 @@ export function SelectMembersView({
           <PaginationContent>
             <PaginationItem>
               <PaginationPrevious
-                onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
+                onClick={() => {
+                  return handlePageChange(Math.max(1, currentPage - 1));
+                }}
                 className={
                   currentPage === 1
                     ? "pointer-events-none opacity-50"
@@ -180,7 +187,9 @@ export function SelectMembersView({
                 return (
                   <PaginationItem key={page}>
                     <PaginationLink
-                      onClick={() => handlePageChange(page)}
+                      onClick={() => {
+                        return handlePageChange(page);
+                      }}
                       isActive={currentPage === page}
                       className="cursor-pointer"
                     >
@@ -193,9 +202,11 @@ export function SelectMembersView({
 
             <PaginationItem>
               <PaginationNext
-                onClick={() =>
-                  handlePageChange(Math.min(totalPages, currentPage + 1))
-                }
+                onClick={() => {
+                  return handlePageChange(
+                    Math.min(totalPages, currentPage + 1),
+                  );
+                }}
                 className={
                   currentPage === totalPages
                     ? "pointer-events-none opacity-50"

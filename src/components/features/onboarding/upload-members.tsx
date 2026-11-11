@@ -41,7 +41,9 @@ export function UploadMembersStep({
           <Button
             type="button"
             className="w-full"
-            onClick={() => setIsUploadModalOpen(true)}
+            onClick={() => {
+              return setIsUploadModalOpen(true);
+            }}
           >
             Upload CSV
           </Button>
@@ -78,7 +80,9 @@ export function UploadMembersStep({
           <Button
             type="button"
             variant="default"
-            onClick={() => setIsUploadModalOpen(true)}
+            onClick={() => {
+              return setIsUploadModalOpen(true);
+            }}
             className="w-full"
           >
             Upload & Continue
@@ -88,7 +92,9 @@ export function UploadMembersStep({
         <CsvUploadModal
           open={isUploadModalOpen}
           onOpenChange={setIsUploadModalOpen}
-          onClose={() => setIsUploadModalOpen(false)}
+          onClose={() => {
+            return setIsUploadModalOpen(false);
+          }}
           onSuccess={() => {
             setIsUploadModalOpen(false);
             onSkip();

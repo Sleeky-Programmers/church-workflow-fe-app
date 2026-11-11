@@ -37,6 +37,7 @@ import {
   formatModuleLabel,
 } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
+import { useLatest } from "@/hooks/use-latest";
 
 export default function ActivityLogPage() {
   const [query, setQuery] = useState("");
@@ -86,38 +87,54 @@ export default function ActivityLogPage() {
     }
   };
 
+  const getActivityLogsRef = useLatest(getActivityLogs);
+
   useEffect(() => {
-    getActivityLogs();
-  }, []);
+    getActivityLogsRef.current();
+  }, [getActivityLogsRef]);
 
   const filtered = useMemo(() => {
     const q = query.toLowerCase();
 
     return activityLogs
       .filter((row) => {
-        if (moduleFilter && row.module !== moduleFilter) return false;
-        if (!q) return true;
+        if (moduleFilter && row.module !== moduleFilter) {
+          return false;
+        }
+        if (!q) {
+          return true;
+        }
 
         const userName =
           `${row.adminId.firstName} ${row.adminId.lastName}`.toLowerCase();
         return userName.includes(q) || row.action.toLowerCase().includes(q);
       })
-      .sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt));
+      .sort((a, b) => {
+        return Date.parse(b.createdAt) - Date.parse(a.createdAt);
+      });
   }, [query, moduleFilter, activityLogs]);
 
   const exportToCSV = () => {
     const headers = ["Timestamp", "User", "Action", "Module", "Details"];
 
-    const rows = filtered.map((r) => [
-      formatDateTime12h(r.createdAt),
-      `${r.adminId.firstName} ${r.adminId.lastName}`,
-      r.action,
-      r.module,
-      r.details,
-    ]);
+    const rows = filtered.map((r) => {
+      return [
+        formatDateTime12h(r.createdAt),
+        `${r.adminId.firstName} ${r.adminId.lastName}`,
+        r.action,
+        r.module,
+        r.details,
+      ];
+    });
 
     const csv = [headers, ...rows]
-      .map((row) => row.map((v) => `"${v}"`).join(","))
+      .map((row) => {
+        return row
+          .map((v) => {
+            return `"${v}"`;
+          })
+          .join(",");
+      })
       .join("\n");
 
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
@@ -135,30 +152,36 @@ export default function ActivityLogPage() {
       header: "Timestamp",
       sortable: true,
       accessor: "createdAt",
-      sortAccessor: (row) => Date.parse(row.createdAt),
-      render: (row) => formatDateTime12h(row.createdAt).toUpperCase(),
+      sortAccessor: (row) => {
+        return Date.parse(row.createdAt);
+      },
+      render: (row) => {
+        return formatDateTime12h(row.createdAt).toUpperCase();
+      },
     },
     {
       key: "user",
       header: "User",
       width: "w-48",
-      render: (row: ActivityRow & { avatarColor?: string }) => (
-        <div className="flex items-center gap-3">
-          <Avatar>
-            <AvatarFallback
-              style={{
-                backgroundColor: row.avatarColor,
-                color: (row as any).avatarTextColor ?? avatarTextColors[0],
-              }}
-            >
-              <User2 className="w-4 h-4" />
-            </AvatarFallback>
-          </Avatar>
-          <Span variant="default">
-            {row.adminId.firstName} {row.adminId.lastName}
-          </Span>
-        </div>
-      ),
+      render: (row: ActivityRow & { avatarColor?: string }) => {
+        return (
+          <div className="flex items-center gap-3">
+            <Avatar>
+              <AvatarFallback
+                style={{
+                  backgroundColor: row.avatarColor,
+                  color: (row as any).avatarTextColor ?? avatarTextColors[0],
+                }}
+              >
+                <User2 className="w-4 h-4" />
+              </AvatarFallback>
+            </Avatar>
+            <Span variant="default">
+              {row.adminId.firstName} {row.adminId.lastName}
+            </Span>
+          </div>
+        );
+      },
     },
     {
       key: "action",
@@ -170,7 +193,9 @@ export default function ActivityLogPage() {
       header: "Module",
       accessor: "module",
       width: "w-40",
-      render: (row) => formatModuleLabel(row.module),
+      render: (row) => {
+        return formatModuleLabel(row.module);
+      },
     },
     {
       key: "details",
@@ -179,11 +204,13 @@ export default function ActivityLogPage() {
     },
   ];
 
-  const rowsWithColor = filtered.map((row, index) => ({
-    ...row,
-    avatarColor: avatarColors[index % avatarColors.length],
-    avatarTextColor: avatarTextColors[index % avatarTextColors.length],
-  }));
+  const rowsWithColor = filtered.map((row, index) => {
+    return {
+      ...row,
+      avatarColor: avatarColors[index % avatarColors.length],
+      avatarTextColor: avatarTextColors[index % avatarTextColors.length],
+    };
+  });
 
   return (
     <div className="space-y-6">
@@ -196,7 +223,9 @@ export default function ActivityLogPage() {
               placeholder="Search by user or action"
               leftIcon={<Search className="w-4 h-4" />}
               value={query}
-              onChange={(e) => setQuery(e.target.value)}
+              onChange={(e) => {
+                return setQuery(e.target.value);
+              }}
             />
           </div>
         </div>
@@ -205,7 +234,11 @@ export default function ActivityLogPage() {
           <Button
             variant="ghost"
             className="hidden sm:flex items-center gap-2"
-            onClick={() => setShowFilter((p) => !p)}
+            onClick={() => {
+              return setShowFilter((p) => {
+                return !p;
+              });
+            }}
           >
             Filter
             <ChevronDown className="w-4 h-4" />
@@ -214,19 +247,21 @@ export default function ActivityLogPage() {
           {showFilter && (
             <div className="absolute right-0 top-10 w-56 rounded-xl border bg-background shadow-lg p-3 z-20">
               <Text text="Filter by module" className=" mb-2" />
-              {ACTIVITY_MODULES.map((m) => (
-                <Button
-                  key={m}
-                  variant={moduleFilter === m ? "secondary" : "ghost"}
-                  className="w-full justify-start "
-                  onClick={() => {
-                    setModuleFilter(m);
-                    setShowFilter(false);
-                  }}
-                >
-                  {formatModuleLabel(m)}
-                </Button>
-              ))}
+              {ACTIVITY_MODULES.map((m) => {
+                return (
+                  <Button
+                    key={m}
+                    variant={moduleFilter === m ? "secondary" : "ghost"}
+                    className="w-full justify-start "
+                    onClick={() => {
+                      setModuleFilter(m);
+                      setShowFilter(false);
+                    }}
+                  >
+                    {formatModuleLabel(m)}
+                  </Button>
+                );
+              })}
               <Button
                 variant="ghost"
                 className="mt-2"
@@ -256,11 +291,15 @@ export default function ActivityLogPage() {
           <Table
             columns={columns}
             data={rowsWithColor}
-            rowKey={(r) => r._id}
+            rowKey={(r) => {
+              return r._id;
+            }}
             showCheckbox={false}
             enablePagination={false}
             minWidth="min-w-[880px]"
-            onRowClick={(r) => setSelectedRow(r as ActivityRow)}
+            onRowClick={(r) => {
+              return setSelectedRow(r as ActivityRow);
+            }}
             emptyState={
               <Text
                 text="No activity logs found."
@@ -287,11 +326,13 @@ export default function ActivityLogPage() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {[5, 10, 25].map((size) => (
-                    <SelectItem key={size} value={String(size)}>
-                      {size}
-                    </SelectItem>
-                  ))}
+                  {[5, 10, 25].map((size) => {
+                    return (
+                      <SelectItem key={size} value={String(size)}>
+                        {size}
+                      </SelectItem>
+                    );
+                  })}
                 </SelectContent>
               </Select>
             </div>
@@ -313,34 +354,41 @@ export default function ActivityLogPage() {
                       variant="outline"
                       size="icon"
                       disabled={!pagination.hasPreviousPage}
-                      onClick={() => getActivityLogs(currentPage - 1)}
+                      onClick={() => {
+                        return getActivityLogs(currentPage - 1);
+                      }}
                     >
                       <ChevronLeft className="w-4 h-4" />
                     </Button>
                   </PaginationItem>
 
-                  {Array.from(
-                    { length: pagination.totalPages },
-                    (_, i) => i + 1,
-                  ).map((page) => (
-                    <PaginationItem key={page}>
-                      <Button
-                        variant={currentPage === page ? "default" : "outline"}
-                        size="sm"
-                        onClick={() => getActivityLogs(page)}
-                        className="w-10"
-                      >
-                        {page}
-                      </Button>
-                    </PaginationItem>
-                  ))}
+                  {Array.from({ length: pagination.totalPages }, (_, i) => {
+                    return i + 1;
+                  }).map((page) => {
+                    return (
+                      <PaginationItem key={page}>
+                        <Button
+                          variant={currentPage === page ? "default" : "outline"}
+                          size="sm"
+                          onClick={() => {
+                            return getActivityLogs(page);
+                          }}
+                          className="w-10"
+                        >
+                          {page}
+                        </Button>
+                      </PaginationItem>
+                    );
+                  })}
 
                   <PaginationItem>
                     <Button
                       variant="outline"
                       size="icon"
                       disabled={!pagination.hasNextPage}
-                      onClick={() => getActivityLogs(currentPage + 1)}
+                      onClick={() => {
+                        return getActivityLogs(currentPage + 1);
+                      }}
                     >
                       <ChevronRight className="w-4 h-4" />
                     </Button>

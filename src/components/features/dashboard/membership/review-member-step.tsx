@@ -1,7 +1,6 @@
 "use client";
 
 import { NewMemberData } from "@/types";
-import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import Heading from "@/components/ui/typography/Heading";
 import { Text } from "@/components/ui/typography/Text";

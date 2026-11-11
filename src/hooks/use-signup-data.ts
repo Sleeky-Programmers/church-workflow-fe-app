@@ -31,7 +31,7 @@ export function useSignupData(): SignupDataType | null {
       }
     }
     setIsLoading(false);
-  }, []);
+  }, [toast]);
 
   return !isLoading ? signupData : null;
 }

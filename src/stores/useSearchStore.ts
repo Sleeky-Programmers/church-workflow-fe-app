@@ -12,43 +12,45 @@ type SearchStore = {
   syncFromURL: (searchParams: URLSearchParams) => void;
 };
 
-export const useSearchStore = create<SearchStore>()((set, get) => ({
-  // Initial state
-  searchQuery: "",
-  isSearching: false,
+export const useSearchStore = create<SearchStore>()((set, get) => {
+  return {
+    // Initial state
+    searchQuery: "",
+    isSearching: false,
 
-  // Set search query
-  setSearchQuery: (query: string) => {
-    set({ searchQuery: query, isSearching: !!query });
-  },
+    // Set search query
+    setSearchQuery: (query: string) => {
+      set({ searchQuery: query, isSearching: !!query });
+    },
 
-  // Clear search
-  clearSearch: () => {
-    set({ searchQuery: "", isSearching: false });
-  },
+    // Clear search
+    clearSearch: () => {
+      set({ searchQuery: "", isSearching: false });
+    },
 
-  // Update URL with current search
-  updateURLSearch: (pathname: string, router: any) => {
-    const { searchQuery } = get();
-    const params = new URLSearchParams(window.location.search);
+    // Update URL with current search
+    updateURLSearch: (pathname: string, router: any) => {
+      const { searchQuery } = get();
+      const params = new URLSearchParams(window.location.search);
 
-    if (searchQuery) {
-      params.set("search", searchQuery);
-    } else {
-      params.delete("search");
-    }
+      if (searchQuery) {
+        params.set("search", searchQuery);
+      } else {
+        params.delete("search");
+      }
 
-    const newURL = `${pathname}${params.toString() ? `?${params.toString()}` : ""}`;
-    router.replace(newURL, { scroll: false });
-  },
+      const newURL = `${pathname}${params.toString() ? `?${params.toString()}` : ""}`;
+      router.replace(newURL, { scroll: false });
+    },
 
-  // Sync from URL params
-  syncFromURL: (searchParams: URLSearchParams) => {
-    const urlSearch = searchParams.get("search") || "";
-    const { searchQuery } = get();
+    // Sync from URL params
+    syncFromURL: (searchParams: URLSearchParams) => {
+      const urlSearch = searchParams.get("search") || "";
+      const { searchQuery } = get();
 
-    if (urlSearch !== searchQuery) {
-      set({ searchQuery: urlSearch, isSearching: !!urlSearch });
-    }
-  },
-}));
+      if (urlSearch !== searchQuery) {
+        set({ searchQuery: urlSearch, isSearching: !!urlSearch });
+      }
+    },
+  };
+});

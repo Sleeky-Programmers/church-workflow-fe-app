@@ -41,13 +41,17 @@ export default function TeamActionsSheet({
     };
   }, [open]);
 
-  if (!open || !team) return null;
+  if (!open || !team) {
+    return null;
+  }
 
   return createPortal(
     <>
       <div
         className="fixed inset-0 z-[100] bg-black/40"
-        onClick={() => onOpenChange(false)}
+        onClick={() => {
+          return onOpenChange(false);
+        }}
       />
 
       <div className="fixed bottom-0 left-0 right-0 z-[101] flex justify-center">
@@ -57,7 +61,9 @@ export default function TeamActionsSheet({
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => onOpenChange(false)}
+              onClick={() => {
+                return onOpenChange(false);
+              }}
             >
               <X className="h-4 w-4" />
             </Button>

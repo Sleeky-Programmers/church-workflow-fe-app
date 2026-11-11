@@ -49,7 +49,9 @@ export function ManageBranchAccessDialog({
   const [selectedBranchIds, setSelectedBranchIds] = useState<string[]>([]);
 
   useEffect(() => {
-    if (!open || !userId) return;
+    if (!open || !userId) {
+      return;
+    }
 
     let cancelled = false;
     async function load() {
@@ -59,7 +61,9 @@ export function ManageBranchAccessDialog({
           fetchAdminBranchAccess(userId!),
           fetchBranches(),
         ]);
-        if (cancelled) return;
+        if (cancelled) {
+          return;
+        }
 
         setBranches(branchesRes.branches as BranchResponse[]);
         setChoice(access.accessScope);
@@ -74,7 +78,9 @@ export function ManageBranchAccessDialog({
           onOpenChange(false);
         }
       } finally {
-        if (!cancelled) setIsLoading(false);
+        if (!cancelled) {
+          setIsLoading(false);
+        }
       }
     }
 
@@ -86,15 +92,19 @@ export function ManageBranchAccessDialog({
   }, [open, userId]);
 
   const toggleBranch = (branchId: string) => {
-    setSelectedBranchIds((prev) =>
-      prev.includes(branchId)
-        ? prev.filter((id) => id !== branchId)
-        : [...prev, branchId],
-    );
+    setSelectedBranchIds((prev) => {
+      return prev.includes(branchId)
+        ? prev.filter((id) => {
+            return id !== branchId;
+          })
+        : [...prev, branchId];
+    });
   };
 
   async function handleSave() {
-    if (!userId) return;
+    if (!userId) {
+      return;
+    }
 
     setIsSaving(true);
     try {
@@ -133,7 +143,9 @@ export function ManageBranchAccessDialog({
           <div className="space-y-4">
             <RadioGroup
               value={choice}
-              onValueChange={(value) => setChoice(value as AccessChoice)}
+              onValueChange={(value) => {
+                return setChoice(value as AccessChoice);
+              }}
               className="space-y-3"
             >
               <div className="flex items-start gap-2">
@@ -167,24 +179,31 @@ export function ManageBranchAccessDialog({
                     No branches found.
                   </Text>
                 ) : (
-                  branches.map((branch) => (
-                    <div key={branch._id} className="flex items-center gap-2">
-                      <Checkbox
-                        id={`branch-${branch._id}`}
-                        checked={selectedBranchIds.includes(branch._id)}
-                        onCheckedChange={() => toggleBranch(branch._id)}
-                      />
-                      <Label
-                        htmlFor={`branch-${branch._id}`}
-                        className="font-normal"
-                      >
-                        {branch.name}
-                        {branch.isHQ && (
-                          <span className="text-gray-400"> (Head Office)</span>
-                        )}
-                      </Label>
-                    </div>
-                  ))
+                  branches.map((branch) => {
+                    return (
+                      <div key={branch._id} className="flex items-center gap-2">
+                        <Checkbox
+                          id={`branch-${branch._id}`}
+                          checked={selectedBranchIds.includes(branch._id)}
+                          onCheckedChange={() => {
+                            return toggleBranch(branch._id);
+                          }}
+                        />
+                        <Label
+                          htmlFor={`branch-${branch._id}`}
+                          className="font-normal"
+                        >
+                          {branch.name}
+                          {branch.isHQ && (
+                            <span className="text-gray-400">
+                              {" "}
+                              (Head Office)
+                            </span>
+                          )}
+                        </Label>
+                      </div>
+                    );
+                  })
                 )}
               </div>
             )}
@@ -195,7 +214,9 @@ export function ManageBranchAccessDialog({
           <Button
             type="button"
             variant="outline"
-            onClick={() => onOpenChange(false)}
+            onClick={() => {
+              return onOpenChange(false);
+            }}
             disabled={isSaving}
           >
             Cancel

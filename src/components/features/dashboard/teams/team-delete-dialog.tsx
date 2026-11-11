@@ -26,7 +26,9 @@ export default function TeamsDeleteDialog({
   return (
     <AlertDialog
       open={!!target}
-      onOpenChange={(open) => !open && onOpenChange(false)}
+      onOpenChange={(open) => {
+        return !open && onOpenChange(false);
+      }}
     >
       <AlertDialogContent className="max-w-sm rounded-2xl">
         <AlertDialogHeader>
@@ -38,7 +40,11 @@ export default function TeamsDeleteDialog({
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter className="gap-2 sm:gap-2">
-          <AlertDialogCancel onClick={() => onOpenChange(false)}>
+          <AlertDialogCancel
+            onClick={() => {
+              return onOpenChange(false);
+            }}
+          >
             Cancel
           </AlertDialogCancel>
           <AlertDialogAction onClick={onConfirm}>Delete</AlertDialogAction>

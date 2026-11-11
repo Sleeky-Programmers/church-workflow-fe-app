@@ -66,7 +66,12 @@ export function MemberLimitSuccessModal({
             </Text>
           </div>
 
-          <Button onClick={() => onOpenChange(false)} className="w-full mt-2">
+          <Button
+            onClick={() => {
+              return onOpenChange(false);
+            }}
+            className="w-full mt-2"
+          >
             Got it
           </Button>
 

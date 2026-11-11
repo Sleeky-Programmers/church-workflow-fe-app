@@ -1,5 +1,6 @@
 import { trackAction } from "@/lib/usage-tracker";
 import { authenticatedFetch } from "@/lib/api";
+import { cachedRequest, invalidateCache } from "@/lib/request-cache";
 
 export type GivingBatchStatus = "draft" | "submitted" | "confirmed" | "voided";
 
@@ -117,11 +118,21 @@ export async function createGivingBatch(payload: CreateGivingBatchPayload) {
 export async function fetchGivingBatches(params: GivingBatchQueryParams = {}) {
   const query = new URLSearchParams();
 
-  if (params.page) query.append("page", String(params.page));
-  if (params.limit) query.append("limit", String(params.limit));
-  if (params.startDate) query.append("startDate", params.startDate);
-  if (params.endDate) query.append("endDate", params.endDate);
-  if (params.status) query.append("status", params.status);
+  if (params.page) {
+    query.append("page", String(params.page));
+  }
+  if (params.limit) {
+    query.append("limit", String(params.limit));
+  }
+  if (params.startDate) {
+    query.append("startDate", params.startDate);
+  }
+  if (params.endDate) {
+    query.append("endDate", params.endDate);
+  }
+  if (params.status) {
+    query.append("status", params.status);
+  }
 
   return authenticatedFetch<{
     data: GivingBatch[];
@@ -184,8 +195,12 @@ export async function fetchGivingSummary(params?: {
   endDate?: string;
 }) {
   const query = new URLSearchParams();
-  if (params?.startDate) query.append("startDate", params.startDate);
-  if (params?.endDate) query.append("endDate", params.endDate);
+  if (params?.startDate) {
+    query.append("startDate", params.startDate);
+  }
+  if (params?.endDate) {
+    query.append("endDate", params.endDate);
+  }
 
   return authenticatedFetch<GivingSummaryResponse>(
     `/giving-batches/summary?${query.toString()}`,
@@ -197,8 +212,12 @@ export async function fetchGivingMonthlyTrend(params?: {
   endDate?: string;
 }) {
   const query = new URLSearchParams();
-  if (params?.startDate) query.append("startDate", params.startDate);
-  if (params?.endDate) query.append("endDate", params.endDate);
+  if (params?.startDate) {
+    query.append("startDate", params.startDate);
+  }
+  if (params?.endDate) {
+    query.append("endDate", params.endDate);
+  }
 
   return authenticatedFetch<GivingMonthlyTrendPoint[]>(
     `/giving-batches/monthly-trend?${query.toString()}`,
@@ -232,8 +251,10 @@ function normalizeCurrency(raw: any): Currency {
 }
 
 export async function fetchOfferingTypes() {
-  const data = await authenticatedFetch<any[]>("/offering-types");
-  return data.map(normalizeOfferingType);
+  return cachedRequest("ref:offering-types", async () => {
+    const data = await authenticatedFetch<any[]>("/offering-types");
+    return data.map(normalizeOfferingType);
+  });
 }
 
 export async function createOfferingType(payload: {
@@ -244,6 +265,7 @@ export async function createOfferingType(payload: {
     method: "POST",
     body: JSON.stringify(payload),
   });
+  invalidateCache("ref:offering-types");
   return normalizeOfferingType(created);
 }
 
@@ -255,6 +277,7 @@ export async function updateOfferingType(
     method: "PUT",
     body: JSON.stringify(payload),
   });
+  invalidateCache("ref:offering-types");
   return normalizeOfferingType(updated);
 }
 
@@ -265,10 +288,12 @@ export async function setDefaultOfferingType(id: string) {
       method: "PUT",
     },
   );
+  invalidateCache("ref:offering-types");
   return normalizeOfferingType(updated);
 }
 
 export async function deleteOfferingType(id: string) {
+  invalidateCache("ref:offering-types");
   return authenticatedFetch<{ message: string }>(`/offering-types/${id}`, {
     method: "DELETE",
   });
@@ -277,8 +302,10 @@ export async function deleteOfferingType(id: string) {
 // ---- Currencies ----
 
 export async function fetchCurrencies() {
-  const data = await authenticatedFetch<any[]>("/currencies");
-  return data.map(normalizeCurrency);
+  return cachedRequest("ref:currencies", async () => {
+    const data = await authenticatedFetch<any[]>("/currencies");
+    return data.map(normalizeCurrency);
+  });
 }
 
 export async function createCurrency(payload: {
@@ -290,6 +317,7 @@ export async function createCurrency(payload: {
     method: "POST",
     body: JSON.stringify(payload),
   });
+  invalidateCache("ref:currencies");
   return normalizeCurrency(created);
 }
 
@@ -301,17 +329,23 @@ export async function updateCurrency(
     method: "PUT",
     body: JSON.stringify(payload),
   });
+  invalidateCache("ref:currencies");
   return normalizeCurrency(updated);
 }
 
 export async function setDefaultCurrency(id: string) {
-  const updated = await authenticatedFetch<any>(`/currencies/${id}/set-default`, {
-    method: "PUT",
-  });
+  const updated = await authenticatedFetch<any>(
+    `/currencies/${id}/set-default`,
+    {
+      method: "PUT",
+    },
+  );
+  invalidateCache("ref:currencies");
   return normalizeCurrency(updated);
 }
 
 export async function deleteCurrency(id: string) {
+  invalidateCache("ref:currencies");
   return authenticatedFetch<{ message: string }>(`/currencies/${id}`, {
     method: "DELETE",
   });

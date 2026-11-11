@@ -31,7 +31,9 @@ export function VoidDialog({
   const [reason, setReason] = useState("");
 
   const handleOpenChange = (next: boolean) => {
-    if (!next) setReason("");
+    if (!next) {
+      setReason("");
+    }
     onOpenChange(next);
   };
 
@@ -51,7 +53,9 @@ export function VoidDialog({
           <Textarea
             rows={3}
             value={reason}
-            onChange={(e) => setReason(e.target.value)}
+            onChange={(e) => {
+              return setReason(e.target.value);
+            }}
             placeholder="e.g. Duplicate entry, counted in error"
           />
         </div>

@@ -50,7 +50,9 @@ const STATUS_STYLES: Record<RequisitionStatus, string> = {
 };
 
 function RequesterName(row: RequisitionResponse) {
-  if (typeof row.requestedBy === "string") return "-";
+  if (typeof row.requestedBy === "string") {
+    return "-";
+  }
   return row.requestedBy?.name || "-";
 }
 
@@ -96,14 +98,18 @@ export default function RequestsPage() {
 
   const handleAddComment = async () => {
     const body = commentDraft.trim();
-    if (!detailTarget || !body) return;
+    if (!detailTarget || !body) {
+      return;
+    }
     setCommentLoading(true);
     try {
       const updated = await addRequisitionComment(detailTarget.id, body);
       setDetailTarget(updated);
-      setRequisitions((prev) =>
-        prev.map((r) => (r.id === updated.id ? updated : r)),
-      );
+      setRequisitions((prev) => {
+        return prev.map((r) => {
+          return r.id === updated.id ? updated : r;
+        });
+      });
       setCommentDraft("");
       toast({
         title: "Comment added",
@@ -132,9 +138,13 @@ export default function RequestsPage() {
 
   useEffect(() => {
     fetchDepartments({ page: 1, limit: 100 })
-      .then((res) =>
-        setDepartments(res.data.map((d) => ({ id: d.id, name: d.name }))),
-      )
+      .then((res) => {
+        return setDepartments(
+          res.data.map((d) => {
+            return { id: d.id, name: d.name };
+          }),
+        );
+      })
       .catch(() => {});
   }, []);
 
@@ -167,7 +177,9 @@ export default function RequestsPage() {
   }, [statusFilter, departmentFilter]);
 
   const handleApprove = async () => {
-    if (!approveTarget) return;
+    if (!approveTarget) {
+      return;
+    }
     setActionLoading(true);
     try {
       await approveRequisition(approveTarget.id);
@@ -219,7 +231,9 @@ export default function RequestsPage() {
     {
       key: "date",
       header: "Date",
-      render: (row) => format(new Date(row.createdAt), "MMM d, yyyy"),
+      render: (row) => {
+        return format(new Date(row.createdAt), "MMM d, yyyy");
+      },
       width: "w-32",
     },
     {
@@ -230,31 +244,39 @@ export default function RequestsPage() {
     {
       key: "department",
       header: "Department",
-      render: (row) => row.departmentName || "-",
+      render: (row) => {
+        return row.departmentName || "-";
+      },
     },
     {
       key: "requestedBy",
       header: "Requested By",
-      render: (row) => RequesterName(row),
+      render: (row) => {
+        return RequesterName(row);
+      },
     },
     {
       key: "amount",
       header: "Amount",
-      render: (row) => (
-        <span className="font-semibold">
-          {formatCurrency(row.amount, row.currency)}
-        </span>
-      ),
+      render: (row) => {
+        return (
+          <span className="font-semibold">
+            {formatCurrency(row.amount, row.currency)}
+          </span>
+        );
+      },
       align: "right",
     },
     {
       key: "status",
       header: "Status",
-      render: (row) => (
-        <Badge variant="outline" className={STATUS_STYLES[row.status]}>
-          {row.status}
-        </Badge>
-      ),
+      render: (row) => {
+        return (
+          <Badge variant="outline" className={STATUS_STYLES[row.status]}>
+            {row.status}
+          </Badge>
+        );
+      },
       align: "center",
     },
   ];
@@ -293,11 +315,13 @@ export default function RequestsPage() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="ALL">All departments</SelectItem>
-              {departments.map((dept) => (
-                <SelectItem key={dept.id} value={dept.id}>
-                  {dept.name}
-                </SelectItem>
-              ))}
+              {departments.map((dept) => {
+                return (
+                  <SelectItem key={dept.id} value={dept.id}>
+                    {dept.name}
+                  </SelectItem>
+                );
+              })}
             </SelectContent>
           </Select>
         </div>
@@ -307,7 +331,9 @@ export default function RequestsPage() {
         <Table
           columns={columns}
           data={requisitions}
-          rowKey={(row) => row.id}
+          rowKey={(row) => {
+            return row.id;
+          }}
           onRowClick={setDetailTarget}
           minWidth="min-w-[760px]"
           isLoading={loading}
@@ -407,19 +433,27 @@ export default function RequestsPage() {
                 </Label>
                 {detailTarget.comments?.length ? (
                   <ul className="space-y-2">
-                    {detailTarget.comments.map((c) => (
-                      <li key={c.id} className="rounded-md border p-3 text-sm">
-                        <div className="mb-1 flex flex-wrap items-baseline justify-between gap-2">
-                          <span className="font-medium">{c.authorName}</span>
-                          <span className="text-xs text-muted-foreground">
-                            {format(new Date(c.createdAt), "MMM d, yyyy h:mm a")}
-                          </span>
-                        </div>
-                        <p className="whitespace-pre-wrap break-words">
-                          {c.body}
-                        </p>
-                      </li>
-                    ))}
+                    {detailTarget.comments.map((c) => {
+                      return (
+                        <li
+                          key={c.id}
+                          className="rounded-md border p-3 text-sm"
+                        >
+                          <div className="mb-1 flex flex-wrap items-baseline justify-between gap-2">
+                            <span className="font-medium">{c.authorName}</span>
+                            <span className="text-xs text-muted-foreground">
+                              {format(
+                                new Date(c.createdAt),
+                                "MMM d, yyyy h:mm a",
+                              )}
+                            </span>
+                          </div>
+                          <p className="whitespace-pre-wrap break-words">
+                            {c.body}
+                          </p>
+                        </li>
+                      );
+                    })}
                   </ul>
                 ) : (
                   <Text variant="muted">
@@ -430,7 +464,9 @@ export default function RequestsPage() {
                   rows={2}
                   maxLength={2000}
                   value={commentDraft}
-                  onChange={(e) => setCommentDraft(e.target.value)}
+                  onChange={(e) => {
+                    return setCommentDraft(e.target.value);
+                  }}
                   placeholder="Ask a question or explain a concern…"
                 />
                 <div className="flex justify-end">
@@ -455,12 +491,18 @@ export default function RequestsPage() {
                       <Button
                         variant="outline"
                         className="text-red-600 border-red-300 hover:bg-red-50 hover:text-red-700"
-                        onClick={() => openReject(detailTarget)}
+                        onClick={() => {
+                          return openReject(detailTarget);
+                        }}
                       >
                         <X className="mr-1 h-4 w-4" />
                         Reject
                       </Button>
-                      <Button onClick={() => openApprove(detailTarget)}>
+                      <Button
+                        onClick={() => {
+                          return openApprove(detailTarget);
+                        }}
+                      >
                         <Check className="mr-1 h-4 w-4" />
                         Approve
                       </Button>
@@ -474,13 +516,15 @@ export default function RequestsPage() {
 
       <AlertDialog
         open={!!approveTarget}
-        onOpenChange={(open) => !open && setApproveTarget(null)}
+        onOpenChange={(open) => {
+          return !open && setApproveTarget(null);
+        }}
       >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Approve this request?</AlertDialogTitle>
             <AlertDialogDescription>
-              Approving "{approveTarget?.title}" for{" "}
+              Approving &quot;{approveTarget?.title}&quot; for{" "}
               {formatCurrency(
                 approveTarget?.amount || 0,
                 approveTarget?.currency || "NGN",
@@ -490,7 +534,11 @@ export default function RequestsPage() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setApproveTarget(null)}>
+            <AlertDialogCancel
+              onClick={() => {
+                return setApproveTarget(null);
+              }}
+            >
               Cancel
             </AlertDialogCancel>
             <AlertDialogAction onClick={handleApprove} disabled={actionLoading}>
@@ -511,13 +559,17 @@ export default function RequestsPage() {
       >
         <DialogContent className="sm:max-w-[420px]">
           <div className="space-y-4 p-2">
-            <Heading level={3}>Reject "{rejectTarget?.title}"</Heading>
+            <Heading level={3}>
+              Reject &quot;{rejectTarget?.title}&quot;
+            </Heading>
             <div className="space-y-1.5">
               <Label>Reason</Label>
               <Textarea
                 rows={3}
                 value={reviewNote}
-                onChange={(e) => setReviewNote(e.target.value)}
+                onChange={(e) => {
+                  return setReviewNote(e.target.value);
+                }}
                 placeholder="Let the requester know why this was rejected"
               />
             </div>

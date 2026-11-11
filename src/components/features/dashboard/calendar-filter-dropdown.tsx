@@ -42,17 +42,21 @@ export const CalendarFilterDropdown = ({
       <div className="space-y-2">
         <Text className="font-medium">By View</Text>
         <div className="flex items-center gap-2">
-          {(["week", "month", "year"] as CalendarView[]).map((view) => (
-            <Button
-              key={view}
-              size="sm"
-              variant={viewMode === view ? "default" : "outline"}
-              onClick={() => setViewMode(view)}
-              className="h-7 capitalize"
-            >
-              {view}
-            </Button>
-          ))}
+          {(["week", "month", "year"] as CalendarView[]).map((view) => {
+            return (
+              <Button
+                key={view}
+                size="sm"
+                variant={viewMode === view ? "default" : "outline"}
+                onClick={() => {
+                  return setViewMode(view);
+                }}
+                className="h-7 capitalize"
+              >
+                {view}
+              </Button>
+            );
+          })}
         </div>
       </div>
 
@@ -61,7 +65,9 @@ export const CalendarFilterDropdown = ({
         <input
           type="date"
           value={filterDate}
-          onChange={(e) => setFilterDate(e.target.value)}
+          onChange={(e) => {
+            return setFilterDate(e.target.value);
+          }}
           className="w-full h-9 rounded-md border border-input px-3 text-sm bg-background"
         />
       </div>
@@ -82,11 +88,13 @@ export const CalendarFilterDropdown = ({
                 </SelectItem>
               );
             })}
-            {specialServices.map((service) => (
-              <SelectItem key={service.id} value={service.id}>
-                {service.title} (Special)
-              </SelectItem>
-            ))}
+            {specialServices.map((service) => {
+              return (
+                <SelectItem key={service.id} value={service.id}>
+                  {service.title} (Special)
+                </SelectItem>
+              );
+            })}
           </SelectContent>
         </Select>
       </div>

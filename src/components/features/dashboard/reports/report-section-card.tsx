@@ -62,7 +62,9 @@ const SECTION_ICONS: Record<string, LucideIcon> = {
 };
 
 function ChangeBadge({ metric }: { metric: ReportMetric }) {
-  if (metric.previous === undefined) return null;
+  if (metric.previous === undefined) {
+    return null;
+  }
 
   if (metric.changePct === null || metric.changePct === undefined) {
     return (
@@ -154,14 +156,29 @@ export function ReportSectionCard({
   trendLabel,
 }: ReportSectionCardProps) {
   const Icon = SECTION_ICONS[section.key] ?? BarChart3;
-  const series = section.series.find((s) => s.points.some((p) => p.value > 0));
-  const breakdown = section.breakdowns.find((b) =>
-    b.items.some((i) => i.value > 0),
-  );
+  const series = section.series.find((s) => {
+    return s.points.some((p) => {
+      return p.value > 0;
+    });
+  });
+  const breakdown = section.breakdowns.find((b) => {
+    return b.items.some((i) => {
+      return i.value > 0;
+    });
+  });
   const showTrend =
-    !!trend && trend.length > 1 && trend.some((t) => t.value > 0);
+    !!trend &&
+    trend.length > 1 &&
+    trend.some((t) => {
+      return t.value > 0;
+    });
   const maxBreakdown = breakdown
-    ? Math.max(...breakdown.items.map((i) => i.value), 1)
+    ? Math.max(
+        ...breakdown.items.map((i) => {
+          return i.value;
+        }),
+        1,
+      )
     : 1;
   const hasCharts = !!series || !!breakdown || showTrend;
 
@@ -170,14 +187,16 @@ export function ReportSectionCard({
       <h3 className="text-lg font-semibold text-gray-900">{section.title}</h3>
 
       <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-4">
-        {section.metrics.map((m, i) => (
-          <MetricCard
-            key={m.key}
-            metric={m}
-            icon={Icon}
-            variant={i % 2 === 0 ? "blue" : "orange"}
-          />
-        ))}
+        {section.metrics.map((m, i) => {
+          return (
+            <MetricCard
+              key={m.key}
+              metric={m}
+              icon={Icon}
+              variant={i % 2 === 0 ? "blue" : "orange"}
+            />
+          );
+        })}
       </div>
 
       {hasCharts && (
@@ -189,10 +208,12 @@ export function ReportSectionCard({
                 config={{ value: { label: series.label, color: "#2563EB" } }}
               >
                 <BarChart
-                  data={series.points.map((p) => ({
-                    day: formatShortDate(p.label),
-                    value: p.value,
-                  }))}
+                  data={series.points.map((p) => {
+                    return {
+                      day: formatShortDate(p.label),
+                      value: p.value,
+                    };
+                  })}
                   margin={{ top: 10, right: 8, left: -16, bottom: 0 }}
                 >
                   <CartesianGrid strokeDasharray="3 3" stroke="#E6E6E6" />
@@ -239,39 +260,43 @@ export function ReportSectionCard({
           {breakdown && (
             <ChartCard title={breakdown.label}>
               <div className="space-y-3 py-1">
-                {breakdown.items.slice(0, 6).map((item) => (
-                  <div key={item.label} className="flex items-center gap-3">
-                    <span className="w-1/3 truncate text-sm text-gray-700">
-                      {item.label}
-                    </span>
-                    <div className="h-2.5 flex-1 rounded-full bg-primary-50">
-                      <div
-                        className="h-2.5 rounded-full bg-primary-400"
-                        style={{
-                          width: `${Math.max((item.value / maxBreakdown) * 100, 2)}%`,
-                        }}
-                      />
+                {breakdown.items.slice(0, 6).map((item) => {
+                  return (
+                    <div key={item.label} className="flex items-center gap-3">
+                      <span className="w-1/3 truncate text-sm text-gray-700">
+                        {item.label}
+                      </span>
+                      <div className="h-2.5 flex-1 rounded-full bg-primary-50">
+                        <div
+                          className="h-2.5 rounded-full bg-primary-400"
+                          style={{
+                            width: `${Math.max((item.value / maxBreakdown) * 100, 2)}%`,
+                          }}
+                        />
+                      </div>
+                      <span className="w-24 text-right text-sm font-semibold text-black">
+                        {formatMetricValue(
+                          item.value,
+                          breakdown.format,
+                          breakdown.currency,
+                        )}
+                      </span>
                     </div>
-                    <span className="w-24 text-right text-sm font-semibold text-black">
-                      {formatMetricValue(
-                        item.value,
-                        breakdown.format,
-                        breakdown.currency,
-                      )}
-                    </span>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </ChartCard>
           )}
         </div>
       )}
 
-      {section.notes.map((note) => (
-        <p key={note} className="text-xs italic text-gray-400">
-          {note}
-        </p>
-      ))}
+      {section.notes.map((note) => {
+        return (
+          <p key={note} className="text-xs italic text-gray-400">
+            {note}
+          </p>
+        );
+      })}
     </div>
   );
 }

@@ -17,7 +17,7 @@ type ServicePopoverProps = {
 
 export function ServicePopover({
   services,
-  date,
+  date: _date,
   children,
 }: ServicePopoverProps) {
   return (
@@ -25,18 +25,20 @@ export function ServicePopover({
       <PopoverTrigger asChild>{children}</PopoverTrigger>
       <PopoverContent className="w-64 p-2" align="start">
         <div className="space-y-1">
-          {services.map((service) => (
-            <div
-              key={service.id}
-              className="p-2 rounded hover:bg-gray-100 cursor-pointer text-sm"
-            >
-              <div className="font-medium text-gray-900">{service.title}</div>
-              <div className="text-xs text-gray-600">
-                {formatTimeRange(service.startTime, service.endTime)}
-                {service.location && ` · ${service.location}`}
+          {services.map((service) => {
+            return (
+              <div
+                key={service.id}
+                className="p-2 rounded hover:bg-gray-100 cursor-pointer text-sm"
+              >
+                <div className="font-medium text-gray-900">{service.title}</div>
+                <div className="text-xs text-gray-600">
+                  {formatTimeRange(service.startTime, service.endTime)}
+                  {service.location && ` · ${service.location}`}
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </PopoverContent>
     </Popover>

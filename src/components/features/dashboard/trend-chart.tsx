@@ -43,7 +43,9 @@ export function TrendChart({
       <CardContent>
         <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-sm">
           <Button
-            onClick={() => setTrend("attendance")}
+            onClick={() => {
+              return setTrend("attendance");
+            }}
             variant="link"
             className={cn(
               "px-0 font-medium",

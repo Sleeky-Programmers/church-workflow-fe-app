@@ -42,8 +42,7 @@ export default function BillingPage() {
   const [currentPlan, setCurrentPlan] = useState<PlanType | null>(null);
   const [subscriptionStatus, setSubscriptionStatus] =
     useState<SubscriptionStatus | null>(null);
-  const [churchStatus, setChurchStatus] =
-    useState<ChurchSubscriptionStatus | null>(null);
+  const [, setChurchStatus] = useState<ChurchSubscriptionStatus | null>(null);
 
   const [loading, setLoading] = useState(true);
 
@@ -56,7 +55,7 @@ export default function BillingPage() {
         setCurrentPlan(data.currentPlan);
         setSubscriptionStatus(data.subscriptionStatus);
         setChurchStatus(data.churchStatus);
-      } catch (err) {
+      } catch {
         toast({
           title: "Error",
           description: "Failed to fetch billing",
@@ -67,13 +66,15 @@ export default function BillingPage() {
     }
 
     fetchBilling();
-  }, []);
+  }, [toast]);
 
-  const formatPrice = (price: number) => `₦${price.toLocaleString()}`;
+  const formatPrice = (price: number) => {
+    return `₦${price.toLocaleString()}`;
+  };
 
   // Yearly billing is shown as its monthly-equivalent (yearly total / 12)
-  // for an apples-to-apples comparison with the monthly toggle - the actual
-  // yearly total is what gets charged, surfaced at checkout instead.
+  // For an apples-to-apples comparison with the monthly toggle - the actual
+  // Yearly total is what gets charged, surfaced at checkout instead.
   const getPrice = (plan: Plan) => {
     return billingCycle === BillingCycle.MONTHLY
       ? plan.monthlyPrice
@@ -98,7 +99,9 @@ export default function BillingPage() {
       <div className="flex items-center justify-center gap-2">
         <Button
           variant="ghost"
-          onClick={() => setBillingCycle(BillingCycle.MONTHLY)}
+          onClick={() => {
+            return setBillingCycle(BillingCycle.MONTHLY);
+          }}
           className={`px-4 py-2 rounded-full ${billingCycle === BillingCycle.MONTHLY ? "bg-primary text-white-600" : "text-muted-foreground"}`}
         >
           Monthly
@@ -106,7 +109,9 @@ export default function BillingPage() {
 
         <Button
           variant="ghost"
-          onClick={() => setBillingCycle(BillingCycle.YEARLY)}
+          onClick={() => {
+            return setBillingCycle(BillingCycle.YEARLY);
+          }}
           className={`px-4 py-2 rounded-full ${billingCycle === BillingCycle.YEARLY ? "bg-primary text-white-600" : "text-muted-foreground"}`}
         >
           Yearly
@@ -120,8 +125,8 @@ export default function BillingPage() {
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
         {plans.map((plan) => {
           // The church's current plan should be marked even while on trial or
-          // in its grace period - only an expired subscription frees the plan
-          // up for re-purchase.
+          // In its grace period - only an expired subscription frees the plan
+          // Up for re-purchase.
           const isCurrent =
             plan.type === currentPlan &&
             subscriptionStatus !== SubscriptionStatus.EXPIRED;
@@ -199,23 +204,31 @@ export default function BillingPage() {
                 )}
 
                 <div className="space-y-2 pt-2">
-                  {[...getPlanLimitLines(plan), ...plan.features].map((feature) => (
-                    <div key={feature} className="flex items-start gap-2">
-                      <Check className="h-4 w-4 text-green-500 mt-[2px]" />
-                      <Text variant="muted">{feature}</Text>
-                    </div>
-                  ))}
+                  {[...getPlanLimitLines(plan), ...plan.features].map(
+                    (feature) => {
+                      return (
+                        <div key={feature} className="flex items-start gap-2">
+                          <Check className="h-4 w-4 text-green-500 mt-[2px]" />
+                          <Text variant="muted">{feature}</Text>
+                        </div>
+                      );
+                    },
+                  )}
                 </div>
               </div>
 
               <div className="mt-6">
                 {isCurrent ? (
                   <Button disabled className="w-full">
-                    {isCurrentTrial ? "Currently Active (Trial)" : "Currently Active"}
+                    {isCurrentTrial
+                      ? "Currently Active (Trial)"
+                      : "Currently Active"}
                   </Button>
                 ) : isContactSalesPlan(plan) ? (
                   <Button
-                    onClick={() => router.push(CONTACT_SALES_HREF)}
+                    onClick={() => {
+                      return router.push(CONTACT_SALES_HREF);
+                    }}
                     variant="outline"
                     className="w-full"
                   >
@@ -223,11 +236,11 @@ export default function BillingPage() {
                   </Button>
                 ) : (
                   <Button
-                    onClick={() =>
-                      router.push(
+                    onClick={() => {
+                      return router.push(
                         `/dashboard/settings/billing/checkout?plan=${plan.type}&cycle=${billingCycle}`,
-                      )
-                    }
+                      );
+                    }}
                     variant={plan.popular ? "default" : "outline"}
                     className="w-full"
                   >

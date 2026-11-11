@@ -16,7 +16,6 @@ import {
   CardContent,
   CardDescription,
   CardFooter,
-  CardHeader,
   CardTitle,
 } from "@/components/ui/card";
 import { Loader } from "@/components/ui/loader";
@@ -63,7 +62,7 @@ export default function PaymentVerifyPage() {
   const [paymentData, setPaymentData] =
     useState<PaymentVerificationData | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [isVerifying, setIsVerifying] = useState(false);
+  const [, setIsVerifying] = useState(false);
 
   // Get the actual reference - Flutterwave uses tx_ref, Paystack uses reference
   const actualReference = txRef || reference;

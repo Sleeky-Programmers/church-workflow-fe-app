@@ -8,7 +8,9 @@ export function getFriendlyErrorMessage(
   error: unknown,
   fallback = "Something went wrong. Please try again.",
 ): string {
-  if (!error) return fallback;
+  if (!error) {
+    return fallback;
+  }
 
   const anyError = error as any;
   const rawMessage: string =
@@ -17,7 +19,10 @@ export function getFriendlyErrorMessage(
   const normalized = rawMessage.toLowerCase();
 
   // Payload / file too large (HTTP 413 or message-based)
-  if (status === 413 || /too large|payload too large|file size/i.test(normalized)) {
+  if (
+    status === 413 ||
+    /too large|payload too large|file size/i.test(normalized)
+  ) {
     return `The selected image is too large. Please choose an image smaller than ${MAX_IMAGE_SIZE_MB}MB.`;
   }
 

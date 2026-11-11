@@ -17,14 +17,15 @@ export default function MemberDetailsRoutePage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!id) return;
+    if (!id) {
+      return;
+    }
 
     const load = async () => {
       try {
         const data = await fetchMemberById(id);
         setMember(data);
-      } catch (error) {
-        console.error(error);
+      } catch {
       } finally {
         setLoading(false);
       }
@@ -48,7 +49,9 @@ export default function MemberDetailsRoutePage() {
   return (
     <MemberDetailsPage
       member={member}
-      onBack={() => router.push("/dashboard/membership/members")}
+      onBack={() => {
+        return router.push("/dashboard/membership/members");
+      }}
     />
   );
 }

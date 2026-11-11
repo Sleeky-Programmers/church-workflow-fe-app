@@ -15,7 +15,7 @@ type DeleteMembersModalProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   memberIds: string[];
-  onDeleted?: (deletedIds: string[]) => void; // callback after successful deletion
+  onDeleted?: (deletedIds: string[]) => void; // Callback after successful deletion
 };
 
 export function DeleteMembersModal({
@@ -82,7 +82,9 @@ export function DeleteMembersModal({
           <div className="flex justify-end gap-3">
             <Button
               variant="outline"
-              onClick={() => onOpenChange(false)}
+              onClick={() => {
+                return onOpenChange(false);
+              }}
               disabled={isDeleting}
             >
               Cancel

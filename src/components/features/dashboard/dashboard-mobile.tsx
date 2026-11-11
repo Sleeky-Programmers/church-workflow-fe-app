@@ -17,7 +17,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import Heading from "@/components/ui/typography/Heading";
 import { Span, Text } from "@/components/ui/typography/Text";
-import { EVENT_CATEGORY_CONFIG } from "@/config/event-category";
 import {
   formatEventDate,
   formatUpcomingBirthday,
@@ -56,8 +55,12 @@ export default function DashboardMobile({
 }: Props) {
   // Sort upcoming events by date
   const sortedUpcomingEvents = upcomingEvents
-    .filter((event) => isInFuture(event.date))
-    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+    .filter((event) => {
+      return isInFuture(event.date);
+    })
+    .sort((a, b) => {
+      return new Date(a.date).getTime() - new Date(b.date).getTime();
+    })
     .slice(0, 4);
 
   // Sort birthdays by nearest
@@ -76,8 +79,12 @@ export default function DashboardMobile({
         dateB.getMonth(),
         dateB.getDate(),
       );
-      if (nextA < now) nextA.setFullYear(now.getFullYear() + 1);
-      if (nextB < now) nextB.setFullYear(now.getFullYear() + 1);
+      if (nextA < now) {
+        nextA.setFullYear(now.getFullYear() + 1);
+      }
+      if (nextB < now) {
+        nextB.setFullYear(now.getFullYear() + 1);
+      }
       return nextA.getTime() - nextB.getTime();
     })
     .slice(0, 4);
@@ -130,7 +137,6 @@ export default function DashboardMobile({
                 <Text text="No upcoming services" variant="muted" />
               ) : (
                 sortedUpcomingEvents.map((event, i) => {
-                  const config = EVENT_CATEGORY_CONFIG[event.category];
                   const date = formatEventDate(event.date);
                   const iconColors = [
                     "bg-blue-500",
@@ -191,22 +197,24 @@ export default function DashboardMobile({
                   description="Members with birthdays in the next 3 months will show up here."
                 />
               ) : (
-                sortedBirthdays.slice(0, 5).map((b, i) => (
-                  <div
-                    key={`${b.name}-${i}`}
-                    className="flex items-center justify-between"
-                  >
-                    <div className="flex items-center gap-2">
-                      <Avatar className="w-7 h-7">
-                        <AvatarFallback className="bg-blue-50">
-                          <User className="w-3.5 h-3.5 text-primary-400" />
-                        </AvatarFallback>
-                      </Avatar>
-                      <Text text={b.name} />
+                sortedBirthdays.slice(0, 5).map((b, i) => {
+                  return (
+                    <div
+                      key={`${b.name}-${i}`}
+                      className="flex items-center justify-between"
+                    >
+                      <div className="flex items-center gap-2">
+                        <Avatar className="w-7 h-7">
+                          <AvatarFallback className="bg-blue-50">
+                            <User className="w-3.5 h-3.5 text-primary-400" />
+                          </AvatarFallback>
+                        </Avatar>
+                        <Text text={b.name} />
+                      </div>
+                      <Span text={formatUpcomingBirthday(b.date)} />
                     </div>
-                    <Span text={formatUpcomingBirthday(b.date)} />
-                  </div>
-                ))
+                  );
+                })
               )}
             </div>
 

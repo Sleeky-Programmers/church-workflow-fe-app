@@ -54,7 +54,9 @@ export default function VerifyCodeForm({
         return prev - 1;
       });
     }, 1000);
-    return () => clearInterval(timer);
+    return () => {
+      return clearInterval(timer);
+    };
   }, []);
 
   const formatTime = (seconds: number) => {
@@ -100,53 +102,55 @@ export default function VerifyCodeForm({
           <FormField
             control={form.control}
             name="code"
-            render={({ field }) => (
-              <FormItem className="flex flex-col items-center">
-                <FormControl>
-                  <div className="w-full overflow-x-visible">
-                    <InputOTP
-                      maxLength={6}
-                      value={field.value}
-                      onChange={field.onChange}
-                      inputMode="numeric"
-                      autoComplete="one-time-code"
-                      containerClassName="justify-center mx-auto"
-                    >
-                      <InputOTPGroup className="space-x-2">
-                        <InputOTPSlot
-                          index={0}
-                          className="h-12 w-10 text-lg sm:h-14 sm:w-12 sm:text-xl [&>input]:font-normal"
-                        />
-                        <InputOTPSlot
-                          index={1}
-                          className="h-12 w-10 text-lg sm:h-14 sm:w-12 sm:text-xl [&>input]:font-normal"
-                        />
-                        <InputOTPSlot
-                          index={2}
-                          className="h-12 w-10 text-lg sm:h-14 sm:w-12 sm:text-xl [&>input]:font-normal"
-                        />
-                      </InputOTPGroup>
-                      <InputOTPSeparator className="[&>svg]:h-4 [&>svg]:w-4 text-muted-foreground" />
-                      <InputOTPGroup className="space-x-2">
-                        <InputOTPSlot
-                          index={3}
-                          className="h-12 w-10 text-lg sm:h-14 sm:w-12 sm:text-xl [&>input]:font-normal"
-                        />
-                        <InputOTPSlot
-                          index={4}
-                          className="h-12 w-10 text-lg sm:h-14 sm:w-12 sm:text-xl [&>input]:font-normal"
-                        />
-                        <InputOTPSlot
-                          index={5}
-                          className="h-12 w-10 text-lg sm:h-14 sm:w-12 sm:text-xl [&>input]:font-normal"
-                        />
-                      </InputOTPGroup>
-                    </InputOTP>
-                  </div>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+            render={({ field }) => {
+              return (
+                <FormItem className="flex flex-col items-center">
+                  <FormControl>
+                    <div className="w-full overflow-x-visible">
+                      <InputOTP
+                        maxLength={6}
+                        value={field.value}
+                        onChange={field.onChange}
+                        inputMode="numeric"
+                        autoComplete="one-time-code"
+                        containerClassName="justify-center mx-auto"
+                      >
+                        <InputOTPGroup className="space-x-2">
+                          <InputOTPSlot
+                            index={0}
+                            className="h-12 w-10 text-lg sm:h-14 sm:w-12 sm:text-xl [&>input]:font-normal"
+                          />
+                          <InputOTPSlot
+                            index={1}
+                            className="h-12 w-10 text-lg sm:h-14 sm:w-12 sm:text-xl [&>input]:font-normal"
+                          />
+                          <InputOTPSlot
+                            index={2}
+                            className="h-12 w-10 text-lg sm:h-14 sm:w-12 sm:text-xl [&>input]:font-normal"
+                          />
+                        </InputOTPGroup>
+                        <InputOTPSeparator className="[&>svg]:h-4 [&>svg]:w-4 text-muted-foreground" />
+                        <InputOTPGroup className="space-x-2">
+                          <InputOTPSlot
+                            index={3}
+                            className="h-12 w-10 text-lg sm:h-14 sm:w-12 sm:text-xl [&>input]:font-normal"
+                          />
+                          <InputOTPSlot
+                            index={4}
+                            className="h-12 w-10 text-lg sm:h-14 sm:w-12 sm:text-xl [&>input]:font-normal"
+                          />
+                          <InputOTPSlot
+                            index={5}
+                            className="h-12 w-10 text-lg sm:h-14 sm:w-12 sm:text-xl [&>input]:font-normal"
+                          />
+                        </InputOTPGroup>
+                      </InputOTP>
+                    </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              );
+            }}
           />
           <Button
             type="submit"

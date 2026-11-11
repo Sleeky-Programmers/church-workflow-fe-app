@@ -11,7 +11,7 @@ export const metadata = generateSeoMetadata({
 });
 
 // See src/app/page.tsx for why this is revalidated rather than left fully
-// static - this page's plan prices come from the same server fetch.
+// Static - this page's plan prices come from the same server fetch.
 export const revalidate = 3600;
 
 export default function ChurchManagementSoftwarePage() {
@@ -35,7 +35,7 @@ export default function ChurchManagementSoftwarePage() {
             chats.
           </Text>
           <Text variant="muted" className="leading-relaxed">
-            Most churches start with what's free and familiar - a shared
+            Most churches start with what&apos;s free and familiar - a shared
             spreadsheet, a notebook at the welcome desk, a WhatsApp group for
             each unit. That works until the church grows past a handful of
             families. Past that point, records go stale, the same member gets
@@ -50,11 +50,11 @@ export default function ChurchManagementSoftwarePage() {
           <Text variant="muted" className="leading-relaxed">
             The features worth prioritizing are the ones that remove friction
             from a real Sunday, not the ones that look impressive in a demo: a
-            member database that's fast to search and easy to keep clean,
+            member database that&apos;s fast to search and easy to keep clean,
             attendance tracking that takes seconds per service rather than
-            minutes, role-based access so volunteers only see what's relevant to
-            their team, and a record of who changed what and when - so
-            leadership isn't left guessing when something looks off.
+            minutes, role-based access so volunteers only see what&apos;s
+            relevant to their team, and a record of who changed what and when -
+            so leadership isn&apos;t left guessing when something looks off.
           </Text>
           <Heading level={3} className="text-lg font-bold mt-6 mb-2">
             Why Accountability Matters
@@ -63,10 +63,11 @@ export default function ChurchManagementSoftwarePage() {
             Church administration runs on trust between leadership, department
             heads, and the congregation - which is exactly why an auditable
             trail of who did what matters more here than in a typical business
-            tool. Church Workflow's role-based permissions and activity log
+            tool. Church Workflow&apos;s role-based permissions and activity log
             exist for that reason: a pastor or admin can see what changed in the
             member database, who added a new team lead, or who updated a service
-            record, without having to ask around or take anyone's word for it.
+            record, without having to ask around or take anyone&apos;s word for
+            it.
           </Text>
         </div>
       </section>

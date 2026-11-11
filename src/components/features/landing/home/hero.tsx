@@ -11,15 +11,27 @@ import { AuthAwareCta } from "@/components/features/landing/shared/AuthAwareCta"
 import { trackEvent } from "@/lib/analytics";
 
 const IconFolderCheckFill = dynamic(
-  () => import("obra-icons-react").then((mod) => mod.IconFolderCheckFill),
+  () => {
+    return import("obra-icons-react").then((mod) => {
+      return mod.IconFolderCheckFill;
+    });
+  },
   { ssr: false },
 );
 const IconSettingsFill = dynamic(
-  () => import("obra-icons-react").then((mod) => mod.IconSettingsFill),
+  () => {
+    return import("obra-icons-react").then((mod) => {
+      return mod.IconSettingsFill;
+    });
+  },
   { ssr: false },
 );
 const IconShieldCheckFill = dynamic(
-  () => import("obra-icons-react").then((mod) => mod.IconShieldCheckFill),
+  () => {
+    return import("obra-icons-react").then((mod) => {
+      return mod.IconShieldCheckFill;
+    });
+  },
   { ssr: false },
 );
 
@@ -47,29 +59,23 @@ export default function HeroSection() {
             to{" "}
             <span className="relative inline-block text-[#0C5FB3]">
               Simplify
-              <img
-                loading="lazy"
-                decoding="async"
+              <Image
                 src="/assets/icons/wave.svg"
                 alt=""
                 aria-hidden="true"
-                className="absolute -bottom-1 left-0 w-full h-auto"
-              />
+                className="absolute -bottom-1 left-0 w-full h-auto" width={0} height={0} sizes="100vw" />
             </span>{" "}
             Church Operations
           </Heading>
 
           <div className="relative">
-            <img
-              loading="lazy"
-              decoding="async"
+            <Image
               src="/assets/icons/star.svg"
               alt=""
               width={36}
               height={36}
               aria-hidden="true"
-              className="absolute -top-3 -right-6 select-none pointer-events-none"
-            />
+              className="absolute -top-3 -right-6 select-none pointer-events-none" />
             <Text variant="muted" className="font-medium leading-relaxed">
               All-in-one software that helps churches manage
               <br />
@@ -94,16 +100,13 @@ export default function HeroSection() {
             </Button>
           </div>
 
-          <img
-            loading="lazy"
-            decoding="async"
+          <Image
             src="/assets/icons/star.svg"
             alt=""
             width={36}
             height={36}
             aria-hidden="true"
-            className="select-none pointer-events-none"
-          />
+            className="select-none pointer-events-none" />
         </div>
       </div>
 
@@ -112,14 +115,16 @@ export default function HeroSection() {
         style={{ backgroundColor: "#F3F7FB" }}
       >
         <div className="absolute right-5 top-1/2 -translate-y-1/2 hidden md:flex flex-col gap-2">
-          {[0, 1, 2, 3].map((i) => (
-            <div
-              key={i}
-              className={`w-2 h-2 rounded-full transition-colors ${
-                i === 0 ? "bg-[#0C5FB3]" : "bg-gray-300"
-              }`}
-            />
-          ))}
+          {[0, 1, 2, 3].map((i) => {
+            return (
+              <div
+                key={i}
+                className={`w-2 h-2 rounded-full transition-colors ${
+                  i === 0 ? "bg-[#0C5FB3]" : "bg-gray-300"
+                }`}
+              />
+            );
+          })}
         </div>
 
         <div

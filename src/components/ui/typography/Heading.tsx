@@ -61,7 +61,7 @@ const Heading = React.forwardRef<HTMLHeadingElement, HeadingProps>(
       sizeClass,
       variantStyles[variant],
       "font-semibold",
-      "leading-tight", // improves readability on mobile
+      "leading-tight", // Improves readability on mobile
       className,
     ]
       .filter(Boolean)

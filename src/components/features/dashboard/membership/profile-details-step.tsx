@@ -63,7 +63,7 @@ export function ProfileDetailsStep({
             Add a New Member Profile
           </Heading>
           <Text variant="default" className="mt-1">
-            Provide the member's information to include them in the church
+            Provide the member&apos;s information to include them in the church
             community
           </Text>
         </div>
@@ -74,44 +74,50 @@ export function ProfileDetailsStep({
               <FormField
                 control={form.control}
                 name="title"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Title</FormLabel>
-                    <FormControl>
-                      <TitleCombobox
-                        value={field.value}
-                        onChange={field.onChange}
-                      />
-                    </FormControl>
-                    {field.value && (
-                      <Button
-                        type="button"
-                        variant="link"
-                        className="h-auto p-0 text-xs"
-                        onClick={() => field.onChange(undefined)}
-                      >
-                        Clear selection
-                      </Button>
-                    )}
-                    <FormMessage />
-                  </FormItem>
-                )}
+                render={({ field }) => {
+                  return (
+                    <FormItem>
+                      <FormLabel>Title</FormLabel>
+                      <FormControl>
+                        <TitleCombobox
+                          value={field.value}
+                          onChange={field.onChange}
+                        />
+                      </FormControl>
+                      {field.value && (
+                        <Button
+                          type="button"
+                          variant="link"
+                          className="h-auto p-0 text-xs"
+                          onClick={() => {
+                            return field.onChange(undefined);
+                          }}
+                        >
+                          Clear selection
+                        </Button>
+                      )}
+                      <FormMessage />
+                    </FormItem>
+                  );
+                }}
               />
 
               <FormField
                 control={form.control}
                 name="fullName"
-                render={({ field }) => (
-                  <FormItem className="col-span-2">
-                    <FormLabel>
-                      Full Name <Span variant="error">*</Span>
-                    </FormLabel>
-                    <FormControl>
-                      <Input placeholder="Enter the full name" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+                render={({ field }) => {
+                  return (
+                    <FormItem className="col-span-2">
+                      <FormLabel>
+                        Full Name <Span variant="error">*</Span>
+                      </FormLabel>
+                      <FormControl>
+                        <Input placeholder="Enter the full name" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  );
+                }}
               />
             </div>
 
@@ -119,100 +125,111 @@ export function ProfileDetailsStep({
               <FormField
                 control={form.control}
                 name="gender"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>
-                      Gender <Span variant="error">*</Span>
-                    </FormLabel>
-                    <RadioGroup
-                      value={field.value || ""}
-                      onValueChange={field.onChange}
-                      className="mt-2 space-y-3"
-                    >
-                      <div className="flex items-center gap-3">
-                        <RadioGroupItem value={Gender.MALE} id="male" />
-                        <FormLabel
-                          htmlFor="male"
-                          className="font-normal cursor-pointer"
-                        >
-                          Male
-                        </FormLabel>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <RadioGroupItem value={Gender.FEMALE} id="female" />
-                        <FormLabel
-                          htmlFor="female"
-                          className="font-normal cursor-pointer"
-                        >
-                          Female
-                        </FormLabel>
-                      </div>
-                    </RadioGroup>
-                    <FormMessage />
-                  </FormItem>
-                )}
+                render={({ field }) => {
+                  return (
+                    <FormItem>
+                      <FormLabel>
+                        Gender <Span variant="error">*</Span>
+                      </FormLabel>
+                      <RadioGroup
+                        value={field.value || ""}
+                        onValueChange={field.onChange}
+                        className="mt-2 space-y-3"
+                      >
+                        <div className="flex items-center gap-3">
+                          <RadioGroupItem value={Gender.MALE} id="male" />
+                          <FormLabel
+                            htmlFor="male"
+                            className="font-normal cursor-pointer"
+                          >
+                            Male
+                          </FormLabel>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <RadioGroupItem value={Gender.FEMALE} id="female" />
+                          <FormLabel
+                            htmlFor="female"
+                            className="font-normal cursor-pointer"
+                          >
+                            Female
+                          </FormLabel>
+                        </div>
+                      </RadioGroup>
+                      <FormMessage />
+                    </FormItem>
+                  );
+                }}
               />
 
               <FormField
                 control={form.control}
                 name="birthday"
-                render={({ field }) => (
-                  <FormItem className="col-span-2">
-                    <FormLabel>Birthday</FormLabel>
-                    <FormControl>
-                      <Input type="date" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+                render={({ field }) => {
+                  return (
+                    <FormItem className="col-span-2">
+                      <FormLabel>Birthday</FormLabel>
+                      <FormControl>
+                        <Input type="date" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  );
+                }}
               />
             </div>
             <div className="grid grid-cols-2 gap-6">
               <FormField
                 control={form.control}
                 name="maritalStatus"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Marital Status</FormLabel>
-                    <Select value={field.value} onValueChange={field.onChange}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value={MaritalStatus.SINGLE}>
-                          Single
-                        </SelectItem>
-                        <SelectItem value={MaritalStatus.MARRIED}>
-                          Married
-                        </SelectItem>
-                        <SelectItem value={MaritalStatus.DIVORCED}>
-                          Divorced
-                        </SelectItem>
-                        <SelectItem value={MaritalStatus.WIDOWED}>
-                          Widowed
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
+                render={({ field }) => {
+                  return (
+                    <FormItem>
+                      <FormLabel>Marital Status</FormLabel>
+                      <Select
+                        value={field.value}
+                        onValueChange={field.onChange}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value={MaritalStatus.SINGLE}>
+                            Single
+                          </SelectItem>
+                          <SelectItem value={MaritalStatus.MARRIED}>
+                            Married
+                          </SelectItem>
+                          <SelectItem value={MaritalStatus.DIVORCED}>
+                            Divorced
+                          </SelectItem>
+                          <SelectItem value={MaritalStatus.WIDOWED}>
+                            Widowed
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  );
+                }}
               />
 
               {form.watch("maritalStatus") === MaritalStatus.MARRIED && (
                 <FormField
                   control={form.control}
                   name="dateOfMarriage"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Date of Marriage</FormLabel>
-                      <FormControl>
-                        <Input type="date" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+                  render={({ field }) => {
+                    return (
+                      <FormItem>
+                        <FormLabel>Date of Marriage</FormLabel>
+                        <FormControl>
+                          <Input type="date" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    );
+                  }}
                 />
               )}
             </div>

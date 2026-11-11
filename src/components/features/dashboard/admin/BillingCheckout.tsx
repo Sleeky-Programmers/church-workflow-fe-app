@@ -16,10 +16,7 @@ import { validateCoupon } from "@/services/couponService";
 import { Coupon, Plan, PlanChangePreview } from "@/types";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
-import {
-  LegalDocument,
-  LegalDocumentModal,
-} from "./LegalDocumentModal";
+import { LegalDocument, LegalDocumentModal } from "./LegalDocumentModal";
 import { useUserStore } from "@/stores/useUserStore";
 import {
   billingAgreementSchema,
@@ -40,7 +37,9 @@ export default function BillingCheckout({
   preview?: PlanChangePreview | null;
 }) {
   const { toast } = useToast();
-  const church = useUserStore((state) => state.church);
+  const church = useUserStore((state) => {
+    return state.church;
+  });
 
   const [selectedMethod, setSelectedMethod] = useState<PaymentProvider>(
     PaymentProvider.PAYSTACK,
@@ -72,12 +71,18 @@ export default function BillingCheckout({
 
   const total = price - discountAmount;
 
-  const formatPrice = (price: number) => `₦${price.toLocaleString()}`;
+  const formatPrice = (price: number) => {
+    return `₦${price.toLocaleString()}`;
+  };
 
   const handlePromoCodeChange = (value: string) => {
     setPromoCode(value);
-    if (appliedCoupon) setAppliedCoupon(null);
-    if (couponError) setCouponError(null);
+    if (appliedCoupon) {
+      setAppliedCoupon(null);
+    }
+    if (couponError) {
+      setCouponError(null);
+    }
   };
 
   const handleApplyCoupon = async () => {
@@ -142,12 +147,13 @@ export default function BillingCheckout({
     }
   };
 
-  const formatDate = (date: string) =>
-    new Date(date).toLocaleDateString("en-US", {
+  const formatDate = (date: string) => {
+    return new Date(date).toLocaleDateString("en-US", {
       year: "numeric",
       month: "long",
       day: "numeric",
     });
+  };
 
   return (
     <div className="space-y-6">
@@ -197,14 +203,16 @@ export default function BillingCheckout({
           <hr />
 
           <div className="space-y-3">
-            <Text className="font-medium">What's included:</Text>
+            <Text className="font-medium">What&apos;s included:</Text>
 
-            {[...getPlanLimitLines(plan), ...plan.features].map((feature) => (
-              <div key={feature} className="flex items-center gap-2">
-                <Check className="h-4 w-4 text-green-500" />
-                <Text variant="muted">{feature}</Text>
-              </div>
-            ))}
+            {[...getPlanLimitLines(plan), ...plan.features].map((feature) => {
+              return (
+                <div key={feature} className="flex items-center gap-2">
+                  <Check className="h-4 w-4 text-green-500" />
+                  <Text variant="muted">{feature}</Text>
+                </div>
+              );
+            })}
           </div>
 
           <hr />
@@ -266,7 +274,9 @@ export default function BillingCheckout({
                   <Input
                     placeholder="Enter code"
                     value={promoCode}
-                    onChange={(e) => handlePromoCodeChange(e.target.value)}
+                    onChange={(e) => {
+                      return handlePromoCodeChange(e.target.value);
+                    }}
                     disabled={isApplyingCoupon}
                     className={couponError ? "border-destructive-600" : ""}
                   />
@@ -299,7 +309,9 @@ export default function BillingCheckout({
             <Text className="font-medium">Payment Method</Text>
 
             <div
-              onClick={() => setSelectedMethod(PaymentProvider.PAYSTACK)}
+              onClick={() => {
+                return setSelectedMethod(PaymentProvider.PAYSTACK);
+              }}
               className={cn(
                 "border rounded-lg p-4 cursor-pointer transition",
                 selectedMethod === PaymentProvider.PAYSTACK
@@ -312,7 +324,9 @@ export default function BillingCheckout({
             </div>
 
             <div
-              onClick={() => setSelectedMethod(PaymentProvider.FLUTTERWAVE)}
+              onClick={() => {
+                return setSelectedMethod(PaymentProvider.FLUTTERWAVE);
+              }}
               className={cn(
                 "border rounded-lg p-4 cursor-pointer transition",
                 selectedMethod === PaymentProvider.FLUTTERWAVE
@@ -328,9 +342,11 @@ export default function BillingCheckout({
             <Checkbox
               id="billing-agreement"
               checked={agreed}
-              onCheckedChange={(val) =>
-                form.setValue("agreed", val === true, { shouldValidate: true })
-              }
+              onCheckedChange={(val) => {
+                return form.setValue("agreed", val === true, {
+                  shouldValidate: true,
+                });
+              }}
               className="mt-0.5 h-5 w-5 shrink-0"
             />
 
@@ -340,7 +356,9 @@ export default function BillingCheckout({
               </label>
               <button
                 type="button"
-                onClick={() => setLegalDoc("terms")}
+                onClick={() => {
+                  return setLegalDoc("terms");
+                }}
                 className="underline text-primary hover:opacity-80"
               >
                 Terms of Service
@@ -348,7 +366,9 @@ export default function BillingCheckout({
               and{" "}
               <button
                 type="button"
-                onClick={() => setLegalDoc("privacy")}
+                onClick={() => {
+                  return setLegalDoc("privacy");
+                }}
                 className="underline text-primary hover:opacity-80"
               >
                 Privacy Policy
@@ -361,7 +381,9 @@ export default function BillingCheckout({
           </div>
           <LegalDocumentModal
             document={legalDoc}
-            onClose={() => setLegalDoc(null)}
+            onClose={() => {
+              return setLegalDoc(null);
+            }}
           />
           <Button
             onClick={handlePayment}

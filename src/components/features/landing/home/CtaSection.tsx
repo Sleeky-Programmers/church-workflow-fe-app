@@ -12,15 +12,27 @@ import { FloatingBadge } from "@/components/ui/landing-page/FloatingBadge";
 import { AuthAwareCta } from "@/components/features/landing/shared/AuthAwareCta";
 
 const IconFolderCheckFill = dynamic(
-  () => import("obra-icons-react").then((mod) => mod.IconFolderCheckFill),
+  () => {
+    return import("obra-icons-react").then((mod) => {
+      return mod.IconFolderCheckFill;
+    });
+  },
   { ssr: false },
 );
 const IconSettingsFill = dynamic(
-  () => import("obra-icons-react").then((mod) => mod.IconSettingsFill),
+  () => {
+    return import("obra-icons-react").then((mod) => {
+      return mod.IconSettingsFill;
+    });
+  },
   { ssr: false },
 );
 const IconShieldCheckFill = dynamic(
-  () => import("obra-icons-react").then((mod) => mod.IconShieldCheckFill),
+  () => {
+    return import("obra-icons-react").then((mod) => {
+      return mod.IconShieldCheckFill;
+    });
+  },
   { ssr: false },
 );
 
@@ -33,14 +45,11 @@ export default function CtaSection() {
 
   return (
     <section className="relative min-h-[600px] flex items-stretch overflow-hidden">
-      <img
-        loading="lazy"
-        decoding="async"
+      <Image
         src="/landing-page/light-blue.png"
         alt=""
         aria-hidden="true"
-        className="absolute inset-0 w-full h-full object-fill pointer-events-none select-none"
-      />
+        className="absolute inset-0 w-full h-full object-fill pointer-events-none select-none" fill sizes="100vw" />
 
       <div className="relative z-10 max-w-6xl mx-auto w-full flex flex-col md:flex-row items-center px-8 md:px-16 py-20 gap-12">
         <div
@@ -49,15 +58,12 @@ export default function CtaSection() {
           }`}
         >
           <div className="absolute top-12 left-6 select-none pointer-events-none opacity-30">
-            <img
-              loading="lazy"
-              decoding="async"
+            <Image
               src="/assets/icons/star.svg"
               alt=""
               aria-hidden="true"
               width={80}
-              height={80}
-            />
+              height={80} />
           </div>
 
           <Heading
@@ -68,14 +74,11 @@ export default function CtaSection() {
             <br />
             <span className="relative inline-block text-[#0C5FB3]">
               Church Operations?
-              <img
-                loading="lazy"
-                decoding="async"
+              <Image
                 src="/assets/icons/wave.svg"
                 alt=""
                 aria-hidden="true"
-                className="absolute -bottom-4 left-0 w-full h-auto"
-              />
+                className="absolute -bottom-4 left-0 w-full h-auto" width={0} height={0} sizes="100vw" />
             </span>
           </Heading>
 

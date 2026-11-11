@@ -8,18 +8,26 @@ export function useAddMemberForm() {
   const [formData, setFormData] = useState<Partial<NewMemberData>>({});
 
   const updateFormData = useCallback((stepData: Partial<NewMemberData>) => {
-    setFormData((prev) => ({ ...prev, ...stepData }));
+    setFormData((prev) => {
+      return { ...prev, ...stepData };
+    });
   }, []);
 
   const goToNextStep = useCallback((stepData?: Partial<NewMemberData>) => {
     if (stepData) {
-      setFormData((prev) => ({ ...prev, ...stepData }));
+      setFormData((prev) => {
+        return { ...prev, ...stepData };
+      });
     }
-    setCurrentStep((prev) => Math.min(prev + 1, 4) as AddMemberStep);
+    setCurrentStep((prev) => {
+      return Math.min(prev + 1, 4) as AddMemberStep;
+    });
   }, []);
 
   const goToPreviousStep = useCallback(() => {
-    setCurrentStep((prev) => Math.max(prev - 1, 1) as AddMemberStep);
+    setCurrentStep((prev) => {
+      return Math.max(prev - 1, 1) as AddMemberStep;
+    });
   }, []);
 
   const reset = useCallback(() => {

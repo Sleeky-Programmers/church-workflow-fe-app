@@ -29,7 +29,9 @@ export default function UserDetailsRoute() {
           fetchRoles(),
         ]);
         setRoles(rolesData);
-        const invite = invitesData.find((inv: any) => inv._id === id);
+        const invite = invitesData.find((inv: any) => {
+          return inv._id === id;
+        });
 
         if (!invite) {
           setUser(null);
@@ -38,7 +40,9 @@ export default function UserDetailsRoute() {
             typeof invite.churchRole === "string"
               ? invite.churchRole
               : invite.churchRole?._id;
-          const roleObj = rolesData.find((r: any) => r._id === roleId);
+          const roleObj = rolesData.find((r: any) => {
+            return r._id === roleId;
+          });
 
           const mappedUser: User = {
             id: invite._id,
@@ -69,7 +73,7 @@ export default function UserDetailsRoute() {
     }
 
     loadData();
-  }, [id]);
+  }, [id, toast]);
 
   if (isLoading) {
     return (

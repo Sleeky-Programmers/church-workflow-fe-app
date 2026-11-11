@@ -37,7 +37,7 @@ export default function CheckoutPage() {
         setCurrentPlan(data.currentPlan);
         setSubscriptionStatus(data.subscriptionStatus);
         setCurrentBillingCycle(data.billingCycle);
-      } catch (err) {
+      } catch {
         toast({
           title: "Error",
           description: "Failed to load subscription plans",
@@ -50,10 +50,12 @@ export default function CheckoutPage() {
     fetchPlans();
   }, [toast]);
 
-  const selectedPlan = plans.find((plans) => plans.type === plan);
+  const selectedPlan = plans.find((plans) => {
+    return plans.type === plan;
+  });
 
   // A plan change while a paid plan is already active must keep the
-  // existing billing cycle - the remaining time carries over, the cycle doesn't switch mid-change.
+  // Existing billing cycle - the remaining time carries over, the cycle doesn't switch mid-change.
   const isPlanChange =
     !!selectedPlan &&
     subscriptionStatus === SubscriptionStatus.ACTIVE &&
@@ -71,7 +73,9 @@ export default function CheckoutPage() {
 
     getPlanChangePreview(selectedPlan.type, effectiveCycle)
       .then(setPreview)
-      .catch(() => setPreview(null));
+      .catch(() => {
+        return setPreview(null);
+      });
   }, [selectedPlan, effectiveCycle]);
 
   if (loading) {
@@ -107,7 +111,9 @@ export default function CheckoutPage() {
     subscriptionStatus === SubscriptionStatus.ACTIVE
   ) {
     return (
-      <div className="p-6">You're already on the {selectedPlan.name} plan.</div>
+      <div className="p-6">
+        You&apos;re already on the {selectedPlan.name} plan.
+      </div>
     );
   }
 

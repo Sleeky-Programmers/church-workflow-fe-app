@@ -1,11 +1,11 @@
-import * as React from "react"
-import { cva, type VariantProps } from "class-variance-authority"
-import { cn } from "@/lib/utils"
-import { Button, ButtonProps } from "./button"
-import Heading from "./typography/Heading"
+import * as React from "react";
+import { cva, type VariantProps } from "class-variance-authority";
+import { cn } from "@/lib/utils";
+import { Button, ButtonProps } from "./button";
+import Heading from "./typography/Heading";
 
 interface AlertActionProps extends ButtonProps {
-  hasDescription?: boolean
+  hasDescription?: boolean;
 }
 
 const alertVariants = cva(
@@ -21,63 +21,74 @@ const alertVariants = cva(
     defaultVariants: {
       variant: "default",
     },
-  }
-)
+  },
+);
 
 const Alert = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement> & VariantProps<typeof alertVariants>
->(({ className, variant, ...props }, ref) => (
-  <div
-    ref={ref}
-    role="alert"
-    className={cn(alertVariants({ variant }), className)}
-    {...props}
-  />
-))
-Alert.displayName = "Alert"
+>(({ className, variant, ...props }, ref) => {
+  return (
+    <div
+      ref={ref}
+      role="alert"
+      className={cn(alertVariants({ variant }), className)}
+      {...props}
+    />
+  );
+});
+Alert.displayName = "Alert";
 
 const AlertTitle = React.forwardRef<
   HTMLHeadingElement,
   React.HTMLAttributes<HTMLHeadingElement>
->(({ className, ...props }, ref) => (
-  <Heading
-    level={5}
-    ref={ref}
-    className={cn("font-medium leading-none tracking-tight", className)}
-    {...props}
-  />
-))
+>(({ className, ...props }, ref) => {
+  return (
+    <Heading
+      level={5}
+      ref={ref}
+      className={cn("font-medium leading-none tracking-tight", className)}
+      {...props}
+    />
+  );
+});
 
-AlertTitle.displayName = "AlertTitle"
+AlertTitle.displayName = "AlertTitle";
 
 const AlertDescription = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
->(({ className, ...props }, ref) => (
-  <div
-    ref={ref}
-    className={cn("text-sm text-muted-foreground [&_p]:leading-relaxed", className)}
-    {...props}
-  />
-))
-
-AlertDescription.displayName = "AlertDescription"
-
-const AlertAction = React.forwardRef<HTMLButtonElement, AlertActionProps>(
-  ({ className, hasDescription, ...props }, ref) => (
-    <Button
+>(({ className, ...props }, ref) => {
+  return (
+    <div
       ref={ref}
       className={cn(
-        "w-auto",
-        hasDescription ? "mt-2 self-start" : "ml-auto mt-0 self-center",
-        className
+        "text-sm text-muted-foreground [&_p]:leading-relaxed",
+        className,
       )}
       {...props}
     />
-  )
-)
+  );
+});
 
-AlertAction.displayName = "AlertAction"
+AlertDescription.displayName = "AlertDescription";
 
-export { Alert, AlertTitle, AlertDescription, AlertAction }
+const AlertAction = React.forwardRef<HTMLButtonElement, AlertActionProps>(
+  ({ className, hasDescription, ...props }, ref) => {
+    return (
+      <Button
+        ref={ref}
+        className={cn(
+          "w-auto",
+          hasDescription ? "mt-2 self-start" : "ml-auto mt-0 self-center",
+          className,
+        )}
+        {...props}
+      />
+    );
+  },
+);
+
+AlertAction.displayName = "AlertAction";
+
+export { Alert, AlertTitle, AlertDescription, AlertAction };

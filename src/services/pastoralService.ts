@@ -116,16 +116,24 @@ export async function fetchPastoralImpactCounts(options?: {
   totalMembers: number;
 }> {
   const params = new URLSearchParams();
-  if (options?.needsFollowUpThreshold !== undefined)
-    params.set("needsFollowUpThreshold", String(options.needsFollowUpThreshold));
-  if (options?.atRiskThreshold !== undefined)
+  if (options?.needsFollowUpThreshold !== undefined) {
+    params.set(
+      "needsFollowUpThreshold",
+      String(options.needsFollowUpThreshold),
+    );
+  }
+  if (options?.atRiskThreshold !== undefined) {
     params.set("atRiskThreshold", String(options.atRiskThreshold));
-  if (options?.inactiveThreshold !== undefined)
+  }
+  if (options?.inactiveThreshold !== undefined) {
     params.set("inactiveThreshold", String(options.inactiveThreshold));
-  if (options?.trackingMode)
+  }
+  if (options?.trackingMode) {
     params.set("trackingMode", options.trackingMode);
-  if (options?.countSpecialEvents !== undefined)
+  }
+  if (options?.countSpecialEvents !== undefined) {
     params.set("countSpecialEvents", String(options.countSpecialEvents));
+  }
 
   const qs = params.toString();
   return authenticatedFetch(
@@ -139,9 +147,12 @@ export async function fetchPastoralAlerts(options?: {
   includeResolved?: boolean;
 }): Promise<PastoralAlert[]> {
   const params = new URLSearchParams();
-  if (options?.category) params.set("category", options.category);
-  if (options?.includeResolved)
+  if (options?.category) {
+    params.set("category", options.category);
+  }
+  if (options?.includeResolved) {
     params.set("includeResolved", String(options.includeResolved));
+  }
 
   const qs = params.toString();
   return authenticatedFetch<PastoralAlert[]>(
@@ -162,7 +173,9 @@ export async function setAlertResolved(
       body: JSON.stringify({ resolved, outcomeNote }),
     },
   );
-  if (resolved) trackAction("alert.resolve");
+  if (resolved) {
+    trackAction("alert.resolve");
+  }
   return alert;
 }
 

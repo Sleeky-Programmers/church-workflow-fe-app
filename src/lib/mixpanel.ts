@@ -5,23 +5,27 @@ let recording = false;
 
 // Routes whose sessions get recorded by Session Replay. Recording is scoped
 // (rather than site-wide) to keep the monthly replay quota spent on the
-// conversion-critical flow - the public marketing pages get event tracking
-// via trackEvent/autocapture but not full replay.
+// Conversion-critical flow - the public marketing pages get event tracking
+// Via trackEvent/autocapture but not full replay.
 // "/" matches only the exact home route; every other entry also matches its
-// sub-paths (e.g. "/dashboard" covers "/dashboard/settings/...").
+// Sub-paths (e.g. "/dashboard" covers "/dashboard/settings/...").
 const RECORDED_PATHS = ["/auth/signup", "/onboarding", "/dashboard"];
 
 function isPathRecorded(pathname: string): boolean {
-  return RECORDED_PATHS.some(
-    (path) => pathname === path || pathname.startsWith(`${path}/`),
-  );
+  return RECORDED_PATHS.some((path) => {
+    return pathname === path || pathname.startsWith(`${path}/`);
+  });
 }
 
 export function initMixpanel() {
-  if (initialized || typeof window === "undefined") return;
+  if (initialized || typeof window === "undefined") {
+    return;
+  }
 
   const token = process.env.NEXT_PUBLIC_MIXPANEL_TOKEN;
-  if (!token) return;
+  if (!token) {
+    return;
+  }
 
   mixpanel.init(token, {
     persistence: "localStorage",
@@ -35,14 +39,14 @@ export function initMixpanel() {
       ? { api_host: process.env.NEXT_PUBLIC_MIXPANEL_API_HOST }
       : {}),
     // Recording is started/stopped manually per route (see
-    // syncSessionRecording) rather than sampled automatically here, so it
-    // stays scoped to RECORDED_PATHS. Input values are still masked by
-    // default (record_mask_inputs) to avoid capturing passwords/PII typed
-    // into forms on the routes that are recorded.
+    // SyncSessionRecording) rather than sampled automatically here, so it
+    // Stays scoped to RECORDED_PATHS. Input values are still masked by
+    // Default (record_mask_inputs) to avoid capturing passwords/PII typed
+    // Into forms on the routes that are recorded.
     record_sessions_percent: 0,
     record_min_ms: 0,
     // Auto-captures clicks/submits/pageviews without manual trackEvent calls,
-    // so replay sessions are paired with a corresponding event trail.
+    // So replay sessions are paired with a corresponding event trail.
     autocapture: true,
   });
   initialized = true;
@@ -53,7 +57,9 @@ export function initMixpanel() {
  * route. Call on initial mount and on every client-side route change.
  */
 export function syncSessionRecording(pathname: string) {
-  if (!initialized) return;
+  if (!initialized) {
+    return;
+  }
 
   const shouldRecord = isPathRecorded(pathname);
 
@@ -70,7 +76,9 @@ export function trackMixpanelEvent(
   name: string,
   props?: Record<string, string | number | boolean | undefined>,
 ) {
-  if (!initialized) return;
+  if (!initialized) {
+    return;
+  }
   mixpanel.track(name, props);
 }
 
@@ -86,10 +94,14 @@ interface MixpanelUserTraits {
 }
 
 export function identifyMixpanelUser(id: string, traits?: MixpanelUserTraits) {
-  if (!initialized) return;
+  if (!initialized) {
+    return;
+  }
   mixpanel.identify(id);
 
-  if (!traits) return;
+  if (!traits) {
+    return;
+  }
 
   const { name, email, avatarUrl, ...rest } = traits;
   mixpanel.people.set({
@@ -101,6 +113,8 @@ export function identifyMixpanelUser(id: string, traits?: MixpanelUserTraits) {
 }
 
 export function resetMixpanel() {
-  if (!initialized) return;
+  if (!initialized) {
+    return;
+  }
   mixpanel.reset();
 }

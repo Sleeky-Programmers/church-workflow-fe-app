@@ -66,35 +66,42 @@ export default function ResetPasswordForm({
           <FormField
             control={form.control}
             name="newPassword"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Enter New Password</FormLabel>
-                <FormControl>
-                  <PasswordInput placeholder="Enter new password" {...field} />
-                </FormControl>
-                <FormDescription>
-                  Password must be at least 8 characters
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
+            render={({ field }) => {
+              return (
+                <FormItem>
+                  <FormLabel>Enter New Password</FormLabel>
+                  <FormControl>
+                    <PasswordInput
+                      placeholder="Enter new password"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    Password must be at least 8 characters
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              );
+            }}
           />
           <FormField
             control={form.control}
             name="confirmPassword"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Confirm New Password</FormLabel>
-                <FormControl>
-                  <PasswordInput
-                    placeholder="Confirm new password"
-                    {...field}
-                  />
-                </FormControl>
-                <FormDescription>Must be the same characters</FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
+            render={({ field }) => {
+              return (
+                <FormItem>
+                  <FormLabel>Confirm New Password</FormLabel>
+                  <FormControl>
+                    <PasswordInput
+                      placeholder="Confirm new password"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormDescription>Must be the same characters</FormDescription>
+                  <FormMessage />
+                </FormItem>
+              );
+            }}
           />
           <Button type="submit" disabled={isLoading} className="w-full">
             {isLoading ? (

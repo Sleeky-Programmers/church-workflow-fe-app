@@ -55,7 +55,7 @@ export function useAdminInvite(): UseAdminInviteReturn {
     };
 
     loadInviteData();
-  }, [searchParams]);
+  }, [searchParams, inviteToken]);
 
   return {
     isAdmin: !!inviteToken,

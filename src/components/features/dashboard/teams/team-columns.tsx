@@ -16,15 +16,21 @@ interface TeamColumnHandlers {
 }
 
 function getAvatarColor(name: string) {
-  if (!name) return AVATAR_COLORS[0];
+  if (!name) {
+    return AVATAR_COLORS[0];
+  }
   const code = name.charCodeAt(0);
   return AVATAR_COLORS[code % AVATAR_COLORS.length];
 }
 
 function getInitials(name: string) {
-  if (!name) return "?";
+  if (!name) {
+    return "?";
+  }
   const parts = name.trim().split(" ");
-  if (parts.length === 1) return parts[0][0].toUpperCase();
+  if (parts.length === 1) {
+    return parts[0][0].toUpperCase();
+  }
   return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
 }
 
@@ -73,34 +79,38 @@ export function getTeamColumns({
     {
       key: "status",
       header: "Status",
-      render: (row) => (
-        <Badge
-          variant="outline"
-          className={
-            row.status.toLowerCase() === "active"
-              ? "border-success-400 text-success-600 bg-transparent font-normal"
-              : "border-gray-300 text-gray-500 bg-transparent font-normal"
-          }
-        >
-          {row.status}
-        </Badge>
-      ),
+      render: (row) => {
+        return (
+          <Badge
+            variant="outline"
+            className={
+              row.status.toLowerCase() === "active"
+                ? "border-success-400 text-success-600 bg-transparent font-normal"
+                : "border-gray-300 text-gray-500 bg-transparent font-normal"
+            }
+          >
+            {row.status}
+          </Badge>
+        );
+      },
       width: "w-40",
       align: "center",
     },
     {
       key: "actions",
       header: "Actions",
-      render: (row) => (
-        <TeamRowActionsMenu
-          row={row}
-          onEdit={onEdit}
-          onManageMembers={onManageMembers}
-          onMarkAttendance={onMarkAttendance}
-          onViewReport={onViewReport}
-          onDeleteRequest={onDeleteRequest}
-        />
-      ),
+      render: (row) => {
+        return (
+          <TeamRowActionsMenu
+            row={row}
+            onEdit={onEdit}
+            onManageMembers={onManageMembers}
+            onMarkAttendance={onMarkAttendance}
+            onViewReport={onViewReport}
+            onDeleteRequest={onDeleteRequest}
+          />
+        );
+      },
       width: "w-20",
       align: "right",
       contentClassName: "overflow-visible",

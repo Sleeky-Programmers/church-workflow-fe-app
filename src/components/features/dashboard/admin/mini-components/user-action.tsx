@@ -29,10 +29,9 @@ export function UserActionsMenu({
   canManageBranchAccess = false,
   isCurrentUser = false,
 }: UserActionsMenuProps) {
-  const availableActions = getAvailableActions(userStatus).filter(
-    (action) =>
-      action.value !== "manage_branch_access" || canManageBranchAccess,
-  );
+  const availableActions = getAvailableActions(userStatus).filter((action) => {
+    return action.value !== "manage_branch_access" || canManageBranchAccess;
+  });
 
   return (
     <DropdownMenu>
@@ -45,7 +44,7 @@ export function UserActionsMenu({
       <DropdownMenuContent align="end">
         {availableActions.map((action) => {
           // Admins can't take actions on their own account - only viewing
-          // their own details is allowed.
+          // Their own details is allowed.
           const isSelfAction =
             isCurrentUser && !canPerformAction(action.value, isCurrentUser);
 

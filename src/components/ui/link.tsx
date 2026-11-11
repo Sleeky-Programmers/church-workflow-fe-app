@@ -8,7 +8,13 @@ type LinkProps = {
   className?: string;
 } & React.AnchorHTMLAttributes<HTMLAnchorElement>;
 
-export function Link({ href, external, children, className, ...props }: LinkProps) {
+export function Link({
+  href,
+  external,
+  children,
+  className,
+  ...props
+}: LinkProps) {
   const baseClass =
     "text-primary-700 underline hover:text-primary-800 transition break-all";
 

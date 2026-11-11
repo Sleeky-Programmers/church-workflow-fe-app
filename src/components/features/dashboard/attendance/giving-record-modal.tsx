@@ -14,7 +14,7 @@ import { Button } from "@/components/ui/button";
 import { RegularService } from "@/types";
 
 // Retained for backwards compatibility with any code still importing this
-// type - the inline giving form has moved to the Giving Batch workflow.
+// Type - the inline giving form has moved to the Giving Batch workflow.
 export type GivingValues = {
   tithe: string;
   offering: string;
@@ -37,7 +37,9 @@ export function GivingRecordModal({
 }: GivingRecordModalProps) {
   const router = useRouter();
 
-  if (!service || !date) return null;
+  if (!service || !date) {
+    return null;
+  }
 
   const parsedDate = new Date(date);
 

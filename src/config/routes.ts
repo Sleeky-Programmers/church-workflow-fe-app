@@ -21,7 +21,7 @@ export enum Routes {
   DepartmentEdit = "/dashboard/departments/[id]/edit",
 
   Admin = "/dashboard/settings/users",
-  UserManagement = "/dashboard/settings/users",
+  UserManagement = Admin,
   RolesPermissions = "/dashboard/settings/roles",
   CreateRole = "/dashboard/settings/roles/create-role",
   Preferences = "/dashboard/settings/preferences",
@@ -48,12 +48,15 @@ export const RouteConfig = {
     attendance: Routes.Attendance,
     membership: Routes.Membership,
     assets: Routes.Assets,
-    assetDetails: (assetId: string) =>
-      getRouteWithParams(Routes.AssetDetails, { id: assetId }),
-    departmentDetails: (id: string) =>
-      getRouteWithParams(Routes.DepartmentDetails, { id }),
-    departmentEdit: (departmentId: string) =>
-      getRouteWithParams(Routes.DepartmentEdit, { id: departmentId }),
+    assetDetails: (assetId: string) => {
+      return getRouteWithParams(Routes.AssetDetails, { id: assetId });
+    },
+    departmentDetails: (id: string) => {
+      return getRouteWithParams(Routes.DepartmentDetails, { id });
+    },
+    departmentEdit: (departmentId: string) => {
+      return getRouteWithParams(Routes.DepartmentEdit, { id: departmentId });
+    },
     search: Routes.Search,
     admin: {
       root: Routes.Admin,
@@ -61,8 +64,9 @@ export const RouteConfig = {
       roles: Routes.RolesPermissions,
       preferences: Routes.Preferences,
       account: Routes.AccountSettings,
-      userDetails: (userId: string) =>
-        Routes.UserDetails.replace("[id]", userId),
+      userDetails: (userId: string) => {
+        return Routes.UserDetails.replace("[id]", userId);
+      },
       createRole: Routes.CreateRole,
     },
   },

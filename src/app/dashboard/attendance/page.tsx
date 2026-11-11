@@ -24,7 +24,6 @@ import { Text } from "@/components/ui/typography/Text";
 import { useToast } from "@/hooks/use-toast";
 import {
   fetchAllServices,
-  fetchServices,
   mapToRegularService,
   mapToSpecialService,
 } from "@/lib/api";
@@ -33,6 +32,7 @@ import { DEFAULT_ORDER } from "@/lib/data";
 import { ServiceFrequency, ServiceType } from "@/lib/enums";
 import { createChurchService, DAY } from "@/services/churchService";
 import { RegularService, SpecialServiceEvent } from "@/types";
+import { useLatest } from "@/hooks/use-latest";
 
 function useIsMobile() {
   const [isMobile, setIsMobile] = useState(false);
@@ -44,7 +44,9 @@ function useIsMobile() {
 
     checkMobile();
     window.addEventListener("resize", checkMobile);
-    return () => window.removeEventListener("resize", checkMobile);
+    return () => {
+      return window.removeEventListener("resize", checkMobile);
+    };
   }, []);
 
   return isMobile;
@@ -87,11 +89,15 @@ export default function AttendancePage() {
 
       // Separate regular and special services
       const regular = data
-        .filter((service) => service.type === "REGULAR")
+        .filter((service) => {
+          return service.type === "REGULAR";
+        })
         .map(mapToRegularService);
 
       const special = data
-        .filter((service) => service.type === "SPECIAL")
+        .filter((service) => {
+          return service.type === "SPECIAL";
+        })
         .map(mapToSpecialService);
 
       setRegularServices(regular);
@@ -107,9 +113,11 @@ export default function AttendancePage() {
     }
   };
 
+  const loadServicesRef = useLatest(loadServices);
+
   useEffect(() => {
-    loadServices();
-  }, []);
+    loadServicesRef.current();
+  }, [loadServicesRef]);
 
   const handleCreateServices = async (newServices: PendingRegularService[]) => {
     try {
@@ -151,8 +159,9 @@ export default function AttendancePage() {
     setSelectedDate(date);
   };
 
-  const getServiceDateKey = (serviceId: string, date: string) =>
-    `${serviceId}|${date}`;
+  const getServiceDateKey = (serviceId: string, date: string) => {
+    return `${serviceId}|${date}`;
+  };
 
   const selectedKey =
     selectedService && selectedDate
@@ -160,24 +169,36 @@ export default function AttendancePage() {
       : null;
 
   const isFutureService = useMemo(() => {
-    if (!selectedService || !selectedDate) return false;
+    if (!selectedService || !selectedDate) {
+      return false;
+    }
     const now = new Date();
     const serviceDate = new Date(selectedDate);
     serviceDate.setHours(0, 0, 0, 0);
     const today = new Date(now);
     today.setHours(0, 0, 0, 0);
 
-    if (serviceDate.getTime() > today.getTime()) return true;
-    if (serviceDate.getTime() < today.getTime()) return false;
+    if (serviceDate.getTime() > today.getTime()) {
+      return true;
+    }
+    if (serviceDate.getTime() < today.getTime()) {
+      return false;
+    }
 
     const start = selectedService.startTime.toLowerCase().trim();
     const timeMatch = start.match(/^(\d{1,2})(?::(\d{2}))?\s*(am|pm)?$/);
-    if (!timeMatch) return false;
+    if (!timeMatch) {
+      return false;
+    }
 
     let hour = Number(timeMatch[1]);
     const suffix = timeMatch[3];
-    if (suffix === "pm" && hour < 12) hour += 12;
-    if (suffix === "am" && hour === 12) hour = 0;
+    if (suffix === "pm" && hour < 12) {
+      hour += 12;
+    }
+    if (suffix === "am" && hour === 12) {
+      hour = 0;
+    }
 
     const minute = Number(timeMatch[2] || 0);
     return (
@@ -214,11 +235,13 @@ export default function AttendancePage() {
         location: service.location,
         recurrence: service.recurrence || "NO_REPEAT",
         specialDays:
-          service.daySchedules?.map((schedule) => ({
-            date: schedule.date,
-            startTime: schedule.startTime,
-            endTime: schedule.endTime || undefined,
-          })) || [],
+          service.daySchedules?.map((schedule) => {
+            return {
+              date: schedule.date,
+              startTime: schedule.startTime,
+              endTime: schedule.endTime || undefined,
+            };
+          }) || [],
         description: service.description,
         eventType: service.eventType || "WORSHIP_SERVICE",
         reminderEnabled: false,
@@ -290,13 +313,15 @@ export default function AttendancePage() {
     presentMembers: string[];
     absentMembers: string[];
   }) => {
-    setSpecialServices((prev) =>
-      prev.map((service) => {
-        if (service.id !== payload.serviceId) return service;
+    setSpecialServices((prev) => {
+      return prev.map((service) => {
+        if (service.id !== payload.serviceId) {
+          return service;
+        }
         const attendanceRecords = [...(service.attendanceRecords || [])];
-        const schedule = service.daySchedules?.find(
-          (s) => s.date === payload.date,
-        );
+        const schedule = service.daySchedules?.find((s) => {
+          return s.date === payload.date;
+        });
         const nextRecord = {
           serviceId: payload.serviceId,
           date: payload.date,
@@ -307,18 +332,21 @@ export default function AttendancePage() {
           startTime: schedule?.startTime || "",
           endTime: schedule?.endTime || "",
         };
-        const existingIndex = attendanceRecords.findIndex(
-          (record) => record.date === payload.date,
-        );
-        if (existingIndex >= 0) attendanceRecords[existingIndex] = nextRecord;
-        else attendanceRecords.push(nextRecord);
+        const existingIndex = attendanceRecords.findIndex((record) => {
+          return record.date === payload.date;
+        });
+        if (existingIndex >= 0) {
+          attendanceRecords[existingIndex] = nextRecord;
+        } else {
+          attendanceRecords.push(nextRecord);
+        }
 
         return {
           ...service,
           attendanceRecords,
         };
-      }),
-    );
+      });
+    });
     toast({
       title: "Success",
       description: "Special service attendance saved successfully",
@@ -341,9 +369,11 @@ export default function AttendancePage() {
     presentMembers: string[];
     absentMembers: string[];
   }) => {
-    setRegularServices((prev) =>
-      prev.map((service) => {
-        if (service.id !== payload.serviceId) return service;
+    setRegularServices((prev) => {
+      return prev.map((service) => {
+        if (service.id !== payload.serviceId) {
+          return service;
+        }
         const attendanceRecords = [...(service.attendanceRecords || [])];
         const nextRecord = {
           serviceId: payload.serviceId,
@@ -355,18 +385,21 @@ export default function AttendancePage() {
           startTime: service.startTime,
           endTime: service.endTime,
         };
-        const existingIndex = attendanceRecords.findIndex(
-          (record) => record.date === payload.date,
-        );
-        if (existingIndex >= 0) attendanceRecords[existingIndex] = nextRecord;
-        else attendanceRecords.push(nextRecord);
+        const existingIndex = attendanceRecords.findIndex((record) => {
+          return record.date === payload.date;
+        });
+        if (existingIndex >= 0) {
+          attendanceRecords[existingIndex] = nextRecord;
+        } else {
+          attendanceRecords.push(nextRecord);
+        }
 
         return {
           ...service,
           attendanceRecords,
         };
-      }),
-    );
+      });
+    });
     toast({
       title: "Success",
       description: "Attendance saved successfully",
@@ -418,7 +451,9 @@ export default function AttendancePage() {
 
         <AttendanceModal
           isOpen={isAttendanceModalOpen}
-          onClose={() => setIsAttendanceModalOpen(false)}
+          onClose={() => {
+            return setIsAttendanceModalOpen(false);
+          }}
           service={selectedService}
           date={selectedDate}
           onSave={handleAttendanceSaved}
@@ -446,11 +481,15 @@ export default function AttendancePage() {
             isFutureService,
           )}
           onSaveOrder={(items) => {
-            if (!selectedService || !selectedDate) return;
-            setOrderByServiceDate((prev) => ({
-              ...prev,
-              [getServiceDateKey(selectedService.id, selectedDate)]: items,
-            }));
+            if (!selectedService || !selectedDate) {
+              return;
+            }
+            setOrderByServiceDate((prev) => {
+              return {
+                ...prev,
+                [getServiceDateKey(selectedService.id, selectedDate)]: items,
+              };
+            });
             toast({
               title: "Success",
               description: "Order of service updated",
@@ -485,7 +524,9 @@ export default function AttendancePage() {
               <Input
                 placeholder="Search"
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(e) => {
+                  return setSearchQuery(e.target.value);
+                }}
                 className="pl-10"
               />
             </div>
@@ -537,7 +578,9 @@ export default function AttendancePage() {
 
       <AttendanceModal
         isOpen={isAttendanceModalOpen}
-        onClose={() => setIsAttendanceModalOpen(false)}
+        onClose={() => {
+          return setIsAttendanceModalOpen(false);
+        }}
         service={selectedService}
         date={selectedDate}
         onSave={handleAttendanceSaved}
@@ -565,11 +608,15 @@ export default function AttendancePage() {
           isFutureService,
         )}
         onSaveOrder={(items) => {
-          if (!selectedService || !selectedDate) return;
-          setOrderByServiceDate((prev) => ({
-            ...prev,
-            [getServiceDateKey(selectedService.id, selectedDate)]: items,
-          }));
+          if (!selectedService || !selectedDate) {
+            return;
+          }
+          setOrderByServiceDate((prev) => {
+            return {
+              ...prev,
+              [getServiceDateKey(selectedService.id, selectedDate)]: items,
+            };
+          });
           toast({
             title: "Success",
             description: "Order of service updated",

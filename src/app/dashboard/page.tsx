@@ -18,16 +18,13 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Loader } from "@/components/ui/loader";
 import { Text } from "@/components/ui/typography/Text";
-import { EVENT_CATEGORY_CONFIG } from "@/config/event-category";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useHasAccess } from "@/lib/access-control";
 import {
   fetchAttendanceStats,
   fetchAttendanceTrend,
   fetchTotalMembers,
-  getMyChurch,
 } from "@/lib/api";
-import { getCurrentUserProfile } from "@/lib/auth/session";
 import { DashboardData } from "@/lib/data";
 import { EventCategory, EventType } from "@/lib/enums";
 import {
@@ -42,9 +39,7 @@ import { fetchGivingMonthlyTrend } from "@/services/givingService";
 import { fetchMemberBirthdays } from "@/services/memberService";
 import { useUserStore } from "@/stores/useUserStore";
 import { ChurchEvent } from "@/types";
-
-import type { ChurchResponse } from "@/types/payload";
-import type { AttendanceTrendResponse, MonthlyAttendance } from "@/lib/api";
+import Image from "next/image";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Constants
@@ -119,8 +114,7 @@ export default function Dashboard() {
       const { totalMembers, growth } = await fetchTotalMembers();
       setTotalMembers(totalMembers.toLocaleString());
       setTotalMembersGrowth(growth || "0%");
-    } catch (err) {
-      console.error("Failed to load member stats:", err);
+    } catch {
       setMembersError(true);
     } finally {
       setMembersLoading(false);
@@ -136,8 +130,8 @@ export default function Dashboard() {
     setAttendanceLoading(true);
     setAttendanceError(false);
     // Stats (the card) and trend (the chart) are independent requests: fire
-    // them together instead of back-to-back, and don't let a chart failure
-    // mark the card as broken (or vice versa).
+    // Them together instead of back-to-back, and don't let a chart failure
+    // Mark the card as broken (or vice versa).
     const [statsResult, trendResult] = await Promise.allSettled([
       fetchAttendanceStats(),
       fetchAttendanceTrend(),
@@ -148,7 +142,6 @@ export default function Dashboard() {
       setServiceAttendance((totalAttendance ?? 0).toLocaleString());
       setServiceAttendanceGrowth(attendanceGrowth || "0%");
     } else {
-      console.error("Failed to load attendance stats:", statsResult.reason);
       setAttendanceError(true);
     }
 
@@ -156,14 +149,15 @@ export default function Dashboard() {
       const trend = trendResult.value;
       // Combine regular and special service data for the chart
       setAttendanceTrendData(
-        (trend.regularService || []).map((regular, index) => ({
-          month: regular.month,
-          thisMonth: regular.totalAttendance,
-          lastMonth: trend.specialService?.[index]?.totalAttendance || 0,
-        })),
+        (trend.regularService || []).map((regular, index) => {
+          return {
+            month: regular.month,
+            thisMonth: regular.totalAttendance,
+            lastMonth: trend.specialService?.[index]?.totalAttendance || 0,
+          };
+        }),
       );
     } else {
-      console.error("Failed to load attendance trend:", trendResult.reason);
     }
 
     setAttendanceLoading(false);
@@ -179,20 +173,24 @@ export default function Dashboard() {
     fetchGivingMonthlyTrend()
       .then((trend) => {
         // Sum across currencies per month - this widget shows a single
-        // combined figure rather than breaking out by currency.
+        // Combined figure rather than breaking out by currency.
         const byMonth: Record<string, number> = {};
         const monthOrder: string[] = [];
         for (const point of trend) {
-          if (!(point.month in byMonth)) monthOrder.push(point.month);
+          if (!(point.month in byMonth)) {
+            monthOrder.push(point.month);
+          }
           byMonth[point.month] =
             (byMonth[point.month] || 0) + point.totalAmount;
         }
         setIncomeTrendData(
-          monthOrder.map((month) => ({
-            month,
-            thisMonth: byMonth[month],
-            lastMonth: 0,
-          })),
+          monthOrder.map((month) => {
+            return {
+              month,
+              thisMonth: byMonth[month],
+              lastMonth: 0,
+            };
+          }),
         );
       })
       .catch(() => {});
@@ -205,25 +203,35 @@ export default function Dashboard() {
       setBirthdaysLoading(true);
       try {
         // One light request (name + birthday only) instead of up to three
-        // sequential pages of full member records, which also silently
-        // missed anyone past the 300th member.
+        // Sequential pages of full member records, which also silently
+        // Missed anyone past the 300th member.
         const members = await fetchMemberBirthdays();
-        if (!mounted) return;
+        if (!mounted) {
+          return;
+        }
         const today = new Date();
         const cutoff = new Date();
         cutoff.setMonth(today.getMonth() + 3);
         const mapped = members
-          .filter((m) => m?.birthday && !isNaN(new Date(m.birthday).getTime()))
-          .map((m) => ({ name: m.fullName, date: m.birthday }))
+          .filter((m) => {
+            return m?.birthday && !isNaN(new Date(m.birthday).getTime());
+          })
+          .map((m) => {
+            return { name: m.fullName, date: m.birthday };
+          })
           .filter(({ date }) => {
             const next = getNextBirthdayDate(date);
             return next >= today && next <= cutoff;
           });
         setUpcomingBirthdays(sortBirthdaysByNearest(mapped));
       } catch {
-        if (mounted) setUpcomingBirthdays([]);
+        if (mounted) {
+          setUpcomingBirthdays([]);
+        }
       } finally {
-        if (mounted) setBirthdaysLoading(false);
+        if (mounted) {
+          setBirthdaysLoading(false);
+        }
       }
     }
     loadBirthdays();
@@ -236,22 +244,28 @@ export default function Dashboard() {
   useEffect(() => {
     try {
       const stored = localStorage.getItem(EVENT_STORAGE_KEY);
-      if (!stored) return;
+      if (!stored) {
+        return;
+      }
       const parsed = JSON.parse(stored) as ChurchEvent[];
-      const normalized = parsed.map((e) => ({
-        title: e.title,
-        date: e.date,
-        category: EVENT_CATEGORY_BY_TYPE[e.type] || EventCategory.GENERAL,
-      }));
-      if (normalized.length) setUpcomingEvents(normalized);
+      const normalized = parsed.map((e) => {
+        return {
+          title: e.title,
+          date: e.date,
+          category: EVENT_CATEGORY_BY_TYPE[e.type] || EventCategory.GENERAL,
+        };
+      });
+      if (normalized.length) {
+        setUpcomingEvents(normalized);
+      }
     } catch {
       setUpcomingEvents(DashboardData.upcomingEvents);
     }
   }, []);
 
   // Only block the whole page when we have no profile to show at all (a true
-  // cold failure). If a cached user exists, a transient refresh error is shown
-  // as a non-blocking banner below and the dashboard stays usable.
+  // Cold failure). If a cached user exists, a transient refresh error is shown
+  // As a non-blocking banner below and the dashboard stays usable.
   if (error && !user) {
     return (
       <div className="flex items-center justify-center py-16 gap-2 flex-col">
@@ -263,7 +277,9 @@ export default function Dashboard() {
             {error}
           </Text>
           <Button
-            onClick={() => fetchUserData(true)}
+            onClick={() => {
+              return fetchUserData(true);
+            }}
             className="mt-4"
             variant="outline"
           >
@@ -282,7 +298,9 @@ export default function Dashboard() {
           Some data may be out of date. {error}
         </p>
         <Button
-          onClick={() => fetchUserData(true)}
+          onClick={() => {
+            return fetchUserData(true);
+          }}
           size="sm"
           variant="outline"
           disabled={isLoading}
@@ -300,18 +318,18 @@ export default function Dashboard() {
         {profileRefreshBanner}
         {canViewGiving && <GivingConfigWarningBanner />}
         <DashboardMobile
-        displayName={displayName}
-        churchName={church?.name || "Your Church"}
-        totalMembers={totalMembers}
-        totalMembersGrowth={totalMembersGrowth}
-        serviceAttendance={serviceAttendance}
-        serviceAttendanceGrowth={serviceAttendanceGrowth}
-        attendanceTrendData={attendanceTrendData}
-        incomeTrendData={incomeTrendData}
-        upcomingEvents={upcomingEvents}
-        upcomingBirthdays={upcomingBirthdays}
-        canViewGiving={canViewGiving}
-        canViewRequests={canViewRequests}
+          displayName={displayName}
+          churchName={church?.name || "Your Church"}
+          totalMembers={totalMembers}
+          totalMembersGrowth={totalMembersGrowth}
+          serviceAttendance={serviceAttendance}
+          serviceAttendanceGrowth={serviceAttendanceGrowth}
+          attendanceTrendData={attendanceTrendData}
+          incomeTrendData={incomeTrendData}
+          upcomingEvents={upcomingEvents}
+          upcomingBirthdays={upcomingBirthdays}
+          canViewGiving={canViewGiving}
+          canViewRequests={canViewRequests}
         />
       </>
     );
@@ -319,8 +337,12 @@ export default function Dashboard() {
 
   // ── Derived ──
   const sortedEvents = upcomingEvents
-    .filter((e) => isInFuture(e.date))
-    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    .filter((e) => {
+      return isInFuture(e.date);
+    })
+    .sort((a, b) => {
+      return new Date(a.date).getTime() - new Date(b.date).getTime();
+    });
 
   // Safely handle null church values with fallbacks
   const churchInitials = church?.alias
@@ -329,7 +351,9 @@ export default function Dashboard() {
       ? church.name
           .split(" ")
           .slice(0, 2)
-          .map((w) => w[0])
+          .map((w) => {
+            return w[0];
+          })
           .join("")
           .toUpperCase()
       : "CW";
@@ -362,11 +386,10 @@ export default function Dashboard() {
 
           {church?.logoUrl ? (
             <div className="w-10 h-10 rounded-full bg-primary-400 flex items-center justify-center ring-2 ring-blue-100 shrink-0 overflow-hidden">
-              <img
+              <Image
                 src={church.logoUrl}
                 alt={church.name || "Church"}
-                className="w-full h-full object-cover"
-              />
+                className="w-full h-full object-cover" width={256} height={256} unoptimized />
             </div>
           ) : (
             <div className="w-10 h-10 rounded-full bg-primary-50 text-white-900 font-semibold flex items-center justify-center ring-2 ring-blue-100 shrink-0 overflow-hidden">
@@ -436,9 +459,10 @@ export default function Dashboard() {
                 </p>
               ) : (
                 sortedEvents.map((event, i) => {
-                  const cfg = EVENT_CATEGORY_CONFIG[event.category];
                   const displayDate = formatEventDate(event.date);
-                  if (!displayDate) return null;
+                  if (!displayDate) {
+                    return null;
+                  }
                   const dotClass =
                     DOT_COLORS[event.category] ?? "bg-primary-400";
                   return (
@@ -492,29 +516,34 @@ export default function Dashboard() {
                   icon={Cake}
                   title="No upcoming birthdays"
                   description="Members with birthdays in the next 3 months will show up here."
-                  action={{ label: "View birthdays", href: "/dashboard/birthdays" }}
+                  action={{
+                    label: "View birthdays",
+                    href: "/dashboard/birthdays",
+                  }}
                 />
               ) : (
-                upcomingBirthdays.slice(0, 5).map((b, i) => (
-                  <div
-                    key={`${b.name}-${i}`}
-                    className="flex items-center justify-between gap-3"
-                  >
-                    <div className="flex items-center gap-2 min-w-0">
-                      <Avatar className="w-7 h-7 shrink-0">
-                        <AvatarFallback className="bg-blue-50">
-                          <User className="w-3.5 h-3.5 text-primary-400" />
-                        </AvatarFallback>
-                      </Avatar>
-                      <span className="text-[13px] font-semibold text-gray-800 truncate">
-                        {b.name}
+                upcomingBirthdays.slice(0, 5).map((b, i) => {
+                  return (
+                    <div
+                      key={`${b.name}-${i}`}
+                      className="flex items-center justify-between gap-3"
+                    >
+                      <div className="flex items-center gap-2 min-w-0">
+                        <Avatar className="w-7 h-7 shrink-0">
+                          <AvatarFallback className="bg-blue-50">
+                            <User className="w-3.5 h-3.5 text-primary-400" />
+                          </AvatarFallback>
+                        </Avatar>
+                        <span className="text-[13px] font-semibold text-gray-800 truncate">
+                          {b.name}
+                        </span>
+                      </div>
+                      <span className="text-[12px] text-gray-400 font-medium shrink-0">
+                        {formatUpcomingBirthday(b.date)}
                       </span>
                     </div>
-                    <span className="text-[12px] text-gray-400 font-medium shrink-0">
-                      {formatUpcomingBirthday(b.date)}
-                    </span>
-                  </div>
-                ))
+                  );
+                })
               )}
             </div>
           </div>

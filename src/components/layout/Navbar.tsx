@@ -29,11 +29,13 @@ import { Text } from "../ui/typography/Text";
 export function Navbar() {
   const pathname = usePathname() || RouteConfig.dashboard.home;
   const isMobile = useIsMobile();
-  const openPalette = useCommandPaletteStore((s) => s.setOpen);
+  const openPalette = useCommandPaletteStore((s) => {
+    return s.setOpen;
+  });
   const modKeyLabel = useModKeyLabel();
 
   const { toggleFavorite, isFavorite } = useFavoritesStore();
-  const { user, getUserFullName, fetchUserData } = useUserStore();
+  const { getUserFullName, fetchUserData } = useUserStore();
   const starred = isFavorite(pathname);
 
   // Fetch user data if not already loaded
@@ -43,18 +45,26 @@ export function Navbar() {
 
   const pageLabel = useMemo(() => {
     const path = pathname.replace(/\/+$/, "");
-    if (!path.startsWith("/dashboard")) return "Overview";
+    if (!path.startsWith("/dashboard")) {
+      return "Overview";
+    }
     const rest = path.replace(/^\/dashboard\/?/, "");
-    if (!rest) return "Overview";
+    if (!rest) {
+      return "Overview";
+    }
     return rest
       .split("/")[0]
       .replace(/[-_]+/g, " ")
-      .replace(/\b\w/g, (c: string) => c.toUpperCase());
+      .replace(/\b\w/g, (c: string) => {
+        return c.toUpperCase();
+      });
   }, [pathname]);
 
   const displayName = getUserFullName();
 
-  if (isMobile) return null;
+  if (isMobile) {
+    return null;
+  }
 
   return (
     <header className="w-full hidden md:flex flex items-center h-16 gap-2 px-3 md:px-6 border-b">
@@ -64,12 +74,12 @@ export function Navbar() {
           size="icon"
           variant={starred ? "starred" : "ghost"}
           aria-label="Star this page"
-          onClick={() =>
-            toggleFavorite({
+          onClick={() => {
+            return toggleFavorite({
               path: pathname,
               label: pageLabel,
-            })
-          }
+            });
+          }}
         >
           <Star className="w-4 h-4" fill={starred ? "currentColor" : "none"} />
         </Button>
@@ -96,14 +106,18 @@ export function Navbar() {
           variant="ghost"
           className="sm:hidden"
           aria-label="Open search"
-          onClick={() => openPalette(true)}
+          onClick={() => {
+            return openPalette(true);
+          }}
         >
           <Search className="w-4 h-4" />
         </Button>
 
         <button
           type="button"
-          onClick={() => openPalette(true)}
+          onClick={() => {
+            return openPalette(true);
+          }}
           aria-label="Search (opens the command palette)"
           aria-keyshortcuts="Control+K Meta+K /"
           className="hidden sm:flex h-10 w-48 md:w-64 items-center gap-2 rounded-md border border-input bg-transparent px-3 text-sm text-muted-foreground shadow-sm transition-colors hover:bg-accent/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"

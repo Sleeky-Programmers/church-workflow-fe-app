@@ -81,32 +81,38 @@ export function ChangeRoleDialog({
             <FormField
               control={form.control}
               name="roleId"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Select New Role</FormLabel>
-                  <Select value={field.value} onValueChange={field.onChange}>
-                    <FormControl>
-                      <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Select a role" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {roles.map((role: any) => (
-                        <SelectItem key={role._id} value={role._id}>
-                          {role.roleName}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
+              render={({ field }) => {
+                return (
+                  <FormItem>
+                    <FormLabel>Select New Role</FormLabel>
+                    <Select value={field.value} onValueChange={field.onChange}>
+                      <FormControl>
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Select a role" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {roles.map((role: any) => {
+                          return (
+                            <SelectItem key={role._id} value={role._id}>
+                              {role.roleName}
+                            </SelectItem>
+                          );
+                        })}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                );
+              }}
             />
             <DialogFooter className="sm:justify-end">
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => onOpenChange(false)}
+                onClick={() => {
+                  return onOpenChange(false);
+                }}
                 disabled={isLoading}
               >
                 Cancel

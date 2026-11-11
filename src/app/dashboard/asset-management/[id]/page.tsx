@@ -21,15 +21,21 @@ export default function AssetDetailRoutePage() {
   const [notFound, setNotFound] = useState(false);
 
   useEffect(() => {
-    if (!id) return;
+    if (!id) {
+      return;
+    }
 
     setLoading(true);
     setNotFound(false);
 
     fetchAssetById(id)
       .then(setAsset)
-      .catch(() => setNotFound(true))
-      .finally(() => setLoading(false));
+      .catch(() => {
+        return setNotFound(true);
+      })
+      .finally(() => {
+        return setLoading(false);
+      });
   }, [id]);
 
   if (loading) {

@@ -48,15 +48,21 @@ export function SuggestionsProvider({ children }: { children: ReactNode }) {
   );
 
   useEffect(() => {
-    if (!pathname?.startsWith("/dashboard")) return;
+    if (!pathname?.startsWith("/dashboard")) {
+      return;
+    }
 
     let cancelled = false;
     const timer = setTimeout(async () => {
       try {
         const data = await fetchSuggestions(pathname);
-        if (!cancelled) setItems(data.suggestions ?? []);
+        if (!cancelled) {
+          setItems(data.suggestions ?? []);
+        }
       } catch {
-        if (!cancelled) setItems([]);
+        if (!cancelled) {
+          setItems([]);
+        }
       }
     }, 600);
 
@@ -71,7 +77,9 @@ export function SuggestionsProvider({ children }: { children: ReactNode }) {
       setRegistry((prev) => {
         const next = new Map(prev);
         for (const id of ids) {
-          const entries = (next.get(id) ?? []).filter((e) => e.token !== token);
+          const entries = (next.get(id) ?? []).filter((e) => {
+            return e.token !== token;
+          });
           next.set(id, [...entries, { token, weight }]);
         }
         return next;
@@ -84,9 +92,14 @@ export function SuggestionsProvider({ children }: { children: ReactNode }) {
     setRegistry((prev) => {
       const next = new Map(prev);
       for (const id of ids) {
-        const entries = (next.get(id) ?? []).filter((e) => e.token !== token);
-        if (entries.length) next.set(id, entries);
-        else next.delete(id);
+        const entries = (next.get(id) ?? []).filter((e) => {
+          return e.token !== token;
+        });
+        if (entries.length) {
+          next.set(id, entries);
+        } else {
+          next.delete(id);
+        }
       }
       return next;
     });
@@ -95,55 +108,74 @@ export function SuggestionsProvider({ children }: { children: ReactNode }) {
   const winnerOf = useCallback(
     (anchorId: string): string | null => {
       const entries = registry.get(anchorId);
-      if (!entries?.length) return null;
-      return entries.reduce((best, e) => (e.weight > best.weight ? e : best))
-        .token;
+      if (!entries?.length) {
+        return null;
+      }
+      return entries.reduce((best, e) => {
+        return e.weight > best.weight ? e : best;
+      }).token;
     },
     [registry],
   );
 
   // Items arrive sorted by priority; the first registered anchor wins.
-  const resolved = useMemo(
-    () =>
-      items.map((suggestion) => ({
+  const resolved = useMemo(() => {
+    return items.map((suggestion) => {
+      return {
         suggestion,
-        anchorId: (suggestion.anchors ?? []).find((a) => registry.has(a)),
-      })),
-    [items, registry],
-  );
+        anchorId: (suggestion.anchors ?? []).find((a) => {
+          return registry.has(a);
+        }),
+      };
+    });
+  }, [items, registry]);
 
-  const bubbles = useMemo(
-    () => resolved.filter((r) => r.anchorId).slice(0, MAX_BUBBLES),
-    [resolved],
-  );
+  const bubbles = useMemo(() => {
+    return resolved
+      .filter((r) => {
+        return r.anchorId;
+      })
+      .slice(0, MAX_BUBBLES);
+  }, [resolved]);
 
-  const fallback = useMemo(
-    () => resolved.filter((r) => !r.anchorId).map((r) => r.suggestion),
-    [resolved],
-  );
+  const fallback = useMemo(() => {
+    return resolved
+      .filter((r) => {
+        return !r.anchorId;
+      })
+      .map((r) => {
+        return r.suggestion;
+      });
+  }, [resolved]);
 
   const bubbleFor = useCallback(
     (ids: string[], token: string) => {
-      const hit = bubbles.find(
-        (b) =>
+      const hit = bubbles.find((b) => {
+        return (
           b.anchorId &&
           ids.includes(b.anchorId) &&
-          winnerOf(b.anchorId) === token,
-      );
+          winnerOf(b.anchorId) === token
+        );
+      });
       return hit?.suggestion ?? null;
     },
     [bubbles, winnerOf],
   );
 
   const dismiss = useCallback((id: string) => {
-    setItems((prev) => prev.filter((s) => s.id !== id));
-    dismissSuggestion(id).catch(() => undefined);
+    setItems((prev) => {
+      return prev.filter((s) => {
+        return s.id !== id;
+      });
+    });
+    dismissSuggestion(id).catch(() => {
+      return undefined;
+    });
   }, []);
 
-  const value = useMemo(
-    () => ({ register, unregister, bubbleFor, fallback, dismiss }),
-    [register, unregister, bubbleFor, fallback, dismiss],
-  );
+  const value = useMemo(() => {
+    return { register, unregister, bubbleFor, fallback, dismiss };
+  }, [register, unregister, bubbleFor, fallback, dismiss]);
 
   return (
     <SuggestionsContext.Provider value={value}>

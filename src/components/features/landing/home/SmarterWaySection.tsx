@@ -3,6 +3,7 @@
 import { Text } from "@/components/ui/typography/Text";
 import Heading from "@/components/ui/typography/Heading";
 import { FeatureCard } from "@/components/ui/landing-page/FeatureCard";
+import Image from "next/image";
 
 const features = [
   {
@@ -30,14 +31,11 @@ const features = [
 export default function SmarterWaySection() {
   return (
     <section className="relative w-full">
-      <img
-        loading="lazy"
-        decoding="async"
+      <Image
         src="/landing-page/light-blue.png"
         alt=""
         aria-hidden="true"
-        className="absolute inset-0 w-full h-full object-fill pointer-events-none select-none"
-      />
+        className="absolute inset-0 w-full h-full object-fill pointer-events-none select-none" fill sizes="100vw" />
 
       <div className="relative z-10 py-24 px-6">
         <div className="max-w-3xl mx-auto text-center mb-16">
@@ -48,14 +46,11 @@ export default function SmarterWaySection() {
             <span>A Smarter Way to</span>
             <span className="relative inline-block text-[#0C5FB3]">
               Manage Your Church
-              <img
-                loading="lazy"
-                decoding="async"
+              <Image
                 src="/assets/icons/wave.svg"
                 alt=""
                 aria-hidden="true"
-                className="absolute -bottom-2 left-0 w-full h-auto"
-              />
+                className="absolute -bottom-2 left-0 w-full h-auto" width={0} height={0} sizes="100vw" />
             </span>
           </Heading>
 
@@ -70,9 +65,9 @@ export default function SmarterWaySection() {
         </div>
 
         <div className="max-w-6xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
-          {features.map((feature) => (
-            <FeatureCard key={feature.title} {...feature} />
-          ))}
+          {features.map((feature) => {
+            return <FeatureCard key={feature.title} {...feature} />;
+          })}
         </div>
       </div>
     </section>

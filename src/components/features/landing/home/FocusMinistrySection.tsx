@@ -2,6 +2,7 @@
 
 import { Text } from "@/components/ui/typography/Text";
 import { ArrowRight } from "lucide-react";
+import Image from "next/image";
 
 const benefits = [
   {
@@ -44,40 +45,31 @@ const benefits = [
 export default function FocusMinistrySection() {
   return (
     <section id="features" className="relative w-full">
-      <img
-        loading="lazy"
-        decoding="async"
+      <Image
         src="/landing-page/darkblue.png"
         alt=""
         aria-hidden="true"
-        className="absolute inset-0 w-full h-full object-fill pointer-events-none select-none"
-      />
+        className="absolute inset-0 w-full h-full object-fill pointer-events-none select-none" fill sizes="100vw" />
 
       <div className="relative z-10 py-20 px-6">
-        <img
-          loading="lazy"
-          decoding="async"
+        <Image
           src="/assets/icons/star.svg"
           alt=""
           aria-hidden="true"
           width={28}
           height={28}
           className="absolute top-10 left-12 select-none pointer-events-none"
-          style={{ filter: "brightness(0) invert(1) opacity(0.6)" }}
-        />
+          style={{ filter: "brightness(0) invert(1) opacity(0.6)" }} />
 
         <div className="max-w-3xl mx-auto text-center mb-16">
           <h2 className="text-4xl md:text-5xl font-black text-[#ffff] leading-tight">
             <span className="relative inline-block">
               Focus More on Ministry.
-              <img
-                loading="lazy"
-                decoding="async"
+              <Image
                 src="/assets/icons/wave.svg"
                 alt=""
                 aria-hidden="true"
-                className="absolute -bottom-6 left-0 w-full h-auto"
-              />
+                className="absolute -bottom-6 left-0 w-full h-auto" width={0} height={0} sizes="100vw" />
             </span>
             <br />
             Less on Administration.
@@ -85,38 +77,40 @@ export default function FocusMinistrySection() {
         </div>
 
         <div className="max-w-3xl mx-auto flex flex-col divide-y divide-[#ffff]/20">
-          {benefits.map((benefit) => (
-            <div
-              key={benefit.number}
-              className="flex items-start gap-6 py-7 group"
-            >
-              <span className="text-[#ffff] font-bold text-lg w-10 shrink-0 pt-0.5">
-                {benefit.number}
-              </span>
-
-              <div className="flex-1 flex flex-col gap-1.5">
-                <p className="font-bold text-[#ffff] text-base md:text-lg">
-                  {benefit.title}
-                </p>
-                <Text
-                  variant="muted"
-                  className="text-[#ffff]/70 text-sm leading-relaxed"
-                >
-                  {benefit.description}
-                </Text>
-              </div>
-
+          {benefits.map((benefit) => {
+            return (
               <div
-                className={`shrink-0 w-10 h-10 rounded-full flex items-center justify-center mt-0.5 transition-all ${
-                  benefit.firstItem
-                    ? "bg-[#ffffff] text-[#0C5FB3] border border-[#ffffff]"
-                    : "bg-[#ffffff]/20 backdrop-blur-sm border border-[#0C5FB3]/30 text-[#ffff]"
-                }`}
+                key={benefit.number}
+                className="flex items-start gap-6 py-7 group"
               >
-                <ArrowRight size={18} />
+                <span className="text-[#ffff] font-bold text-lg w-10 shrink-0 pt-0.5">
+                  {benefit.number}
+                </span>
+
+                <div className="flex-1 flex flex-col gap-1.5">
+                  <p className="font-bold text-[#ffff] text-base md:text-lg">
+                    {benefit.title}
+                  </p>
+                  <Text
+                    variant="muted"
+                    className="text-[#ffff]/70 text-sm leading-relaxed"
+                  >
+                    {benefit.description}
+                  </Text>
+                </div>
+
+                <div
+                  className={`shrink-0 w-10 h-10 rounded-full flex items-center justify-center mt-0.5 transition-all ${
+                    benefit.firstItem
+                      ? "bg-[#ffffff] text-[#0C5FB3] border border-[#ffffff]"
+                      : "bg-[#ffffff]/20 backdrop-blur-sm border border-[#0C5FB3]/30 text-[#ffff]"
+                  }`}
+                >
+                  <ArrowRight size={18} />
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </section>

@@ -38,29 +38,42 @@ export default function ManageTeamMembersDialog({
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
-    if (!open) return;
+    if (!open) {
+      return;
+    }
     setSelectedIds(memberIds);
     setShowSelectedPanel(false);
     setPanelQuery("");
   }, [open, memberIds]);
 
   const selectedMembers = useMemo(() => {
-    if (!selectedIds.length) return [];
-    return members.filter((member) => selectedIds.includes(member.id));
+    if (!selectedIds.length) {
+      return [];
+    }
+    return members.filter((member) => {
+      return selectedIds.includes(member.id);
+    });
   }, [selectedIds, members]);
 
   const panelMembers = useMemo(() => {
-    if (!panelQuery.trim()) return selectedMembers;
+    if (!panelQuery.trim()) {
+      return selectedMembers;
+    }
     const query = panelQuery.toLowerCase();
-    return selectedMembers.filter(
-      (member) =>
+    return selectedMembers.filter((member) => {
+      return (
         member.fullName.toLowerCase().includes(query) ||
-        member.email.toLowerCase().includes(query),
-    );
+        member.email.toLowerCase().includes(query)
+      );
+    });
   }, [panelQuery, selectedMembers]);
 
   function removeSelectedMember(id: string) {
-    setSelectedIds((prev) => prev.filter((memberId) => memberId !== id));
+    setSelectedIds((prev) => {
+      return prev.filter((memberId) => {
+        return memberId !== id;
+      });
+    });
   }
 
   return (
@@ -99,7 +112,9 @@ export default function ManageTeamMembersDialog({
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => setShowSelectedPanel(true)}
+                          onClick={() => {
+                            return setShowSelectedPanel(true);
+                          }}
                           className="h-7"
                         >
                           View All Members
@@ -108,8 +123,12 @@ export default function ManageTeamMembersDialog({
                       </div>
                       <div className="flex flex-wrap gap-2">
                         {selectedIds.slice(0, 3).map((id) => {
-                          const member = members.find((m) => m.id === id);
-                          if (!member) return null;
+                          const member = members.find((m) => {
+                            return m.id === id;
+                          });
+                          if (!member) {
+                            return null;
+                          }
 
                           return (
                             <Span
@@ -122,7 +141,9 @@ export default function ManageTeamMembersDialog({
                                 type="button"
                                 size="icon"
                                 variant="ghost"
-                                onClick={() => removeSelectedMember(id)}
+                                onClick={() => {
+                                  return removeSelectedMember(id);
+                                }}
                                 aria-label={`Remove ${member.fullName}`}
                               >
                                 <X className="h-3 w-3" />
@@ -173,7 +194,9 @@ export default function ManageTeamMembersDialog({
                   <Button
                     variant="ghost"
                     size="icon"
-                    onClick={() => setShowSelectedPanel(false)}
+                    onClick={() => {
+                      return setShowSelectedPanel(false);
+                    }}
                   >
                     <X className="h-4 w-4" />
                   </Button>
@@ -183,7 +206,9 @@ export default function ManageTeamMembersDialog({
                   <Input
                     placeholder="Select or search"
                     value={panelQuery}
-                    onChange={(e) => setPanelQuery(e.target.value)}
+                    onChange={(e) => {
+                      return setPanelQuery(e.target.value);
+                    }}
                   />
                 </div>
 
@@ -191,36 +216,40 @@ export default function ManageTeamMembersDialog({
                   {panelMembers.length === 0 ? (
                     <Text variant="muted">No members selected.</Text>
                   ) : (
-                    panelMembers.map((member) => (
-                      <div
-                        key={member.id}
-                        className="flex items-center justify-between gap-3 rounded-lg border border-gray-200 bg-white px-3 py-2"
-                      >
-                        <div className="flex items-center gap-3 min-w-0">
-                          <Avatar className="h-8 w-8">
-                            <AvatarFallback className="bg-gray-200 text-gray-700 text-xs">
-                              {member.initials}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div className="min-w-0">
-                            <Text variant="default" className="truncate">
-                              {member.fullName}
-                            </Text>
-                            <Text variant="muted" className="truncate">
-                              {member.email}
-                            </Text>
-                          </div>
-                        </div>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => removeSelectedMember(member.id)}
-                          className="text-destructive-600 hover:text-destructive-700"
+                    panelMembers.map((member) => {
+                      return (
+                        <div
+                          key={member.id}
+                          className="flex items-center justify-between gap-3 rounded-lg border border-gray-200 bg-white px-3 py-2"
                         >
-                          <X className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    ))
+                          <div className="flex items-center gap-3 min-w-0">
+                            <Avatar className="h-8 w-8">
+                              <AvatarFallback className="bg-gray-200 text-gray-700 text-xs">
+                                {member.initials}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div className="min-w-0">
+                              <Text variant="default" className="truncate">
+                                {member.fullName}
+                              </Text>
+                              <Text variant="muted" className="truncate">
+                                {member.email}
+                              </Text>
+                            </div>
+                          </div>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => {
+                              return removeSelectedMember(member.id);
+                            }}
+                            className="text-destructive-600 hover:text-destructive-700"
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      );
+                    })
                   )}
                 </div>
 
@@ -257,7 +286,9 @@ export default function ManageTeamMembersDialog({
                 <Button
                   variant="ghost"
                   size="icon"
-                  onClick={() => setShowSelectedPanel(false)}
+                  onClick={() => {
+                    return setShowSelectedPanel(false);
+                  }}
                 >
                   <X className="h-4 w-4" />
                 </Button>
@@ -267,7 +298,9 @@ export default function ManageTeamMembersDialog({
                 <Input
                   placeholder="Select or search"
                   value={panelQuery}
-                  onChange={(e) => setPanelQuery(e.target.value)}
+                  onChange={(e) => {
+                    return setPanelQuery(e.target.value);
+                  }}
                 />
               </div>
 
@@ -275,36 +308,40 @@ export default function ManageTeamMembersDialog({
                 {panelMembers.length === 0 ? (
                   <Text variant="muted">No members selected.</Text>
                 ) : (
-                  panelMembers.map((member) => (
-                    <div
-                      key={member.id}
-                      className="flex items-center justify-between gap-3 rounded-lg border border-gray-200 bg-white px-3 py-2"
-                    >
-                      <div className="flex items-center gap-3 min-w-0">
-                        <Avatar className="h-8 w-8">
-                          <AvatarFallback className="bg-gray-200 text-gray-700 text-xs">
-                            {member.initials}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div className="min-w-0">
-                          <Text variant="default" className="truncate">
-                            {member.fullName}
-                          </Text>
-                          <Text variant="muted" className="truncate">
-                            {member.email}
-                          </Text>
-                        </div>
-                      </div>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => removeSelectedMember(member.id)}
-                        className="text-destructive-600 hover:text-destructive-700"
+                  panelMembers.map((member) => {
+                    return (
+                      <div
+                        key={member.id}
+                        className="flex items-center justify-between gap-3 rounded-lg border border-gray-200 bg-white px-3 py-2"
                       >
-                        <X className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  ))
+                        <div className="flex items-center gap-3 min-w-0">
+                          <Avatar className="h-8 w-8">
+                            <AvatarFallback className="bg-gray-200 text-gray-700 text-xs">
+                              {member.initials}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="min-w-0">
+                            <Text variant="default" className="truncate">
+                              {member.fullName}
+                            </Text>
+                            <Text variant="muted" className="truncate">
+                              {member.email}
+                            </Text>
+                          </div>
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => {
+                            return removeSelectedMember(member.id);
+                          }}
+                          className="text-destructive-600 hover:text-destructive-700"
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    );
+                  })
                 )}
               </div>
 

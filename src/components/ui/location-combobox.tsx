@@ -32,8 +32,8 @@ interface LocationComboboxProps {
 }
 
 // Searchable location picker: type-ahead over the church's configured
-// location list, with a "Use '...'" fallback so any custom location can
-// still be entered when nothing matches. The list itself is managed at
+// Location list, with a "Use '...'" fallback so any custom location can
+// Still be entered when nothing matches. The list itself is managed at
 // Settings > Titles & Locations.
 export function LocationCombobox({
   value,
@@ -45,24 +45,32 @@ export function LocationCombobox({
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
 
-  const activeLabels = useMemo(
-    () => locations.filter((l) => l.isActive).map((l) => l.name),
-    [locations],
-  );
+  const activeLabels = useMemo(() => {
+    return locations
+      .filter((l) => {
+        return l.isActive;
+      })
+      .map((l) => {
+        return l.name;
+      });
+  }, [locations]);
 
   const filteredLabels = useMemo(() => {
     const query = normalizeLocationQuery(search);
-    if (!query) return activeLabels;
-    return activeLabels.filter((label) =>
-      normalizeLocationQuery(label).includes(query),
-    );
+    if (!query) {
+      return activeLabels;
+    }
+    return activeLabels.filter((label) => {
+      return normalizeLocationQuery(label).includes(query);
+    });
   }, [activeLabels, search]);
 
   const trimmedSearch = search.trim();
-  const hasExactMatch = activeLabels.some(
-    (label) =>
-      normalizeLocationQuery(label) === normalizeLocationQuery(trimmedSearch),
-  );
+  const hasExactMatch = activeLabels.some((label) => {
+    return (
+      normalizeLocationQuery(label) === normalizeLocationQuery(trimmedSearch)
+    );
+  });
 
   const handleSelect = (label: string) => {
     onChange(label);
@@ -92,25 +100,38 @@ export function LocationCombobox({
         <Command shouldFilter={false}>
           <CommandInput
             value={search}
-            onValueChange={(v) => setSearch(v.slice(0, LOCATION_MAX_LENGTH))}
+            onValueChange={(v) => {
+              return setSearch(v.slice(0, LOCATION_MAX_LENGTH));
+            }}
             placeholder="Search locations..."
           />
 
           <CommandList className="max-h-64">
             <CommandGroup>
-              {filteredLabels.map((label) => (
-                <CommandItem key={label} onSelect={() => handleSelect(label)}>
-                  {label}
-                  <Check
-                    className={`ml-auto h-4 w-4 ${value === label ? "opacity-100" : "opacity-0"}`}
-                  />
-                </CommandItem>
-              ))}
+              {filteredLabels.map((label) => {
+                return (
+                  <CommandItem
+                    key={label}
+                    onSelect={() => {
+                      return handleSelect(label);
+                    }}
+                  >
+                    {label}
+                    <Check
+                      className={`ml-auto h-4 w-4 ${value === label ? "opacity-100" : "opacity-0"}`}
+                    />
+                  </CommandItem>
+                );
+              })}
             </CommandGroup>
 
             {trimmedSearch && !hasExactMatch && (
               <CommandGroup>
-                <CommandItem onSelect={() => handleSelect(trimmedSearch)}>
+                <CommandItem
+                  onSelect={() => {
+                    return handleSelect(trimmedSearch);
+                  }}
+                >
                   Use &ldquo;{trimmedSearch}&rdquo;
                 </CommandItem>
               </CommandGroup>

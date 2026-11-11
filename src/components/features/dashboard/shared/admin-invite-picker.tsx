@@ -22,17 +22,17 @@ interface AdminInvitePickerProps {
   onPendingEmailChange: (email: string | null) => void;
   disabled?: boolean;
   // Reassigning this role is an org-wide administrative action (matches the
-  // backend's FULL_ACCESS requirement) - the person actually holding it can
-  // edit everything else but not reassign themselves or anyone else, so
-  // this renders as plain text instead of an editable picker for them.
+  // Backend's FULL_ACCESS requirement) - the person actually holding it can
+  // Edit everything else but not reassign themselves or anyone else, so
+  // This renders as plain text instead of an editable picker for them.
   readOnly?: boolean;
   inviteDialogTitle?: string;
   readOnlyHint?: string;
 }
 
 // Shared "pick an existing admin, or invite someone new" control - used for
-// small-team leaders and department heads/assistant heads so the picker
-// can't drift between the different forms that need it.
+// Small-team leaders and department heads/assistant heads so the picker
+// Can't drift between the different forms that need it.
 export function AdminInvitePicker({
   label,
   adminId,
@@ -77,9 +77,15 @@ export function AdminInvitePicker({
         firstName?: string;
         lastName?: string;
       } = { email: data.email };
-      if (data.title) payload.title = data.title;
-      if (data.firstName) payload.firstName = data.firstName;
-      if (data.lastName) payload.lastName = data.lastName;
+      if (data.title) {
+        payload.title = data.title;
+      }
+      if (data.firstName) {
+        payload.firstName = data.firstName;
+      }
+      if (data.lastName) {
+        payload.lastName = data.lastName;
+      }
 
       const result = await createAdminInvite(data.role, payload);
       onAdminIdChange("");
@@ -116,7 +122,9 @@ export function AdminInvitePicker({
             variant="ghost"
             size="sm"
             disabled={disabled}
-            onClick={() => onPendingEmailChange(null)}
+            onClick={() => {
+              return onPendingEmailChange(null);
+            }}
           >
             Cancel
           </Button>
@@ -137,7 +145,9 @@ export function AdminInvitePicker({
             title={`Clear ${label.toLowerCase()}`}
             variant="outline"
             disabled={disabled}
-            onClick={() => onAdminIdChange("")}
+            onClick={() => {
+              return onAdminIdChange("");
+            }}
             className="shrink-0"
           >
             <RefreshCw className="h-4 w-4 text-gray-500" />

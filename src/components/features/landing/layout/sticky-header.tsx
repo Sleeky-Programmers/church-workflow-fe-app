@@ -12,9 +12,13 @@ export function StickyHeader({ children, className }: StickyHeaderProps) {
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 20);
+    const onScroll = () => {
+      return setScrolled(window.scrollY > 20);
+    };
     window.addEventListener("scroll", onScroll);
-    return () => window.removeEventListener("scroll", onScroll);
+    return () => {
+      return window.removeEventListener("scroll", onScroll);
+    };
   }, []);
 
   return (

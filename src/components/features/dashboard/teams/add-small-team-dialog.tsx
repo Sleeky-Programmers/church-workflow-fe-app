@@ -77,7 +77,9 @@ export default function AddSmallTeamDialog({
     if (!memberIds.length) {
       return [];
     }
-    return members.filter((member) => memberIds.includes(member.id));
+    return members.filter((member) => {
+      return memberIds.includes(member.id);
+    });
   }, [memberIds, members]);
 
   const filteredPanelMembers = useMemo(() => {
@@ -85,11 +87,12 @@ export default function AddSmallTeamDialog({
       return selectedMembers;
     }
     const query = panelQuery.toLowerCase();
-    return selectedMembers.filter(
-      (member) =>
+    return selectedMembers.filter((member) => {
+      return (
         member.fullName.toLowerCase().includes(query) ||
-        member.email.toLowerCase().includes(query),
-    );
+        member.email.toLowerCase().includes(query)
+      );
+    });
   }, [panelQuery, selectedMembers]);
 
   const totalPanelPages = Math.max(
@@ -105,8 +108,8 @@ export default function AddSmallTeamDialog({
   }, [filteredPanelMembers, safePage]);
 
   // Creating a team is an org-wide administrative action (matches the
-  // backend's FULL_ACCESS requirement on POST /small-teams) - team leaders
-  // scoped to their own team(s) never see the entry point for it.
+  // Backend's FULL_ACCESS requirement on POST /small-teams) - team leaders
+  // Scoped to their own team(s) never see the entry point for it.
   if (!canCreate) {
     return null;
   }
@@ -149,51 +152,61 @@ export default function AddSmallTeamDialog({
   }
 
   function removeSelectedMember(id: string) {
-    setMemberIds((prev) => prev.filter((memberId) => memberId !== id));
+    setMemberIds((prev) => {
+      return prev.filter((memberId) => {
+        return memberId !== id;
+      });
+    });
   }
 
   const isOpen = controlledOpen ?? open;
   const setIsOpen = onOpenChange ?? setOpen;
 
-  const SelectedMembersList = () => (
-    <>
-      {pagedPanelMembers.length === 0 ? (
-        <div className="px-4 py-6 text-center">
-          <Text variant="muted">No members found.</Text>
-        </div>
-      ) : (
-        pagedPanelMembers.map((member) => (
-          <div
-            key={member.id}
-            className="flex items-center justify-between gap-3 px-4 py-2.5"
-          >
-            <div className="flex items-center gap-3 min-w-0">
-              <Avatar className="h-8 w-8 shrink-0">
-                <AvatarFallback className="bg-gray-200 text-gray-700 text-xs">
-                  {member.initials}
-                </AvatarFallback>
-              </Avatar>
-              <div className="min-w-0">
-                <Text variant="default" className="truncate">
-                  {member.fullName}
-                </Text>
-                <Text variant="muted" className="truncate text-xs">
-                  {member.email}
-                </Text>
-              </div>
-            </div>
-            <Button
-              variant="rowRemove"
-              onClick={() => removeSelectedMember(member.id)}
-              aria-label={`Remove ${member.fullName}`}
-            >
-              <X className="h-4 w-4" />
-            </Button>
+  const SelectedMembersList = () => {
+    return (
+      <>
+        {pagedPanelMembers.length === 0 ? (
+          <div className="px-4 py-6 text-center">
+            <Text variant="muted">No members found.</Text>
           </div>
-        ))
-      )}
-    </>
-  );
+        ) : (
+          pagedPanelMembers.map((member) => {
+            return (
+              <div
+                key={member.id}
+                className="flex items-center justify-between gap-3 px-4 py-2.5"
+              >
+                <div className="flex items-center gap-3 min-w-0">
+                  <Avatar className="h-8 w-8 shrink-0">
+                    <AvatarFallback className="bg-gray-200 text-gray-700 text-xs">
+                      {member.initials}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="min-w-0">
+                    <Text variant="default" className="truncate">
+                      {member.fullName}
+                    </Text>
+                    <Text variant="muted" className="truncate text-xs">
+                      {member.email}
+                    </Text>
+                  </div>
+                </div>
+                <Button
+                  variant="rowRemove"
+                  onClick={() => {
+                    return removeSelectedMember(member.id);
+                  }}
+                  aria-label={`Remove ${member.fullName}`}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            );
+          })
+        )}
+      </>
+    );
+  };
 
   const PaginationFooter = () => {
     if (totalPanelPages <= 1) {
@@ -207,7 +220,9 @@ export default function AddSmallTeamDialog({
           size="sm"
           className="h-7 px-2 text-xs"
           disabled={safePage <= 1}
-          onClick={() => handlePageChange(safePage - 1)}
+          onClick={() => {
+            return handlePageChange(safePage - 1);
+          }}
         >
           {"< Previous"}
         </Button>
@@ -219,7 +234,9 @@ export default function AddSmallTeamDialog({
             return (
               <Button
                 key={pageNum}
-                onClick={() => handlePageChange(pageNum)}
+                onClick={() => {
+                  return handlePageChange(pageNum);
+                }}
                 className={cn(
                   "px-2 py-0.5 text-xs",
                   isActive
@@ -238,7 +255,9 @@ export default function AddSmallTeamDialog({
           size="sm"
           className="h-7 px-2 text-xs"
           disabled={safePage >= totalPanelPages}
-          onClick={() => handlePageChange(safePage + 1)}
+          onClick={() => {
+            return handlePageChange(safePage + 1);
+          }}
         >
           {"Next >"}
         </Button>
@@ -246,36 +265,42 @@ export default function AddSmallTeamDialog({
     );
   };
 
-  const PanelContent = () => (
-    <div className="rounded-xl shadow-lg flex flex-col overflow-hidden bg-white w-full h-full">
-      <div className="flex items-center justify-between border-b px-4 py-3">
-        <Heading level={3}>Selected Members</Heading>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => setShowSelectedPanel(false)}
-        >
-          <X className="h-4 w-4" />
-        </Button>
-      </div>
+  const PanelContent = () => {
+    return (
+      <div className="rounded-xl shadow-lg flex flex-col overflow-hidden bg-white w-full h-full">
+        <div className="flex items-center justify-between border-b px-4 py-3">
+          <Heading level={3}>Selected Members</Heading>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => {
+              return setShowSelectedPanel(false);
+            }}
+          >
+            <X className="h-4 w-4" />
+          </Button>
+        </div>
 
-      <div className="relative p-4 border-b">
-        <Search className="absolute left-7 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
-        <Input
-          placeholder="Select or search"
-          value={panelQuery}
-          onChange={(e) => handlePanelQueryChange(e.target.value)}
-          className="pl-8"
-        />
-      </div>
+        <div className="relative p-4 border-b">
+          <Search className="absolute left-7 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
+          <Input
+            placeholder="Select or search"
+            value={panelQuery}
+            onChange={(e) => {
+              return handlePanelQueryChange(e.target.value);
+            }}
+            className="pl-8"
+          />
+        </div>
 
-      <div className="flex-1 overflow-y-auto py-1">
-        <SelectedMembersList />
-      </div>
+        <div className="flex-1 overflow-y-auto py-1">
+          <SelectedMembersList />
+        </div>
 
-      <PaginationFooter />
-    </div>
-  );
+        <PaginationFooter />
+      </div>
+    );
+  };
 
   return (
     <>
@@ -325,7 +350,9 @@ export default function AddSmallTeamDialog({
                   <Input
                     placeholder="e.g. Youth Group A"
                     value={teamName}
-                    onChange={(e) => setTeamName(e.target.value)}
+                    onChange={(e) => {
+                      return setTeamName(e.target.value);
+                    }}
                     className="w-full"
                   />
                 </div>
@@ -353,7 +380,9 @@ export default function AddSmallTeamDialog({
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => setShowSelectedPanel(true)}
+                          onClick={() => {
+                            return setShowSelectedPanel(true);
+                          }}
                           className="h-7 text-xs sm:text-sm"
                         >
                           View All Members
@@ -362,7 +391,9 @@ export default function AddSmallTeamDialog({
                       </div>
                       <div className="flex flex-wrap gap-2">
                         {memberIds.slice(0, 3).map((id) => {
-                          const member = members.find((m) => m.id === id);
+                          const member = members.find((m) => {
+                            return m.id === id;
+                          });
                           if (!member) {
                             return null;
                           }
@@ -376,7 +407,9 @@ export default function AddSmallTeamDialog({
                               {member.fullName.split(" ")[0]}
                               <Button
                                 variant="chipRemove"
-                                onClick={() => removeSelectedMember(id)}
+                                onClick={() => {
+                                  return removeSelectedMember(id);
+                                }}
                                 aria-label={`Remove ${member.fullName}`}
                               >
                                 <X className="h-3 w-3" />
@@ -400,7 +433,9 @@ export default function AddSmallTeamDialog({
                   <MemberMultiSelect
                     fetchOptions={fetchGroupEligibleMembers}
                     value={memberIds}
-                    onChange={(ids) => setMemberIds(ids)}
+                    onChange={(ids) => {
+                      return setMemberIds(ids);
+                    }}
                     placeholder="Select or search"
                   />
                 </div>
@@ -426,7 +461,9 @@ export default function AddSmallTeamDialog({
                     rows={4}
                     placeholder="Add description"
                     value={description}
-                    onChange={(e) => setDescription(e.target.value)}
+                    onChange={(e) => {
+                      return setDescription(e.target.value);
+                    }}
                     className="flex w-full px-3 py-2 resize-y"
                   />
                 </div>

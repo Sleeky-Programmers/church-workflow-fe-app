@@ -16,9 +16,14 @@ export const signupSchema = z.object({
   lastName: z.string().min(2, "Last name must be at least 2 characters"),
   email: z.string().email("Invalid email format"),
   password: z.string().min(8, "Password must be at least 8 characters"),
-  agreeToTerms: z.boolean().refine((val) => val === true, {
-    message: "You must accept the Terms and Conditions",
-  }),
+  agreeToTerms: z.boolean().refine(
+    (val) => {
+      return val === true;
+    },
+    {
+      message: "You must accept the Terms and Conditions",
+    },
+  ),
 });
 
 export const adminSignupSchema = z.object({
@@ -51,10 +56,15 @@ export const resetPasswordSchema = z
     newPassword: z.string().min(8, "Password must be at least 8 characters"),
     confirmPassword: z.string().min(1, "Please confirm your password"),
   })
-  .refine((data) => data.newPassword === data.confirmPassword, {
-    message: "Passwords must match",
-    path: ["confirmPassword"],
-  });
+  .refine(
+    (data) => {
+      return data.newPassword === data.confirmPassword;
+    },
+    {
+      message: "Passwords must match",
+      path: ["confirmPassword"],
+    },
+  );
 
 export type ResetPasswordFormValues = z.infer<typeof resetPasswordSchema>;
 
@@ -70,10 +80,15 @@ export const updatePasswordSchema = z
     newPassword: z.string().min(6, "Minimum 6 characters"),
     confirmPassword: z.string().min(1, "Confirm password is required"),
   })
-  .refine((data) => data.newPassword === data.confirmPassword, {
-    message: "Passwords do not match",
-    path: ["confirmPassword"],
-  });
+  .refine(
+    (data) => {
+      return data.newPassword === data.confirmPassword;
+    },
+    {
+      message: "Passwords do not match",
+      path: ["confirmPassword"],
+    },
+  );
 
 export type UpdatePasswordFormValues = z.infer<typeof updatePasswordSchema>;
 
@@ -108,9 +123,14 @@ export type EditPersonalInfoFormValues = z.infer<typeof editPersonalInfoSchema>;
 export const promoCodeSchema = z.string().trim().min(1, "Enter a coupon code");
 
 export const billingAgreementSchema = z.object({
-  agreed: z.boolean().refine((val) => val === true, {
-    message: "You must agree to the Terms and Privacy Policy",
-  }),
+  agreed: z.boolean().refine(
+    (val) => {
+      return val === true;
+    },
+    {
+      message: "You must agree to the Terms and Privacy Policy",
+    },
+  ),
 });
 
 export type BillingAgreementFormValues = z.infer<typeof billingAgreementSchema>;
@@ -167,12 +187,13 @@ export const createSpecialServiceSchema = z
       return;
     }
 
-    const invalidIndex = data.daySchedules.findIndex(
-      (schedule) =>
+    const invalidIndex = data.daySchedules.findIndex((schedule) => {
+      return (
         schedule.startTime &&
         schedule.endTime &&
-        schedule.endTime <= schedule.startTime,
-    );
+        schedule.endTime <= schedule.startTime
+      );
+    });
     if (invalidIndex !== -1) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
@@ -203,10 +224,15 @@ export const eventFormSchema = z
     reminderType: z.nativeEnum(EventReminderType),
     remindBeforeMinutes: z.nativeEnum(ReminderTimeBefore),
   })
-  .refine((data) => data.endTime > data.startTime, {
-    message: "End time must be after start time",
-    path: ["endTime"],
-  });
+  .refine(
+    (data) => {
+      return data.endTime > data.startTime;
+    },
+    {
+      message: "End time must be after start time",
+      path: ["endTime"],
+    },
+  );
 
 export type EventFormValues = z.infer<typeof eventFormSchema>;
 

@@ -37,7 +37,9 @@ function isoDate(d: Date) {
 
 function groupSections<T extends { group: string }>(items: T[]) {
   const out: Record<string, T[]> = {};
-  for (const item of items) (out[item.group] ||= []).push(item);
+  for (const item of items) {
+    (out[item.group] ||= []).push(item);
+  }
   return out;
 }
 
@@ -62,12 +64,13 @@ export default function ReportsPage() {
   const branchParam = branch === "all" ? "all" : undefined;
 
   const fail = useCallback(
-    (error: any) =>
-      toast({
+    (error: any) => {
+      return toast({
         title: "Error",
         description: error?.message || "Could not load the report",
         variant: "destructive",
-      }),
+      });
+    },
     [toast],
   );
 
@@ -106,32 +109,48 @@ export default function ReportsPage() {
   }, [from, to, branchParam, fail]);
 
   useEffect(() => {
-    if (view === "custom") return;
+    if (view === "custom") {
+      return;
+    }
     loadFeed(view);
   }, [view, loadFeed]);
 
   const period = feed?.periods[selected];
   const sections: SectionResult[] = useMemo(() => {
-    if (view === "custom") return summary?.sections ?? [];
-    if (!period || !feed) return [];
+    if (view === "custom") {
+      return summary?.sections ?? [];
+    }
+    if (!period || !feed) {
+      return [];
+    }
     return feed.sections
-      .map((s) => period.sections[s.key])
+      .map((s) => {
+        return period.sections[s.key];
+      })
       .filter(Boolean) as SectionResult[];
   }, [view, summary, period, feed]);
 
   const trendFor = (section: SectionResult) => {
-    if (view === "custom" || !feed) return undefined;
+    if (view === "custom" || !feed) {
+      return undefined;
+    }
     const headline =
-      section.metrics.find((m) => m.format === "currency") ??
-      section.metrics[0];
-    if (!headline) return undefined;
+      section.metrics.find((m) => {
+        return m.format === "currency";
+      }) ?? section.metrics[0];
+    if (!headline) {
+      return undefined;
+    }
 
-    const points: TrendPoint[] = feed.periods.map((p) => ({
-      label: p.label.split(" - ")[0],
-      value:
-        p.sections[section.key]?.metrics.find((m) => m.key === headline.key)
-          ?.value ?? 0,
-    }));
+    const points: TrendPoint[] = feed.periods.map((p) => {
+      return {
+        label: p.label.split(" - ")[0],
+        value:
+          p.sections[section.key]?.metrics.find((m) => {
+            return m.key === headline.key;
+          })?.value ?? 0,
+      };
+    });
     return { points, label: headline.label };
   };
 
@@ -166,28 +185,39 @@ export default function ReportsPage() {
                 ["active", "This branch"],
                 ["all", "All branches"],
               ] as const
-            ).map(([value, label]) => (
-              <button
-                key={value}
-                type="button"
-                onClick={() => setBranch(value)}
-                className={cn(
-                  "rounded-md px-3 py-1 font-medium",
-                  branch === value
-                    ? "bg-background text-foreground shadow"
-                    : "text-muted-foreground",
-                )}
-              >
-                {label}
-              </button>
-            ))}
+            ).map(([value, label]) => {
+              return (
+                <button
+                  key={value}
+                  type="button"
+                  onClick={() => {
+                    return setBranch(value);
+                  }}
+                  className={cn(
+                    "rounded-md px-3 py-1 font-medium",
+                    branch === value
+                      ? "bg-background text-foreground shadow"
+                      : "text-muted-foreground",
+                  )}
+                >
+                  {label}
+                </button>
+              );
+            })}
           </div>
-          <Button variant="outline" onClick={() => setCustomizeOpen(true)}>
+          <Button
+            variant="outline"
+            onClick={() => {
+              return setCustomizeOpen(true);
+            }}
+          >
             <SlidersHorizontal className="mr-2 h-4 w-4" />
             Customize
           </Button>
           <Button
-            onClick={() => setExportOpen(true)}
+            onClick={() => {
+              return setExportOpen(true);
+            }}
             disabled={view === "custom" ? !summary : !period}
           >
             <Download className="mr-2 h-4 w-4" />
@@ -198,21 +228,25 @@ export default function ReportsPage() {
 
       <div className="flex flex-wrap items-center gap-2">
         <div className="inline-flex rounded-lg bg-muted p-1 text-sm">
-          {VIEWS.map((v) => (
-            <button
-              key={v.value}
-              type="button"
-              onClick={() => setView(v.value)}
-              className={cn(
-                "rounded-md px-3 py-1 font-medium",
-                view === v.value
-                  ? "bg-background text-foreground shadow"
-                  : "text-muted-foreground",
-              )}
-            >
-              {v.label}
-            </button>
-          ))}
+          {VIEWS.map((v) => {
+            return (
+              <button
+                key={v.value}
+                type="button"
+                onClick={() => {
+                  return setView(v.value);
+                }}
+                className={cn(
+                  "rounded-md px-3 py-1 font-medium",
+                  view === v.value
+                    ? "bg-background text-foreground shadow"
+                    : "text-muted-foreground",
+                )}
+              >
+                {v.label}
+              </button>
+            );
+          })}
         </div>
 
         {view === "custom" ? (
@@ -221,7 +255,9 @@ export default function ReportsPage() {
               type="date"
               value={from}
               max={to}
-              onChange={(e) => setFrom(e.target.value)}
+              onChange={(e) => {
+                return setFrom(e.target.value);
+              }}
               className="rounded-md border bg-white px-2 py-1"
               aria-label="From"
             />
@@ -230,7 +266,9 @@ export default function ReportsPage() {
               type="date"
               value={to}
               min={from}
-              onChange={(e) => setTo(e.target.value)}
+              onChange={(e) => {
+                return setTo(e.target.value);
+              }}
               className="rounded-md border bg-white px-2 py-1"
               aria-label="To"
             />
@@ -241,28 +279,34 @@ export default function ReportsPage() {
         ) : (
           <div className="flex max-w-full gap-1.5 overflow-x-auto pb-1">
             {feed?.periods
-              .map((p, i) => ({ p, i }))
+              .map((p, i) => {
+                return { p, i };
+              })
               .reverse()
-              .map(({ p, i }) => (
-                <button
-                  key={p.start}
-                  type="button"
-                  onClick={() => setSelected(i)}
-                  className={cn(
-                    "shrink-0 rounded-full border px-3 py-1 text-xs",
-                    selected === i
-                      ? "border-blue-600 bg-blue-50 font-semibold text-blue-700"
-                      : "bg-white text-gray-600 hover:bg-gray-50",
-                  )}
-                >
-                  {p.label}
-                  {p.isCurrent && (
-                    <span className="ml-1 text-[10px] text-amber-600">
-                      in progress
-                    </span>
-                  )}
-                </button>
-              ))}
+              .map(({ p, i }) => {
+                return (
+                  <button
+                    key={p.start}
+                    type="button"
+                    onClick={() => {
+                      return setSelected(i);
+                    }}
+                    className={cn(
+                      "shrink-0 rounded-full border px-3 py-1 text-xs",
+                      selected === i
+                        ? "border-blue-600 bg-blue-50 font-semibold text-blue-700"
+                        : "bg-white text-gray-600 hover:bg-gray-50",
+                    )}
+                  >
+                    {p.label}
+                    {p.isCurrent && (
+                      <span className="ml-1 text-[10px] text-amber-600">
+                        in progress
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
           </div>
         )}
       </div>
@@ -286,32 +330,36 @@ export default function ReportsPage() {
             : "No sections to show. Use Customize to switch sections back on."}
         </div>
       ) : (
-        Object.entries(grouped).map(([group, items]) => (
-          <section key={group} className="space-y-3">
-            <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-400">
-              {GROUP_LABELS[group] ?? group}
-            </h2>
-            <div className="space-y-8">
-              {items.map((section) => {
-                const trend = trendFor(section);
-                return (
-                  <ReportSectionCard
-                    key={section.key}
-                    section={section}
-                    trend={trend?.points}
-                    trendLabel={trend?.label}
-                  />
-                );
-              })}
-            </div>
-          </section>
-        ))
+        Object.entries(grouped).map(([group, items]) => {
+          return (
+            <section key={group} className="space-y-3">
+              <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-400">
+                {GROUP_LABELS[group] ?? group}
+              </h2>
+              <div className="space-y-8">
+                {items.map((section) => {
+                  const trend = trendFor(section);
+                  return (
+                    <ReportSectionCard
+                      key={section.key}
+                      section={section}
+                      trend={trend?.points}
+                      trendLabel={trend?.label}
+                    />
+                  );
+                })}
+              </div>
+            </section>
+          );
+        })
       )}
 
       <CustomizeDialog
         open={customizeOpen}
         onOpenChange={setCustomizeOpen}
-        onSaved={() => (view === "custom" ? loadCustom() : loadFeed(view))}
+        onSaved={() => {
+          return view === "custom" ? loadCustom() : loadFeed(view);
+        }}
       />
       <ExportDialog
         open={exportOpen}

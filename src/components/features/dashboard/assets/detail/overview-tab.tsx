@@ -104,10 +104,9 @@ export function OverviewTab({
   asset: Asset;
   onLogService: () => void;
 }) {
-  const total = Object.values(asset.conditions).reduce(
-    (sum, value) => sum + value,
-    0,
-  );
+  const total = Object.values(asset.conditions).reduce((sum, value) => {
+    return sum + value;
+  }, 0);
 
   const left: DetailItem[] = [
     { label: "Category", value: asset.category, icon: Package },
@@ -140,15 +139,15 @@ export function OverviewTab({
           <Card title="Details">
             <div className="mt-2 grid grid-cols-1 gap-x-8 sm:grid-cols-2">
               <div className="divide-y divide-gray-100">
-                {left.map((item) => (
-                  <DetailRow key={item.label} item={item} />
-                ))}
+                {left.map((item) => {
+                  return <DetailRow key={item.label} item={item} />;
+                })}
               </div>
 
               <div className="divide-y divide-gray-100">
-                {right.map((item) => (
-                  <DetailRow key={item.label} item={item} />
-                ))}
+                {right.map((item) => {
+                  return <DetailRow key={item.label} item={item} />;
+                })}
               </div>
             </div>
           </Card>
@@ -185,7 +184,9 @@ export function OverviewTab({
                 CONDITION_META.map(({ key }) => {
                   const value = asset.conditions[key];
 
-                  if (!value) return null;
+                  if (!value) {
+                    return null;
+                  }
 
                   return (
                     <span
@@ -198,58 +199,62 @@ export function OverviewTab({
             </div>
 
             <div className="mt-5 grid grid-cols-2 gap-x-8 gap-y-3">
-              {CONDITION_META.map(({ key, label, dotClass }) => (
-                <div
-                  key={key}
-                  className="flex items-center justify-between gap-3 text-sm"
-                >
-                  <span className="flex items-center gap-2 text-gray-600">
-                    <span
-                      className={cn("h-2.5 w-2.5 rounded-full", dotClass)}
-                    />
-                    {label}
-                  </span>
-                  <span className="font-semibold text-gray-900">
-                    {asset.conditions[key]}
-                  </span>
-                </div>
-              ))}
+              {CONDITION_META.map(({ key, label, dotClass }) => {
+                return (
+                  <div
+                    key={key}
+                    className="flex items-center justify-between gap-3 text-sm"
+                  >
+                    <span className="flex items-center gap-2 text-gray-600">
+                      <span
+                        className={cn("h-2.5 w-2.5 rounded-full", dotClass)}
+                      />
+                      {label}
+                    </span>
+                    <span className="font-semibold text-gray-900">
+                      {asset.conditions[key]}
+                    </span>
+                  </div>
+                );
+              })}
             </div>
           </Card>
 
           <Card title="Maintenance Status">
             <div className="mt-3 divide-y divide-gray-100">
-              {statusRows.map((row) => (
-                <div
-                  key={row.label}
-                  className="flex items-center justify-between gap-3 py-3"
-                >
-                  <span className="text-sm text-gray-500">{row.label}</span>
+              {statusRows.map((row) => {
+                return (
+                  <div
+                    key={row.label}
+                    className="flex items-center justify-between gap-3 py-3"
+                  >
+                    <span className="text-sm text-gray-500">{row.label}</span>
 
-                  <span className="flex items-center gap-2">
-                    <span
-                      className={cn(
-                        "text-sm font-medium text-gray-900",
-                        row.label === "Next Due" && "text-gray-500",
+                    <span className="flex items-center gap-2">
+                      <span
+                        className={cn(
+                          "text-sm font-medium text-gray-900",
+                          row.label === "Next Due" && "text-gray-500",
+                        )}
+                      >
+                        {row.value}
+                      </span>
+
+                      {row.badge === "freq" && asset.schedule.frequency && (
+                        <span className="rounded-md border border-blue-200 bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-700">
+                          {asset.schedule.frequency}
+                        </span>
                       )}
-                    >
-                      {row.value}
+
+                      {row.badge === "due" && (
+                        <span className="rounded-md border border-blue-200 bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-700">
+                          {asset.schedule.dueState}
+                        </span>
+                      )}
                     </span>
-
-                    {row.badge === "freq" && asset.schedule.frequency && (
-                      <span className="rounded-md border border-blue-200 bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-700">
-                        {asset.schedule.frequency}
-                      </span>
-                    )}
-
-                    {row.badge === "due" && (
-                      <span className="rounded-md border border-blue-200 bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-700">
-                        {asset.schedule.dueState}
-                      </span>
-                    )}
-                  </span>
-                </div>
-              ))}
+                  </div>
+                );
+              })}
             </div>
 
             <Button
@@ -272,47 +277,52 @@ export function OverviewTab({
 
           <div className="mt-4 divide-y divide-gray-100">
             {[...asset.units]
-              .map((unit, index) => ({ unit, index }))
-              .sort(
-                (a, b) =>
+              .map((unit, index) => {
+                return { unit, index };
+              })
+              .sort((a, b) => {
+                return (
                   UNIT_RANK[b.unit.condition] - UNIT_RANK[a.unit.condition] ||
-                  a.index - b.index,
-              )
-              .map(({ unit, index }) => (
-                <div
-                  key={unit.id ?? index}
-                  className="flex flex-col gap-1 py-3 sm:flex-row sm:items-start sm:justify-between sm:gap-6"
-                >
-                  <div className="min-w-0">
-                    <p className="text-sm font-semibold text-gray-900">
-                      {unit.serial || `Item ${index + 1}`}
-                    </p>
-                    {unit.conditionNote && (
-                      <p className="mt-0.5 text-sm text-gray-600">
-                        {unit.conditionNote}
-                      </p>
-                    )}
-                    {(unit.purchaseDate || unit.value !== null) && (
-                      <p className="mt-0.5 text-xs text-gray-400">
-                        {unit.purchaseDate && `Bought ${unit.purchaseDate}`}
-                        {unit.purchaseDate && unit.value !== null && " · "}
-                        {unit.value !== null && `Value ${unit.value}`}
-                      </p>
-                    )}
-                  </div>
-
-                  <span
-                    className={cn(
-                      "inline-flex w-fit shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium",
-                      UNIT_PILL[unit.condition],
-                    )}
+                  a.index - b.index
+                );
+              })
+              .map(({ unit, index }) => {
+                return (
+                  <div
+                    key={unit.id ?? index}
+                    className="flex flex-col gap-1 py-3 sm:flex-row sm:items-start sm:justify-between sm:gap-6"
                   >
-                    {unit.condition === "Repair"
-                      ? "Needs Repair"
-                      : unit.condition}
-                  </span>
-                </div>
-              ))}
+                    <div className="min-w-0">
+                      <p className="text-sm font-semibold text-gray-900">
+                        {unit.serial || `Item ${index + 1}`}
+                      </p>
+                      {unit.conditionNote && (
+                        <p className="mt-0.5 text-sm text-gray-600">
+                          {unit.conditionNote}
+                        </p>
+                      )}
+                      {(unit.purchaseDate || unit.value !== null) && (
+                        <p className="mt-0.5 text-xs text-gray-400">
+                          {unit.purchaseDate && `Bought ${unit.purchaseDate}`}
+                          {unit.purchaseDate && unit.value !== null && " · "}
+                          {unit.value !== null && `Value ${unit.value}`}
+                        </p>
+                      )}
+                    </div>
+
+                    <span
+                      className={cn(
+                        "inline-flex w-fit shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium",
+                        UNIT_PILL[unit.condition],
+                      )}
+                    >
+                      {unit.condition === "Repair"
+                        ? "Needs Repair"
+                        : unit.condition}
+                    </span>
+                  </div>
+                );
+              })}
           </div>
         </Card>
       )}

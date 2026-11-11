@@ -11,7 +11,7 @@ export const metadata = generateSeoMetadata({
 });
 
 // See src/app/page.tsx for why this is revalidated rather than left fully
-// static - this page's plan prices come from the same server fetch.
+// Static - this page's plan prices come from the same server fetch.
 export const revalidate = 3600;
 
 export default function ChurchManagementSoftwareNigeriaPage() {
@@ -27,12 +27,12 @@ export default function ChurchManagementSoftwareNigeriaPage() {
         <div className="space-y-4">
           <Text variant="muted" className="leading-relaxed">
             Most church management software is built for a North American or
-            European context and simply doesn't fit how Nigerian churches are
-            structured or how members expect to pay for things. Church Workflow
-            starts from the Nigerian church - cell groups, fellowships, and
-            units that function as small, self-contained teams inside a larger
-            congregation - and builds the software around that, not the other
-            way round.
+            European context and simply doesn&apos;t fit how Nigerian churches
+            are structured or how members expect to pay for things. Church
+            Workflow starts from the Nigerian church - cell groups, fellowships,
+            and units that function as small, self-contained teams inside a
+            larger congregation - and builds the software around that, not the
+            other way round.
           </Text>
           <Heading level={3} className="text-lg font-bold mt-6 mb-2">
             Naira Pricing, Paid the Way You Actually Pay
@@ -40,20 +40,21 @@ export default function ChurchManagementSoftwareNigeriaPage() {
           <Text variant="muted" className="leading-relaxed">
             Every plan is priced in Naira, not converted from a dollar price at
             checkout. Subscriptions are processed through Paystack, which means
-            payment isn't limited to a card - bank transfer and USSD are
-            supported too, so a church treasurer doesn't need a debit card on
-            hand to keep the subscription active.
+            payment isn&apos;t limited to a card - bank transfer and USSD are
+            supported too, so a church treasurer doesn&apos;t need a debit card
+            on hand to keep the subscription active.
           </Text>
           <Heading level={3} className="text-lg font-bold mt-6 mb-2">
-            Cell Groups and Fellowships, Not Just "Departments"
+            Cell Groups and Fellowships, Not Just &quot;Departments&quot;
           </Heading>
           <Text variant="muted" className="leading-relaxed">
-            Church Workflow's Small Teams feature maps directly onto how
+            Church Workflow&apos;s Small Teams feature maps directly onto how
             Nigerian churches already organize themselves - a cell group, a
-            fellowship, a young adults' unit, or a single department of a larger
-            church - each with its own leader, members, and attendance record,
-            without forcing your structure into a rigid "branch" or "campus"
-            model that doesn't match how you actually operate.
+            fellowship, a young adults&apos; unit, or a single department of a
+            larger church - each with its own leader, members, and attendance
+            record, without forcing your structure into a rigid
+            &quot;branch&quot; or &quot;campus&quot; model that doesn&apos;t
+            match how you actually operate.
           </Text>
           <Heading level={3} className="text-lg font-bold mt-6 mb-2">
             Support You Can Actually Reach

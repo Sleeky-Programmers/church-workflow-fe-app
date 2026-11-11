@@ -69,8 +69,12 @@ export async function fetchDepartments(params: DepartmentQueryParams) {
     query.append("search", params.search);
   }
 
-  if (params.page) query.append("page", String(params.page));
-  if (params.limit) query.append("limit", String(params.limit));
+  if (params.page) {
+    query.append("page", String(params.page));
+  }
+  if (params.limit) {
+    query.append("limit", String(params.limit));
+  }
 
   return authenticatedFetch<{
     data: DepartmentResponse[];

@@ -1,4 +1,5 @@
 import { authenticatedFetch } from "@/lib/api";
+import { cachedRequest, invalidateCache } from "@/lib/request-cache";
 
 export interface PaymentMethod {
   id: string;
@@ -26,8 +27,10 @@ function normalizePaymentMethod(raw: any): PaymentMethod {
 }
 
 export async function fetchPaymentMethods() {
-  const data = await authenticatedFetch<any[]>("/payment-methods");
-  return data.map(normalizePaymentMethod);
+  return cachedRequest("ref:payment-methods", async () => {
+    const data = await authenticatedFetch<any[]>("/payment-methods");
+    return data.map(normalizePaymentMethod);
+  });
 }
 
 export async function fetchPaymentMethodPresets() {
@@ -42,6 +45,7 @@ export async function createPaymentMethod(payload: {
     method: "POST",
     body: JSON.stringify(payload),
   });
+  invalidateCache("ref:payment-methods");
   return normalizePaymentMethod(created);
 }
 
@@ -53,10 +57,12 @@ export async function updatePaymentMethod(
     method: "PUT",
     body: JSON.stringify(payload),
   });
+  invalidateCache("ref:payment-methods");
   return normalizePaymentMethod(updated);
 }
 
 export async function deletePaymentMethod(id: string) {
+  invalidateCache("ref:payment-methods");
   return authenticatedFetch<{ message: string }>(`/payment-methods/${id}`, {
     method: "DELETE",
   });

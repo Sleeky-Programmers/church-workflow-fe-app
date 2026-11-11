@@ -46,7 +46,10 @@ export function UpdatePasswordModal({ open, onOpenChange }: any) {
       onOpenChange(false);
     } catch (error: any) {
       setSubmitError(
-        getFriendlyErrorMessage(error, "Couldn't update your password. Please try again."),
+        getFriendlyErrorMessage(
+          error,
+          "Couldn't update your password. Please try again.",
+        ),
       );
     }
   };
@@ -118,7 +121,9 @@ export function UpdatePasswordModal({ open, onOpenChange }: any) {
             <Button
               type="button"
               variant="destructive"
-              onClick={() => onOpenChange(false)}
+              onClick={() => {
+                return onOpenChange(false);
+              }}
             >
               Cancel
             </Button>

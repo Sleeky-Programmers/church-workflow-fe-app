@@ -55,7 +55,9 @@ export function LocationManager({ readOnly = false }: LocationManagerProps) {
     try {
       const response = await fetchLocationsPage(page, PAGE_SIZE);
       setLocations(
-        [...response.data].sort((a, b) => a.sortOrder - b.sortOrder),
+        [...response.data].sort((a, b) => {
+          return a.sortOrder - b.sortOrder;
+        }),
       );
       setCurrentPage(response.pagination.page);
       setTotalPages(response.pagination.totalPages || 1);
@@ -73,7 +75,9 @@ export function LocationManager({ readOnly = false }: LocationManagerProps) {
   }, []);
 
   const handleAdd = async () => {
-    if (!newName.trim()) return;
+    if (!newName.trim()) {
+      return;
+    }
     setIsSaving(true);
     setError(null);
     try {
@@ -99,7 +103,9 @@ export function LocationManager({ readOnly = false }: LocationManagerProps) {
   };
 
   const handleConfirmDelete = async () => {
-    if (!pendingDelete) return;
+    if (!pendingDelete) {
+      return;
+    }
     const location = pendingDelete;
     setDeletingId(location.id);
     setError(null);
@@ -125,7 +131,9 @@ export function LocationManager({ readOnly = false }: LocationManagerProps) {
   };
 
   const handleSaveEdit = async (location: Location) => {
-    if (!editingName.trim()) return;
+    if (!editingName.trim()) {
+      return;
+    }
     setError(null);
     try {
       await updateLocation(location.id, { name: editingName.trim() });
@@ -138,7 +146,9 @@ export function LocationManager({ readOnly = false }: LocationManagerProps) {
 
   const handleReorder = async (index: number, direction: -1 | 1) => {
     const targetIndex = index + direction;
-    if (targetIndex < 0 || targetIndex >= locations.length) return;
+    if (targetIndex < 0 || targetIndex >= locations.length) {
+      return;
+    }
 
     const reordered = [...locations];
     const [moved] = reordered.splice(index, 1);
@@ -148,11 +158,11 @@ export function LocationManager({ readOnly = false }: LocationManagerProps) {
 
     try {
       await Promise.all(
-        reordered.map((location, i) =>
-          location.sortOrder === i
+        reordered.map((location, i) => {
+          return location.sortOrder === i
             ? Promise.resolve()
-            : updateLocation(location.id, { sortOrder: i }),
-        ),
+            : updateLocation(location.id, { sortOrder: i });
+        }),
       );
       await load(currentPage);
     } catch (err: any) {
@@ -182,8 +192,12 @@ export function LocationManager({ readOnly = false }: LocationManagerProps) {
           <Input
             placeholder="New location (e.g. Main Auditorium)"
             value={newName}
-            onChange={(e) => setNewName(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && handleAdd()}
+            onChange={(e) => {
+              return setNewName(e.target.value);
+            }}
+            onKeyDown={(e) => {
+              return e.key === "Enter" && handleAdd();
+            }}
             disabled={isSaving}
           />
           <Button onClick={handleAdd} disabled={isSaving || !newName.trim()}>
@@ -200,117 +214,135 @@ export function LocationManager({ readOnly = false }: LocationManagerProps) {
       ) : (
         <>
           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
-            {locations.map((location, index) => (
-              <div
-                key={location.id}
-                className="rounded-xl border border-gray-200 p-3 flex flex-col gap-2 hover:border-gray-300 transition-colors"
-              >
-                <div className="flex items-start justify-between gap-2">
-                  {!readOnly && editingId === location.id ? (
-                    <div className="flex flex-1 items-center gap-1">
-                      <Input
-                        value={editingName}
-                        onChange={(e) => setEditingName(e.target.value)}
-                        className="h-8"
-                        autoFocus
-                      />
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        className="h-8 w-8 shrink-0"
-                        onClick={() => handleSaveEdit(location)}
-                      >
-                        <Check className="w-4 h-4 text-green-600" />
-                      </Button>
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        className="h-8 w-8 shrink-0"
-                        onClick={() => setEditingId(null)}
-                      >
-                        <X className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  ) : (
-                    <div className="min-w-0 flex-1">
-                      <p className="text-sm font-semibold text-gray-900 truncate">
-                        {location.name}
-                      </p>
-                      <div className="flex items-center gap-1.5 mt-1">
-                        <span
-                          className={`text-[11px] px-1.5 py-0.5 rounded-full ${
-                            location.isActive
-                              ? "bg-green-50 text-green-700"
-                              : "bg-gray-100 text-gray-500"
-                          }`}
+            {locations.map((location, index) => {
+              return (
+                <div
+                  key={location.id}
+                  className="rounded-xl border border-gray-200 p-3 flex flex-col gap-2 hover:border-gray-300 transition-colors"
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    {!readOnly && editingId === location.id ? (
+                      <div className="flex flex-1 items-center gap-1">
+                        <Input
+                          value={editingName}
+                          onChange={(e) => {
+                            return setEditingName(e.target.value);
+                          }}
+                          className="h-8"
+                          autoFocus
+                        />
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="h-8 w-8 shrink-0"
+                          onClick={() => {
+                            return handleSaveEdit(location);
+                          }}
                         >
-                          {location.isActive ? "Active" : "Inactive"}
-                        </span>
-                        {location.isSystem && (
-                          <span className="text-[11px] px-1.5 py-0.5 rounded-full bg-blue-50 text-blue-600">
-                            system
-                          </span>
-                        )}
+                          <Check className="w-4 h-4 text-green-600" />
+                        </Button>
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="h-8 w-8 shrink-0"
+                          onClick={() => {
+                            return setEditingId(null);
+                          }}
+                        >
+                          <X className="w-4 h-4" />
+                        </Button>
                       </div>
-                    </div>
-                  )}
+                    ) : (
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm font-semibold text-gray-900 truncate">
+                          {location.name}
+                        </p>
+                        <div className="flex items-center gap-1.5 mt-1">
+                          <span
+                            className={`text-[11px] px-1.5 py-0.5 rounded-full ${
+                              location.isActive
+                                ? "bg-green-50 text-green-700"
+                                : "bg-gray-100 text-gray-500"
+                            }`}
+                          >
+                            {location.isActive ? "Active" : "Inactive"}
+                          </span>
+                          {location.isSystem && (
+                            <span className="text-[11px] px-1.5 py-0.5 rounded-full bg-blue-50 text-blue-600">
+                              system
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                    {!readOnly && editingId !== location.id && (
+                      <div className="flex flex-col shrink-0">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            return handleReorder(index, -1);
+                          }}
+                          disabled={index === 0 && currentPage === 1}
+                          className="disabled:opacity-30 text-gray-500 hover:text-gray-900"
+                        >
+                          <ArrowUp className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            return handleReorder(index, 1);
+                          }}
+                          disabled={
+                            index === locations.length - 1 &&
+                            currentPage === totalPages
+                          }
+                          className="disabled:opacity-30 text-gray-500 hover:text-gray-900"
+                        >
+                          <ArrowDown className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    )}
+                  </div>
 
                   {!readOnly && editingId !== location.id && (
-                    <div className="flex flex-col shrink-0">
-                      <button
-                        type="button"
-                        onClick={() => handleReorder(index, -1)}
-                        disabled={index === 0 && currentPage === 1}
-                        className="disabled:opacity-30 text-gray-500 hover:text-gray-900"
+                    <div className="flex items-center gap-1.5 pt-1">
+                      <Button
+                        size="sm"
+                        variant={location.isActive ? "outline" : "secondary"}
+                        className="h-7 px-2 text-xs"
+                        onClick={() => {
+                          return handleToggleActive(location);
+                        }}
                       >
-                        <ArrowUp className="w-3.5 h-3.5" />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleReorder(index, 1)}
-                        disabled={
-                          index === locations.length - 1 &&
-                          currentPage === totalPages
-                        }
-                        className="disabled:opacity-30 text-gray-500 hover:text-gray-900"
+                        {location.isActive ? "Deactivate" : "Activate"}
+                      </Button>
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="h-7 w-7"
+                        onClick={() => {
+                          return handleStartEdit(location);
+                        }}
                       >
-                        <ArrowDown className="w-3.5 h-3.5" />
-                      </button>
+                        <Pencil className="w-3.5 h-3.5" />
+                      </Button>
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="h-7 w-7 text-red-500 hover:text-red-600 ml-auto"
+                        disabled={deletingId === location.id}
+                        onClick={() => {
+                          return setPendingDelete(location);
+                        }}
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </Button>
                     </div>
                   )}
                 </div>
-
-                {!readOnly && editingId !== location.id && (
-                  <div className="flex items-center gap-1.5 pt-1">
-                    <Button
-                      size="sm"
-                      variant={location.isActive ? "outline" : "secondary"}
-                      className="h-7 px-2 text-xs"
-                      onClick={() => handleToggleActive(location)}
-                    >
-                      {location.isActive ? "Deactivate" : "Activate"}
-                    </Button>
-                    <Button
-                      size="icon"
-                      variant="ghost"
-                      className="h-7 w-7"
-                      onClick={() => handleStartEdit(location)}
-                    >
-                      <Pencil className="w-3.5 h-3.5" />
-                    </Button>
-                    <Button
-                      size="icon"
-                      variant="ghost"
-                      className="h-7 w-7 text-red-500 hover:text-red-600 ml-auto"
-                      disabled={deletingId === location.id}
-                      onClick={() => setPendingDelete(location)}
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </Button>
-                  </div>
-                )}
-              </div>
-            ))}
+              );
+            })}
           </div>
 
           {!locations.length && (
@@ -325,7 +357,9 @@ export function LocationManager({ readOnly = false }: LocationManagerProps) {
                 size="sm"
                 variant="outline"
                 disabled={currentPage === 1 || isLoading}
-                onClick={() => load(currentPage - 1)}
+                onClick={() => {
+                  return load(currentPage - 1);
+                }}
               >
                 <ChevronLeft className="h-4 w-4" />
                 Previous
@@ -337,7 +371,9 @@ export function LocationManager({ readOnly = false }: LocationManagerProps) {
                 size="sm"
                 variant="outline"
                 disabled={currentPage === totalPages || isLoading}
-                onClick={() => load(currentPage + 1)}
+                onClick={() => {
+                  return load(currentPage + 1);
+                }}
               >
                 Next
                 <ChevronRight className="h-4 w-4" />
@@ -349,7 +385,9 @@ export function LocationManager({ readOnly = false }: LocationManagerProps) {
 
       <ConfirmDialog
         open={!!pendingDelete}
-        onOpenChange={(open) => !open && setPendingDelete(null)}
+        onOpenChange={(open) => {
+          return !open && setPendingDelete(null);
+        }}
         title={`Delete "${pendingDelete?.name}"?`}
         description="This permanently removes the location. This action cannot be undone."
         confirmLabel="Delete"

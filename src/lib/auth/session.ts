@@ -61,7 +61,9 @@ function isClient(): boolean {
 }
 
 function safeJsonParse<T>(value: string | null): T | null {
-  if (!value) return null;
+  if (!value) {
+    return null;
+  }
   try {
     return JSON.parse(value) as T;
   } catch {
@@ -76,7 +78,9 @@ function toUserKey(input?: string): string {
 
 function decodeJwtPayload(token: string): UnknownRecord | null {
   const segments = token.split(".");
-  if (segments.length < 2) return null;
+  if (segments.length < 2) {
+    return null;
+  }
   try {
     const payload = segments[1].replace(/-/g, "+").replace(/_/g, "/");
     const parsed = atob(payload);
@@ -94,7 +98,9 @@ function inferIdentityFromToken(token: string): {
   id?: string;
 } {
   const payload = decodeJwtPayload(token);
-  if (!payload) return {};
+  if (!payload) {
+    return {};
+  }
 
   const email =
     (payload.email as string | undefined) ||
@@ -123,12 +129,16 @@ function onboardingStorageKey(userKey: string): string {
 }
 
 export function getAccessToken(): string | null {
-  if (!isClient()) return null;
+  if (!isClient()) {
+    return null;
+  }
   return window.localStorage.getItem(ACCESS_TOKEN_KEY);
 }
 
 export function getCurrentUserKey(): string | null {
-  if (!isClient()) return null;
+  if (!isClient()) {
+    return null;
+  }
   return window.localStorage.getItem(CURRENT_USER_KEY);
 }
 
@@ -200,7 +210,9 @@ export function initializeAuthSession(args: {
 // Add this to your auth storage file (where initializeAuthSession is)
 
 export function clearAuthSession(): void {
-  if (!isClient()) return;
+  if (!isClient()) {
+    return;
+  }
 
   // Get current user key before clearing
   const userKey = getCurrentUserKey();
@@ -231,22 +243,32 @@ export function clearAuthSession(): void {
       keysToRemove.push(key);
     }
   }
-  keysToRemove.forEach((key) => window.localStorage.removeItem(key));
+  keysToRemove.forEach((key) => {
+    return window.localStorage.removeItem(key);
+  });
 }
 
 export function getCurrentUserProfile(): UserProfile | null {
-  if (!isClient()) return null;
+  if (!isClient()) {
+    return null;
+  }
   const userKey = getCurrentUserKey();
-  if (!userKey) return null;
+  if (!userKey) {
+    return null;
+  }
   return safeJsonParse<UserProfile>(
     window.localStorage.getItem(profileStorageKey(userKey)),
   );
 }
 
 export function getCurrentOnboardingState(): OnboardingState | null {
-  if (!isClient()) return null;
+  if (!isClient()) {
+    return null;
+  }
   const userKey = getCurrentUserKey();
-  if (!userKey) return null;
+  if (!userKey) {
+    return null;
+  }
   return safeJsonParse<OnboardingState>(
     window.localStorage.getItem(onboardingStorageKey(userKey)),
   );
@@ -254,18 +276,26 @@ export function getCurrentOnboardingState(): OnboardingState | null {
 
 export function shouldCurrentUserCompleteOnboarding(): boolean {
   const token = getAccessToken();
-  if (!token) return false;
+  if (!token) {
+    return false;
+  }
   const onboarding = getCurrentOnboardingState();
-  if (!onboarding) return true;
+  if (!onboarding) {
+    return true;
+  }
   return !onboarding.churchIdentityCompleted;
 }
 
 export function updateCurrentOnboardingState(
   updater: (current: OnboardingState) => OnboardingState,
 ): OnboardingState | null {
-  if (!isClient()) return null;
+  if (!isClient()) {
+    return null;
+  }
   const userKey = getCurrentUserKey();
-  if (!userKey) return null;
+  if (!userKey) {
+    return null;
+  }
 
   const current = getCurrentOnboardingState() || {
     ...DEFAULT_ONBOARDING_STATE,
@@ -287,23 +317,29 @@ export function updateCurrentOnboardingState(
 export function markChurchIdentityComplete(
   identity: ChurchIdentityRecord,
 ): OnboardingState | null {
-  return updateCurrentOnboardingState((current) => ({
-    ...current,
-    churchIdentityCompleted: true,
-    churchIdentity: identity,
-  }));
+  return updateCurrentOnboardingState((current) => {
+    return {
+      ...current,
+      churchIdentityCompleted: true,
+      churchIdentity: identity,
+    };
+  });
 }
 
 export function markWeeklyServicesComplete(): OnboardingState | null {
-  return updateCurrentOnboardingState((current) => ({
-    ...current,
-    weeklyServicesCompleted: true,
-  }));
+  return updateCurrentOnboardingState((current) => {
+    return {
+      ...current,
+      weeklyServicesCompleted: true,
+    };
+  });
 }
 
 export function markMembersUploaded(): OnboardingState | null {
-  return updateCurrentOnboardingState((current) => ({
-    ...current,
-    membersUploaded: true,
-  }));
+  return updateCurrentOnboardingState((current) => {
+    return {
+      ...current,
+      membersUploaded: true,
+    };
+  });
 }

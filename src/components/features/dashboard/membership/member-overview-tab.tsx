@@ -24,7 +24,9 @@ function DetailField({
 }) {
   const formatDateLikeValue = (input: string) => {
     const parsed = new Date(input);
-    if (Number.isNaN(parsed.getTime())) return input;
+    if (Number.isNaN(parsed.getTime())) {
+      return input;
+    }
     return parsed.toISOString().split("T")[0];
   };
 

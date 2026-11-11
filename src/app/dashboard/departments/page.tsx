@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronDown, MoreVertical, Search, X } from "lucide-react";
+import { ChevronDown, Search, X } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -47,7 +47,7 @@ export default function DepartmentPage() {
   const [loading, setLoading] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<DepartmentRow | null>(null);
   const [exporting, setExporting] = useState(false);
-  const [isAddOpen, setIsAddOpen] = useState(false);
+  const [] = useState(false);
   const [editTargetId, setEditTargetId] = useState<string | null>(null);
 
   const loadDepartments = async (searchValue?: string) => {
@@ -181,28 +181,36 @@ export default function DepartmentPage() {
               <Loader size="w-10 h-10" showShadow={false} />
             </div>
           ) : (
-            data.map((dept) => (
-              <div
-                key={dept.id}
-                className="flex items-center justify-between px-4 py-4"
-              >
-                <p className="text-sm font-medium text-gray-900">{dept.name}</p>
-
-                <Button
-                  variant="outline"
-                  className="text-sm border-gray-300"
-                  onClick={() => handleView(dept)}
+            data.map((dept) => {
+              return (
+                <div
+                  key={dept.id}
+                  className="flex items-center justify-between px-4 py-4"
                 >
-                  View Department
-                </Button>
-              </div>
-            ))
+                  <p className="text-sm font-medium text-gray-900">
+                    {dept.name}
+                  </p>
+
+                  <Button
+                    variant="outline"
+                    className="text-sm border-gray-300"
+                    onClick={() => {
+                      return handleView(dept);
+                    }}
+                  >
+                    View Department
+                  </Button>
+                </div>
+              );
+            })
           )}
         </div>
 
         <AlertDialog
           open={!!deleteTarget}
-          onOpenChange={(open) => !open && setDeleteTarget(null)}
+          onOpenChange={(open) => {
+            return !open && setDeleteTarget(null);
+          }}
         >
           <AlertDialogContent>
             <AlertDialogHeader>
@@ -225,9 +233,13 @@ export default function DepartmentPage() {
 
         <EditDepartmentDialog
           open={!!editTargetId}
-          onOpenChange={(open) => !open && setEditTargetId(null)}
+          onOpenChange={(open) => {
+            return !open && setEditTargetId(null);
+          }}
           departmentId={editTargetId}
-          onSaved={() => loadDepartments(searchTerm)}
+          onSaved={() => {
+            return loadDepartments(searchTerm);
+          }}
         />
       </div>
     );
@@ -244,7 +256,9 @@ export default function DepartmentPage() {
               <Input
                 placeholder="Search by HOD, member..."
                 value={searchInput}
-                onChange={(e) => setSearchInput(e.target.value)}
+                onChange={(e) => {
+                  return setSearchInput(e.target.value);
+                }}
                 onKeyPress={handleKeyPress}
                 className="w-[300px] pr-20"
               />
@@ -297,18 +311,22 @@ export default function DepartmentPage() {
         <Table
           columns={columns}
           data={data}
-          rowKey={(row) => row.id}
+          rowKey={(row) => {
+            return row.id;
+          }}
           showCheckbox
           isLoading={loading}
-          onRowClick={(row) =>
-            router.push(RouteConfig.dashboard.departmentDetails(row.id))
-          }
+          onRowClick={(row) => {
+            return router.push(RouteConfig.dashboard.departmentDetails(row.id));
+          }}
         />
       </div>
 
       <AlertDialog
         open={!!deleteTarget}
-        onOpenChange={(open) => !open && setDeleteTarget(null)}
+        onOpenChange={(open) => {
+          return !open && setDeleteTarget(null);
+        }}
       >
         <AlertDialogContent className="max-w-sm rounded-2xl">
           <AlertDialogHeader>
@@ -321,7 +339,11 @@ export default function DepartmentPage() {
           </AlertDialogHeader>
 
           <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setDeleteTarget(null)}>
+            <AlertDialogCancel
+              onClick={() => {
+                return setDeleteTarget(null);
+              }}
+            >
               Cancel
             </AlertDialogCancel>
 
@@ -334,9 +356,13 @@ export default function DepartmentPage() {
 
       <EditDepartmentDialog
         open={!!editTargetId}
-        onOpenChange={(open) => !open && setEditTargetId(null)}
+        onOpenChange={(open) => {
+          return !open && setEditTargetId(null);
+        }}
         departmentId={editTargetId}
-        onSaved={() => loadDepartments(searchTerm)}
+        onSaved={() => {
+          return loadDepartments(searchTerm);
+        }}
       />
     </div>
   );

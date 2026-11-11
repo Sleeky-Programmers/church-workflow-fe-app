@@ -70,7 +70,9 @@ function GiveVerifyContent() {
       });
   }, [reference]);
 
-  const handleGoHome = () => router.push("/");
+  const handleGoHome = () => {
+    return router.push("/");
+  };
 
   if (status === "loading") {
     return (

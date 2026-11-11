@@ -33,11 +33,15 @@ export function AddNoteDialog({
 
   // Reset the draft each time the dialog opens for a new target
   useEffect(() => {
-    if (open) setBody(initialBody ?? "");
+    if (open) {
+      setBody(initialBody ?? "");
+    }
   }, [open, initialBody]);
 
   const handleSubmit = async () => {
-    if (!body.trim()) return;
+    if (!body.trim()) {
+      return;
+    }
     setIsSubmitting(true);
     try {
       await onSubmit(body.trim());
@@ -48,7 +52,12 @@ export function AddNoteDialog({
   };
 
   return (
-    <Dialog open={open} onOpenChange={(next) => !next && onClose()}>
+    <Dialog
+      open={open}
+      onOpenChange={(next) => {
+        return !next && onClose();
+      }}
+    >
       <DialogContent className="sm:max-w-md">
         <div className="flex flex-col gap-6">
           <DialogHeader className="space-y-2">
@@ -66,7 +75,9 @@ export function AddNoteDialog({
 
           <textarea
             value={body}
-            onChange={(e) => setBody(e.target.value)}
+            onChange={(e) => {
+              return setBody(e.target.value);
+            }}
             rows={5}
             placeholder="e.g. Called on Tuesday 4pm - she's travelling for work but plans to return next Sunday…"
             className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-100 resize-none"
@@ -81,11 +92,7 @@ export function AddNoteDialog({
               onClick={handleSubmit}
               disabled={!body.trim() || isSubmitting}
             >
-              {isSubmitting
-                ? "Saving…"
-                : isEdit
-                  ? "Save Changes"
-                  : "Save Note"}
+              {isSubmitting ? "Saving…" : isEdit ? "Save Changes" : "Save Note"}
             </Button>
           </div>
         </div>

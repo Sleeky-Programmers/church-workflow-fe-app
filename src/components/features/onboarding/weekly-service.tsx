@@ -62,7 +62,9 @@ export function WeeklyServicesStep({
 
   const clearError = (field: string) => {
     setErrors((prev) => {
-      if (!prev[field]) return prev;
+      if (!prev[field]) {
+        return prev;
+      }
       const next = { ...prev };
       delete next[field];
       return next;
@@ -70,23 +72,31 @@ export function WeeklyServicesStep({
   };
 
   const handleDayToggle = (day: string) => {
-    setNewService((prev) => ({
-      ...prev,
-      days: prev.days.includes(day)
-        ? prev.days.filter((d) => d !== day)
-        : [...prev.days, day],
-    }));
+    setNewService((prev) => {
+      return {
+        ...prev,
+        days: prev.days.includes(day)
+          ? prev.days.filter((d) => {
+              return d !== day;
+            })
+          : [...prev.days, day],
+      };
+    });
     clearError("days");
   };
 
   const handleAddService = () => {
     const nextErrors: Record<string, string> = {};
 
-    if (!newService.title.trim())
+    if (!newService.title.trim()) {
       nextErrors.title = "Please enter a service name";
-    if (newService.days.length === 0)
+    }
+    if (newService.days.length === 0) {
       nextErrors.days = "Please select at least one day";
-    if (!newService.startTime) nextErrors.startTime = "Please set a start time";
+    }
+    if (!newService.startTime) {
+      nextErrors.startTime = "Please set a start time";
+    }
 
     if (Object.keys(nextErrors).length > 0) {
       setErrors(nextErrors);
@@ -105,7 +115,9 @@ export function WeeklyServicesStep({
   };
 
   const handleContinue = async () => {
-    if (isContinuing) return;
+    if (isContinuing) {
+      return;
+    }
 
     setIsContinuing(true);
     try {
@@ -134,10 +146,12 @@ export function WeeklyServicesStep({
             placeholder="e.g. Sunday Worship Service"
             value={newService.title}
             onChange={(e) => {
-              setNewService((prev) => ({
-                ...prev,
-                title: e.target.value,
-              }));
+              setNewService((prev) => {
+                return {
+                  ...prev,
+                  title: e.target.value,
+                };
+              });
               clearError("title");
             }}
             className={errors.title ? "border-destructive-600" : ""}
@@ -148,19 +162,23 @@ export function WeeklyServicesStep({
         <div className="space-y-2">
           <Label>Days</Label>
           <div className="grid grid-cols-4 sm:grid-cols-7 gap-2">
-            {daysOfWeek.map((day) => (
-              <Button
-                key={day.short}
-                type="button"
-                variant={
-                  newService.days.includes(day.full) ? "default" : "outline"
-                }
-                className="w-full"
-                onClick={() => handleDayToggle(day.full)}
-              >
-                {day.short}
-              </Button>
-            ))}
+            {daysOfWeek.map((day) => {
+              return (
+                <Button
+                  key={day.short}
+                  type="button"
+                  variant={
+                    newService.days.includes(day.full) ? "default" : "outline"
+                  }
+                  className="w-full"
+                  onClick={() => {
+                    return handleDayToggle(day.full);
+                  }}
+                >
+                  {day.short}
+                </Button>
+              );
+            })}
           </div>
           {errors.days ? <Text variant="error">{errors.days}</Text> : null}
         </div>
@@ -176,10 +194,12 @@ export function WeeklyServicesStep({
                 placeholder="--:-- --"
                 value={newService.startTime}
                 onChange={(e) => {
-                  setNewService((prev) => ({
-                    ...prev,
-                    startTime: e.target.value,
-                  }));
+                  setNewService((prev) => {
+                    return {
+                      ...prev,
+                      startTime: e.target.value,
+                    };
+                  });
                   clearError("startTime");
                 }}
                 className="pr-10"
@@ -198,12 +218,14 @@ export function WeeklyServicesStep({
                 type="time"
                 placeholder="--:-- --"
                 value={newService.endTime}
-                onChange={(e) =>
-                  setNewService((prev) => ({
-                    ...prev,
-                    endTime: e.target.value,
-                  }))
-                }
+                onChange={(e) => {
+                  return setNewService((prev) => {
+                    return {
+                      ...prev,
+                      endTime: e.target.value,
+                    };
+                  });
+                }}
                 className="pr-10"
               />
               <Clock3 className="h-4 w-4 absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
@@ -216,9 +238,11 @@ export function WeeklyServicesStep({
           <Input
             placeholder="e.g. Main Auditorium"
             value={newService.location}
-            onChange={(e) =>
-              setNewService((prev) => ({ ...prev, location: e.target.value }))
-            }
+            onChange={(e) => {
+              return setNewService((prev) => {
+                return { ...prev, location: e.target.value };
+              });
+            }}
           />
         </div>
       </div>
@@ -235,40 +259,47 @@ export function WeeklyServicesStep({
 
       {services.length > 0 && (
         <div className="space-y-3">
-          {services.map((service, index) => (
-            <Card key={index} className="p-4 hover:shadow-sm transition-shadow">
-              <div className="flex flex-col sm:flex-row items-start justify-between gap-3">
-                <div className="flex-1">
-                  <Heading level={3} className="mb-1">
-                    {service.title || "Untitled Service"}
-                  </Heading>
-                  <div className="space-y-1">
-                    <Text variant="muted" className="text-sm">
-                      {service.days.join(", ") || "No days selected"} -{" "}
-                      {service.startTime || "--:--"} -{" "}
-                      {service.endTime || "--:--"}
-                    </Text>
-                    {service.location && (
+          {services.map((service, index) => {
+            return (
+              <Card
+                key={index}
+                className="p-4 hover:shadow-sm transition-shadow"
+              >
+                <div className="flex flex-col sm:flex-row items-start justify-between gap-3">
+                  <div className="flex-1">
+                    <Heading level={3} className="mb-1">
+                      {service.title || "Untitled Service"}
+                    </Heading>
+                    <div className="space-y-1">
                       <Text variant="muted" className="text-sm">
-                        {service.location}
+                        {service.days.join(", ") || "No days selected"} -{" "}
+                        {service.startTime || "--:--"} -{" "}
+                        {service.endTime || "--:--"}
                       </Text>
-                    )}
+                      {service.location && (
+                        <Text variant="muted" className="text-sm">
+                          {service.location}
+                        </Text>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 sm:ml-8 self-end sm:self-auto">
+                    <Text variant="tag">Weekly</Text>
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="icon"
+                      onClick={() => {
+                        return onRemoveService(index);
+                      }}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
                   </div>
                 </div>
-                <div className="flex items-center gap-2 sm:ml-8 self-end sm:self-auto">
-                  <Text variant="tag">Weekly</Text>
-                  <Button
-                    type="button"
-                    variant="destructive"
-                    size="icon"
-                    onClick={() => onRemoveService(index)}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-            </Card>
-          ))}
+              </Card>
+            );
+          })}
         </div>
       )}
 
