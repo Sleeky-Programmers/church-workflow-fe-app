@@ -24,27 +24,31 @@ export function PermissionModuleSelector({
       <RadioGroup
         value={value}
         disabled={disabled}
-        onValueChange={(newValue) =>
-          onChange && onChange(module.module, newValue as PermissionLevel)
-        }
+        onValueChange={(newValue) => {
+          return (
+            onChange && onChange(module.module, newValue as PermissionLevel)
+          );
+        }}
       >
-        {module.options.map((option) => (
-          <div key={option.value} className="flex items-center space-x-2">
-            <RadioGroupItem
-              value={option.value}
-              id={`${module.module}-${option.value}`}
-            />
-            <Label
-              htmlFor={`${module.module}-${option.value}`}
-              className={`text-sm font-normal ${disabled ? "cursor-not-allowed text-gray-600" : "cursor-pointer"}`}
-            >
-              {option.label}
-              {option.description && (
-                <Span variant="default"> → {option.description}</Span>
-              )}
-            </Label>
-          </div>
-        ))}
+        {module.options.map((option) => {
+          return (
+            <div key={option.value} className="flex items-center space-x-2">
+              <RadioGroupItem
+                value={option.value}
+                id={`${module.module}-${option.value}`}
+              />
+              <Label
+                htmlFor={`${module.module}-${option.value}`}
+                className={`text-sm font-normal ${disabled ? "cursor-not-allowed text-gray-600" : "cursor-pointer"}`}
+              >
+                {option.label}
+                {option.description && (
+                  <Span variant="default"> → {option.description}</Span>
+                )}
+              </Label>
+            </div>
+          );
+        })}
       </RadioGroup>
     </div>
   );

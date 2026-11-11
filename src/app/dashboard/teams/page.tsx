@@ -29,11 +29,16 @@ import {
 import { TeamStatus } from "@/lib/enums";
 import { fetchMembers as fetchMemberProfiles } from "@/services/memberService";
 import { MemberProfile, RegularService, TeamRow } from "@/types";
+import { useLatest } from "@/hooks/use-latest";
 
 function getInitials(fullName: string) {
   const names = fullName.trim().split(" ").filter(Boolean);
-  if (!names.length) return "?";
-  if (names.length === 1) return names[0][0].toUpperCase();
+  if (!names.length) {
+    return "?";
+  }
+  if (names.length === 1) {
+    return names[0][0].toUpperCase();
+  }
   return `${names[0][0]}${names[names.length - 1][0]}`.toUpperCase();
 }
 
@@ -80,21 +85,24 @@ export default function TeamsPage() {
   const [editTarget, setEditTarget] = useState<TeamRow | null>(null);
   const [isSavingTeam, setIsSavingTeam] = useState(false);
 
-  const mapTeamToRow = (team: TeamApiEntity): TeamRow => ({
-    id: team._id,
-    name: team.name,
-    description: team.description || "", // ✅ Add description field
-    leader: team.leader
-      ? {
-          id: team.leader.id,
-          name: team.leader.fullName,
-          initials: getInitials(team.leader.fullName),
-        }
-      : null,
-    pendingLeaderEmail: team.pendingLeaderEmail || null,
-    members: team.membersCount,
-    status: team.status === "ACTIVE" ? TeamStatus.ACTIVE : TeamStatus.INACTIVE,
-  });
+  const mapTeamToRow = (team: TeamApiEntity): TeamRow => {
+    return {
+      id: team._id,
+      name: team.name,
+      description: team.description || "", // ✅ Add description field
+      leader: team.leader
+        ? {
+            id: team.leader.id,
+            name: team.leader.fullName,
+            initials: getInitials(team.leader.fullName),
+          }
+        : null,
+      pendingLeaderEmail: team.pendingLeaderEmail || null,
+      members: team.membersCount,
+      status:
+        team.status === "ACTIVE" ? TeamStatus.ACTIVE : TeamStatus.INACTIVE,
+    };
+  };
 
   const loadAllMembers = async () => {
     const pageSize = 100;
@@ -122,10 +130,21 @@ export default function TeamsPage() {
       }
     }
     const membersMap = Object.fromEntries(
-      allTeams.map((team) => [team._id, (team.members || []).map((m) => m.id)]),
+      allTeams.map((team) => {
+        return [
+          team._id,
+          (team.members || []).map((m) => {
+            return m.id;
+          }),
+        ];
+      }),
     );
     setTeamMembers(membersMap);
-    setData(allTeams.map((team) => mapTeamToRow(team as TeamApiEntity)));
+    setData(
+      allTeams.map((team) => {
+        return mapTeamToRow(team as TeamApiEntity);
+      }),
+    );
   };
 
   const loadPageData = async () => {
@@ -149,29 +168,32 @@ export default function TeamsPage() {
     }
   };
 
+  const loadPageDataRef = useLatest(loadPageData);
+
   useEffect(() => {
-    loadPageData();
-  }, []);
+    loadPageDataRef.current();
+  }, [loadPageDataRef]);
 
   const filtered = useMemo(() => {
     let filteredTeams = data;
 
     if (query) {
       const q = query.toLowerCase();
-      filteredTeams = filteredTeams.filter(
-        (team) =>
+      filteredTeams = filteredTeams.filter((team) => {
+        return (
           team.name.toLowerCase().includes(q) ||
           (team.leader?.name ?? "").toLowerCase().includes(q) ||
           (team.description?.toLowerCase() || "").includes(q) || // ✅ Add description to search
           String(team.members).includes(q) ||
-          team.status.toLowerCase().includes(q),
-      );
+          team.status.toLowerCase().includes(q)
+        );
+      });
     }
 
     if (statusFilter !== "all") {
-      filteredTeams = filteredTeams.filter(
-        (team) => team.status === statusFilter,
-      );
+      filteredTeams = filteredTeams.filter((team) => {
+        return team.status === statusFilter;
+      });
     }
 
     if (selectedMemberId !== "all") {
@@ -182,9 +204,9 @@ export default function TeamsPage() {
     }
 
     if (minMembers > 0) {
-      filteredTeams = filteredTeams.filter(
-        (team) => team.members >= minMembers,
-      );
+      filteredTeams = filteredTeams.filter((team) => {
+        return team.members >= minMembers;
+      });
     }
 
     return filteredTeams;
@@ -209,7 +231,9 @@ export default function TeamsPage() {
     status: "ACTIVE" | "INACTIVE";
     description: string;
   }) => {
-    if (!editTarget) return;
+    if (!editTarget) {
+      return;
+    }
 
     setIsSavingTeam(true);
     try {
@@ -239,8 +263,12 @@ export default function TeamsPage() {
     }
   };
 
-  const handleManageMembers = (row: TeamRow) => setManageTarget(row);
-  const handleMarkAttendance = (row: TeamRow) => setMarkTarget(row);
+  const handleManageMembers = (row: TeamRow) => {
+    return setManageTarget(row);
+  };
+  const handleMarkAttendance = (row: TeamRow) => {
+    return setMarkTarget(row);
+  };
 
   const handleViewReport = async (row: TeamRow) => {
     setReportTarget(row);
@@ -261,7 +289,9 @@ export default function TeamsPage() {
   };
 
   const handleConfirmDelete = async () => {
-    if (!deleteTarget) return;
+    if (!deleteTarget) {
+      return;
+    }
     try {
       await deleteSmallTeam(deleteTarget.id);
       await loadTeams();
@@ -303,7 +333,9 @@ export default function TeamsPage() {
   };
 
   const handleUpdateMembers = async (memberIds: string[]) => {
-    if (!manageTarget) return;
+    if (!manageTarget) {
+      return;
+    }
     await updateSmallTeamMembers(manageTarget.id, memberIds);
     await loadTeams();
     setManageTarget(null);
@@ -318,7 +350,9 @@ export default function TeamsPage() {
     date: string;
     memberIds: string[];
   }) => {
-    if (!markTarget) return;
+    if (!markTarget) {
+      return;
+    }
     await markSmallTeamAttendance({
       teamId: markTarget.id,
       serviceId: payload.serviceId,
@@ -343,7 +377,9 @@ export default function TeamsPage() {
     <>
       <ManageTeamMembersDialog
         open={!!manageTarget}
-        onOpenChange={(open) => !open && setManageTarget(null)}
+        onOpenChange={(open) => {
+          return !open && setManageTarget(null);
+        }}
         team={manageTarget}
         members={members}
         memberIds={manageTarget ? teamMembers[manageTarget.id] || [] : []}
@@ -352,7 +388,9 @@ export default function TeamsPage() {
 
       <MarkTeamAttendanceDialog
         open={!!markTarget}
-        onOpenChange={(open) => !open && setMarkTarget(null)}
+        onOpenChange={(open) => {
+          return !open && setMarkTarget(null);
+        }}
         team={markTarget}
         members={members}
         services={services}
@@ -362,7 +400,9 @@ export default function TeamsPage() {
 
       <TeamsDeleteDialog
         target={deleteTarget}
-        onOpenChange={(open) => !open && setDeleteTarget(null)}
+        onOpenChange={(open) => {
+          return !open && setDeleteTarget(null);
+        }}
         onConfirm={handleConfirmDelete}
       />
 
@@ -452,7 +492,9 @@ export default function TeamsPage() {
           <Table
             columns={columns}
             data={filtered}
-            rowKey={(row) => row.id}
+            rowKey={(row) => {
+              return row.id;
+            }}
             showCheckbox
           />
         )}

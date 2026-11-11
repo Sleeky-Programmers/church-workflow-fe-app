@@ -130,7 +130,9 @@ export default function AdminSignupForm({
     }
   };
 
-  const onLogin = () => router.push(RouteConfig.auth.signIn);
+  const onLogin = () => {
+    return router.push(RouteConfig.auth.signIn);
+  };
 
   return (
     <div className="animate-fade-in">
@@ -146,107 +148,118 @@ export default function AdminSignupForm({
             <FormField
               control={form.control}
               name="firstName"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>First Name</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="Enter your first name"
-                      {...field}
-                      disabled={!!preFilledName?.firstName}
-                      readOnly={!!preFilledName?.firstName}
-                      className={
-                        preFilledName?.firstName
-                          ? "bg-gray-100 cursor-not-allowed"
-                          : ""
-                      }
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
+              render={({ field }) => {
+                return (
+                  <FormItem>
+                    <FormLabel>First Name</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="Enter your first name"
+                        {...field}
+                        disabled={!!preFilledName?.firstName}
+                        readOnly={!!preFilledName?.firstName}
+                        className={
+                          preFilledName?.firstName
+                            ? "bg-gray-100 cursor-not-allowed"
+                            : ""
+                        }
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                );
+              }}
             />
             <FormField
               control={form.control}
               name="lastName"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Last Name</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="Enter your last name"
-                      {...field}
-                      disabled={!!preFilledName?.lastName}
-                      readOnly={!!preFilledName?.lastName}
-                      className={
-                        preFilledName?.lastName
-                          ? "bg-gray-100 cursor-not-allowed"
-                          : ""
-                      }
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
+              render={({ field }) => {
+                return (
+                  <FormItem>
+                    <FormLabel>Last Name</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="Enter your last name"
+                        {...field}
+                        disabled={!!preFilledName?.lastName}
+                        readOnly={!!preFilledName?.lastName}
+                        className={
+                          preFilledName?.lastName
+                            ? "bg-gray-100 cursor-not-allowed"
+                            : ""
+                        }
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                );
+              }}
             />
           </div>
           <FormField
             control={form.control}
             name="email"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Email</FormLabel>
-                <FormControl>
-                  <Input
-                    type="email"
-                    placeholder="example@gmail.com"
-                    {...field}
-                    disabled={!!preFilledEmail}
-                    readOnly={!!preFilledEmail}
-                    className={
-                      preFilledEmail ? "bg-gray-100 cursor-not-allowed" : ""
-                    }
-                  />
-                </FormControl>
-                {preFilledEmail && (
-                  <Text variant="muted" className="text-xs">
-                    Email address from your invitation
-                  </Text>
-                )}
-                <FormMessage />
-              </FormItem>
-            )}
+            render={({ field }) => {
+              return (
+                <FormItem>
+                  <FormLabel>Email</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="email"
+                      placeholder="example@gmail.com"
+                      {...field}
+                      disabled={!!preFilledEmail}
+                      readOnly={!!preFilledEmail}
+                      className={
+                        preFilledEmail ? "bg-gray-100 cursor-not-allowed" : ""
+                      }
+                    />
+                  </FormControl>
+                  {preFilledEmail && (
+                    <Text variant="muted" className="text-xs">
+                      Email address from your invitation
+                    </Text>
+                  )}
+                  <FormMessage />
+                </FormItem>
+              );
+            }}
           />
           <FormField
             control={form.control}
             name="password"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Password</FormLabel>
-                <FormControl>
-                  <div className="relative">
-                    <Input
-                      type={showPassword ? "text" : "password"}
-                      placeholder="Create a password"
-                      {...field}
-                    />
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2"
-                    >
-                      {showPassword ? <EyeOff /> : <Eye />}
-                    </Button>
-                  </div>
-                </FormControl>
-                <Text variant="muted" className="text-xs mt-1">
-                  Must contain 8+ characters, uppercase, lowercase, and a number
-                </Text>
-                <FormMessage />
-              </FormItem>
-            )}
+            render={({ field }) => {
+              return (
+                <FormItem>
+                  <FormLabel>Password</FormLabel>
+                  <FormControl>
+                    <div className="relative">
+                      <Input
+                        type={showPassword ? "text" : "password"}
+                        placeholder="Create a password"
+                        {...field}
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => {
+                          return setShowPassword(!showPassword);
+                        }}
+                        className="absolute right-3 top-1/2 -translate-y-1/2"
+                      >
+                        {showPassword ? <EyeOff /> : <Eye />}
+                      </Button>
+                    </div>
+                  </FormControl>
+                  <Text variant="muted" className="text-xs mt-1">
+                    Must contain 8+ characters, uppercase, lowercase, and a
+                    number
+                  </Text>
+                  <FormMessage />
+                </FormItem>
+              );
+            }}
           />
           <Button
             type="submit"

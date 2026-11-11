@@ -48,12 +48,14 @@ const STEP_CONFIG = [
 
 function MembershipStepIndicator({ step }: { step: 1 | 2 | 3 }) {
   const active =
-    STEP_CONFIG.find((c) => c.number === step) ?? STEP_CONFIG[0];
+    STEP_CONFIG.find((c) => {
+      return c.number === step;
+    }) ?? STEP_CONFIG[0];
   const ActiveIcon = active.icon;
 
   // Per the design: a compact pill with the active step's icon chip on the
-  // left, its "Step n/3" label, then the remaining step icons separated by
-  // dividers on the right.
+  // Left, its "Step n/3" label, then the remaining step icons separated by
+  // Dividers on the right.
   return (
     <div className="flex-shrink-0">
       <div className="flex items-stretch rounded-lg border border-gray-300 overflow-hidden">
@@ -74,7 +76,9 @@ function MembershipStepIndicator({ step }: { step: 1 | 2 | 3 }) {
           </div>
         </div>
 
-        {STEP_CONFIG.filter((c) => c.number !== active.number).map((config) => {
+        {STEP_CONFIG.filter((c) => {
+          return c.number !== active.number;
+        }).map((config) => {
           const Icon = config.icon;
 
           return (
@@ -102,12 +106,16 @@ export function AddMemberModal({
   const [isSaving, setIsSaving] = useState(false);
 
   const handleStep1Next = (data: any) => {
-    setFormData((prev) => ({ ...prev, ...data }));
+    setFormData((prev) => {
+      return { ...prev, ...data };
+    });
     setStep(2);
   };
 
   const handleStep2Next = (data: any) => {
-    setFormData((prev) => ({ ...prev, ...data }));
+    setFormData((prev) => {
+      return { ...prev, ...data };
+    });
     setStep(3);
   };
 
@@ -168,7 +176,9 @@ export function AddMemberModal({
   };
 
   const handleStep3Next = (data: any) => {
-    setFormData((prev) => ({ ...prev, ...data }));
+    setFormData((prev) => {
+      return { ...prev, ...data };
+    });
     setStep(4);
   };
 
@@ -197,7 +207,9 @@ export function AddMemberModal({
   };
   const handleBack = () => {
     if (step > 1) {
-      setStep((prev) => (prev - 1) as 1 | 2 | 3 | 4);
+      setStep((prev) => {
+        return (prev - 1) as 1 | 2 | 3 | 4;
+      });
     }
   };
 

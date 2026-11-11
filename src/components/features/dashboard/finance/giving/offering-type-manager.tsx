@@ -42,23 +42,24 @@ export function OfferingTypeManager() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingName, setEditingName] = useState("");
   const [deletingId, setDeletingId] = useState<string | null>(null);
-  const [pendingDelete, setPendingDelete] = useState<OfferingType | null>(
-    null,
-  );
+  const [pendingDelete, setPendingDelete] = useState<OfferingType | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
 
   const totalPages = Math.max(1, Math.ceil(types.length / PAGE_SIZE));
-  const pagedTypes = useMemo(
-    () => types.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE),
-    [types, currentPage],
-  );
+  const pagedTypes = useMemo(() => {
+    return types.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+  }, [types, currentPage]);
 
   const load = async () => {
     setIsLoading(true);
     setError(null);
     try {
       const data = await fetchOfferingTypes();
-      setTypes([...data].sort((a, b) => a.sortOrder - b.sortOrder));
+      setTypes(
+        [...data].sort((a, b) => {
+          return a.sortOrder - b.sortOrder;
+        }),
+      );
     } catch (err: any) {
       setError(err.message || "Failed to load offering types");
     } finally {
@@ -73,15 +74,22 @@ export function OfferingTypeManager() {
 
   // Keep the current page in range as the list grows/shrinks.
   useEffect(() => {
-    if (currentPage > totalPages) setCurrentPage(totalPages);
+    if (currentPage > totalPages) {
+      setCurrentPage(totalPages);
+    }
   }, [currentPage, totalPages]);
 
   const handleAdd = async () => {
-    if (!newName.trim()) return;
+    if (!newName.trim()) {
+      return;
+    }
     setIsSaving(true);
     setError(null);
     try {
-      await createOfferingType({ name: newName.trim(), sortOrder: types.length });
+      await createOfferingType({
+        name: newName.trim(),
+        sortOrder: types.length,
+      });
       setNewName("");
       await load();
       setCurrentPage(Math.max(1, Math.ceil((types.length + 1) / PAGE_SIZE)));
@@ -118,7 +126,9 @@ export function OfferingTypeManager() {
   };
 
   const handleConfirmDelete = async () => {
-    if (!pendingDelete) return;
+    if (!pendingDelete) {
+      return;
+    }
     const type = pendingDelete;
     setDeletingId(type.id);
     setError(null);
@@ -140,7 +150,9 @@ export function OfferingTypeManager() {
   };
 
   const handleSaveEdit = async (type: OfferingType) => {
-    if (!editingName.trim()) return;
+    if (!editingName.trim()) {
+      return;
+    }
     setError(null);
     try {
       await updateOfferingType(type.id, { name: editingName.trim() });
@@ -153,7 +165,9 @@ export function OfferingTypeManager() {
 
   const handleReorder = async (absoluteIndex: number, direction: -1 | 1) => {
     const targetIndex = absoluteIndex + direction;
-    if (targetIndex < 0 || targetIndex >= types.length) return;
+    if (targetIndex < 0 || targetIndex >= types.length) {
+      return;
+    }
 
     const reordered = [...types];
     const [moved] = reordered.splice(absoluteIndex, 1);
@@ -163,11 +177,11 @@ export function OfferingTypeManager() {
 
     try {
       await Promise.all(
-        reordered.map((type, i) =>
-          type.sortOrder === i
+        reordered.map((type, i) => {
+          return type.sortOrder === i
             ? Promise.resolve()
-            : updateOfferingType(type.id, { sortOrder: i }),
-        ),
+            : updateOfferingType(type.id, { sortOrder: i });
+        }),
       );
       await load();
     } catch (err: any) {
@@ -196,8 +210,12 @@ export function OfferingTypeManager() {
         <Input
           placeholder="New offering type name"
           value={newName}
-          onChange={(e) => setNewName(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && handleAdd()}
+          onChange={(e) => {
+            return setNewName(e.target.value);
+          }}
+          onKeyDown={(e) => {
+            return e.key === "Enter" && handleAdd();
+          }}
           disabled={isSaving}
         />
         <Button onClick={handleAdd} disabled={isSaving || !newName.trim()}>
@@ -225,7 +243,9 @@ export function OfferingTypeManager() {
                       <div className="flex flex-1 items-center gap-1">
                         <Input
                           value={editingName}
-                          onChange={(e) => setEditingName(e.target.value)}
+                          onChange={(e) => {
+                            return setEditingName(e.target.value);
+                          }}
                           className="h-8"
                           autoFocus
                         />
@@ -233,7 +253,9 @@ export function OfferingTypeManager() {
                           size="icon"
                           variant="ghost"
                           className="h-8 w-8 shrink-0"
-                          onClick={() => handleSaveEdit(type)}
+                          onClick={() => {
+                            return handleSaveEdit(type);
+                          }}
                         >
                           <Check className="w-4 h-4 text-green-600" />
                         </Button>
@@ -241,7 +263,9 @@ export function OfferingTypeManager() {
                           size="icon"
                           variant="ghost"
                           className="h-8 w-8 shrink-0"
-                          onClick={() => setEditingId(null)}
+                          onClick={() => {
+                            return setEditingId(null);
+                          }}
                         >
                           <X className="w-4 h-4" />
                         </Button>
@@ -279,7 +303,9 @@ export function OfferingTypeManager() {
                       <div className="flex flex-col shrink-0">
                         <button
                           type="button"
-                          onClick={() => handleReorder(absoluteIndex, -1)}
+                          onClick={() => {
+                            return handleReorder(absoluteIndex, -1);
+                          }}
                           disabled={absoluteIndex === 0}
                           className="disabled:opacity-30 text-gray-500 hover:text-gray-900"
                         >
@@ -287,7 +313,9 @@ export function OfferingTypeManager() {
                         </button>
                         <button
                           type="button"
-                          onClick={() => handleReorder(absoluteIndex, 1)}
+                          onClick={() => {
+                            return handleReorder(absoluteIndex, 1);
+                          }}
                           disabled={absoluteIndex === types.length - 1}
                           className="disabled:opacity-30 text-gray-500 hover:text-gray-900"
                         >
@@ -301,9 +329,13 @@ export function OfferingTypeManager() {
                     <div className="flex items-center gap-1.5 pt-1">
                       <button
                         type="button"
-                        onClick={() => handleSetDefault(type)}
+                        onClick={() => {
+                          return handleSetDefault(type);
+                        }}
                         title={
-                          type.isDefault ? "Default offering type" : "Set as default"
+                          type.isDefault
+                            ? "Default offering type"
+                            : "Set as default"
                         }
                       >
                         <Star
@@ -318,7 +350,9 @@ export function OfferingTypeManager() {
                         size="sm"
                         variant={type.isActive ? "outline" : "secondary"}
                         className="h-7 px-2 text-xs"
-                        onClick={() => handleToggleActive(type)}
+                        onClick={() => {
+                          return handleToggleActive(type);
+                        }}
                       >
                         {type.isActive ? "Deactivate" : "Activate"}
                       </Button>
@@ -326,7 +360,9 @@ export function OfferingTypeManager() {
                         size="icon"
                         variant="ghost"
                         className="h-7 w-7"
-                        onClick={() => handleStartEdit(type)}
+                        onClick={() => {
+                          return handleStartEdit(type);
+                        }}
                       >
                         <Pencil className="w-3.5 h-3.5" />
                       </Button>
@@ -335,7 +371,9 @@ export function OfferingTypeManager() {
                         variant="ghost"
                         className="h-7 w-7 text-red-500 hover:text-red-600 ml-auto"
                         disabled={deletingId === type.id}
-                        onClick={() => setPendingDelete(type)}
+                        onClick={() => {
+                          return setPendingDelete(type);
+                        }}
                       >
                         <Trash2 className="w-3.5 h-3.5" />
                       </Button>
@@ -358,7 +396,11 @@ export function OfferingTypeManager() {
                 size="sm"
                 variant="outline"
                 disabled={currentPage === 1}
-                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                onClick={() => {
+                  return setCurrentPage((p) => {
+                    return Math.max(1, p - 1);
+                  });
+                }}
               >
                 <ChevronLeft className="h-4 w-4" />
                 Previous
@@ -370,7 +412,11 @@ export function OfferingTypeManager() {
                 size="sm"
                 variant="outline"
                 disabled={currentPage === totalPages}
-                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                onClick={() => {
+                  return setCurrentPage((p) => {
+                    return Math.min(totalPages, p + 1);
+                  });
+                }}
               >
                 Next
                 <ChevronRight className="h-4 w-4" />
@@ -382,7 +428,9 @@ export function OfferingTypeManager() {
 
       <ConfirmDialog
         open={!!pendingDelete}
-        onOpenChange={(open) => !open && setPendingDelete(null)}
+        onOpenChange={(open) => {
+          return !open && setPendingDelete(null);
+        }}
         title={`Delete "${pendingDelete?.name}"?`}
         description="This permanently removes the offering type. If it's used by existing giving records, deletion will be blocked - deactivate it instead. This action cannot be undone."
         confirmLabel="Delete"

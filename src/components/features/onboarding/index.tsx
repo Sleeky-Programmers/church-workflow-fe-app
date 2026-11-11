@@ -7,12 +7,11 @@ import { useForm } from "react-hook-form";
 import { Card } from "@/components/ui/card";
 import { RouteConfig } from "@/config/routes";
 import { useToast } from "@/hooks/use-toast";
-import { createChurch, createWeeklyService, uploadMembersCsv } from "@/lib/api";
+import { createChurch, createWeeklyService } from "@/lib/api";
 import {
   getAccessToken,
   getCurrentUserKey,
   markChurchIdentityComplete,
-  markMembersUploaded,
   markWeeklyServicesComplete,
 } from "@/lib/auth/session";
 import { convertTo12Hour } from "@/lib/utils";
@@ -68,11 +67,15 @@ export default function ChurchOnboarding() {
       return;
     }
 
-    if (typeof window === "undefined") return;
+    if (typeof window === "undefined") {
+      return;
+    }
 
     const savedDraft = window.localStorage.getItem(identityDraftKey);
 
-    if (!savedDraft) return;
+    if (!savedDraft) {
+      return;
+    }
 
     try {
       const parsed = JSON.parse(savedDraft) as Partial<ChurchIdentityValues>;
@@ -246,14 +249,18 @@ export default function ChurchOnboarding() {
     }
   };
 
-  const handleBack = () => step > 1 && setStep(step - 1);
+  const handleBack = () => {
+    return step > 1 && setStep(step - 1);
+  };
   const handleSkip = () => {
     persistWeeklyServices();
     router.push(RouteConfig.dashboard.home);
   };
 
   const addService = (service: WeeklyServicesValues[number]) => {
-    setServices((prev) => [...prev, service]);
+    setServices((prev) => {
+      return [...prev, service];
+    });
   };
 
   const updateService = (
@@ -267,7 +274,11 @@ export default function ChurchOnboarding() {
   };
 
   const removeService = (index: number) => {
-    setServices(services.filter((_, i) => i !== index));
+    setServices(
+      services.filter((_, i) => {
+        return i !== index;
+      }),
+    );
   };
 
   const renderStep = () => {

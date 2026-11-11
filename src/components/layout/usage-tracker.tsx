@@ -14,7 +14,9 @@ export function UsageTracker() {
   const previous = useRef<{ path: string; at: number } | null>(null);
 
   useEffect(() => {
-    if (!pathname?.startsWith("/dashboard")) return;
+    if (!pathname?.startsWith("/dashboard")) {
+      return;
+    }
 
     const now = Date.now();
     const last = previous.current;
@@ -26,10 +28,14 @@ export function UsageTracker() {
 
   useEffect(() => {
     const onHide = () => {
-      if (document.visibilityState === "hidden") flushUsage(true);
+      if (document.visibilityState === "hidden") {
+        flushUsage(true);
+      }
     };
     document.addEventListener("visibilitychange", onHide);
-    return () => document.removeEventListener("visibilitychange", onHide);
+    return () => {
+      return document.removeEventListener("visibilitychange", onHide);
+    };
   }, []);
 
   return null;

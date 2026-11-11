@@ -24,7 +24,7 @@ import { UserDetailsPermissionsView } from "./mini-components/user-permission";
 import { UserActionZone } from "./mini-components/user-action-zone";
 import { RemoveUserDialog } from "./mini-components/remove-user-dialog";
 import Heading from "@/components/ui/typography/Heading";
-import { Span, Text } from "@/components/ui/typography/Text";
+import { Text } from "@/components/ui/typography/Text";
 
 type UserDetailsPageProps = {
   user: User;
@@ -71,9 +71,9 @@ export function UserDetailsPage({
           const fetchedRole = await fetchRoleById(selectedRole);
           setRoleData(fetchedRole);
         } else {
-          const fallbackObj = roles.find(
-            (r: any) => r._id === selectedRole || r.roleName === selectedRole,
-          );
+          const fallbackObj = roles.find((r: any) => {
+            return r._id === selectedRole || r.roleName === selectedRole;
+          });
           setRoleData(fallbackObj || null);
         }
       } catch (error: any) {
@@ -82,16 +82,16 @@ export function UserDetailsPage({
           description: error.message || "Failed to load role data",
           variant: "destructive",
         });
-        const fallbackObj = roles.find(
-          (r: any) => r._id === selectedRole || r.roleName === selectedRole,
-        );
+        const fallbackObj = roles.find((r: any) => {
+          return r._id === selectedRole || r.roleName === selectedRole;
+        });
         setRoleData(fallbackObj || null);
       } finally {
         setIsLoadingRole(false);
       }
     }
     loadRole();
-  }, [selectedRole, roles]);
+  }, [selectedRole, roles, toast]);
 
   let rolePermissions = null;
   if (roleData) {
@@ -101,11 +101,13 @@ export function UserDetailsPage({
         roleData.description ||
         "Permissions are automatically assigned based on role.",
       permissions:
-        roleData.permissions?.map((p: any) => ({
-          module: backendToFrontendModule[p.moduleSection] || p.moduleSection,
-          level: p.accessLevel?.toLowerCase(),
-          description: `Access Level: ${p.accessLevel}`,
-        })) || [],
+        roleData.permissions?.map((p: any) => {
+          return {
+            module: backendToFrontendModule[p.moduleSection] || p.moduleSection,
+            level: p.accessLevel?.toLowerCase(),
+            description: `Access Level: ${p.accessLevel}`,
+          };
+        }) || [],
     };
   } else {
     rolePermissions = ROLE_PERMISSIONS[selectedRole];
@@ -236,16 +238,20 @@ export function UserDetailsPage({
                 </SelectTrigger>
                 <SelectContent>
                   {roles && roles.length > 0
-                    ? roles.map((r: any) => (
-                        <SelectItem key={r._id} value={r._id}>
-                          {r.roleName}
-                        </SelectItem>
-                      ))
-                    : ROLE_OPTIONS.map((role) => (
-                        <SelectItem key={role} value={role}>
-                          {role}
-                        </SelectItem>
-                      ))}
+                    ? roles.map((r: any) => {
+                        return (
+                          <SelectItem key={r._id} value={r._id}>
+                            {r.roleName}
+                          </SelectItem>
+                        );
+                      })
+                    : ROLE_OPTIONS.map((role) => {
+                        return (
+                          <SelectItem key={role} value={role}>
+                            {role}
+                          </SelectItem>
+                        );
+                      })}
                 </SelectContent>
               </Select>
               <Text variant="default">

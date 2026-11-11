@@ -53,13 +53,15 @@ export default function PersonalPreferencePage() {
       }
     }
     loadSettings();
-  }, []);
+  }, [toast]);
 
   const handleToggle = (key: keyof NotificationSettings) => {
-    setNotifications((prev) => ({
-      ...prev,
-      [key]: !prev[key],
-    }));
+    setNotifications((prev) => {
+      return {
+        ...prev,
+        [key]: !prev[key],
+      };
+    });
     setHasChanges(true);
   };
 
@@ -119,7 +121,9 @@ export default function PersonalPreferencePage() {
             <Switch
               id="requisition-approvals"
               checked={notifications.requisitionApprovals}
-              onCheckedChange={() => handleToggle("requisitionApprovals")}
+              onCheckedChange={() => {
+                return handleToggle("requisitionApprovals");
+              }}
             />
           </div>
 
@@ -133,7 +137,9 @@ export default function PersonalPreferencePage() {
             <Switch
               id="events"
               checked={notifications.events}
-              onCheckedChange={() => handleToggle("events")}
+              onCheckedChange={() => {
+                return handleToggle("events");
+              }}
             />
           </div>
 
@@ -147,7 +153,9 @@ export default function PersonalPreferencePage() {
             <Switch
               id="birthdays"
               checked={notifications.birthdays}
-              onCheckedChange={() => handleToggle("birthdays")}
+              onCheckedChange={() => {
+                return handleToggle("birthdays");
+              }}
             />
           </div>
         </div>

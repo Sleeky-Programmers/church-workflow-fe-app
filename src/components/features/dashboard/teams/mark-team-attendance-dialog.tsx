@@ -80,17 +80,22 @@ export default function MarkTeamAttendanceDialog({
   const [isEditMode, setIsEditMode] = useState(true);
 
   const [serviceId, setServiceId] = useState("");
-  const [date, setDate] = useState(
-    () => new Date().toISOString().split("T")[0],
-  );
+  const [date, setDate] = useState(() => {
+    return new Date().toISOString().split("T")[0];
+  });
 
-  const selectedService = useMemo(
-    () => services.find((service) => service.id === serviceId) || null,
-    [serviceId, services],
-  );
+  const selectedService = useMemo(() => {
+    return (
+      services.find((service) => {
+        return service.id === serviceId;
+      }) || null
+    );
+  }, [serviceId, services]);
 
   useEffect(() => {
-    if (!open) return;
+    if (!open) {
+      return;
+    }
     reset();
     setIsMembersDialogOpen(false);
     setMembersViewMode("select");
@@ -101,17 +106,23 @@ export default function MarkTeamAttendanceDialog({
   }, [open, reset]);
 
   const ensureMembersLoaded = async () => {
-    if (hasMembersLoaded) return;
+    if (hasMembersLoaded) {
+      return;
+    }
     setLoading(true);
     try {
       const filtered = members
-        .filter((member) => teamMemberIds.includes(member.id))
-        .map((member) => ({
-          id: member.id,
-          name: member.fullName,
-          email: member.email,
-          initials: member.initials,
-        }));
+        .filter((member) => {
+          return teamMemberIds.includes(member.id);
+        })
+        .map((member) => {
+          return {
+            id: member.id,
+            name: member.fullName,
+            email: member.email,
+            initials: member.initials,
+          };
+        });
       setMembers(filtered);
       setHasMembersLoaded(true);
     } finally {
@@ -142,13 +153,15 @@ export default function MarkTeamAttendanceDialog({
   };
 
   const handleAbsentSelection = (memberId: string, selected: boolean) => {
-    setAbsentSelections((prev) =>
-      selected
+    setAbsentSelections((prev) => {
+      return selected
         ? prev.includes(memberId)
           ? prev
           : [...prev, memberId]
-        : prev.filter((id) => id !== memberId),
-    );
+        : prev.filter((id) => {
+            return id !== memberId;
+          });
+    });
   };
 
   const handleMarkPresent = () => {
@@ -232,7 +245,9 @@ export default function MarkTeamAttendanceDialog({
               <Input
                 type="date"
                 value={date}
-                onChange={(e) => setDate(e.target.value)}
+                onChange={(e) => {
+                  return setDate(e.target.value);
+                }}
                 className="h-10"
               />
             </div>
@@ -243,16 +258,18 @@ export default function MarkTeamAttendanceDialog({
                   <SelectValue placeholder="Select or search" />
                 </SelectTrigger>
                 <SelectContent>
-                  {services.map((service) => (
-                    <SelectItem key={service.id} value={service.id}>
-                      <div className="flex flex-col">
-                        <Span>{getServiceLabel(service)}</Span>
-                        <Span className="text-xs text-muted-foreground">
-                          Regular Service
-                        </Span>
-                      </div>
-                    </SelectItem>
-                  ))}
+                  {services.map((service) => {
+                    return (
+                      <SelectItem key={service.id} value={service.id}>
+                        <div className="flex flex-col">
+                          <Span>{getServiceLabel(service)}</Span>
+                          <Span className="text-xs text-muted-foreground">
+                            Regular Service
+                          </Span>
+                        </div>
+                      </SelectItem>
+                    );
+                  })}
                 </SelectContent>
               </Select>
             </div>
@@ -402,7 +419,12 @@ export default function MarkTeamAttendanceDialog({
             {isSaving ? "Saving..." : "Save"}
           </Button>
         ) : (
-          <Button onClick={() => setIsEditMode(true)} className="w-full">
+          <Button
+            onClick={() => {
+              return setIsEditMode(true);
+            }}
+            className="w-full"
+          >
             Edit
           </Button>
         )}
@@ -465,7 +487,9 @@ export default function MarkTeamAttendanceDialog({
         }
         onAction={
           !isEditMode
-            ? () => setIsMembersDialogOpen(false)
+            ? () => {
+                return setIsMembersDialogOpen(false);
+              }
             : membersViewMode === "present"
               ? handleUpdatePresentRecord
               : membersViewMode === "absent"
@@ -500,7 +524,9 @@ export default function MarkTeamAttendanceDialog({
         <Dialog
           open={isMembersOpen}
           onOpenChange={(nextOpen) => {
-            if (!nextOpen) setIsMembersDialogOpen(false);
+            if (!nextOpen) {
+              setIsMembersDialogOpen(false);
+            }
           }}
         >
           <DialogContent

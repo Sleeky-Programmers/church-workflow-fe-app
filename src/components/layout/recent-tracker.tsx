@@ -6,20 +6,28 @@ import { useRecentStore } from "@/stores/useRecentStore";
 
 export function RecentTracker() {
   const pathname = usePathname();
-  const addRecent = useRecentStore((s) => s.addRecent);
+  const addRecent = useRecentStore((s) => {
+    return s.addRecent;
+  });
 
   useEffect(() => {
-    if (!pathname?.startsWith("/dashboard")) return;
+    if (!pathname?.startsWith("/dashboard")) {
+      return;
+    }
 
-    if (pathname === "/dashboard") return;
+    if (pathname === "/dashboard") {
+      return;
+    }
 
     const slug = pathname.replace("/dashboard/", "").split("/")[0];
 
-    if (!slug) return;
+    if (!slug) {
+      return;
+    }
 
-    const label = slug
-      .replace(/[-_]+/g, " ")
-      .replace(/\b\w/g, (l) => l.toUpperCase());
+    const label = slug.replace(/[-_]+/g, " ").replace(/\b\w/g, (l) => {
+      return l.toUpperCase();
+    });
 
     addRecent({
       path: pathname,

@@ -89,7 +89,9 @@ export function ScheduleDeletionDialog({
           <div className="flex gap-3 justify-end">
             <Button
               variant="outline"
-              onClick={() => onOpenChange(false)}
+              onClick={() => {
+                return onOpenChange(false);
+              }}
               disabled={isLoading}
             >
               Cancel

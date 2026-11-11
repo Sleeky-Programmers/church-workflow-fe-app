@@ -16,6 +16,7 @@ import Heading from "@/components/ui/typography/Heading";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { verifyCodeSchema, VerifyCodeFormValues } from "@/types/schema";
+import { useLatest } from "@/hooks/use-latest";
 
 interface Props {
   email: string;
@@ -38,22 +39,30 @@ export default function VerifyOtpForm({ email, onVerify, onResend }: Props) {
   const { toast } = useToast();
 
   useEffect(() => {
-    if (verifyCodeSchema.safeParse({ code: otp }).success) handleVerify(otp);
-  }, [otp]);
-
-  useEffect(() => {
-    if (otp.length > 0 && error) setError(false);
+    if (otp.length > 0 && error) {
+      setError(false);
+    }
   }, [otp, error]);
 
   useEffect(() => {
-    if (resendTimer <= 0) return;
-    const timer = setTimeout(() => setResendTimer((t) => t - 1), 1000);
-    return () => clearTimeout(timer);
+    if (resendTimer <= 0) {
+      return;
+    }
+    const timer = setTimeout(() => {
+      return setResendTimer((t) => {
+        return t - 1;
+      });
+    }, 1000);
+    return () => {
+      return clearTimeout(timer);
+    };
   }, [resendTimer]);
 
   const handleVerify = useCallback(
     async (code: string) => {
-      if (isVerifying) return;
+      if (isVerifying) {
+        return;
+      }
       setIsVerifying(true);
       setError(false);
 
@@ -68,6 +77,14 @@ export default function VerifyOtpForm({ email, onVerify, onResend }: Props) {
     [isVerifying, onVerify],
   );
 
+  const handleVerifyRef = useLatest(handleVerify);
+
+  useEffect(() => {
+    if (verifyCodeSchema.safeParse({ code: otp }).success) {
+      handleVerifyRef.current(otp);
+    }
+  }, [otp, handleVerifyRef]);
+
   const handleResend = async () => {
     setIsResending(true);
     setError(false);
@@ -78,7 +95,9 @@ export default function VerifyOtpForm({ email, onVerify, onResend }: Props) {
       await onResend();
       setResendSuccess(true);
       setResendTimer(60);
-      setTimeout(() => setResendSuccess(false), 4000);
+      setTimeout(() => {
+        return setResendSuccess(false);
+      }, 4000);
     } catch (error: any) {
       toast({
         title: "Error",
@@ -110,7 +129,9 @@ export default function VerifyOtpForm({ email, onVerify, onResend }: Props) {
         <InputOTP
           maxLength={6}
           value={otp}
-          onChange={(value) => form.setValue("code", value)}
+          onChange={(value) => {
+            return form.setValue("code", value);
+          }}
           autoFocus
           disabled={isVerifying}
           containerClassName="justify-center min-w-max mx-auto"
@@ -162,7 +183,9 @@ export default function VerifyOtpForm({ email, onVerify, onResend }: Props) {
       <Button
         className="w-full mt-4"
         disabled={otp.length !== 6 || isVerifying}
-        onClick={() => handleVerify(otp)}
+        onClick={() => {
+          return handleVerify(otp);
+        }}
       >
         {isVerifying ? (
           <Span className="flex items-center gap-2">

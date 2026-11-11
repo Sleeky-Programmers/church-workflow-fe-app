@@ -1,4 +1,4 @@
-import { ModulePermission, Role } from "@/types";
+import { ModulePermission } from "@/types";
 
 export const frontendToBackendModule: Record<string, string> = {
   "Members Module": "MEMBERS",
@@ -13,15 +13,17 @@ export const frontendToBackendModule: Record<string, string> = {
 
 export const backendToFrontendModule: Record<string, string> =
   Object.fromEntries(
-    Object.entries(frontendToBackendModule).map(([k, v]) => [v, k]),
+    Object.entries(frontendToBackendModule).map(([k, v]) => {
+      return [v, k];
+    }),
   );
 
 // Modules hidden from the role create/edit permission table, but still part
-// of MODULE_PERMISSIONS below so their state stays seeded and gets
-// resubmitted unchanged on save - never silently reset to "no_access"
-// just because there's no UI control for them.
+// Of MODULE_PERMISSIONS below so their state stays seeded and gets
+// Resubmitted unchanged on save - never silently reset to "no_access"
+// Just because there's no UI control for them.
 // Requests was hidden here while the module was a "Coming Soon" stub - now
-// that it's a real feature (Phase 3), it's configurable again.
+// That it's a real feature (Phase 3), it's configurable again.
 const HIDDEN_MODULES = new Set<string>([]);
 
 export const MODULE_PERMISSIONS: ModulePermission[] = [
@@ -236,6 +238,8 @@ export const MODULE_PERMISSIONS: ModulePermission[] = [
 ];
 
 // The subset of MODULE_PERMISSIONS actually rendered as editable rows in
-// the role create/edit form.
+// The role create/edit form.
 export const VISIBLE_MODULE_PERMISSIONS: ModulePermission[] =
-  MODULE_PERMISSIONS.filter((module) => !HIDDEN_MODULES.has(module.module));
+  MODULE_PERMISSIONS.filter((module) => {
+    return !HIDDEN_MODULES.has(module.module);
+  });

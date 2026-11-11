@@ -57,7 +57,9 @@ export default function UserProfilePage() {
         <Button
           variant="outline"
           size="sm"
-          onClick={() => fetchUserData(true)}
+          onClick={() => {
+            return fetchUserData(true);
+          }}
           className="gap-2"
         >
           Refresh
@@ -110,7 +112,9 @@ export default function UserProfilePage() {
               variant="outline"
               className="flex items-center gap-2 h-8 sm:h-9"
               size="sm"
-              onClick={() => setOpenPersonalModal(true)}
+              onClick={() => {
+                return setOpenPersonalModal(true);
+              }}
             >
               <Edit className="h-4 w-4" />
               <Span className="hidden sm:inline">Edit</Span>
@@ -158,7 +162,9 @@ export default function UserProfilePage() {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => setOpenPasswordModal(true)}
+              onClick={() => {
+                return setOpenPasswordModal(true);
+              }}
               className="gap-2"
             >
               <LockOpenIcon className="h-4 w-4" />
@@ -204,7 +210,9 @@ export default function UserProfilePage() {
             <Button
               variant="outline"
               className="flex items-center gap-2 h-8 sm:h-9"
-              onClick={() => setOpenChurchModal(true)}
+              onClick={() => {
+                return setOpenChurchModal(true);
+              }}
               size="sm"
             >
               <Edit className="h-4 w-4" />

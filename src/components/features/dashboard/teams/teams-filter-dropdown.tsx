@@ -61,17 +61,21 @@ export const TeamsFilterDropdown = ({
               TeamStatus.ACTIVE,
               TeamStatus.INACTIVE,
             ] as TeamStatusFilter[]
-          ).map((status) => (
-            <Button
-              key={status}
-              size="sm"
-              variant={statusFilter === status ? "default" : "outline"}
-              onClick={() => setStatusFilter(status)}
-              className="h-7 capitalize flex-1"
-            >
-              {status === "all" ? "All" : status.toLowerCase()}
-            </Button>
-          ))}
+          ).map((status) => {
+            return (
+              <Button
+                key={status}
+                size="sm"
+                variant={statusFilter === status ? "default" : "outline"}
+                onClick={() => {
+                  return setStatusFilter(status);
+                }}
+                className="h-7 capitalize flex-1"
+              >
+                {status === "all" ? "All" : status.toLowerCase()}
+              </Button>
+            );
+          })}
         </div>
       </div>
 
@@ -84,11 +88,13 @@ export const TeamsFilterDropdown = ({
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All members</SelectItem>
-            {members.map((member) => (
-              <SelectItem key={member.id} value={member.id}>
-                {member.fullName}
-              </SelectItem>
-            ))}
+            {members.map((member) => {
+              return (
+                <SelectItem key={member.id} value={member.id}>
+                  {member.fullName}
+                </SelectItem>
+              );
+            })}
           </SelectContent>
         </Select>
       </div>
@@ -97,17 +103,21 @@ export const TeamsFilterDropdown = ({
       <div className="space-y-2">
         <Text className="font-medium">Minimum Team Size</Text>
         <div className="flex items-center gap-2">
-          {[0, 2, 3, 5, 10].map((size) => (
-            <Button
-              key={size}
-              size="sm"
-              variant={minMembers === size ? "default" : "outline"}
-              onClick={() => setMinMembers(size)}
-              className="h-7 flex-1"
-            >
-              {size === 0 ? "Any" : `${size}+`}
-            </Button>
-          ))}
+          {[0, 2, 3, 5, 10].map((size) => {
+            return (
+              <Button
+                key={size}
+                size="sm"
+                variant={minMembers === size ? "default" : "outline"}
+                onClick={() => {
+                  return setMinMembers(size);
+                }}
+                className="h-7 flex-1"
+              >
+                {size === 0 ? "Any" : `${size}+`}
+              </Button>
+            );
+          })}
         </div>
       </div>
     </>

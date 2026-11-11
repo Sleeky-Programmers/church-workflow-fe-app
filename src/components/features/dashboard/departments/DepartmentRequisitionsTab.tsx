@@ -116,7 +116,9 @@ function NewRequestDialog({
             <Input
               placeholder="What is this request for?"
               value={title}
-              onChange={(e) => setTitle(e.target.value)}
+              onChange={(e) => {
+                return setTitle(e.target.value);
+              }}
               disabled={isSaving}
             />
           </div>
@@ -126,7 +128,9 @@ function NewRequestDialog({
             <Textarea
               rows={3}
               value={description}
-              onChange={(e) => setDescription(e.target.value)}
+              onChange={(e) => {
+                return setDescription(e.target.value);
+              }}
               disabled={isSaving}
             />
           </div>
@@ -138,7 +142,9 @@ function NewRequestDialog({
               min={0}
               placeholder="0.00"
               value={amount}
-              onChange={(e) => setAmount(e.target.value)}
+              onChange={(e) => {
+                return setAmount(e.target.value);
+              }}
               disabled={isSaving}
             />
           </div>
@@ -216,32 +222,38 @@ export function DepartmentRequisitionsTab({
         </div>
       ) : (
         <div className="divide-y border rounded-xl overflow-hidden bg-white">
-          {requisitions.map((req) => (
-            <div key={req.id} className="p-4 space-y-1">
-              <div className="flex items-center justify-between gap-3">
-                <Text className="font-semibold">{req.title}</Text>
-                <Badge variant="outline" className={STATUS_STYLES[req.status]}>
-                  {req.status}
-                </Badge>
+          {requisitions.map((req) => {
+            return (
+              <div key={req.id} className="p-4 space-y-1">
+                <div className="flex items-center justify-between gap-3">
+                  <Text className="font-semibold">{req.title}</Text>
+                  <Badge
+                    variant="outline"
+                    className={STATUS_STYLES[req.status]}
+                  >
+                    {req.status}
+                  </Badge>
+                </div>
+                {req.description && (
+                  <Text variant="muted" className="text-sm">
+                    {req.description}
+                  </Text>
+                )}
+                <div className="flex items-center justify-between text-sm text-gray-500">
+                  <span>{format(new Date(req.createdAt), "MMM d, yyyy")}</span>
+                  <span className="font-medium text-gray-900">
+                    {formatCurrency(req.amount, req.currency)}
+                  </span>
+                </div>
+                {req.status === RequisitionStatus.REJECTED &&
+                  req.reviewNote && (
+                    <Text className="text-sm text-red-600">
+                      Reason: {req.reviewNote}
+                    </Text>
+                  )}
               </div>
-              {req.description && (
-                <Text variant="muted" className="text-sm">
-                  {req.description}
-                </Text>
-              )}
-              <div className="flex items-center justify-between text-sm text-gray-500">
-                <span>{format(new Date(req.createdAt), "MMM d, yyyy")}</span>
-                <span className="font-medium text-gray-900">
-                  {formatCurrency(req.amount, req.currency)}
-                </span>
-              </div>
-              {req.status === RequisitionStatus.REJECTED && req.reviewNote && (
-                <Text className="text-sm text-red-600">
-                  Reason: {req.reviewNote}
-                </Text>
-              )}
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>

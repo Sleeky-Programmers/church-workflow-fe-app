@@ -10,7 +10,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
-import { Span, Text } from "@/components/ui/typography/Text";
+import { Text } from "@/components/ui/typography/Text";
 import { cn } from "@/lib/utils";
 
 export interface FilterOption<T = string> {
@@ -62,16 +62,19 @@ export const ReusableFilterDropdown = ({
   const [open, setOpen] = useState(false);
 
   const toggleSection = (sectionId: string) => {
-    setOpenSection((prev) => (prev === sectionId ? "" : sectionId));
+    setOpenSection((prev) => {
+      return prev === sectionId ? "" : sectionId;
+    });
   };
 
-  const pillClass = (active: boolean) =>
-    cn(
+  const pillClass = (active: boolean) => {
+    return cn(
       "flex-1 text-xs px-2.5 py-1.5 rounded-md border transition",
       active
         ? "bg-blue-50 border-blue-600 text-gray-700"
         : "bg-white border-gray-300 text-gray-700 hover:bg-gray-100",
     );
+  };
 
   const handleClose = () => {
     setOpen(false);
@@ -128,61 +131,69 @@ export const ReusableFilterDropdown = ({
             <Input
               placeholder={searchPlaceholder}
               value={searchQuery || ""}
-              onChange={(e) => onSearchChange(e.target.value)}
+              onChange={(e) => {
+                return onSearchChange(e.target.value);
+              }}
               className="pl-8 h-8 text-xs"
             />
           </div>
         )}
 
-        {filterSections.map((section, index) => (
-          <div
-            key={section.id}
-            className={index > 0 ? "py-2 border-t" : "mb-2 border-t"}
-          >
-            <Button
-              variant="filterHeader"
-              onClick={() => toggleSection(section.id)}
-              className="w-full flex justify-between items-center"
+        {filterSections.map((section, index) => {
+          return (
+            <div
+              key={section.id}
+              className={index > 0 ? "py-2 border-t" : "mb-2 border-t"}
             >
-              {section.title}
-              {openSection === section.id ? (
-                <ChevronUp className="h-5 w-5 text-gray-500" />
-              ) : (
-                <ChevronDown className="h-5 w-5 text-gray-500" />
-              )}
-            </Button>
-
-            {openSection === section.id && (
-              <div
-                className={cn(
-                  "flex gap-1.5 mt-2",
-                  section.columns === 2 && "grid grid-cols-2",
-                  section.columns === 3 && "grid grid-cols-3",
-                  !section.columns && "flex",
-                )}
+              <Button
+                variant="filterHeader"
+                onClick={() => {
+                  return toggleSection(section.id);
+                }}
+                className="w-full flex justify-between items-center"
               >
-                {section.options.map((option) => (
-                  <Button
-                    variant="filter"
-                    key={String(option.value)}
-                    onClick={() =>
-                      section.onChange(
-                        section.selectedValue === option.value
-                          ? null
-                          : option.value,
-                      )
-                    }
-                    className={pillClass(
-                      section.selectedValue === option.value,
-                    )}
-                  >
-                    {option.label}
-                  </Button>
-                ))}
-              </div>
-            )}
-          </div>
-        ))}
+                {section.title}
+                {openSection === section.id ? (
+                  <ChevronUp className="h-5 w-5 text-gray-500" />
+                ) : (
+                  <ChevronDown className="h-5 w-5 text-gray-500" />
+                )}
+              </Button>
+
+              {openSection === section.id && (
+                <div
+                  className={cn(
+                    "flex gap-1.5 mt-2",
+                    section.columns === 2 && "grid grid-cols-2",
+                    section.columns === 3 && "grid grid-cols-3",
+                    !section.columns && "flex",
+                  )}
+                >
+                  {section.options.map((option) => {
+                    return (
+                      <Button
+                        variant="filter"
+                        key={String(option.value)}
+                        onClick={() => {
+                          return section.onChange(
+                            section.selectedValue === option.value
+                              ? null
+                              : option.value,
+                          );
+                        }}
+                        className={pillClass(
+                          section.selectedValue === option.value,
+                        )}
+                      >
+                        {option.label}
+                      </Button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          );
+        })}
 
         {additionalSections && (
           <div className="py-2 border-t space-y-3">{additionalSections}</div>

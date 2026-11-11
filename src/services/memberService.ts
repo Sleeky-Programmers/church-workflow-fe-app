@@ -54,6 +54,20 @@ function normalizeMemberPayload(data: Partial<NewMemberData>) {
   };
 }
 
+export type MemberBirthday = {
+  _id: string;
+  fullName: string;
+  birthday: string;
+};
+
+/** Name + birthday for every member that has one set (single light query). */
+export async function fetchMemberBirthdays(): Promise<MemberBirthday[]> {
+  const res = await authenticatedFetch<MemberBirthday[]>("/members/birthdays", {
+    method: "GET",
+  });
+  return Array.isArray(res) ? res : [];
+}
+
 export async function fetchMembers(
   page = 1,
   limit = 10,
@@ -78,13 +92,18 @@ export async function fetchMembers(
     params.append("filter", filter);
   }
   // Independent facet filters (AND-ed server-side)
-  if (facets?.gender) params.append("gender", facets.gender);
-  if (facets?.maritalStatus)
+  if (facets?.gender) {
+    params.append("gender", facets.gender);
+  }
+  if (facets?.maritalStatus) {
     params.append("maritalStatus", facets.maritalStatus);
-  if (facets?.membershipStatus)
+  }
+  if (facets?.membershipStatus) {
     params.append("membershipStatus", facets.membershipStatus);
-  if (facets?.excludeStatus)
+  }
+  if (facets?.excludeStatus) {
     params.append("excludeStatus", facets.excludeStatus);
+  }
 
   const response = await authenticatedFetch<FetchMembersResponse>(
     `/members?${params}`,
@@ -234,9 +253,17 @@ export async function fetchArchivedGuests(
   page = 1,
   limit = 10,
   search?: string,
-): Promise<{ data: ArchivedGuest[]; pagination: FetchMembersResponse["pagination"] }> {
-  const params = new URLSearchParams({ page: String(page), limit: String(limit) });
-  if (search) params.append("search", search);
+): Promise<{
+  data: ArchivedGuest[];
+  pagination: FetchMembersResponse["pagination"];
+}> {
+  const params = new URLSearchParams({
+    page: String(page),
+    limit: String(limit),
+  });
+  if (search) {
+    params.append("search", search);
+  }
   return authenticatedFetch(`/members/archived?${params}`, { method: "GET" });
 }
 
@@ -291,7 +318,9 @@ export async function getResourcePlanLimitStatus(
 }
 
 /** Stable reference for <LimitBanner fetchStatus> (an inline arrow would refetch every render). */
-export const getGuestPlanLimitStatus = () => getResourcePlanLimitStatus("guest");
+export const getGuestPlanLimitStatus = () => {
+  return getResourcePlanLimitStatus("guest");
+};
 
 export async function getMemberPlanLimitStatus(): Promise<PlanLimitStatus> {
   const status = await getMemberLimitStatus();

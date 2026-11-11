@@ -65,7 +65,9 @@ export function RemoveUserDialog({
               <Input
                 id="confirm-input"
                 value={confirmText}
-                onChange={(e) => setConfirmText(e.target.value)}
+                onChange={(e) => {
+                  return setConfirmText(e.target.value);
+                }}
                 placeholder="remove user"
               />
             </div>

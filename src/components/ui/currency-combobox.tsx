@@ -16,7 +16,10 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { CURRENCY_CATALOG, CURRENCY_CATALOG_BY_CODE } from "@/lib/currency-catalog";
+import {
+  CURRENCY_CATALOG,
+  CURRENCY_CATALOG_BY_CODE,
+} from "@/lib/currency-catalog";
 
 interface CurrencyComboboxProps {
   value?: string;
@@ -32,7 +35,7 @@ function normalizeQuery(value: string): string {
 
 // Searchable currency picker over the full bundled ISO 4217 catalog
 // (@/lib/currency-catalog) - mirrors the Command/Popover pattern already
-// used by TitleCombobox. Selecting an entry here is the only input the
+// Used by TitleCombobox. Selecting an entry here is the only input the
 // "Add currency" form needs; symbol and name are derived from the code.
 export function CurrencyCombobox({
   value,
@@ -44,21 +47,27 @@ export function CurrencyCombobox({
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
 
-  const excluded = useMemo(() => new Set(excludeCodes), [excludeCodes]);
+  const excluded = useMemo(() => {
+    return new Set(excludeCodes);
+  }, [excludeCodes]);
 
-  const options = useMemo(
-    () => CURRENCY_CATALOG.filter((entry) => !excluded.has(entry.code)),
-    [excluded],
-  );
+  const options = useMemo(() => {
+    return CURRENCY_CATALOG.filter((entry) => {
+      return !excluded.has(entry.code);
+    });
+  }, [excluded]);
 
   const filteredOptions = useMemo(() => {
     const query = normalizeQuery(search);
-    if (!query) return options;
-    return options.filter(
-      (entry) =>
+    if (!query) {
+      return options;
+    }
+    return options.filter((entry) => {
+      return (
         entry.code.toLowerCase().includes(query) ||
-        entry.name.toLowerCase().includes(query),
-    );
+        entry.name.toLowerCase().includes(query)
+      );
+    });
   }, [options, search]);
 
   const selected = value ? CURRENCY_CATALOG_BY_CODE[value] : undefined;
@@ -101,21 +110,25 @@ export function CurrencyCombobox({
 
           <CommandList className="max-h-64">
             <CommandGroup>
-              {filteredOptions.map((entry) => (
-                <CommandItem
-                  key={entry.code}
-                  onSelect={() => handleSelect(entry.code)}
-                >
-                  <span className="truncate">
-                    {entry.code} - {entry.name} ({entry.symbol})
-                  </span>
-                  <Check
-                    className={`ml-auto h-4 w-4 shrink-0 ${
-                      value === entry.code ? "opacity-100" : "opacity-0"
-                    }`}
-                  />
-                </CommandItem>
-              ))}
+              {filteredOptions.map((entry) => {
+                return (
+                  <CommandItem
+                    key={entry.code}
+                    onSelect={() => {
+                      return handleSelect(entry.code);
+                    }}
+                  >
+                    <span className="truncate">
+                      {entry.code} - {entry.name} ({entry.symbol})
+                    </span>
+                    <Check
+                      className={`ml-auto h-4 w-4 shrink-0 ${
+                        value === entry.code ? "opacity-100" : "opacity-0"
+                      }`}
+                    />
+                  </CommandItem>
+                );
+              })}
             </CommandGroup>
           </CommandList>
         </Command>

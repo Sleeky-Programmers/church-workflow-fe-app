@@ -19,7 +19,7 @@ type EmptyStateProps = {
 };
 
 // Shared empty-state UI for dashboard cards - replaces bare muted text with
-// an icon badge, a friendly message and an optional next-step action.
+// An icon badge, a friendly message and an optional next-step action.
 export function EmptyState({
   icon: Icon,
   title,

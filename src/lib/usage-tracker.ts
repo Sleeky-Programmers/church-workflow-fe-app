@@ -1,7 +1,7 @@
 import { sendUsageEvents, type UsageEvent } from "@/services/suggestionService";
 
 // Usage is batched and sent quietly in the background. A failure here must
-// never affect the page, so every path swallows its errors.
+// Never affect the page, so every path swallows its errors.
 const FLUSH_DELAY_MS = 8000;
 const MAX_QUEUE = 20;
 
@@ -10,7 +10,9 @@ let timer: ReturnType<typeof setTimeout> | null = null;
 
 function hasSession(): boolean {
   try {
-    return typeof window !== "undefined" && !!localStorage.getItem("accessToken");
+    return (
+      typeof window !== "undefined" && !!localStorage.getItem("accessToken")
+    );
   } catch {
     return false;
   }
@@ -28,18 +30,24 @@ export function flushUsage(keepalive = false) {
 
   const batch = queue.slice(0, MAX_QUEUE);
   queue = queue.slice(MAX_QUEUE);
-  sendUsageEvents(batch, keepalive)?.catch(() => undefined);
+  sendUsageEvents(batch, keepalive)?.catch(() => {
+    return undefined;
+  });
 }
 
 function enqueue(event: UsageEvent) {
-  if (!hasSession()) return;
+  if (!hasSession()) {
+    return;
+  }
   queue.push(event);
   if (queue.length >= MAX_QUEUE) {
     flushUsage();
     return;
   }
   if (!timer) {
-    timer = setTimeout(() => flushUsage(), FLUSH_DELAY_MS);
+    timer = setTimeout(() => {
+      return flushUsage();
+    }, FLUSH_DELAY_MS);
   }
 }
 

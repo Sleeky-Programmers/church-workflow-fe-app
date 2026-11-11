@@ -54,7 +54,7 @@ export function CreateRoleForm({
   showCancelButton = true,
   cancelButtonText = "Cancel",
   submitButtonText,
-  isDialog = false,
+  isDialog: _isDialog = false,
 }: CreateRoleFormProps) {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
@@ -71,23 +71,24 @@ export function CreateRoleForm({
     Record<string, PermissionLevel>
   >(
     initialData?.permissions ||
-      MODULE_PERMISSIONS.reduce(
-        (acc, module) => ({
+      MODULE_PERMISSIONS.reduce((acc, module) => {
+        return {
           ...acc,
           [module.module]: "no_access" as PermissionLevel,
-        }),
-        {},
-      ),
+        };
+      }, {}),
   );
 
   const handlePermissionChange = (
     moduleName: string,
     level: PermissionLevel,
   ) => {
-    setPermissions((prev) => ({
-      ...prev,
-      [moduleName]: level,
-    }));
+    setPermissions((prev) => {
+      return {
+        ...prev,
+        [moduleName]: level,
+      };
+    });
   };
 
   const handleSubmit = async ({ name, description }: CreateRoleFormValues) => {
@@ -95,10 +96,12 @@ export function CreateRoleForm({
 
     try {
       const formattedPermissions = Object.entries(permissions).map(
-        ([moduleName, level]) => ({
-          moduleSection: frontendToBackendModule[moduleName] || moduleName,
-          accessLevel: level.toUpperCase(),
-        }),
+        ([moduleName, level]) => {
+          return {
+            moduleSection: frontendToBackendModule[moduleName] || moduleName,
+            accessLevel: level.toUpperCase(),
+          };
+        },
       );
 
       let result;
@@ -160,40 +163,44 @@ export function CreateRoleForm({
           <FormField
             control={form.control}
             name="name"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Role Name</FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="E.g. Media Lead"
-                    disabled={isLoading}
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+            render={({ field }) => {
+              return (
+                <FormItem>
+                  <FormLabel>Role Name</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="E.g. Media Lead"
+                      disabled={isLoading}
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              );
+            }}
           />
 
           <FormField
             control={form.control}
             name="description"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>
-                  Description <Span variant="muted">(Optional)</Span>
-                </FormLabel>
-                <FormControl>
-                  <Textarea
-                    placeholder="Type your message here."
-                    disabled={isLoading}
-                    rows={3}
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+            render={({ field }) => {
+              return (
+                <FormItem>
+                  <FormLabel>
+                    Description <Span variant="muted">(Optional)</Span>
+                  </FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder="Type your message here."
+                      disabled={isLoading}
+                      rows={3}
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              );
+            }}
           />
         </div>
 
@@ -206,15 +213,17 @@ export function CreateRoleForm({
           </div>
 
           <div className="space-y-6">
-            {VISIBLE_MODULE_PERMISSIONS.map((module) => (
-              <PermissionModuleSelector
-                key={module.module}
-                module={module}
-                value={permissions[module.module] || "no_access"}
-                onChange={handlePermissionChange}
-                disabled={isLoading}
-              />
-            ))}
+            {VISIBLE_MODULE_PERMISSIONS.map((module) => {
+              return (
+                <PermissionModuleSelector
+                  key={module.module}
+                  module={module}
+                  value={permissions[module.module] || "no_access"}
+                  onChange={handlePermissionChange}
+                  disabled={isLoading}
+                />
+              );
+            })}
           </div>
         </div>
 

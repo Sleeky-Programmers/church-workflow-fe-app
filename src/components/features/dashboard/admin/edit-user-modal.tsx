@@ -63,7 +63,10 @@ export function EditPersonalInfoModal({
       onOpenChange(false);
     } catch (error: any) {
       setSubmitError(
-        getFriendlyErrorMessage(error, "Couldn't update your profile. Please try again."),
+        getFriendlyErrorMessage(
+          error,
+          "Couldn't update your profile. Please try again.",
+        ),
       );
     }
   };
@@ -83,81 +86,87 @@ export function EditPersonalInfoModal({
           className="flex min-h-0 flex-1 flex-col"
         >
           <div className="flex-1 space-y-4 overflow-y-auto px-6 py-5">
-          {submitError && (
-            <div
-              role="alert"
-              className="flex items-start gap-2 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-600"
-            >
-              <AlertCircle className="mt-0.5 h-4 w-4 flex-shrink-0" />
-              <span>{submitError}</span>
-            </div>
-          )}
-
-          <div>
-            <Label>Title</Label>
-            <Controller
-              control={control}
-              name="title"
-              render={({ field }) => (
-                <TitleCombobox value={field.value} onChange={field.onChange} />
-              )}
-            />
-            {errors.title && (
-              <Text variant="error">{errors.title.message}</Text>
+            {submitError && (
+              <div
+                role="alert"
+                className="flex items-start gap-2 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-600"
+              >
+                <AlertCircle className="mt-0.5 h-4 w-4 flex-shrink-0" />
+                <span>{submitError}</span>
+              </div>
             )}
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label>First Name</Label>
-              <Input {...register("firstName")} className="bg-gray-100" />
-              {errors.firstName && (
-                <Text variant="error">{errors.firstName.message}</Text>
-              )}
-            </div>
 
             <div>
-              <Label>Last Name</Label>
-              <Input {...register("lastName")} className="bg-gray-100" />
-              {errors.lastName && (
-                <Text variant="error">{errors.lastName.message}</Text>
+              <Label>Title</Label>
+              <Controller
+                control={control}
+                name="title"
+                render={({ field }) => {
+                  return (
+                    <TitleCombobox
+                      value={field.value}
+                      onChange={field.onChange}
+                    />
+                  );
+                }}
+              />
+              {errors.title && (
+                <Text variant="error">{errors.title.message}</Text>
               )}
             </div>
-          </div>
 
-          <div>
-            <Label>Phone Number</Label>
-            <Input
-              {...register("phoneNumber")}
-              type="tel"
-              placeholder="e.g. +234 801 234 5678"
-              className="bg-gray-100"
-            />
-            {errors.phoneNumber && (
-              <Text variant="error">{errors.phoneNumber.message}</Text>
-            )}
-          </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>First Name</Label>
+                <Input {...register("firstName")} className="bg-gray-100" />
+                {errors.firstName && (
+                  <Text variant="error">{errors.firstName.message}</Text>
+                )}
+              </div>
 
-          <div>
-            <Label>Email</Label>
-            <Input
-              {...register("email")}
-              disabled
-              readOnly
-              className="bg-gray-100 cursor-not-allowed text-gray-500"
-            />
-            <Text variant="muted" className="text-xs mt-1">
-              Email address can&apos;t be changed here.
-            </Text>
-          </div>
+              <div>
+                <Label>Last Name</Label>
+                <Input {...register("lastName")} className="bg-gray-100" />
+                {errors.lastName && (
+                  <Text variant="error">{errors.lastName.message}</Text>
+                )}
+              </div>
+            </div>
 
+            <div>
+              <Label>Phone Number</Label>
+              <Input
+                {...register("phoneNumber")}
+                type="tel"
+                placeholder="e.g. +234 801 234 5678"
+                className="bg-gray-100"
+              />
+              {errors.phoneNumber && (
+                <Text variant="error">{errors.phoneNumber.message}</Text>
+              )}
+            </div>
+
+            <div>
+              <Label>Email</Label>
+              <Input
+                {...register("email")}
+                disabled
+                readOnly
+                className="bg-gray-100 cursor-not-allowed text-gray-500"
+              />
+              <Text variant="muted" className="text-xs mt-1">
+                Email address can&apos;t be changed here.
+              </Text>
+            </div>
           </div>
 
           <SheetFooter className="mt-0 flex-row items-center justify-end gap-2 border-t px-6 py-4">
             <Button
               type="button"
               variant="destructive"
-              onClick={() => onOpenChange(false)}
+              onClick={() => {
+                return onOpenChange(false);
+              }}
               size="sm"
             >
               Cancel

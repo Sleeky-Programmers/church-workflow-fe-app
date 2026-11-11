@@ -55,12 +55,14 @@ export function ViewRolePermissionsDialog({
               fetchedRole.description ||
               "Permissions are automatically assigned based on role.",
             permissions:
-              fetchedRole.permissions?.map((p: any) => ({
-                module:
-                  backendToFrontendModule[p.moduleSection] || p.moduleSection,
-                level: p.accessLevel?.toLowerCase(),
-                description: `Access Level: ${p.accessLevel}`,
-              })) || [],
+              fetchedRole.permissions?.map((p: any) => {
+                return {
+                  module:
+                    backendToFrontendModule[p.moduleSection] || p.moduleSection,
+                  level: p.accessLevel?.toLowerCase(),
+                  description: `Access Level: ${p.accessLevel}`,
+                };
+              }) || [],
           });
         } else {
           setRolePermissions(ROLE_PERMISSIONS[roleName] || null);
@@ -78,7 +80,7 @@ export function ViewRolePermissionsDialog({
     }
 
     loadRole();
-  }, [open, roleId, roleName]);
+  }, [open, roleId, roleName, toast]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

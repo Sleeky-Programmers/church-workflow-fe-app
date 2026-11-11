@@ -38,7 +38,9 @@ export function EditBranchDialog({
   const [timeZone, setTimeZone] = useState("");
 
   useEffect(() => {
-    if (!open || !branch) return;
+    if (!open || !branch) {
+      return;
+    }
     setName(branch.name);
     setAlias(branch.alias || "");
     setAddress(branch.address || "");
@@ -48,7 +50,9 @@ export function EditBranchDialog({
   }, [open, branch]);
 
   async function handleSave() {
-    if (!branch) return;
+    if (!branch) {
+      return;
+    }
     if (!name.trim()) {
       toast({
         title: "Missing information",
@@ -105,7 +109,9 @@ export function EditBranchDialog({
             <Label>Branch Name</Label>
             <Input
               value={name}
-              onChange={(e) => setName(e.target.value)}
+              onChange={(e) => {
+                return setName(e.target.value);
+              }}
               disabled={isSaving}
             />
           </div>
@@ -114,7 +120,9 @@ export function EditBranchDialog({
             <Label>Short Name / Alias (optional)</Label>
             <Input
               value={alias}
-              onChange={(e) => setAlias(e.target.value)}
+              onChange={(e) => {
+                return setAlias(e.target.value);
+              }}
               disabled={isSaving}
             />
           </div>
@@ -123,7 +131,9 @@ export function EditBranchDialog({
             <Label>Address (optional)</Label>
             <Input
               value={address}
-              onChange={(e) => setAddress(e.target.value)}
+              onChange={(e) => {
+                return setAddress(e.target.value);
+              }}
               disabled={isSaving}
             />
           </div>
@@ -133,7 +143,9 @@ export function EditBranchDialog({
               <Label>State (optional)</Label>
               <Input
                 value={state}
-                onChange={(e) => setState(e.target.value)}
+                onChange={(e) => {
+                  return setState(e.target.value);
+                }}
                 disabled={isSaving}
               />
             </div>
@@ -141,7 +153,9 @@ export function EditBranchDialog({
               <Label>Country (optional)</Label>
               <Input
                 value={country}
-                onChange={(e) => setCountry(e.target.value)}
+                onChange={(e) => {
+                  return setCountry(e.target.value);
+                }}
                 disabled={isSaving}
               />
             </div>
@@ -151,7 +165,9 @@ export function EditBranchDialog({
             <Label>Time Zone (optional)</Label>
             <Input
               value={timeZone}
-              onChange={(e) => setTimeZone(e.target.value)}
+              onChange={(e) => {
+                return setTimeZone(e.target.value);
+              }}
               disabled={isSaving}
               placeholder="e.g. Africa/Lagos"
             />

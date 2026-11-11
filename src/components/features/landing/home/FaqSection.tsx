@@ -27,16 +27,18 @@ export default function FaqSection() {
         </div>
 
         <Accordion type="single" collapsible className="w-full">
-          {FAQ_ITEMS.map((item) => (
-            <AccordionItem key={item.question} value={item.question}>
-              <AccordionTrigger className="text-left text-base font-semibold text-gray-900">
-                {item.question}
-              </AccordionTrigger>
-              <AccordionContent className="text-gray-500 leading-relaxed">
-                {item.answer}
-              </AccordionContent>
-            </AccordionItem>
-          ))}
+          {FAQ_ITEMS.map((item) => {
+            return (
+              <AccordionItem key={item.question} value={item.question}>
+                <AccordionTrigger className="text-left text-base font-semibold text-gray-900">
+                  {item.question}
+                </AccordionTrigger>
+                <AccordionContent className="text-gray-500 leading-relaxed">
+                  {item.answer}
+                </AccordionContent>
+              </AccordionItem>
+            );
+          })}
         </Accordion>
       </div>
     </section>

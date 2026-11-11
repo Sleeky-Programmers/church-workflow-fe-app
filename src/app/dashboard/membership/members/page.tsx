@@ -4,10 +4,7 @@ import { Search, X } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
-import {
-  fadeUp,
-  staggerContainer,
-} from "@/components/features/dashboard/membership/animations";
+import { fadeUp } from "@/components/features/dashboard/membership/animations";
 
 import { LimitBanner } from "@/components/features/dashboard/subscription/limit-banner";
 import { PlanLimitReachedModal } from "@/components/features/dashboard/subscription/plan-limit-reached-modal";
@@ -74,10 +71,8 @@ export default function MembershipPage() {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isCsvModalOpen, setIsCsvModalOpen] = useState(false);
 
-  const [selectedFormat, setSelectedFormat] = useState<"form" | "csv" | null>(
-    null,
-  );
-  const [isCsvUploading, setIsCsvUploading] = useState(false);
+  const [, setSelectedFormat] = useState<"form" | "csv" | null>(null);
+  const [isCsvUploading] = useState(false);
 
   const [page, setPage] = useState(1);
   const [pagination, setPagination] = useState<any>(null);
@@ -119,7 +114,7 @@ export default function MembershipPage() {
         );
         setMembers(response.data);
         setPagination(response.pagination);
-      } catch (error) {
+      } catch {
         toast({ title: "Failed to load members" });
       } finally {
         setIsLoading(false);
@@ -137,19 +132,22 @@ export default function MembershipPage() {
       setLimitStatus(status);
       setGuestLimitStatus(guestStatus);
       return status;
-    } catch (error) {
-      console.error("Failed to load member limit status:", error);
+    } catch {
       return null;
     }
   }, []);
 
   // Load the plan catalogue once so the "Upgrade to Growth" modal can show
-  // the next tier's name/features without hardcoding them.
+  // The next tier's name/features without hardcoding them.
   useEffect(() => {
     getPlans()
       .then(setPlans)
-      .catch((error) => console.error("Failed to load plans:", error))
-      .finally(() => setPlansLoaded(true));
+      .catch(() => {
+        return undefined;
+      })
+      .finally(() => {
+        return setPlansLoaded(true);
+      });
   }, []);
 
   useEffect(() => {
@@ -159,12 +157,13 @@ export default function MembershipPage() {
   const nextPlan = getNextPlan(limitStatus?.planName ?? null, plans);
   const nextPlanFeatures = getUpgradeFeatures(nextPlan);
 
-  const atLimit = (s: PlanLimitStatus | null) =>
-    !!s && s.limit > 0 && s.current >= s.limit;
+  const atLimit = (s: PlanLimitStatus | null) => {
+    return !!s && s.limit > 0 && s.current >= s.limit;
+  };
 
   // Members and guests have separate limits, so adding is only blocked up
-  // front when both are full. The server checks the right limit for the
-  // status chosen and names it in its message.
+  // Front when both are full. The server checks the right limit for the
+  // Status chosen and names it in its message.
   const handleAddMemberClick = async () => {
     const status = limitStatus ?? (await refreshLimitStatus());
     const guestStatus =
@@ -179,15 +178,20 @@ export default function MembershipPage() {
 
   const setTab = (tab: "people" | "archived") => {
     const params = new URLSearchParams(searchParams.toString());
-    if (tab === "archived") params.set("tab", "archived");
-    else params.delete("tab");
+    if (tab === "archived") {
+      params.set("tab", "archived");
+    } else {
+      params.delete("tab");
+    }
     router.replace(`?${params.toString()}`);
   };
 
   const handleGuestsChanged = () => {
     loadMembers(page, debouncedSearch, facetQuery);
     refreshLimitStatus();
-    setBannerKey((k) => k + 1);
+    setBannerKey((k) => {
+      return k + 1;
+    });
   };
 
   const handleViewUpgradePlans = () => {
@@ -231,7 +235,7 @@ export default function MembershipPage() {
   ]);
 
   // Single fetch effect: search, facets, and page all route through here so
-  // every state change issues exactly one request (no double-fetch).
+  // Every state change issues exactly one request (no double-fetch).
   useEffect(() => {
     loadMembers(page, debouncedSearch, facetQuery);
   }, [page, debouncedSearch, facetQuery, loadMembers]);
@@ -322,8 +326,7 @@ export default function MembershipPage() {
         <div className="px-4 sm:px-6 py-3 sm:py-4 flex flex-wrap items-center gap-x-3 gap-y-3 md:flex-nowrap md:justify-between">
           <div className="flex items-center gap-3 min-w-0 flex-1 md:flex-none">
             {isMobile && (
-              <div className="flex items-center justify-center h-8 w-8 shrink-0">
-              </div>
+              <div className="flex items-center justify-center h-8 w-8 shrink-0"></div>
             )}
             <Heading
               level={3}
@@ -344,7 +347,9 @@ export default function MembershipPage() {
             {selectedMemberIds.length > 0 ? (
               <Button
                 variant="destructive"
-                onClick={() => setIsDeleteModalOpen(true)}
+                onClick={() => {
+                  return setIsDeleteModalOpen(true);
+                }}
                 className="rounded-lg whitespace-nowrap"
               >
                 Remove
@@ -400,21 +405,25 @@ export default function MembershipPage() {
             ["people", "People"],
             ["archived", "Archived guests"],
           ] as const
-        ).map(([tab, label]) => (
-          <button
-            key={tab}
-            role="tab"
-            aria-selected={activeTab === tab}
-            onClick={() => setTab(tab)}
-            className={
-              activeTab === tab
-                ? "rounded-full bg-primary-500 px-3 py-1.5 text-sm font-medium text-white"
-                : "rounded-full border border-gray-200 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
-            }
-          >
-            {label}
-          </button>
-        ))}
+        ).map(([tab, label]) => {
+          return (
+            <button
+              key={tab}
+              role="tab"
+              aria-selected={activeTab === tab}
+              onClick={() => {
+                return setTab(tab);
+              }}
+              className={
+                activeTab === tab
+                  ? "rounded-full bg-primary-500 px-3 py-1.5 text-sm font-medium text-white"
+                  : "rounded-full border border-gray-200 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
+              }
+            >
+              {label}
+            </button>
+          );
+        })}
       </div>
 
       {activeTab === "archived" ? (
@@ -422,40 +431,50 @@ export default function MembershipPage() {
           <ArchivedGuestsPanel onRestored={handleGuestsChanged} />
         </div>
       ) : (
-      <motion.div
-        variants={fadeUp}
-        initial="hidden"
-        animate="visible"
-        className="py-4 sm:py-6 px-3 sm:px-4 relative"
-      >
-        {isLoading && (
-          <div className="absolute inset-0 flex items-center justify-center bg-white/60 z-10">
-            <Loader size="w-10 h-10" showShadow={false} />
-          </div>
-        )}
-        <MembersTable
-          members={members}
-          pagination={pagination}
-          onPageChange={setPage}
-          onRowClick={(memberId) =>
-            router.push(`/dashboard/membership/members/${memberId}`)
-          }
-          onAddMember={handleAddMemberClick}
-          selectedMemberIds={selectedMemberIds}
-          onSelectMember={(id, checked) =>
-            setSelectedMemberIds((prev) =>
-              checked ? [...prev, id] : prev.filter((mid) => mid !== id),
-            )
-          }
-          onSelectAll={(checked) =>
-            setSelectedMemberIds(checked ? members.map((m) => m.id) : [])
-          }
-          setIsDeleteModalOpen={setIsDeleteModalOpen}
-          setIsFormatModalOpen={setIsFormatModalOpen}
-          isCsvUploading={isCsvUploading}
-          searchActive={Boolean(searchQuery || facetQuery)}
-        />
-      </motion.div>
+        <motion.div
+          variants={fadeUp}
+          initial="hidden"
+          animate="visible"
+          className="py-4 sm:py-6 px-3 sm:px-4 relative"
+        >
+          {isLoading && (
+            <div className="absolute inset-0 flex items-center justify-center bg-white/60 z-10">
+              <Loader size="w-10 h-10" showShadow={false} />
+            </div>
+          )}
+          <MembersTable
+            members={members}
+            pagination={pagination}
+            onPageChange={setPage}
+            onRowClick={(memberId) => {
+              return router.push(`/dashboard/membership/members/${memberId}`);
+            }}
+            onAddMember={handleAddMemberClick}
+            selectedMemberIds={selectedMemberIds}
+            onSelectMember={(id, checked) => {
+              return setSelectedMemberIds((prev) => {
+                return checked
+                  ? [...prev, id]
+                  : prev.filter((mid) => {
+                      return mid !== id;
+                    });
+              });
+            }}
+            onSelectAll={(checked) => {
+              return setSelectedMemberIds(
+                checked
+                  ? members.map((m) => {
+                      return m.id;
+                    })
+                  : [],
+              );
+            }}
+            setIsDeleteModalOpen={setIsDeleteModalOpen}
+            setIsFormatModalOpen={setIsFormatModalOpen}
+            isCsvUploading={isCsvUploading}
+            searchActive={Boolean(searchQuery || facetQuery)}
+          />
+        </motion.div>
       )}
 
       <AddMemberFormatModal
@@ -472,7 +491,9 @@ export default function MembershipPage() {
 
       <CsvUploadModal
         open={isCsvModalOpen}
-        onClose={() => setIsCsvModalOpen(false)}
+        onClose={() => {
+          return setIsCsvModalOpen(false);
+        }}
         onSuccess={async (insertedCount) => {
           const response = await fetchMembers(1, 10);
           setMembers(response.data);
@@ -480,7 +501,9 @@ export default function MembershipPage() {
           setPage(1);
 
           const status = await refreshLimitStatus();
-          setBannerKey((k) => k + 1);
+          setBannerKey((k) => {
+            return k + 1;
+          });
           if (status?.isOverLimit && status.isWithinGracePeriod) {
             setSuccessModal({ context: "import", addedCount: insertedCount });
           }
@@ -493,19 +516,15 @@ export default function MembershipPage() {
         onOpenChange={setIsDeleteModalOpen}
         memberIds={selectedMemberIds}
         onDeleted={(deletedIds) => {
-          const remaining = members.filter(
-            (m) => !deletedIds.includes(m.id),
-          );
+          const remaining = members.filter((m) => {
+            return !deletedIds.includes(m.id);
+          });
           setMembers(remaining);
           setSelectedMemberIds([]);
 
           // If this page is now empty and there are earlier pages, step back
-          // so the user isn't stranded on a blank page.
-          if (
-            remaining.length === 0 &&
-            pagination &&
-            pagination.page > 1
-          ) {
+          // So the user isn't stranded on a blank page.
+          if (remaining.length === 0 && pagination && pagination.page > 1) {
             setPage(pagination.page - 1);
           } else {
             loadMembers(page, debouncedSearch, facetQuery);
@@ -520,7 +539,9 @@ export default function MembershipPage() {
         <MemberLimitSuccessModal
           open
           onOpenChange={(open) => {
-            if (!open) setSuccessModal(null);
+            if (!open) {
+              setSuccessModal(null);
+            }
           }}
           context={successModal.context}
           addedCount={successModal.addedCount}

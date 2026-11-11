@@ -29,6 +29,7 @@ import { trackAction } from "@/lib/usage-tracker";
 
 import { AttendanceStatsView } from "./attendance-stats";
 import { SelectMembersView } from "./select-member-view";
+import { useLatest } from "@/hooks/use-latest";
 
 type ServiceType = RegularService | SpecialServiceEvent;
 
@@ -91,7 +92,9 @@ export function AttendanceModal({
 
   // Helper to load members
   const ensureMembersLoaded = async (skipIfLoaded: boolean = true) => {
-    if (skipIfLoaded && hasMembersLoaded) return;
+    if (skipIfLoaded && hasMembersLoaded) {
+      return;
+    }
     setLoading(true);
     try {
       const data = await fetchMembers(1, 100);
@@ -133,8 +136,24 @@ export function AttendanceModal({
     return selectedDate > today;
   };
 
+  const handleClose = () => {
+    reset();
+    setHasMembersLoaded(false);
+    setIsMembersDialogOpen(false);
+    setSearch("");
+    setMembersViewMode("select");
+    setAbsentSelections([]);
+    setIsEditMode(false);
+    onClose();
+  };
+
+  const ensureMembersLoadedRef = useLatest(ensureMembersLoaded);
+  const handleCloseRef = useLatest(handleClose);
+
   useEffect(() => {
-    if (!isOpen || !service || !date) return;
+    if (!isOpen || !service || !date) {
+      return;
+    }
 
     if (isFutureDate(date)) {
       toast({
@@ -143,7 +162,7 @@ export function AttendanceModal({
           "You cannot mark attendance for future dates. Please select a past or current date.",
         variant: "destructive",
       });
-      handleClose();
+      handleCloseRef.current();
       return;
     }
 
@@ -152,7 +171,9 @@ export function AttendanceModal({
     const loadAttendance = async () => {
       try {
         const result = await getAttendanceRecord(service.id, date);
-        if (!isActive) return;
+        if (!isActive) {
+          return;
+        }
 
         if (result.stats) {
           setAttendanceStats({
@@ -182,9 +203,11 @@ export function AttendanceModal({
         }
 
         // Load members immediately after attendance is loaded
-        await ensureMembersLoaded(false);
+        await ensureMembersLoadedRef.current(false);
       } catch (error: any) {
-        if (!isActive) return;
+        if (!isActive) {
+          return;
+        }
         toast({
           title: "Error",
           description: error.message || "Failed to load attendance",
@@ -194,7 +217,7 @@ export function AttendanceModal({
         setAttendanceStats(null);
         setIsEditMode(true);
         // Still try to load members even if attendance failed
-        await ensureMembersLoaded(false);
+        await ensureMembersLoadedRef.current(false);
       }
     };
 
@@ -203,7 +226,7 @@ export function AttendanceModal({
     return () => {
       isActive = false;
     };
-  }, [isOpen, service, date, toast]);
+  }, [isOpen, service, date, toast, ensureMembersLoadedRef, handleCloseRef]);
 
   const loadAllMembers = async () => {
     await ensureMembersLoaded(false);
@@ -226,13 +249,15 @@ export function AttendanceModal({
   };
 
   const handleAbsentSelection = (memberId: string, selected: boolean) => {
-    setAbsentSelections((prev) =>
-      selected
+    setAbsentSelections((prev) => {
+      return selected
         ? prev.includes(memberId)
           ? prev
           : [...prev, memberId]
-        : prev.filter((id) => id !== memberId),
-    );
+        : prev.filter((id) => {
+            return id !== memberId;
+          });
+    });
   };
 
   const handleMarkAbsentAsPresent = () => {
@@ -299,17 +324,6 @@ export function AttendanceModal({
     } finally {
       setIsSaving(false);
     }
-  };
-
-  const handleClose = () => {
-    reset();
-    setHasMembersLoaded(false);
-    setIsMembersDialogOpen(false);
-    setSearch("");
-    setMembersViewMode("select");
-    setAbsentSelections([]);
-    setIsEditMode(false);
-    onClose();
   };
 
   if (!service || !date) {
@@ -430,7 +444,12 @@ export function AttendanceModal({
             Cannot Edit Future Dates
           </Button>
         ) : hasExistingAttendance && !isEditMode ? (
-          <Button onClick={() => setIsEditMode(true)} className="w-full">
+          <Button
+            onClick={() => {
+              return setIsEditMode(true);
+            }}
+            className="w-full"
+          >
             Edit
           </Button>
         ) : (
@@ -476,7 +495,9 @@ export function AttendanceModal({
         }
         onAction={
           !isEditMode
-            ? () => setIsMembersDialogOpen(false)
+            ? () => {
+                return setIsMembersDialogOpen(false);
+              }
             : membersViewMode === "present"
               ? handleUpdatePresentRecord
               : membersViewMode === "absent"
@@ -514,7 +535,9 @@ export function AttendanceModal({
         <Dialog
           open={isMembersOpen}
           onOpenChange={(open) => {
-            if (!open) setIsMembersDialogOpen(false);
+            if (!open) {
+              setIsMembersDialogOpen(false);
+            }
           }}
         >
           <DialogContent

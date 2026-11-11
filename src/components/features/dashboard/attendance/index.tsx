@@ -16,6 +16,7 @@ import {
 import { ServiceTypeModal } from "./service-type";
 import { Text } from "@/components/ui/typography/Text";
 import Heading from "@/components/ui/typography/Heading";
+import { useLatest } from "@/hooks/use-latest";
 
 export function AttendanceCalendarPage() {
   const { toast } = useToast();
@@ -33,10 +34,6 @@ export function AttendanceCalendarPage() {
   const [isCreateServiceModalOpen, setIsCreateServiceModalOpen] =
     useState(false);
 
-  useEffect(() => {
-    loadServices();
-  }, []);
-
   const loadServices = async () => {
     setIsLoading(true);
     try {
@@ -53,6 +50,12 @@ export function AttendanceCalendarPage() {
     }
   };
 
+  const loadServicesRef = useLatest(loadServices);
+
+  useEffect(() => {
+    loadServicesRef.current();
+  }, [loadServicesRef]);
+
   const handleAddAttendance = (service: RegularService, date: string) => {
     setSelectedService(service);
     setSelectedDate(date);
@@ -67,7 +70,7 @@ export function AttendanceCalendarPage() {
     });
   };
 
-  const handleAddGivingRecord = (service: RegularService, date: string) => {
+  const handleAddGivingRecord = (_service: RegularService, _date: string) => {
     toast({
       title: "Coming Soon",
       description: "Giving record functionality will be available soon",
@@ -90,20 +93,24 @@ export function AttendanceCalendarPage() {
   };
 
   const handleCreateServices = async (newServices: PendingRegularService[]) => {
-    setServices((prev) => [
-      ...prev,
-      ...newServices.map((service) => ({
-        id: `${Date.now()}-${service.day}`,
-        title: service.title,
-        type: "REGULAR" as const,
-        day: service.day,
-        startTime: service.startTime,
-        endTime: service.endTime,
-        location: service.location,
-        frequency: service.frequency,
-        attendanceRecords: [],
-      })),
-    ]);
+    setServices((prev) => {
+      return [
+        ...prev,
+        ...newServices.map((service) => {
+          return {
+            id: `${Date.now()}-${service.day}`,
+            title: service.title,
+            type: "REGULAR" as const,
+            day: service.day,
+            startTime: service.startTime,
+            endTime: service.endTime,
+            location: service.location,
+            frequency: service.frequency,
+            attendanceRecords: [],
+          };
+        }),
+      ];
+    });
   };
 
   const handleAttendanceSaved = (_payload: {
@@ -143,7 +150,9 @@ export function AttendanceCalendarPage() {
             <Input
               placeholder="Search"
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e) => {
+                return setSearchQuery(e.target.value);
+              }}
               className="pl-10"
             />
           </div>
@@ -162,7 +171,9 @@ export function AttendanceCalendarPage() {
 
       <AttendanceModal
         isOpen={isAttendanceModalOpen}
-        onClose={() => setIsAttendanceModalOpen(false)}
+        onClose={() => {
+          return setIsAttendanceModalOpen(false);
+        }}
         service={selectedService}
         date={selectedDate}
         onSave={handleAttendanceSaved}

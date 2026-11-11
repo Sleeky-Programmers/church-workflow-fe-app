@@ -21,8 +21,8 @@ export async function logout(): Promise<void> {
   useRecentStore.getState().clearRecents();
 
   if (typeof window !== "undefined") {
-    SESSION_SCOPED_STORAGE_KEYS.forEach((key) =>
-      window.localStorage.removeItem(key),
-    );
+    SESSION_SCOPED_STORAGE_KEYS.forEach((key) => {
+      return window.localStorage.removeItem(key);
+    });
   }
 }

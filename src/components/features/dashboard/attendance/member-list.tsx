@@ -49,9 +49,9 @@ export function MemberListItem({
       {(mode === "select" || mode === "view-absent") && (
         <Checkbox
           checked={isSelected}
-          onCheckedChange={(checked) =>
-            onSelect?.(member.id, checked as boolean)
-          }
+          onCheckedChange={(checked) => {
+            return onSelect?.(member.id, checked as boolean);
+          }}
         />
       )}
 
@@ -59,7 +59,9 @@ export function MemberListItem({
         <Button
           variant="ghost"
           size="icon"
-          onClick={() => onRemove?.(member.id)}
+          onClick={() => {
+            return onRemove?.(member.id);
+          }}
           className="text-destructive-600 hover:text-destructive-700 hover:bg-destructive-50"
         >
           <X className="h-4 w-4" />

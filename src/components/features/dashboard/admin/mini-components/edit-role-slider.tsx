@@ -57,10 +57,12 @@ export function EditRoleSlider({
         const fetchedRole = await fetchRoleById(role!.id);
 
         const permissions = MODULE_PERMISSIONS.reduce(
-          (acc, module) => ({
-            ...acc,
-            [module.module]: "no_access" as PermissionLevel,
-          }),
+          (acc, module) => {
+            return {
+              ...acc,
+              [module.module]: "no_access" as PermissionLevel,
+            };
+          },
           {} as Record<string, PermissionLevel>,
         );
 
@@ -126,7 +128,9 @@ export function EditRoleSlider({
             roleId={role?.id}
             initialData={initialData}
             onSuccess={handleSuccess}
-            onCancel={() => onOpenChange(false)}
+            onCancel={() => {
+              return onOpenChange(false);
+            }}
             showCancelButton={true}
             submitButtonText="Save Changes"
             isDialog={true}

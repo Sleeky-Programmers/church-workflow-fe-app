@@ -6,7 +6,9 @@ let cache: Location[] | null = null;
 let inFlight: Promise<Location[]> | null = null;
 
 function loadLocations(): Promise<Location[]> {
-  if (cache) return Promise.resolve(cache);
+  if (cache) {
+    return Promise.resolve(cache);
+  }
   if (!inFlight) {
     inFlight = fetchLocations()
       .then((data) => {
@@ -25,15 +27,21 @@ export function useLocations() {
   const [isLoading, setIsLoading] = useState(!cache);
 
   useEffect(() => {
-    if (cache) return;
+    if (cache) {
+      return;
+    }
     let cancelled = false;
     setIsLoading(true);
     loadLocations()
       .then((data) => {
-        if (!cancelled) setLocations(data);
+        if (!cancelled) {
+          setLocations(data);
+        }
       })
       .finally(() => {
-        if (!cancelled) setIsLoading(false);
+        if (!cancelled) {
+          setIsLoading(false);
+        }
       });
     return () => {
       cancelled = true;

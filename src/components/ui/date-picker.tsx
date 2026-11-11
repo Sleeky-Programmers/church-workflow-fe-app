@@ -4,7 +4,11 @@ import { format, isValid, parseISO } from "date-fns";
 import { CalendarDays } from "lucide-react";
 
 import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 
 export interface DatePickerProps {
@@ -15,6 +19,10 @@ export interface DatePickerProps {
   placeholder?: string;
   disabled?: boolean;
   className?: string;
+  /** Earliest selectable date, yyyy-MM-dd. */
+  minDate?: string;
+  /** Latest selectable date, yyyy-MM-dd. */
+  maxDate?: string;
 }
 
 /** App-wide date input: a Popover-driven Calendar instead of the native
@@ -26,9 +34,17 @@ export function DatePicker({
   placeholder = "Select Date",
   disabled,
   className,
+  minDate,
+  maxDate,
 }: DatePickerProps) {
   const parsed = value ? parseISO(value) : undefined;
   const selected = parsed && isValid(parsed) ? parsed : undefined;
+  const min = minDate ? parseISO(minDate) : undefined;
+  const max = maxDate ? parseISO(maxDate) : undefined;
+  const disabledDays = [
+    ...(min && isValid(min) ? [{ before: min }] : []),
+    ...(max && isValid(max) ? [{ after: max }] : []),
+  ];
 
   return (
     <Popover>
@@ -54,7 +70,11 @@ export function DatePicker({
         <Calendar
           mode="single"
           selected={selected}
-          onSelect={(date) => onChange(date ? format(date, "yyyy-MM-dd") : "")}
+          defaultMonth={selected}
+          disabled={disabledDays.length ? disabledDays : undefined}
+          onSelect={(date) => {
+            return onChange(date ? format(date, "yyyy-MM-dd") : "");
+          }}
         />
       </PopoverContent>
     </Popover>

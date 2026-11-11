@@ -40,7 +40,7 @@ export function getDepartmentColumns({
   onEdit,
   onExport,
   onDeleteRequest,
-  onView,
+  onView: _onView,
 }: DepartmentColumnHandlers): DepartmentTableColumn[] {
   return [
     {
@@ -84,18 +84,20 @@ export function getDepartmentColumns({
     {
       key: "status",
       header: "Status",
-      render: (row) => (
-        <Badge
-          variant="outline"
-          className={
-            row.status.toLowerCase() === "active"
-              ? "border-success-400 text-success-600 bg-transparent font-normal"
-              : "border-gray-300 text-gray-500 bg-transparent font-normal"
-          }
-        >
-          {row.status}
-        </Badge>
-      ),
+      render: (row) => {
+        return (
+          <Badge
+            variant="outline"
+            className={
+              row.status.toLowerCase() === "active"
+                ? "border-success-400 text-success-600 bg-transparent font-normal"
+                : "border-gray-300 text-gray-500 bg-transparent font-normal"
+            }
+          >
+            {row.status}
+          </Badge>
+        );
+      },
       width: "w-40",
       align: "center",
     },
@@ -103,16 +105,18 @@ export function getDepartmentColumns({
     {
       key: "actions",
       header: "Actions",
-      render: (row) => (
-        <div className="flex justify-end w-full" data-row-action>
-          <RowActionsMenu
-            row={row}
-            onEdit={onEdit}
-            onExport={onExport}
-            onDeleteRequest={onDeleteRequest}
-          />
-        </div>
-      ),
+      render: (row) => {
+        return (
+          <div className="flex justify-end w-full" data-row-action>
+            <RowActionsMenu
+              row={row}
+              onEdit={onEdit}
+              onExport={onExport}
+              onDeleteRequest={onDeleteRequest}
+            />
+          </div>
+        );
+      },
       align: "right",
     },
   ];

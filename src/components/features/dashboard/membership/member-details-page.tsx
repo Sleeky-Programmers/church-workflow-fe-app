@@ -15,6 +15,7 @@ import { fetchMemberAttendanceHistory } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
 import { EditMemberModal } from "./edit-member-modal";
 import { updateMember } from "@/services/memberService";
+import { useLatest } from "@/hooks/use-latest";
 
 type MemberDetailsPageProps = {
   member: MemberProfile;
@@ -26,7 +27,8 @@ export function MemberDetailsPage({ member, onBack }: MemberDetailsPageProps) {
   const [activeTab, setActiveTab] = useState<"overview" | "attendance">(
     "overview",
   );
-  const [filterValue, setFilterValue] = useState("all");
+  const fallbackRecordsRef = useLatest(member.attendanceRecords);
+  const [filterValue] = useState("all");
   const [isAttendanceLoading, setIsAttendanceLoading] = useState(false);
   const [openEdit, setOpenEdit] = useState(false);
   const [currentMember, setCurrentMember] = useState(member);
@@ -50,15 +52,17 @@ export function MemberDetailsPage({ member, onBack }: MemberDetailsPageProps) {
         const response = await fetchMemberAttendanceHistory(member.id);
         const normalizedRecords: MemberAttendanceRecord[] = (
           response.records || []
-        ).map((record) => ({
-          ...record,
-          date: (() => {
-            const parsed = new Date(record.date);
-            return Number.isNaN(parsed.getTime())
-              ? record.date
-              : parsed.toISOString().split("T")[0];
-          })(),
-        }));
+        ).map((record) => {
+          return {
+            ...record,
+            date: (() => {
+              const parsed = new Date(record.date);
+              return Number.isNaN(parsed.getTime())
+                ? record.date
+                : parsed.toISOString().split("T")[0];
+            })(),
+          };
+        });
         setAttendanceRecords(normalizedRecords);
         setAttendanceStats(response.stats);
         setAttendanceTrends(response.trends || []);
@@ -68,13 +72,13 @@ export function MemberDetailsPage({ member, onBack }: MemberDetailsPageProps) {
           description: error?.message || "Please try again.",
           variant: "destructive",
         });
-        setAttendanceRecords(member.attendanceRecords || []);
+        setAttendanceRecords(fallbackRecordsRef.current || []);
       } finally {
         setIsAttendanceLoading(false);
       }
     };
     loadAttendance();
-  }, [member.id, toast]);
+  }, [member.id, toast, fallbackRecordsRef]);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -115,7 +119,9 @@ export function MemberDetailsPage({ member, onBack }: MemberDetailsPageProps) {
       <div className="flex items-center justify-between px-4 sm:px-6 py-3 bg-white border-b">
         <Pills
           value={activeTab}
-          onChange={(val) => setActiveTab(val)}
+          onChange={(val) => {
+            return setActiveTab(val);
+          }}
           options={[
             { label: "Overview", value: "overview" },
             { label: "Attendance", value: "attendance" },
@@ -126,7 +132,9 @@ export function MemberDetailsPage({ member, onBack }: MemberDetailsPageProps) {
           <Button
             variant="outline"
             className="flex items-center gap-2 h-8 sm:h-9"
-            onClick={() => setOpenEdit(true)}
+            onClick={() => {
+              return setOpenEdit(true);
+            }}
           >
             <Edit className="h-4 w-4" />
             <Span className="hidden sm:inline">Edit</Span>
@@ -155,15 +163,19 @@ export function MemberDetailsPage({ member, onBack }: MemberDetailsPageProps) {
       {openEdit && (
         <EditMemberModal
           member={currentMember}
-          onClose={() => setOpenEdit(false)}
+          onClose={() => {
+            return setOpenEdit(false);
+          }}
           onSave={async (data) => {
             try {
               const updated = await updateMember(currentMember.id, data);
 
-              setCurrentMember((prev) => ({
-                ...prev,
-                ...updated,
-              }));
+              setCurrentMember((prev) => {
+                return {
+                  ...prev,
+                  ...updated,
+                };
+              });
               toast({
                 title: "Member updated",
                 description: "Changes saved successfully",

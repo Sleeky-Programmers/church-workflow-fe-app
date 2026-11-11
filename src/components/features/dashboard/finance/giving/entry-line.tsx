@@ -43,7 +43,9 @@ export function EntryLine({
 
   const handleAmountChange = (raw: string) => {
     const normalized = raw.replace(/,/g, "");
-    if (normalized !== "" && Number.isNaN(Number(normalized))) return;
+    if (normalized !== "" && Number.isNaN(Number(normalized))) {
+      return;
+    }
     onChange({ ...entry, amount: normalized === "" ? 0 : Number(normalized) });
   };
 
@@ -55,20 +57,22 @@ export function EntryLine({
         </label>
         <Select
           value={entry.offeringTypeId}
-          onValueChange={(value) =>
-            onChange({ ...entry, offeringTypeId: value })
-          }
+          onValueChange={(value) => {
+            return onChange({ ...entry, offeringTypeId: value });
+          }}
           disabled={disabled}
         >
           <SelectTrigger>
             <SelectValue placeholder="Select type" />
           </SelectTrigger>
           <SelectContent>
-            {offeringTypes.map((type) => (
-              <SelectItem key={type.id} value={type.id}>
-                {type.name}
-              </SelectItem>
-            ))}
+            {offeringTypes.map((type) => {
+              return (
+                <SelectItem key={type.id} value={type.id}>
+                  {type.name}
+                </SelectItem>
+              );
+            })}
           </SelectContent>
         </Select>
       </div>
@@ -85,7 +89,9 @@ export function EntryLine({
                 })
               : ""
           }
-          onChange={(e) => handleAmountChange(e.target.value)}
+          onChange={(e) => {
+            return handleAmountChange(e.target.value);
+          }}
           disabled={disabled}
         />
       </div>
@@ -95,20 +101,22 @@ export function EntryLine({
           <label className="text-xs font-medium text-gray-500">Currency</label>
           <Select
             value={entry.currencyCode}
-            onValueChange={(value) =>
-              onChange({ ...entry, currencyCode: value })
-            }
+            onValueChange={(value) => {
+              return onChange({ ...entry, currencyCode: value });
+            }}
             disabled={disabled}
           >
             <SelectTrigger>
               <SelectValue placeholder="Currency" />
             </SelectTrigger>
             <SelectContent>
-              {currencies.map((currency) => (
-                <SelectItem key={currency.id} value={currency.code}>
-                  {currency.code}
-                </SelectItem>
-              ))}
+              {currencies.map((currency) => {
+                return (
+                  <SelectItem key={currency.id} value={currency.code}>
+                    {currency.code}
+                  </SelectItem>
+                );
+              })}
             </SelectContent>
           </Select>
         </div>
@@ -120,20 +128,22 @@ export function EntryLine({
         </label>
         <Select
           value={entry.paymentMethod}
-          onValueChange={(value) =>
-            onChange({ ...entry, paymentMethod: value })
-          }
+          onValueChange={(value) => {
+            return onChange({ ...entry, paymentMethod: value });
+          }}
           disabled={disabled}
         >
           <SelectTrigger>
             <SelectValue placeholder="Method" />
           </SelectTrigger>
           <SelectContent>
-            {paymentMethods.map((method) => (
-              <SelectItem key={method.code} value={method.code}>
-                {method.name}
-              </SelectItem>
-            ))}
+            {paymentMethods.map((method) => {
+              return (
+                <SelectItem key={method.code} value={method.code}>
+                  {method.name}
+                </SelectItem>
+              );
+            })}
           </SelectContent>
         </Select>
       </div>

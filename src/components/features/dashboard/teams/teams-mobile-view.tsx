@@ -49,15 +49,21 @@ type TeamsMobileViewProps = {
 };
 
 function getAvatarColor(name: string) {
-  if (!name) return AVATAR_COLORS[0];
+  if (!name) {
+    return AVATAR_COLORS[0];
+  }
   const code = name.charCodeAt(0);
   return AVATAR_COLORS[code % AVATAR_COLORS.length];
 }
 
 function getInitials(name: string) {
-  if (!name) return "?";
+  if (!name) {
+    return "?";
+  }
   const parts = name.trim().split(" ");
-  if (parts.length === 1) return parts[0][0].toUpperCase();
+  if (parts.length === 1) {
+    return parts[0][0].toUpperCase();
+  }
   return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
 }
 
@@ -92,7 +98,9 @@ export function TeamsMobileView({
             variant="ghost"
             size="icon"
             className="h-9 w-9"
-            onClick={() => setIsAddTeamOpen(true)}
+            onClick={() => {
+              return setIsAddTeamOpen(true);
+            }}
           >
             <Plus className="h-5 w-5" />
           </Button>
@@ -105,7 +113,9 @@ export function TeamsMobileView({
             placeholder="Search by Small Team, Member"
             leftIcon={<Search className="w-4 h-4" />}
             value={query}
-            onChange={(e) => onQueryChange(e.target.value)}
+            onChange={(e) => {
+              return onQueryChange(e.target.value);
+            }}
             className="flex-1"
           />
           <TeamsFilterDropdown

@@ -54,21 +54,25 @@ export default function ContactPage() {
         </Text>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          {channels.map(({ icon: Icon, label, value, href }) => (
-            <a
-              key={label}
-              href={href}
-              target={href.startsWith("http") ? "_blank" : undefined}
-              rel={href.startsWith("http") ? "noopener noreferrer" : undefined}
-              className="flex flex-col items-center gap-2 rounded-xl border border-gray-200 p-6 hover:border-blue-400 hover:bg-blue-50 transition-colors"
-            >
-              <Icon className="w-6 h-6 text-[#0C5FB3]" />
-              <Text className="font-semibold">{label}</Text>
-              <Text variant="muted" className="text-sm">
-                {value}
-              </Text>
-            </a>
-          ))}
+          {channels.map(({ icon: Icon, label, value, href }) => {
+            return (
+              <a
+                key={label}
+                href={href}
+                target={href.startsWith("http") ? "_blank" : undefined}
+                rel={
+                  href.startsWith("http") ? "noopener noreferrer" : undefined
+                }
+                className="flex flex-col items-center gap-2 rounded-xl border border-gray-200 p-6 hover:border-blue-400 hover:bg-blue-50 transition-colors"
+              >
+                <Icon className="w-6 h-6 text-[#0C5FB3]" />
+                <Text className="font-semibold">{label}</Text>
+                <Text variant="muted" className="text-sm">
+                  {value}
+                </Text>
+              </a>
+            );
+          })}
         </div>
       </section>
 

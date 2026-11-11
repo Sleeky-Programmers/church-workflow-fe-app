@@ -13,7 +13,7 @@ export const metadata = generateSeoMetadata({
 });
 
 // See src/app/page.tsx for why this is revalidated rather than left fully
-// static - this page's plan prices come from the same server fetch.
+// Static - this page's plan prices come from the same server fetch.
 export const revalidate = 3600;
 
 export default function PricingPage() {

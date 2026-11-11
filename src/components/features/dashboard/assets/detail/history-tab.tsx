@@ -22,26 +22,28 @@ export function HistoryTab({ asset }: { asset: Asset }) {
         </p>
       ) : (
         <ol className="mt-4 space-y-5">
-          {asset.history.map((event) => (
-            <li key={event.id} className="flex gap-4">
-              <span
-                className={cn(
-                  "mt-1.5 h-2.5 w-2.5 shrink-0 rounded-full",
-                  TONE_CLASS[event.tone],
-                )}
-              />
+          {asset.history.map((event) => {
+            return (
+              <li key={event.id} className="flex gap-4">
+                <span
+                  className={cn(
+                    "mt-1.5 h-2.5 w-2.5 shrink-0 rounded-full",
+                    TONE_CLASS[event.tone],
+                  )}
+                />
 
-              <div className="min-w-0">
-                <p className="text-xs text-gray-400">{event.timestamp}</p>
-                <p className="mt-1 text-sm leading-relaxed text-gray-600">
-                  <span className="font-semibold text-gray-900">
-                    {event.actor}
-                  </span>{" "}
-                  {event.action}
-                </p>
-              </div>
-            </li>
-          ))}
+                <div className="min-w-0">
+                  <p className="text-xs text-gray-400">{event.timestamp}</p>
+                  <p className="mt-1 text-sm leading-relaxed text-gray-600">
+                    <span className="font-semibold text-gray-900">
+                      {event.actor}
+                    </span>{" "}
+                    {event.action}
+                  </p>
+                </div>
+              </li>
+            );
+          })}
         </ol>
       )}
     </section>

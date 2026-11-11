@@ -1,8 +1,8 @@
 // ─────────────────────────────────────────────────────────────────────────────
 // Shared motion language for the CW Members module. Everything here is tuned
-// for a dashboard: quick, subtle, and professional - small distances, short
-// durations, gentle overshoot (bounce) only where it reads as feedback rather
-// than playfulness.
+// For a dashboard: quick, subtle, and professional - small distances, short
+// Durations, gentle overshoot (bounce) only where it reads as feedback rather
+// Than playfulness.
 // ─────────────────────────────────────────────────────────────────────────────
 
 import type { Variants, Transition } from "framer-motion";
@@ -82,16 +82,16 @@ export const pageTransition: Variants = {
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Hover language - quick lift with a soft spring, and a gentle press-down on
-// tap. Subtle enough for data-dense dashboard surfaces.
+// Tap. Subtle enough for data-dense dashboard surfaces.
 // ─────────────────────────────────────────────────────────────────────────────
 
-/** whileHover target for cards and rows. */
+/** WhileHover target for cards and rows. */
 export const hoverLift = { y: -2 } as const;
 
 /** Slightly stronger lift for primary interactive tiles (stat cards). */
 export const hoverLiftStrong = { y: -3, scale: 1.01 } as const;
 
-/** whileTap target - tactile press without feeling mushy. */
+/** WhileTap target - tactile press without feeling mushy. */
 export const tapPress = { scale: 0.99 } as const;
 
 /** Transition used for hover/tap so the response feels immediate. */

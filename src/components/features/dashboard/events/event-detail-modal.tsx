@@ -32,14 +32,18 @@ type EventDetailModalProps = {
 
 // Helper function to parse time string safely
 function parseTimeString(date: string, time: string): Date | null {
-  if (!date || !time) return null;
+  if (!date || !time) {
+    return null;
+  }
 
   // Remove AM/PM and trim
   const cleanTime = time.replace(/\s*(AM|PM)/i, "").trim();
   const [hours, minutes] = cleanTime.split(":").map(Number);
 
   const parsedDate = parseISO(date);
-  if (!isValid(parsedDate)) return null;
+  if (!isValid(parsedDate)) {
+    return null;
+  }
 
   // Set the time
   parsedDate.setHours(hours || 0, minutes || 0, 0, 0);
@@ -73,8 +77,6 @@ export function EventDetailModal({
   if (!event) {
     return null;
   }
-
-  console.log({ event });
 
   const getDisplayDate = () => {
     if (event.specialDays && event.specialDays.length > 0) {
@@ -128,7 +130,9 @@ export function EventDetailModal({
                 className="p-2"
                 size="icon"
                 variant="ghost"
-                onClick={() => onDelete(event.id)}
+                onClick={() => {
+                  return onDelete(event.id);
+                }}
                 aria-label="Delete activity"
               >
                 <Trash2 className="w-4 h-4" />
@@ -189,7 +193,13 @@ export function EventDetailModal({
         </div>
 
         <div className="px-6 py-4 border-t flex justify-end">
-          <Button onClick={() => onEdit(event)}>Update</Button>
+          <Button
+            onClick={() => {
+              return onEdit(event);
+            }}
+          >
+            Update
+          </Button>
         </div>
       </DialogContent>
     </Dialog>

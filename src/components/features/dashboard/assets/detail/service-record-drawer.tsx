@@ -39,7 +39,9 @@ const CONDITION_META: { key: keyof ConditionBreakdown; label: string }[] = [
 
 function daysFromToday(dateLabel: string): number | null {
   const parsed = new Date(dateLabel);
-  if (Number.isNaN(parsed.getTime())) return null;
+  if (Number.isNaN(parsed.getTime())) {
+    return null;
+  }
 
   const diff = parsed.getTime() - Date.now();
   return Math.round(diff / (1000 * 60 * 60 * 24));
@@ -79,16 +81,19 @@ export function ServiceRecordDrawer({
 }) {
   const record = records[index];
 
-  if (!record) return null;
+  if (!record) {
+    return null;
+  }
 
   const atServiceTotal = Object.values(record.conditionAtService).reduce(
-    (sum, value) => sum + value,
+    (sum, value) => {
+      return sum + value;
+    },
     0,
   );
-  const currentTotal = Object.values(asset.conditions).reduce(
-    (sum, value) => sum + value,
-    0,
-  );
+  const currentTotal = Object.values(asset.conditions).reduce((sum, value) => {
+    return sum + value;
+  }, 0);
   const totalChange = currentTotal - atServiceTotal;
 
   const reviewDays = daysFromToday(record.nextReviewDate);
@@ -147,17 +152,19 @@ export function ServiceRecordDrawer({
                 { label: "Time Logged", value: record.timeLogged },
                 { label: "Logged By", value: record.performedBy },
                 { label: "Maintenance Type", value: record.maintenanceType },
-              ].map((row) => (
-                <div
-                  key={row.label}
-                  className="flex items-center justify-between gap-4 py-2.5"
-                >
-                  <dt className="text-sm text-gray-500">{row.label}</dt>
-                  <dd className="text-sm font-medium text-gray-900">
-                    {row.value}
-                  </dd>
-                </div>
-              ))}
+              ].map((row) => {
+                return (
+                  <div
+                    key={row.label}
+                    className="flex items-center justify-between gap-4 py-2.5"
+                  >
+                    <dt className="text-sm text-gray-500">{row.label}</dt>
+                    <dd className="text-sm font-medium text-gray-900">
+                      {row.value}
+                    </dd>
+                  </div>
+                );
+              })}
 
               <div className="flex items-center justify-between gap-4 py-2.5">
                 <dt className="text-sm text-gray-500">Next Review Date</dt>
@@ -253,8 +260,8 @@ export function ServiceRecordDrawer({
             </div>
 
             <p className="mt-3 rounded-lg bg-blue-50 px-3.5 py-2.5 text-xs leading-relaxed text-blue-800">
-              These values were recorded when this service entry was logged
-              and may differ from the current asset condition.
+              These values were recorded when this service entry was logged and
+              may differ from the current asset condition.
             </p>
           </Card>
 
@@ -262,18 +269,20 @@ export function ServiceRecordDrawer({
           {record.attachments.length > 0 && (
             <Card title="Attachments">
               <div className="mt-3 flex flex-wrap gap-3">
-                {record.attachments.map((attachment) => (
-                  <figure
-                    key={attachment.id}
-                    className="flex h-24 w-24 flex-col items-center justify-center gap-1 overflow-hidden rounded-lg border border-gray-200 bg-gray-50 text-gray-400"
-                    title={attachment.name}
-                  >
-                    <ImageIcon className="h-6 w-6" />
-                    <figcaption className="max-w-[88px] truncate px-1 text-[10px] text-gray-400">
-                      {attachment.name}
-                    </figcaption>
-                  </figure>
-                ))}
+                {record.attachments.map((attachment) => {
+                  return (
+                    <figure
+                      key={attachment.id}
+                      className="flex h-24 w-24 flex-col items-center justify-center gap-1 overflow-hidden rounded-lg border border-gray-200 bg-gray-50 text-gray-400"
+                      title={attachment.name}
+                    >
+                      <ImageIcon className="h-6 w-6" />
+                      <figcaption className="max-w-[88px] truncate px-1 text-[10px] text-gray-400">
+                        {attachment.name}
+                      </figcaption>
+                    </figure>
+                  );
+                })}
               </div>
             </Card>
           )}
@@ -284,7 +293,9 @@ export function ServiceRecordDrawer({
           <button
             type="button"
             disabled={index === 0}
-            onClick={() => onNavigate(index - 1)}
+            onClick={() => {
+              return onNavigate(index - 1);
+            }}
             className="flex items-center gap-1 text-sm font-medium text-gray-600 transition-colors hover:text-gray-900 disabled:cursor-not-allowed disabled:opacity-40"
           >
             <ChevronLeft className="h-4 w-4" />
@@ -298,7 +309,9 @@ export function ServiceRecordDrawer({
           <button
             type="button"
             disabled={index === records.length - 1}
-            onClick={() => onNavigate(index + 1)}
+            onClick={() => {
+              return onNavigate(index + 1);
+            }}
             className="flex items-center gap-1 text-sm font-medium text-blue-600 transition-colors hover:text-blue-700 disabled:cursor-not-allowed disabled:opacity-40"
           >
             Next Record

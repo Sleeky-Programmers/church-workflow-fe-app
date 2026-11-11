@@ -18,6 +18,7 @@ import { Loader } from "@/components/ui/loader";
 import { getNextPlan } from "@/lib/plan-utils";
 import { getCurrentPlan, getPlans } from "@/services/billingService";
 import { CurrentPlanResponse, Plan } from "@/types";
+import { useLatest } from "@/hooks/use-latest";
 
 export default function RolesPermissionsPage() {
   const router = useRouter();
@@ -40,31 +41,33 @@ export default function RolesPermissionsPage() {
   const customRolesEnabled = currentPlan?.customRolesEnabled ?? false;
 
   useEffect(() => {
-    loadRoles();
-  }, []);
-
-  useEffect(() => {
     Promise.all([getCurrentPlan(), getPlans()])
       .then(([plan, allPlans]) => {
         setCurrentPlan(plan);
         setPlans(allPlans);
       })
-      .catch((error) => console.error("Failed to load plan info:", error))
-      .finally(() => setPlansLoaded(true));
+      .catch(() => {
+        return undefined;
+      })
+      .finally(() => {
+        return setPlansLoaded(true);
+      });
   }, []);
 
   const loadRoles = async () => {
     setIsLoading(true);
     try {
       const data = await fetchRoles();
-      const mappedRoles: Role[] = data.map((role: any) => ({
-        id: role._id,
-        name: role.roleName,
-        type: role.type.toLowerCase() as "system" | "custom",
-        users: 0,
-        status: role.status.toLowerCase() as "active" | "disabled",
-        description: role.description || "",
-      }));
+      const mappedRoles: Role[] = data.map((role: any) => {
+        return {
+          id: role._id,
+          name: role.roleName,
+          type: role.type.toLowerCase() as "system" | "custom",
+          users: 0,
+          status: role.status.toLowerCase() as "active" | "disabled",
+          description: role.description || "",
+        };
+      });
       setRoles(mappedRoles);
     } catch (error: any) {
       toast({
@@ -77,9 +80,19 @@ export default function RolesPermissionsPage() {
     }
   };
 
+  const loadRolesRef = useLatest(loadRoles);
+
+  useEffect(() => {
+    loadRolesRef.current();
+  }, [loadRolesRef]);
+
   const handleActionSelect = async (roleId: string, action: RoleAction) => {
-    const role = roles.find((r) => r.id === roleId);
-    if (!role) return;
+    const role = roles.find((r) => {
+      return r.id === roleId;
+    });
+    if (!role) {
+      return;
+    }
 
     switch (action) {
       case "view_permissions":
@@ -109,16 +122,18 @@ export default function RolesPermissionsPage() {
 
   const handleDeactivateRole = async (roleId?: string) => {
     const idToDeactivate = roleId || selectedRole?.id;
-    if (!idToDeactivate) return;
+    if (!idToDeactivate) {
+      return;
+    }
 
     try {
       await updateRoleStatus(idToDeactivate, "DISABLED");
 
-      setRoles((prev) =>
-        prev.map((r) =>
-          r.id === idToDeactivate ? { ...r, status: "disabled" } : r,
-        ),
-      );
+      setRoles((prev) => {
+        return prev.map((r) => {
+          return r.id === idToDeactivate ? { ...r, status: "disabled" } : r;
+        });
+      });
 
       toast({
         title: "Success",
@@ -138,9 +153,11 @@ export default function RolesPermissionsPage() {
     try {
       await updateRoleStatus(roleId, "ACTIVE");
 
-      setRoles((prev) =>
-        prev.map((r) => (r.id === roleId ? { ...r, status: "active" } : r)),
-      );
+      setRoles((prev) => {
+        return prev.map((r) => {
+          return r.id === roleId ? { ...r, status: "active" } : r;
+        });
+      });
 
       toast({
         title: "Success",
@@ -187,7 +204,9 @@ export default function RolesPermissionsPage() {
         open={isDeactivateDialogOpen}
         onOpenChange={setIsDeactivateDialogOpen}
         roleName={selectedRole?.name || ""}
-        onConfirm={() => handleDeactivateRole()}
+        onConfirm={() => {
+          return handleDeactivateRole();
+        }}
       />
 
       <ViewRolePermissionsDialog
@@ -198,7 +217,9 @@ export default function RolesPermissionsPage() {
         roleType={selectedRole?.type}
         onEdit={
           selectedRole?.type === "custom"
-            ? () => setIsEditSliderOpen(true)
+            ? () => {
+                return setIsEditSliderOpen(true);
+              }
             : undefined
         }
       />

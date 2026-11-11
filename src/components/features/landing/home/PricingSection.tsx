@@ -20,7 +20,7 @@ export default async function PricingSection() {
     }
   } catch {
     // Falls back to FALLBACK_PLANS - this is a public marketing page and
-    // must never be blocked by an API hiccup.
+    // Must never be blocked by an API hiccup.
   }
 
   return <PricingSectionClient plans={plans} />;

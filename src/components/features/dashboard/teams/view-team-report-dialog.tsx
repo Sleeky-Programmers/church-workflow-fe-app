@@ -1,6 +1,6 @@
 "use client";
 
-import { Calendar, Mail, TrendingUp, User, Users, X } from "lucide-react";
+import { Calendar, Mail, TrendingUp, Users, X } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -61,7 +61,9 @@ export function ViewTeamReportDialog({
   const [attendanceColor, setAttendanceColor] = useState<string>("");
 
   useEffect(() => {
-    if (!open) return;
+    if (!open) {
+      return;
+    }
     if (reportData) {
       const percentage = reportData.attendancePercentage;
       if (percentage >= 80) {
@@ -85,8 +87,12 @@ export function ViewTeamReportDialog({
 
   const getInitials = (fullName: string) => {
     const names = fullName.trim().split(" ").filter(Boolean);
-    if (!names.length) return "?";
-    if (names.length === 1) return names[0][0].toUpperCase();
+    if (!names.length) {
+      return "?";
+    }
+    if (names.length === 1) {
+      return names[0][0].toUpperCase();
+    }
     return `${names[0][0]}${names[names.length - 1][0]}`.toUpperCase();
   };
 
@@ -264,41 +270,46 @@ export function ViewTeamReportDialog({
                   </Text>
                 </div>
                 <div className="space-y-2 max-h-[200px] overflow-y-auto">
-                  {reportData.team.members.map((member) => (
-                    <div
-                      key={member.id}
-                      className="bg-white rounded-lg border border-gray-200 px-3 py-2 flex items-center justify-between"
-                    >
-                      <div className="flex items-center gap-3 min-w-0">
-                        <Avatar className="h-8 w-8">
-                          <AvatarFallback className="bg-gray-200 text-gray-700 text-xs">
-                            {getInitials(member.fullName)}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div className="min-w-0">
-                          <Text className="text-sm truncate">
-                            {member.fullName}
-                          </Text>
-                          <div className="flex items-center gap-1">
-                            <Mail className="w-3 h-3 text-gray-400" />
-                            <Text variant="muted" className="text-xs truncate">
-                              {member.email}
+                  {reportData.team.members.map((member) => {
+                    return (
+                      <div
+                        key={member.id}
+                        className="bg-white rounded-lg border border-gray-200 px-3 py-2 flex items-center justify-between"
+                      >
+                        <div className="flex items-center gap-3 min-w-0">
+                          <Avatar className="h-8 w-8">
+                            <AvatarFallback className="bg-gray-200 text-gray-700 text-xs">
+                              {getInitials(member.fullName)}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="min-w-0">
+                            <Text className="text-sm truncate">
+                              {member.fullName}
                             </Text>
+                            <div className="flex items-center gap-1">
+                              <Mail className="w-3 h-3 text-gray-400" />
+                              <Text
+                                variant="muted"
+                                className="text-xs truncate"
+                              >
+                                {member.email}
+                              </Text>
+                            </div>
                           </div>
                         </div>
+                        {reportData.lowAttendanceMembers.some((low) => {
+                          return low.id === member.id;
+                        }) && (
+                          <Span
+                            variant="chip"
+                            className="bg-yellow-100 text-yellow-800 text-xs px-2 py-0.5"
+                          >
+                            Low Attendance
+                          </Span>
+                        )}
                       </div>
-                      {reportData.lowAttendanceMembers.some(
-                        (low) => low.id === member.id,
-                      ) && (
-                        <Span
-                          variant="chip"
-                          className="bg-yellow-100 text-yellow-800 text-xs px-2 py-0.5"
-                        >
-                          Low Attendance
-                        </Span>
-                      )}
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
 

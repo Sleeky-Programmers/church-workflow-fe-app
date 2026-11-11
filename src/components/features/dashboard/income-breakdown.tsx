@@ -10,7 +10,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { ChartContainer } from "@/components/ui/chart";
 import { Loader } from "@/components/ui/loader";
 import Heading from "@/components/ui/typography/Heading";
-import { Span, Text } from "@/components/ui/typography/Text";
+import { Span } from "@/components/ui/typography/Text";
 import { fetchGivingSummary } from "@/services/givingService";
 
 const COLORS = [
@@ -37,18 +37,19 @@ export function IncomeBreakdown() {
           endDate: format(new Date(), "yyyy-MM-dd"),
         });
 
-        const total = summary.byOfferingType.reduce(
-          (sum, row) => sum + row.amount,
-          0,
-        );
+        const total = summary.byOfferingType.reduce((sum, row) => {
+          return sum + row.amount;
+        }, 0);
 
         setSlices(
-          summary.byOfferingType.map((row, index) => ({
-            name: row.name,
-            color: COLORS[index % COLORS.length],
-            value: row.amount,
-            percent: total > 0 ? Math.round((row.amount / total) * 100) : 0,
-          })),
+          summary.byOfferingType.map((row, index) => {
+            return {
+              name: row.name,
+              color: COLORS[index % COLORS.length],
+              value: row.amount,
+              percent: total > 0 ? Math.round((row.amount / total) * 100) : 0,
+            };
+          }),
         );
       } catch {
         setSlices([]);
@@ -60,8 +61,12 @@ export function IncomeBreakdown() {
     load();
   }, []);
 
-  const top = [...slices].sort((a, b) => b.value - a.value)[0];
-  const hasData = slices.some((s) => s.value > 0);
+  const top = [...slices].sort((a, b) => {
+    return b.value - a.value;
+  })[0];
+  const hasData = slices.some((s) => {
+    return s.value > 0;
+  });
 
   const config = slices.reduce(
     (acc, item) => {
@@ -104,9 +109,9 @@ export function IncomeBreakdown() {
                     cx="50%"
                     cy="50%"
                   >
-                    {slices.map((entry, i) => (
-                      <Cell key={i} fill={entry.color} />
-                    ))}
+                    {slices.map((entry, i) => {
+                      return <Cell key={i} fill={entry.color} />;
+                    })}
                   </Pie>
 
                   {top && (
@@ -152,21 +157,23 @@ export function IncomeBreakdown() {
                 description="Add a giving record to see the distribution by offering type."
               />
             )}
-            {slices.map((item) => (
-              <div
-                key={item.name}
-                className="flex items-center justify-between gap-3 text-sm"
-              >
-                <div className="flex items-center gap-2">
-                  <Span
-                    className="w-3 h-3 rounded-full"
-                    style={{ backgroundColor: item.color }}
-                  />
-                  <Span className="truncate">{item.name}</Span>
+            {slices.map((item) => {
+              return (
+                <div
+                  key={item.name}
+                  className="flex items-center justify-between gap-3 text-sm"
+                >
+                  <div className="flex items-center gap-2">
+                    <Span
+                      className="w-3 h-3 rounded-full"
+                      style={{ backgroundColor: item.color }}
+                    />
+                    <Span className="truncate">{item.name}</Span>
+                  </div>
+                  <Span className="font-mono">{item.percent}%</Span>
                 </div>
-                <Span className="font-mono">{item.percent}%</Span>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </CardContent>

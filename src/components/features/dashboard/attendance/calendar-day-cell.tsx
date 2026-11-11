@@ -70,31 +70,39 @@ export function CalendarDayCell({
       </div>
 
       <div className="space-y-1">
-        {day.services.map((service) => (
-          <ServiceItem
-            key={service.id}
-            service={service}
-            date={day.dateString}
-            givingTotal={givingTotals[`${service.id}|${day.dateString}`]}
-            onAddAttendance={() => onAddAttendance(service, day.dateString)}
-            onViewServiceDetails={() =>
-              onViewServiceDetails(service, day.dateString)
-            }
-            onAddGivingRecord={() => onAddGivingRecord(service, day.dateString)}
-          />
-        ))}
+        {day.services.map((service) => {
+          return (
+            <ServiceItem
+              key={service.id}
+              service={service}
+              date={day.dateString}
+              givingTotal={givingTotals[`${service.id}|${day.dateString}`]}
+              onAddAttendance={() => {
+                return onAddAttendance(service, day.dateString);
+              }}
+              onViewServiceDetails={() => {
+                return onViewServiceDetails(service, day.dateString);
+              }}
+              onAddGivingRecord={() => {
+                return onAddGivingRecord(service, day.dateString);
+              }}
+            />
+          );
+        })}
 
         {specialServices.map((service) => {
           // Get schedule for this date
-          const schedule = service.daySchedules?.find(
-            (s) => s.date === day.dateString,
-          );
+          const schedule = service.daySchedules?.find((s) => {
+            return s.date === day.dateString;
+          });
 
           return (
             <div
               key={service.id}
               className="text-xs mb-2 p-2 border border-primary/30 bg-primary/5 rounded hover:bg-primary/10 transition-colors cursor-pointer"
-              onClick={() => onAddSpecialAttendance?.(service, day.dateString)}
+              onClick={() => {
+                return onAddSpecialAttendance?.(service, day.dateString);
+              }}
             >
               <div className="flex items-start gap-1.5">
                 <Star className="h-3 w-3 text-primary flex-shrink-0 mt-0.5" />

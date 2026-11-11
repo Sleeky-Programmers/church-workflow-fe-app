@@ -1,8 +1,4 @@
-import {
-  Gender,
-  MaritalStatus,
-  MembershipStatus,
-} from "@/lib/enums";
+import { Gender, MaritalStatus, MembershipStatus } from "@/lib/enums";
 
 interface FilterState {
   gender: Gender | null;
@@ -11,20 +7,25 @@ interface FilterState {
 }
 
 // All three facets are sent independently and AND-ed server-side, so a user
-// can filter by gender + marital status + membership status simultaneously.
+// Can filter by gender + marital status + membership status simultaneously.
 export function mapFiltersToQueryParams(filter: FilterState): string {
   const params = new URLSearchParams();
 
-  if (filter.gender) params.set("gender", filter.gender);
-  if (filter.maritalStatus) params.set("maritalStatus", filter.maritalStatus);
-  if (filter.membershipStatus)
+  if (filter.gender) {
+    params.set("gender", filter.gender);
+  }
+  if (filter.maritalStatus) {
+    params.set("maritalStatus", filter.maritalStatus);
+  }
+  if (filter.membershipStatus) {
     params.set("membershipStatus", filter.membershipStatus);
+  }
 
   return params.toString();
 }
 
 // Kept for the legacy single-filter param (used by a few call sites that only
-// ever pass one facet).
+// Ever pass one facet).
 export function mapFiltersToBackend(filter: FilterState): string {
   if (filter.gender === Gender.MALE) {
     return MemberFilterParam.MALE;
@@ -67,5 +68,5 @@ export function mapFiltersToBackend(filter: FilterState): string {
 }
 
 // Re-exported so existing imports of the legacy helper keep working without
-// pulling the enum directly.
+// Pulling the enum directly.
 import { MemberFilter as MemberFilterParam } from "@/lib/enums";

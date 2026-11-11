@@ -49,11 +49,17 @@ export function AddExpenseDialog({ onSaved }: Props) {
   const [departmentId, setDepartmentId] = useState<string>("");
 
   useEffect(() => {
-    if (!open) return;
+    if (!open) {
+      return;
+    }
     fetchDepartments({ page: 1, limit: 100 })
-      .then((res) =>
-        setDepartments(res.data.map((d) => ({ id: d.id, name: d.name }))),
-      )
+      .then((res) => {
+        return setDepartments(
+          res.data.map((d) => {
+            return { id: d.id, name: d.name };
+          }),
+        );
+      })
       .catch(() => {});
   }, [open]);
 
@@ -139,7 +145,9 @@ export function AddExpenseDialog({ onSaved }: Props) {
             <Input
               placeholder="e.g. Utilities, Maintenance, Transport"
               value={category}
-              onChange={(e) => setCategory(e.target.value)}
+              onChange={(e) => {
+                return setCategory(e.target.value);
+              }}
               disabled={isSaving}
             />
           </div>
@@ -149,7 +157,9 @@ export function AddExpenseDialog({ onSaved }: Props) {
             <Textarea
               rows={3}
               value={description}
-              onChange={(e) => setDescription(e.target.value)}
+              onChange={(e) => {
+                return setDescription(e.target.value);
+              }}
               disabled={isSaving}
             />
           </div>
@@ -162,7 +172,9 @@ export function AddExpenseDialog({ onSaved }: Props) {
                 min={0}
                 placeholder="0.00"
                 value={amount}
-                onChange={(e) => setAmount(e.target.value)}
+                onChange={(e) => {
+                  return setAmount(e.target.value);
+                }}
                 disabled={isSaving}
               />
             </div>
@@ -171,7 +183,9 @@ export function AddExpenseDialog({ onSaved }: Props) {
               <Input
                 type="date"
                 value={date}
-                onChange={(e) => setDate(e.target.value)}
+                onChange={(e) => {
+                  return setDate(e.target.value);
+                }}
                 disabled={isSaving}
               />
             </div>
@@ -184,11 +198,13 @@ export function AddExpenseDialog({ onSaved }: Props) {
                 <SelectValue placeholder="No specific department" />
               </SelectTrigger>
               <SelectContent>
-                {departments.map((dept) => (
-                  <SelectItem key={dept.id} value={dept.id}>
-                    {dept.name}
-                  </SelectItem>
-                ))}
+                {departments.map((dept) => {
+                  return (
+                    <SelectItem key={dept.id} value={dept.id}>
+                      {dept.name}
+                    </SelectItem>
+                  );
+                })}
               </SelectContent>
             </Select>
           </div>

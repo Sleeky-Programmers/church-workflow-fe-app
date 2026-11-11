@@ -6,7 +6,9 @@
     "dev": "next dev ",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "eslint src --max-warnings 0",
+		"lint:fix": "eslint src --fix",
+		"typecheck": "tsc --noEmit",
     "prepare": "husky"
   },
   "engines": {
@@ -14,7 +16,7 @@
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
-      "eslint --fix",
+      "eslint --fix --max-warnings 0",
       "prettier --write"
     ],
     "*.{css,scss,md,json}": [

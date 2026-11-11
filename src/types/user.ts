@@ -37,7 +37,9 @@ export type UserAction =
 const SELF_ALLOWED_ACTIONS: UserAction[] = ["view_details"];
 
 export function canPerformAction(action: UserAction, isCurrentUser: boolean) {
-  if (!isCurrentUser) return true;
+  if (!isCurrentUser) {
+    return true;
+  }
   return SELF_ALLOWED_ACTIONS.includes(action);
 }
 

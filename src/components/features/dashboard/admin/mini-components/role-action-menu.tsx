@@ -28,22 +28,34 @@ export function RoleActionsMenu({
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuItem onClick={() => onActionSelect("view_permissions")}>
+        <DropdownMenuItem
+          onClick={() => {
+            return onActionSelect("view_permissions");
+          }}
+        >
           View permissions
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => onActionSelect("edit")}>
+        <DropdownMenuItem
+          onClick={() => {
+            return onActionSelect("edit");
+          }}
+        >
           Edit
         </DropdownMenuItem>
         {status === "active" ? (
           <DropdownMenuItem
-            onClick={() => onActionSelect("disable")}
+            onClick={() => {
+              return onActionSelect("disable");
+            }}
             className="text-destructive-600"
           >
             Disable
           </DropdownMenuItem>
         ) : (
           <DropdownMenuItem
-            onClick={() => onActionSelect("enable")}
+            onClick={() => {
+              return onActionSelect("enable");
+            }}
             className="text-success-600"
           >
             Enable

@@ -21,17 +21,25 @@ import { SidebarTrigger } from "../ui/sidebar";
  */
 export function MobileTopBar() {
   const pathname = usePathname() || RouteConfig.dashboard.home;
-  const getUserFullName = useUserStore((state) => state.getUserFullName);
+  const getUserFullName = useUserStore((state) => {
+    return state.getUserFullName;
+  });
   const displayName = getUserFullName();
-  const openPalette = useCommandPaletteStore((state) => state.setOpen);
+  const openPalette = useCommandPaletteStore((state) => {
+    return state.setOpen;
+  });
 
   const pageLabel = useMemo(() => {
     const rest = pathname.replace(/\/+$/, "").replace(/^\/dashboard\/?/, "");
-    if (!rest) return "Overview";
+    if (!rest) {
+      return "Overview";
+    }
     return rest
       .split("/")[0]
       .replace(/[-_]+/g, " ")
-      .replace(/\b\w/g, (c) => c.toUpperCase());
+      .replace(/\b\w/g, (c) => {
+        return c.toUpperCase();
+      });
   }, [pathname]);
 
   return (
@@ -47,7 +55,9 @@ export function MobileTopBar() {
         variant="ghost"
         className="shrink-0"
         aria-label="Search"
-        onClick={() => openPalette(true)}
+        onClick={() => {
+          return openPalette(true);
+        }}
       >
         <Search className="h-4 w-4" />
       </Button>

@@ -39,7 +39,7 @@ interface Props {
   // Receives the newly created department, e.g. so a picker can select it.
   onCreated?: (department: DepartmentResponse) => void;
   // Controlled mode: pass both to open the dialog from elsewhere (such as a
-  // dropdown option). The built-in "Add a department" button is then hidden.
+  // Dropdown option). The built-in "Add a department" button is then hidden.
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
 }
@@ -70,8 +70,12 @@ const getVisibleMembers = <T extends Member>(
   const visibleIds = memberIds.slice(startIndex, endIndex);
 
   return visibleIds
-    .map((id) => memberMap[id])
-    .filter((member) => member !== undefined);
+    .map((id) => {
+      return memberMap[id];
+    })
+    .filter((member) => {
+      return member !== undefined;
+    });
 };
 
 export default function AddDepartmentDialog({
@@ -88,7 +92,9 @@ export default function AddDepartmentDialog({
   const isControlled = controlledOpen !== undefined;
   const open = isControlled ? controlledOpen : internalOpen;
   const setOpen = (next: boolean) => {
-    if (!isControlled) setInternalOpen(next);
+    if (!isControlled) {
+      setInternalOpen(next);
+    }
     onOpenChange?.(next);
   };
   const [departmentName, setDepartmentName] = useState("");
@@ -106,8 +112,8 @@ export default function AddDepartmentDialog({
   const [selectedMembersPage, setSelectedMembersPage] = useState(1);
 
   // Creating a department is an org-wide administrative action (matches the
-  // backend's FULL_ACCESS requirement on POST /department) - department
-  // heads scoped to their own department never see the entry point for it.
+  // Backend's FULL_ACCESS requirement on POST /department) - department
+  // Heads scoped to their own department never see the entry point for it.
   if (!canCreate) {
     return null;
   }
@@ -166,7 +172,11 @@ export default function AddDepartmentDialog({
   }
 
   function removeSelectedMember(id: string) {
-    setMemberIds((prev) => prev.filter((mid) => mid !== id));
+    setMemberIds((prev) => {
+      return prev.filter((mid) => {
+        return mid !== id;
+      });
+    });
 
     setMemberMap((prev) => {
       const updated = { ...prev };
@@ -206,7 +216,9 @@ export default function AddDepartmentDialog({
             <Input
               placeholder="e.g. ushering department"
               value={departmentName}
-              onChange={(e) => setDepartmentName(e.target.value)}
+              onChange={(e) => {
+                return setDepartmentName(e.target.value);
+              }}
             />
           </div>
 
@@ -256,44 +268,46 @@ export default function AddDepartmentDialog({
                       memberMap,
                       selectedMembersPage,
                       6,
-                    ).map((member) => (
-                      <div
-                        key={member.id}
-                        className="group flex items-center gap-2 rounded-full bg-background border shadow-sm pl-3 pr-1 py-1 transition-all hover:shadow-md hover:border-primary/20"
-                      >
-                        <div className="w-6 h-6 rounded-full bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center">
-                          <span className="text-xs font-medium text-primary">
-                            {member.fullName.charAt(0).toUpperCase()}
-                          </span>
-                        </div>
-
-                        <span className="text-sm font-medium">
-                          {member.fullName}
-                        </span>
-
-                        <Button
-                          size="icon"
-                          variant="ghost"
-                          onClick={() => {
-                            const remainingCount = memberIds.length - 1;
-                            const itemsPerPage = 6;
-                            const newTotalPages = Math.ceil(
-                              remainingCount / itemsPerPage,
-                            );
-                            removeSelectedMember(member.id);
-                            if (
-                              selectedMembersPage > newTotalPages &&
-                              newTotalPages > 0
-                            ) {
-                              setSelectedMembersPage(newTotalPages);
-                            }
-                          }}
-                          className="h-5 w-5 rounded-full hover:bg-destructive/10 hover:text-destructive transition-colors"
+                    ).map((member) => {
+                      return (
+                        <div
+                          key={member.id}
+                          className="group flex items-center gap-2 rounded-full bg-background border shadow-sm pl-3 pr-1 py-1 transition-all hover:shadow-md hover:border-primary/20"
                         >
-                          <X className="h-3 w-3" />
-                        </Button>
-                      </div>
-                    ))}
+                          <div className="w-6 h-6 rounded-full bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center">
+                            <span className="text-xs font-medium text-primary">
+                              {member.fullName.charAt(0).toUpperCase()}
+                            </span>
+                          </div>
+
+                          <span className="text-sm font-medium">
+                            {member.fullName}
+                          </span>
+
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            onClick={() => {
+                              const remainingCount = memberIds.length - 1;
+                              const itemsPerPage = 6;
+                              const newTotalPages = Math.ceil(
+                                remainingCount / itemsPerPage,
+                              );
+                              removeSelectedMember(member.id);
+                              if (
+                                selectedMembersPage > newTotalPages &&
+                                newTotalPages > 0
+                              ) {
+                                setSelectedMembersPage(newTotalPages);
+                              }
+                            }}
+                            className="h-5 w-5 rounded-full hover:bg-destructive/10 hover:text-destructive transition-colors"
+                          >
+                            <X className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      );
+                    })}
                   </div>
 
                   <PaginationControls
@@ -347,7 +361,9 @@ export default function AddDepartmentDialog({
               rows={4}
               placeholder="Add description"
               value={description}
-              onChange={(e) => setDescription(e.target.value)}
+              onChange={(e) => {
+                return setDescription(e.target.value);
+              }}
             />
           </div>
         </div>
@@ -376,7 +392,9 @@ const PaginationControls = ({
   totalItems,
   itemsPerPage,
 }: PaginationControlsProps) => {
-  if (totalPages <= 1) return null;
+  if (totalPages <= 1) {
+    return null;
+  }
 
   const startItem = (currentPage - 1) * itemsPerPage + 1;
   const endItem = Math.min(currentPage * itemsPerPage, totalItems);
@@ -410,15 +428,17 @@ const PaginationControls = ({
         <Button
           variant="outline"
           size="sm"
-          onClick={() => onPageChange(currentPage - 1)}
+          onClick={() => {
+            return onPageChange(currentPage - 1);
+          }}
           disabled={currentPage === 1}
           className="h-7 px-2 text-xs"
         >
           Prev
         </Button>
 
-        {getPageNumbers().map((page, idx) =>
-          page === "ellipsis" ? (
+        {getPageNumbers().map((page, idx) => {
+          return page === "ellipsis" ? (
             <span
               key={`ellipsis-${idx}`}
               className="px-1 text-xs text-muted-foreground"
@@ -430,18 +450,22 @@ const PaginationControls = ({
               key={page}
               variant={currentPage === page ? "default" : "outline"}
               size="sm"
-              onClick={() => onPageChange(Number(page))}
+              onClick={() => {
+                return onPageChange(Number(page));
+              }}
               className="h-7 w-7 p-0 text-xs"
             >
               {page}
             </Button>
-          ),
-        )}
+          );
+        })}
 
         <Button
           variant="outline"
           size="sm"
-          onClick={() => onPageChange(currentPage + 1)}
+          onClick={() => {
+            return onPageChange(currentPage + 1);
+          }}
           disabled={currentPage === totalPages}
           className="h-7 px-2 text-xs"
         >

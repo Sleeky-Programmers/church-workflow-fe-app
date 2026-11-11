@@ -35,16 +35,21 @@ export function AttendanceStatsCards({
 
   return (
     <div className="grid grid-cols-3 gap-4 mb-6">
-      {stats.map((stat, index) => (
-        <Card key={index} className="p-6">
-          <Heading level={2} className={`${stat.textColor} items-center mb-1`}>
-            {stat.value}
-          </Heading>
-          <Text variant="label" className="mb-2">
-            {stat.label}
-          </Text>
-        </Card>
-      ))}
+      {stats.map((stat, index) => {
+        return (
+          <Card key={index} className="p-6">
+            <Heading
+              level={2}
+              className={`${stat.textColor} items-center mb-1`}
+            >
+              {stat.value}
+            </Heading>
+            <Text variant="label" className="mb-2">
+              {stat.label}
+            </Text>
+          </Card>
+        );
+      })}
     </div>
   );
 }

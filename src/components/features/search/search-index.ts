@@ -47,9 +47,9 @@ const SECTION_BY_PREFIX: Array<[prefix: string, section: string | string[]]> = [
 ];
 
 function sectionFor(href: string) {
-  return SECTION_BY_PREFIX.find(
-    ([prefix]) => href === prefix || href.startsWith(`${prefix}/`),
-  )?.[1];
+  return SECTION_BY_PREFIX.find(([prefix]) => {
+    return href === prefix || href.startsWith(`${prefix}/`);
+  })?.[1];
 }
 
 /** Extra words people type for a page that aren't in its label. */
@@ -91,7 +91,9 @@ function buildPages(): SearchIndexEntry[] {
   const seen = new Set<string>();
 
   const push = (entry: SearchIndexEntry) => {
-    if (seen.has(entry.href)) return;
+    if (seen.has(entry.href)) {
+      return;
+    }
     seen.add(entry.href);
     entries.push(entry);
   };
@@ -99,15 +101,21 @@ function buildPages(): SearchIndexEntry[] {
   const sidebarItems = [...SidebarData.pages, ...SidebarData.footer];
   for (const item of sidebarItems) {
     // "Logout" lives in the sidebar footer but isn't a page to jump to.
-    if (item.url.startsWith("/auth")) continue;
-    const children = (item as { children?: Array<{ title: string; url: string }> })
-      .children;
+    if (item.url.startsWith("/auth")) {
+      continue;
+    }
+    const children = (
+      item as { children?: Array<{ title: string; url: string }> }
+    ).children;
 
     if (children?.length) {
       for (const child of children) {
         push({
           id: `page:${child.url}`,
-          label: child.title === "Dashboard" ? `${item.title} Dashboard` : child.title,
+          label:
+            child.title === "Dashboard"
+              ? `${item.title} Dashboard`
+              : child.title,
           href: child.url,
           parent: item.title,
           keywords: [
@@ -202,15 +210,26 @@ const STATIC_INDEX: SearchIndexEntry[] = [...buildPages(), ...ACTIONS];
 
 export const FALLBACK_ICON = FileText;
 
-function canSee(entry: SearchIndexEntry, role: UserChurchRole | null | undefined) {
-  if (!entry.section) return true;
-  const sections = Array.isArray(entry.section) ? entry.section : [entry.section];
-  return sections.some((s) => hasAccessLevel(role, s, entry.level ?? "VIEW"));
+function canSee(
+  entry: SearchIndexEntry,
+  role: UserChurchRole | null | undefined,
+) {
+  if (!entry.section) {
+    return true;
+  }
+  const sections = Array.isArray(entry.section)
+    ? entry.section
+    : [entry.section];
+  return sections.some((s) => {
+    return hasAccessLevel(role, s, entry.level ?? "VIEW");
+  });
 }
 
 /** Pages, settings and quick actions the given role is allowed to open. */
 export function getSearchIndex(role: UserChurchRole | null | undefined) {
-  return STATIC_INDEX.filter((entry) => canSee(entry, role));
+  return STATIC_INDEX.filter((entry) => {
+    return canSee(entry, role);
+  });
 }
 
 /**
@@ -225,25 +244,50 @@ export function filterSearchIndex(
   limit = 8,
 ): SearchIndexEntry[] {
   const query = rawQuery.trim().toLowerCase();
-  if (!query) return [];
+  if (!query) {
+    return [];
+  }
   const terms = query.split(/\s+/).filter(Boolean);
 
   const scored: Array<{ entry: SearchIndexEntry; score: number }> = [];
   for (const entry of entries) {
     const label = entry.label.toLowerCase();
-    const haystack = [label, entry.parent?.toLowerCase() ?? "", ...entry.keywords].join(" ");
-    if (!terms.every((t) => haystack.includes(t))) continue;
+    const haystack = [
+      label,
+      entry.parent?.toLowerCase() ?? "",
+      ...entry.keywords,
+    ].join(" ");
+    if (
+      !terms.every((t) => {
+        return haystack.includes(t);
+      })
+    ) {
+      continue;
+    }
 
     let score = 1;
-    if (label === query) score = 5;
-    else if (label.startsWith(query)) score = 4;
-    else if (words(label).some((w) => w.startsWith(terms[0]))) score = 3;
-    else if (label.includes(query)) score = 2;
+    if (label === query) {
+      score = 5;
+    } else if (label.startsWith(query)) {
+      score = 4;
+    } else if (
+      words(label).some((w) => {
+        return w.startsWith(terms[0]);
+      })
+    ) {
+      score = 3;
+    } else if (label.includes(query)) {
+      score = 2;
+    }
     scored.push({ entry, score });
   }
 
   return scored
-    .sort((a, b) => b.score - a.score || a.entry.label.localeCompare(b.entry.label))
+    .sort((a, b) => {
+      return b.score - a.score || a.entry.label.localeCompare(b.entry.label);
+    })
     .slice(0, limit)
-    .map((s) => s.entry);
+    .map((s) => {
+      return s.entry;
+    });
 }

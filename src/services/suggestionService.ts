@@ -26,7 +26,9 @@ export interface UsageEvent {
 }
 
 export async function sendUsageEvents(events: UsageEvent[], keepalive = false) {
-  if (!events.length) return;
+  if (!events.length) {
+    return;
+  }
   return authenticatedFetch<{ recorded: number }>("/suggestions/track", {
     method: "POST",
     body: JSON.stringify({ events }),

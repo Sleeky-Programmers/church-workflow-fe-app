@@ -58,11 +58,14 @@ export function LimitBanner({
     (async () => {
       try {
         const data = await fetchStatus();
-        if (isMounted) setStatus(data);
-      } catch (err) {
-        console.error("Failed to fetch limit status:", err);
+        if (isMounted) {
+          setStatus(data);
+        }
+      } catch {
       } finally {
-        if (isMounted) setLoading(false);
+        if (isMounted) {
+          setLoading(false);
+        }
       }
     })();
 
@@ -72,10 +75,14 @@ export function LimitBanner({
   }, [fetchStatus]);
 
   // Dismissing is temporary: the banner lives in component state only, so it
-  // shows again after a reload or when the user comes back to the page.
-  const handleDismiss = () => setIsVisible(false);
+  // Shows again after a reload or when the user comes back to the page.
+  const handleDismiss = () => {
+    return setIsVisible(false);
+  };
 
-  if (loading || !status || !isVisible) return null;
+  if (loading || !status || !isVisible) {
+    return null;
+  }
 
   const {
     current,
@@ -89,14 +96,16 @@ export function LimitBanner({
   } = status;
 
   // Work it out from the counts: some status endpoints report `isOverLimit`
-  // when the limit is merely reached. Reaching it is a warning (amber); only
-  // going past it is an error (red).
+  // When the limit is merely reached. Reaching it is a warning (amber); only
+  // Going past it is an error (red).
   const hasLimit = limit > 0;
   const exceeded = hasLimit && current > limit;
   const atLimit = hasLimit && current === limit;
   const plan = toSentenceCase(planName || "");
 
-  if (!isNearLimit && !atLimit && !exceeded) return null;
+  if (!isNearLimit && !atLimit && !exceeded) {
+    return null;
+  }
 
   let bannerColor: BannerColor = "blue";
   let title = "";
@@ -154,7 +163,9 @@ export function LimitBanner({
 
       <div className="flex items-center gap-3 self-stretch sm:self-auto">
         <Button
-          onClick={() => router.push(upgradeHref)}
+          onClick={() => {
+            return router.push(upgradeHref);
+          }}
           variant={bannerColor === "red" ? "destructive" : "default"}
           className="flex-1 sm:flex-none"
         >

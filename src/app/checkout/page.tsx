@@ -18,7 +18,9 @@ import { getPlans } from "@/services/billingService";
 import { Plan } from "@/types";
 import { getPlanLimitLines } from "@/lib/plan-utils";
 
-const formatPrice = (price: number) => `₦${price.toLocaleString()}`;
+const formatPrice = (price: number) => {
+  return `₦${price.toLocaleString()}`;
+};
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -59,7 +61,7 @@ export default function CheckoutPage() {
         if (response.ok) {
           const data = await response.json();
           // Only block a no-op re-purchase of the plan already active - a
-          // genuine plan change (upgrade/downgrade) still proceeds to checkout.
+          // Genuine plan change (upgrade/downgrade) still proceeds to checkout.
           const isSamePlanActive =
             data?.currentPlan === selected.plan &&
             data?.subscriptionStatus === "ACTIVE";
@@ -71,7 +73,7 @@ export default function CheckoutPage() {
           }
         }
       } catch {
-        // fails silently - payment API will catch it
+        // Fails silently - payment API will catch it
       }
 
       setPlan(selected);
@@ -83,14 +85,20 @@ export default function CheckoutPage() {
   useEffect(() => {
     getPlans()
       .then((plans) => {
-        const match = plans.find((p) => p.type === plan?.plan);
-        if (match) setPlanDetails(match);
+        const match = plans.find((p) => {
+          return p.type === plan?.plan;
+        });
+        if (match) {
+          setPlanDetails(match);
+        }
       })
-      .catch(() => setPlanDetails(null));
+      .catch(() => {
+        return setPlanDetails(null);
+      });
   }, [plan]);
 
   // The actual amount charged today - always the real total for the chosen
-  // cycle, never a monthly-equivalent, since this is the payment confirmation.
+  // Cycle, never a monthly-equivalent, since this is the payment confirmation.
   const price =
     plan && planDetails
       ? plan.billingCycle === "MONTHLY"
@@ -207,14 +215,18 @@ export default function CheckoutPage() {
           </div>
 
           <div className="flex flex-col gap-2 pt-1">
-            {[...getPlanLimitLines(planDetails), ...planDetails.features].map((feature) => (
-              <div key={feature} className="flex items-center gap-2">
-                <Check size={13} className="text-green-600 shrink-0" />
-                <Text variant="muted" className="text-xs">
-                  {feature}
-                </Text>
-              </div>
-            ))}
+            {[...getPlanLimitLines(planDetails), ...planDetails.features].map(
+              (feature) => {
+                return (
+                  <div key={feature} className="flex items-center gap-2">
+                    <Check size={13} className="text-green-600 shrink-0" />
+                    <Text variant="muted" className="text-xs">
+                      {feature}
+                    </Text>
+                  </div>
+                );
+              },
+            )}
           </div>
         </div>
 
@@ -226,7 +238,9 @@ export default function CheckoutPage() {
           <input
             type="text"
             value={promoCode}
-            onChange={(e) => setPromoCode(e.target.value)}
+            onChange={(e) => {
+              return setPromoCode(e.target.value);
+            }}
             placeholder="Enter promo code"
             className="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-[#0C5FB3] transition-colors"
           />

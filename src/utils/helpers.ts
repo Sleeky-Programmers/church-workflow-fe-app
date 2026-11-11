@@ -1,7 +1,11 @@
 export function formatDate(isoDate?: string): string {
-  if (!isoDate) return "-";
+  if (!isoDate) {
+    return "-";
+  }
   const date = new Date(isoDate);
-  if (Number.isNaN(date.getTime())) return "-";
+  if (Number.isNaN(date.getTime())) {
+    return "-";
+  }
   const day = date.getDate().toString().padStart(2, "0");
   const month = (date.getMonth() + 1).toString().padStart(2, "0");
   const year = date.getFullYear();
@@ -20,7 +24,9 @@ export const formatLabel = (value: string) => {
   return value
     .toLowerCase()
     .replace(/_/g, " ")
-    .replace(/\b\w/g, (c) => c.toUpperCase());
+    .replace(/\b\w/g, (c) => {
+      return c.toUpperCase();
+    });
 };
 
 /**
@@ -29,7 +35,9 @@ export const formatLabel = (value: string) => {
  * @returns Time in 12-hour format with AM/PM (e.g., "9:00 AM", "2:30 PM")
  */
 export function convertTo12HourFormat(time24: string): string {
-  if (!time24) return "";
+  if (!time24) {
+    return "";
+  }
 
   const [hours, minutes] = time24.split(":").map(Number);
   const ampm = hours >= 12 ? "PM" : "AM";
@@ -43,10 +51,14 @@ export function convertTo12HourFormat(time24: string): string {
  * @returns Time in 24-hour format (e.g., "09:00", "14:30")
  */
 export function convertTo24HourFormat(time12: string): string {
-  if (!time12) return "";
+  if (!time12) {
+    return "";
+  }
 
   const match = time12.match(/^(\d{1,2}):(\d{2})\s?(AM|PM)$/i);
-  if (!match) return time12;
+  if (!match) {
+    return time12;
+  }
 
   let hours = parseInt(match[1]);
   const minutes = parseInt(match[2]);

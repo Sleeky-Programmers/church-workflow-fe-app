@@ -32,7 +32,9 @@ interface LoginFormProps {
 export default function LoginForm({ onForgotPassword }: LoginFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
-  const setUser = useAuthStore((state) => state.setUser);
+  const setUser = useAuthStore((state) => {
+    return state.setUser;
+  });
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
@@ -98,7 +100,9 @@ export default function LoginForm({ onForgotPassword }: LoginFormProps) {
     }
   };
 
-  const onSignUp = () => router.push(RouteConfig.auth.signUp);
+  const onSignUp = () => {
+    return router.push(RouteConfig.auth.signUp);
+  };
 
   const handleGoogleLogin = async (idToken: string) => {
     setIsLoading(true);
@@ -148,38 +152,45 @@ export default function LoginForm({ onForgotPassword }: LoginFormProps) {
           <FormField
             control={form.control}
             name="email"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Email</FormLabel>
-                <FormControl>
-                  <Input
-                    type="email"
-                    placeholder="Enter your email address"
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+            render={({ field }) => {
+              return (
+                <FormItem>
+                  <FormLabel>Email</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="email"
+                      placeholder="Enter your email address"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              );
+            }}
           />
 
           <FormField
             control={form.control}
             name="password"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Password</FormLabel>
-                <FormControl>
-                  <PasswordInput placeholder="Enter your password" {...field} />
-                </FormControl>
-                <div className="flex justify-end">
-                  <Button variant="link" onClick={onForgotPassword}>
-                    Forgot password?
-                  </Button>
-                </div>
-                <FormMessage />
-              </FormItem>
-            )}
+            render={({ field }) => {
+              return (
+                <FormItem>
+                  <FormLabel>Password</FormLabel>
+                  <FormControl>
+                    <PasswordInput
+                      placeholder="Enter your password"
+                      {...field}
+                    />
+                  </FormControl>
+                  <div className="flex justify-end">
+                    <Button variant="link" onClick={onForgotPassword}>
+                      Forgot password?
+                    </Button>
+                  </div>
+                  <FormMessage />
+                </FormItem>
+              );
+            }}
           />
 
           <Button type="submit" disabled={isLoading} className="w-full py-6">

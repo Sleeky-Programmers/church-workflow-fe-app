@@ -1,12 +1,18 @@
 {
+  "root": true,
   "extends": ["next/core-web-vitals", "next/typescript"],
+  "ignorePatterns": [".next/**", "node_modules/**", "out/**", "next-env.d.ts"],
   "rules": {
     "@typescript-eslint/interface-name-prefix": "off",
     "@typescript-eslint/explicit-function-return-type": "off",
     "@typescript-eslint/explicit-module-boundary-types": "off",
     "@typescript-eslint/no-explicit-any": "off",
     "no-console": "error",
-    "react-hooks/rules-of-hooks": "off",
+    "curly": ["error", "all"],
+    "brace-style": ["error", "1tbs", { "allowSingleLine": false }],
+    "arrow-body-style": ["error", "always"],
+    "no-lonely-if": "error",
+    "react-hooks/rules-of-hooks": "error",
     "no-warning-comments": [
       "warn",
       {

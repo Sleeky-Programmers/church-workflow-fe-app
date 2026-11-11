@@ -8,6 +8,7 @@ import { Suspense, useEffect, useMemo, useState } from "react";
 import { DuplicateWarningBanner } from "@/components/features/dashboard/finance/giving/duplicate-warning-banner";
 import { EntryLine } from "@/components/features/dashboard/finance/giving/entry-line";
 import { Button } from "@/components/ui/button";
+import { DatePicker } from "@/components/ui/date-picker";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Loader } from "@/components/ui/loader";
@@ -48,7 +49,11 @@ function emptyEntry(
 ): GivingBatchEntryPayload {
   return {
     offeringTypeId:
-      offeringTypes.find((t) => t.isDefault)?.id || offeringTypes[0]?.id || "",
+      offeringTypes.find((t) => {
+        return t.isDefault;
+      })?.id ||
+      offeringTypes[0]?.id ||
+      "",
     currencyCode: defaultCurrency,
     amount: 0,
     paymentMethod: paymentMethods[0]?.code || "",
@@ -83,12 +88,11 @@ function NewGivingBatchContent() {
   const [churchServiceId, setChurchServiceId] = useState(
     searchParams.get("churchServiceId") || "",
   );
-  // The date is fixed to the service occurrence this batch is being
-  // Recorded for - it's never editable in this form (see the read-only
-  // Date field below).
-  const [date] = useState(
-    searchParams.get("date") || format(new Date(), "yyyy-MM-dd"),
-  );
+  // Selectable range: from the service occurrence date (when we arrived from
+  // One) up to today - giving can't be recorded for a future date.
+  const today = format(new Date(), "yyyy-MM-dd");
+  const serviceDate = searchParams.get("date") || undefined;
+  const [date, setDate] = useState(serviceDate || today);
   const [countedWith, setCountedWith] = useState("");
   const [notes, setNotes] = useState("");
   const [entries, setEntries] = useState<GivingBatchEntryPayload[]>([]);
@@ -102,36 +106,52 @@ function NewGivingBatchContent() {
     async function loadOptions() {
       setIsLoadingOptions(true);
       try {
-        const [servicesData, offeringTypesData, currenciesData, paymentMethodsData] =
-          await Promise.all([
-            fetchAllServices(format(new Date(), "yyyy-MM")),
-            fetchOfferingTypes(),
-            fetchCurrencies(),
-            fetchPaymentMethods(),
-          ]);
+        const [
+          servicesData,
+          offeringTypesData,
+          currenciesData,
+          paymentMethodsData,
+        ] = await Promise.all([
+          fetchAllServices(format(new Date(), "yyyy-MM")),
+          fetchOfferingTypes(),
+          fetchCurrencies(),
+          fetchPaymentMethods(),
+        ]);
 
         setServices(
-          servicesData.map((s: any) => ({ id: s._id, title: s.title })),
+          servicesData.map((s: any) => {
+            return { id: s._id, title: s.title };
+          }),
         );
 
-        const activeOfferingTypes = offeringTypesData.filter((t) => t.isActive);
+        const activeOfferingTypes = offeringTypesData.filter((t) => {
+          return t.isActive;
+        });
         setOfferingTypes(activeOfferingTypes);
 
-        const activeCurrencies = currenciesData.filter((c) => c.isActive);
+        const activeCurrencies = currenciesData.filter((c) => {
+          return c.isActive;
+        });
         setCurrencies(activeCurrencies);
 
-        const activePaymentMethods = paymentMethodsData.filter(
-          (m) => m.isActive,
-        );
+        const activePaymentMethods = paymentMethodsData.filter((m) => {
+          return m.isActive;
+        });
         setPaymentMethods(activePaymentMethods);
 
         const defaultCurrency =
-          activeCurrencies.find((c) => c.isDefault)?.code ||
+          activeCurrencies.find((c) => {
+            return c.isDefault;
+          })?.code ||
           activeCurrencies[0]?.code ||
           "NGN";
 
         setEntries([
-          emptyEntry(activeOfferingTypes, defaultCurrency, activePaymentMethods),
+          emptyEntry(
+            activeOfferingTypes,
+            defaultCurrency,
+            activePaymentMethods,
+          ),
         ]);
       } catch (error: any) {
         toast({
@@ -157,11 +177,14 @@ function NewGivingBatchContent() {
     let cancelled = false;
     checkDuplicateGivingBatch({ churchServiceId, date })
       .then((res) => {
-        if (!cancelled)
+        if (!cancelled) {
           setDuplicateBatchId(res.exists ? res.batchId : undefined);
+        }
       })
       .catch(() => {
-        if (!cancelled) setDuplicateBatchId(undefined);
+        if (!cancelled) {
+          setDuplicateBatchId(undefined);
+        }
       });
 
     return () => {
@@ -169,16 +192,22 @@ function NewGivingBatchContent() {
     };
   }, [churchServiceId, date]);
 
-  const defaultCurrencyCode = useMemo(
-    () =>
-      currencies.find((c) => c.isDefault)?.code || currencies[0]?.code || "NGN",
-    [currencies],
-  );
+  const defaultCurrencyCode = useMemo(() => {
+    return (
+      currencies.find((c) => {
+        return c.isDefault;
+      })?.code ||
+      currencies[0]?.code ||
+      "NGN"
+    );
+  }, [currencies]);
 
   const totalsByCurrency = useMemo(() => {
     const totals: Record<string, number> = {};
     for (const entry of entries) {
-      if (!entry.currencyCode) continue;
+      if (!entry.currencyCode) {
+        continue;
+      }
       totals[entry.currencyCode] =
         (totals[entry.currencyCode] || 0) + (entry.amount || 0);
     }
@@ -186,33 +215,54 @@ function NewGivingBatchContent() {
   }, [entries]);
 
   const handleAddEntry = () => {
-    setEntries((prev) => [
-      ...prev,
-      emptyEntry(offeringTypes, defaultCurrencyCode, paymentMethods),
-    ]);
+    setEntries((prev) => {
+      return [
+        ...prev,
+        emptyEntry(offeringTypes, defaultCurrencyCode, paymentMethods),
+      ];
+    });
   };
 
   const handleEntryChange = (index: number, entry: GivingBatchEntryPayload) => {
-    setEntries((prev) => prev.map((e, i) => (i === index ? entry : e)));
+    setEntries((prev) => {
+      return prev.map((e, i) => {
+        return i === index ? entry : e;
+      });
+    });
   };
 
   const handleRemoveEntry = (index: number) => {
-    setEntries((prev) => prev.filter((_, i) => i !== index));
+    setEntries((prev) => {
+      return prev.filter((_, i) => {
+        return i !== index;
+      });
+    });
   };
 
   const isFormValid =
     churchServiceId &&
     date &&
+    duplicateBatchId === undefined &&
     entries.length > 0 &&
-    entries.every(
-      (entry) =>
+    entries.every((entry) => {
+      return (
         entry.offeringTypeId &&
         entry.currencyCode &&
         entry.paymentMethod &&
-        entry.amount > 0,
-    );
+        entry.amount > 0
+      );
+    });
 
   const handleSave = async (submitAfterSave: boolean) => {
+    if (duplicateBatchId !== undefined) {
+      toast({
+        title: "Record already exists",
+        description:
+          "A giving record already exists for this service and date. It can only be edited.",
+        variant: "destructive",
+      });
+      return;
+    }
     if (!isFormValid) {
       toast({
         title: "Missing information",
@@ -282,21 +332,32 @@ function NewGivingBatchContent() {
                   <SelectValue placeholder="Select a service" />
                 </SelectTrigger>
                 <SelectContent>
-                  {services.map((service) => (
-                    <SelectItem key={service.id} value={service.id}>
-                      {service.title}
-                    </SelectItem>
-                  ))}
+                  {services.map((service) => {
+                    return (
+                      <SelectItem key={service.id} value={service.id}>
+                        {service.title}
+                      </SelectItem>
+                    );
+                  })}
                 </SelectContent>
               </Select>
             </div>
 
             <div className="space-y-1.5">
               <Label>Date</Label>
-              <Input type="date" value={date} disabled readOnly />
+              <DatePicker
+                value={date}
+                onChange={(next) => {
+                  return next && setDate(next);
+                }}
+                minDate={serviceDate}
+                maxDate={today}
+                disabled={isSaving}
+              />
               <Text variant="muted" className="text-xs">
-                Fixed to the service occurrence being recorded and can&apos;t
-                be changed.
+                {serviceDate
+                  ? "From the service date up to today."
+                  : "Today or an earlier date; future dates aren't allowed."}
               </Text>
             </div>
 
@@ -305,7 +366,9 @@ function NewGivingBatchContent() {
               <Input
                 placeholder="e.g. Second counter's name"
                 value={countedWith}
-                onChange={(e) => setCountedWith(e.target.value)}
+                onChange={(e) => {
+                  return setCountedWith(e.target.value);
+                }}
               />
             </div>
           </div>
@@ -320,30 +383,38 @@ function NewGivingBatchContent() {
             </div>
 
             <div className="space-y-3">
-              {entries.map((entry, index) => (
-                <EntryLine
-                  key={index}
-                  entry={entry}
-                  offeringTypes={offeringTypes}
-                  currencies={currencies}
-                  paymentMethods={paymentMethods}
-                  onChange={(next) => handleEntryChange(index, next)}
-                  onRemove={() => handleRemoveEntry(index)}
-                  canRemove={entries.length > 1}
-                  disabled={isSaving}
-                />
-              ))}
+              {entries.map((entry, index) => {
+                return (
+                  <EntryLine
+                    key={index}
+                    entry={entry}
+                    offeringTypes={offeringTypes}
+                    currencies={currencies}
+                    paymentMethods={paymentMethods}
+                    onChange={(next) => {
+                      return handleEntryChange(index, next);
+                    }}
+                    onRemove={() => {
+                      return handleRemoveEntry(index);
+                    }}
+                    canRemove={entries.length > 1}
+                    disabled={isSaving}
+                  />
+                );
+              })}
             </div>
 
             <div className="flex flex-wrap items-center gap-4 pt-2 border-t">
-              {Object.entries(totalsByCurrency).map(([code, amount]) => (
-                <div key={code} className="text-sm">
-                  <span className="text-gray-500">Total {code}: </span>
-                  <span className="font-semibold">
-                    {formatCurrency(amount, code)}
-                  </span>
-                </div>
-              ))}
+              {Object.entries(totalsByCurrency).map(([code, amount]) => {
+                return (
+                  <div key={code} className="text-sm">
+                    <span className="text-gray-500">Total {code}: </span>
+                    <span className="font-semibold">
+                      {formatCurrency(amount, code)}
+                    </span>
+                  </div>
+                );
+              })}
             </div>
           </div>
 
@@ -352,7 +423,9 @@ function NewGivingBatchContent() {
             <Textarea
               rows={3}
               value={notes}
-              onChange={(e) => setNotes(e.target.value)}
+              onChange={(e) => {
+                return setNotes(e.target.value);
+              }}
               placeholder="Any additional context about this batch"
             />
           </div>
@@ -361,11 +434,18 @@ function NewGivingBatchContent() {
             <Button
               variant="outline"
               disabled={isSaving}
-              onClick={() => handleSave(false)}
+              onClick={() => {
+                return handleSave(false);
+              }}
             >
               Save as Draft
             </Button>
-            <Button disabled={isSaving} onClick={() => handleSave(true)}>
+            <Button
+              disabled={isSaving}
+              onClick={() => {
+                return handleSave(true);
+              }}
+            >
               {isSaving ? "Saving..." : "Submit"}
             </Button>
           </div>

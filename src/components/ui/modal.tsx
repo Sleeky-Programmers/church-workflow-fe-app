@@ -12,7 +12,9 @@ type Props = {
 };
 
 export function BaseModal({ open, title, onClose, children, footer }: Props) {
-  if (!open) return null;
+  if (!open) {
+    return null;
+  }
 
   return createPortal(
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">

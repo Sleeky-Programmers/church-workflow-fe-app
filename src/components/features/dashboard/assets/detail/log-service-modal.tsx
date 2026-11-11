@@ -94,7 +94,9 @@ export function LogServiceModal({
     <Dialog
       open={open}
       onOpenChange={(next) => {
-        if (!next) reset();
+        if (!next) {
+          reset();
+        }
         onOpenChange(next);
       }}
     >
@@ -110,7 +112,9 @@ export function LogServiceModal({
           <button
             type="button"
             aria-label="Close"
-            onClick={() => onOpenChange(false)}
+            onClick={() => {
+              return onOpenChange(false);
+            }}
             className="-mr-1 rounded-md p-1 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-800"
           >
             ✕
@@ -152,18 +156,17 @@ export function LogServiceModal({
                   value={maintenanceType}
                   onValueChange={setMaintenanceType}
                 >
-                  <SelectTrigger
-                    id="maintenance-type"
-                    className={controlClass}
-                  >
+                  <SelectTrigger id="maintenance-type" className={controlClass}>
                     <SelectValue placeholder="Select Type" />
                   </SelectTrigger>
                   <SelectContent>
-                    {MAINTENANCE_TYPES.map((option) => (
-                      <SelectItem key={option} value={option}>
-                        {option}
-                      </SelectItem>
-                    ))}
+                    {MAINTENANCE_TYPES.map((option) => {
+                      return (
+                        <SelectItem key={option} value={option}>
+                          {option}
+                        </SelectItem>
+                      );
+                    })}
                   </SelectContent>
                 </Select>
               </div>
@@ -192,7 +195,9 @@ export function LogServiceModal({
                 id="service-notes"
                 rows={4}
                 value={notes}
-                onChange={(event) => setNotes(event.target.value)}
+                onChange={(event) => {
+                  return setNotes(event.target.value);
+                }}
                 placeholder="Describe the maintenance work performed..."
                 className={`${controlClass} h-auto resize-none py-2`}
               />
@@ -221,7 +226,9 @@ export function LogServiceModal({
             <Button
               type="button"
               variant="outline"
-              onClick={() => onOpenChange(false)}
+              onClick={() => {
+                return onOpenChange(false);
+              }}
               className="h-10 rounded-lg border-gray-300 px-5 text-sm font-medium"
             >
               Cancel

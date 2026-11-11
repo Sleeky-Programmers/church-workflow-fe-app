@@ -84,7 +84,9 @@ function Bubble({
     };
   }, [place, target]);
 
-  if (!pos) return null;
+  if (!pos) {
+    return null;
+  }
 
   return createPortal(
     <div
@@ -156,9 +158,13 @@ export function SuggestionAnchor({
   const key = ids.join("|");
 
   useEffect(() => {
-    if (!ctx) return;
+    if (!ctx) {
+      return;
+    }
     ctx.register(ids, token, weight);
-    return () => ctx.unregister(ids, token);
+    return () => {
+      return ctx.unregister(ids, token);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ctx?.register, ctx?.unregister, key, token, weight]);
 
@@ -171,7 +177,9 @@ export function SuggestionAnchor({
         <Bubble
           suggestion={suggestion}
           target={ref.current}
-          onDismiss={() => ctx?.dismiss(suggestion.id)}
+          onDismiss={() => {
+            return ctx?.dismiss(suggestion.id);
+          }}
         />
       )}
     </div>

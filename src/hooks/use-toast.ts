@@ -33,7 +33,9 @@ function genId() {
 
 function dispatch(action: Action) {
   memoryState = reducer(memoryState, action);
-  listeners.forEach((l) => l(memoryState));
+  listeners.forEach((l) => {
+    return l(memoryState);
+  });
 }
 
 function reducer(state: State, action: Action): State {
@@ -45,23 +47,25 @@ function reducer(state: State, action: Action): State {
 
     case "UPDATE_TOAST":
       return {
-        toasts: state.toasts.map((t) =>
-          t.id === action.toast.id ? { ...t, ...action.toast } : t,
-        ),
+        toasts: state.toasts.map((t) => {
+          return t.id === action.toast.id ? { ...t, ...action.toast } : t;
+        }),
       };
 
     case "DISMISS_TOAST":
       return {
-        toasts: state.toasts.map((t) =>
-          !action.toastId || t.id === action.toastId
+        toasts: state.toasts.map((t) => {
+          return !action.toastId || t.id === action.toastId
             ? { ...t, open: false }
-            : t,
-        ),
+            : t;
+        }),
       };
 
     case "REMOVE_TOAST":
       return {
-        toasts: state.toasts.filter((t) => t.id !== action.toastId),
+        toasts: state.toasts.filter((t) => {
+          return t.id !== action.toastId;
+        }),
       };
 
     default:
@@ -77,7 +81,9 @@ export function toast(props: Omit<ToasterToast, "id">) {
     id,
     open: true,
     onOpenChange: (open) => {
-      if (!open) dispatch({ type: "DISMISS_TOAST", toastId: id });
+      if (!open) {
+        dispatch({ type: "DISMISS_TOAST", toastId: id });
+      }
     },
   };
 

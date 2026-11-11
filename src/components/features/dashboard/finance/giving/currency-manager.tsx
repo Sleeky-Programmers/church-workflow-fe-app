@@ -50,11 +50,12 @@ export function CurrencyManager() {
     : undefined;
 
   const totalPages = Math.max(1, Math.ceil(currencies.length / PAGE_SIZE));
-  const pagedCurrencies = useMemo(
-    () =>
-      currencies.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE),
-    [currencies, currentPage],
-  );
+  const pagedCurrencies = useMemo(() => {
+    return currencies.slice(
+      (currentPage - 1) * PAGE_SIZE,
+      currentPage * PAGE_SIZE,
+    );
+  }, [currencies, currentPage]);
 
   const load = async () => {
     setIsLoading(true);
@@ -75,7 +76,9 @@ export function CurrencyManager() {
   }, []);
 
   useEffect(() => {
-    if (currentPage > totalPages) setCurrentPage(totalPages);
+    if (currentPage > totalPages) {
+      setCurrentPage(totalPages);
+    }
   }, [currentPage, totalPages]);
 
   const handleAdd = async () => {
@@ -127,7 +130,9 @@ export function CurrencyManager() {
   };
 
   const handleConfirmDelete = async () => {
-    if (!pendingDelete) return;
+    if (!pendingDelete) {
+      return;
+    }
     const currency = pendingDelete;
     setDeletingId(currency.id);
     setError(null);
@@ -149,7 +154,9 @@ export function CurrencyManager() {
   };
 
   const handleSaveEdit = async (currency: Currency) => {
-    if (!editingSymbol.trim()) return;
+    if (!editingSymbol.trim()) {
+      return;
+    }
     setError(null);
     try {
       await updateCurrency(currency.id, { symbol: editingSymbol.trim() });
@@ -182,7 +189,9 @@ export function CurrencyManager() {
           <CurrencyCombobox
             value={selectedCode}
             onChange={setSelectedCode}
-            excludeCodes={currencies.map((c) => c.code)}
+            excludeCodes={currencies.map((c) => {
+              return c.code;
+            })}
             disabled={isSaving}
           />
         </div>
@@ -217,112 +226,132 @@ export function CurrencyManager() {
       ) : (
         <>
           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
-            {pagedCurrencies.map((currency) => (
-              <div
-                key={currency.id}
-                className="rounded-xl border border-gray-200 p-3 flex flex-col gap-2 hover:border-gray-300 transition-colors"
-              >
-                <div className="flex items-start justify-between gap-2">
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm font-bold text-gray-900">
-                        {currency.code}
-                      </span>
-                      {editingId === currency.id ? (
-                        <div className="flex items-center gap-1">
-                          <Input
-                            value={editingSymbol}
-                            onChange={(e) => setEditingSymbol(e.target.value)}
-                            className="h-7 w-16"
-                            autoFocus
-                          />
-                          <Button
-                            size="icon"
-                            variant="ghost"
-                            className="h-7 w-7"
-                            onClick={() => handleSaveEdit(currency)}
-                          >
-                            <Check className="w-4 h-4 text-green-600" />
-                          </Button>
-                          <Button
-                            size="icon"
-                            variant="ghost"
-                            className="h-7 w-7"
-                            onClick={() => setEditingId(null)}
-                          >
-                            <X className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      ) : (
-                        <span className="text-sm text-gray-500 truncate">
-                          {currency.symbol}
+            {pagedCurrencies.map((currency) => {
+              return (
+                <div
+                  key={currency.id}
+                  className="rounded-xl border border-gray-200 p-3 flex flex-col gap-2 hover:border-gray-300 transition-colors"
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-bold text-gray-900">
+                          {currency.code}
                         </span>
-                      )}
-                    </div>
-                    <p className="text-xs text-gray-500 truncate mt-0.5">
-                      {currency.name}
-                    </p>
-                    <div className="flex items-center gap-1.5 mt-1">
-                      <span
-                        className={`text-[11px] px-1.5 py-0.5 rounded-full ${
-                          currency.isActive
-                            ? "bg-green-50 text-green-700"
-                            : "bg-gray-100 text-gray-500"
-                        }`}
-                      >
-                        {currency.isActive ? "Active" : "Inactive"}
-                      </span>
-                      {currency.isDefault && (
-                        <span className="text-[11px] px-1.5 py-0.5 rounded-full bg-amber-50 text-amber-700">
-                          default
+                        {editingId === currency.id ? (
+                          <div className="flex items-center gap-1">
+                            <Input
+                              value={editingSymbol}
+                              onChange={(e) => {
+                                return setEditingSymbol(e.target.value);
+                              }}
+                              className="h-7 w-16"
+                              autoFocus
+                            />
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              className="h-7 w-7"
+                              onClick={() => {
+                                return handleSaveEdit(currency);
+                              }}
+                            >
+                              <Check className="w-4 h-4 text-green-600" />
+                            </Button>
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              className="h-7 w-7"
+                              onClick={() => {
+                                return setEditingId(null);
+                              }}
+                            >
+                              <X className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        ) : (
+                          <span className="text-sm text-gray-500 truncate">
+                            {currency.symbol}
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-xs text-gray-500 truncate mt-0.5">
+                        {currency.name}
+                      </p>
+                      <div className="flex items-center gap-1.5 mt-1">
+                        <span
+                          className={`text-[11px] px-1.5 py-0.5 rounded-full ${
+                            currency.isActive
+                              ? "bg-green-50 text-green-700"
+                              : "bg-gray-100 text-gray-500"
+                          }`}
+                        >
+                          {currency.isActive ? "Active" : "Inactive"}
                         </span>
-                      )}
+                        {currency.isDefault && (
+                          <span className="text-[11px] px-1.5 py-0.5 rounded-full bg-amber-50 text-amber-700">
+                            default
+                          </span>
+                        )}
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                <div className="flex items-center gap-1.5 pt-1">
-                  <button
-                    type="button"
-                    onClick={() => handleSetDefault(currency)}
-                    title={currency.isDefault ? "Default currency" : "Set as default"}
-                  >
-                    <Star
-                      className={`w-4 h-4 ${
+                  <div className="flex items-center gap-1.5 pt-1">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        return handleSetDefault(currency);
+                      }}
+                      title={
                         currency.isDefault
-                          ? "fill-amber-400 text-amber-400"
-                          : "text-gray-300 hover:text-amber-400"
-                      }`}
-                    />
-                  </button>
-                  <Button
-                    size="sm"
-                    variant={currency.isActive ? "outline" : "secondary"}
-                    className="h-7 px-2 text-xs"
-                    onClick={() => handleToggleActive(currency)}
-                  >
-                    {currency.isActive ? "Deactivate" : "Activate"}
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    className="h-7 px-2 text-xs"
-                    onClick={() => handleStartEdit(currency)}
-                  >
-                    Edit symbol
-                  </Button>
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    className="h-7 w-7 text-red-500 hover:text-red-600 ml-auto"
-                    disabled={deletingId === currency.id}
-                    onClick={() => setPendingDelete(currency)}
-                  >
-                    <Trash2 className="w-3.5 h-3.5" />
-                  </Button>
+                          ? "Default currency"
+                          : "Set as default"
+                      }
+                    >
+                      <Star
+                        className={`w-4 h-4 ${
+                          currency.isDefault
+                            ? "fill-amber-400 text-amber-400"
+                            : "text-gray-300 hover:text-amber-400"
+                        }`}
+                      />
+                    </button>
+                    <Button
+                      size="sm"
+                      variant={currency.isActive ? "outline" : "secondary"}
+                      className="h-7 px-2 text-xs"
+                      onClick={() => {
+                        return handleToggleActive(currency);
+                      }}
+                    >
+                      {currency.isActive ? "Deactivate" : "Activate"}
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="h-7 px-2 text-xs"
+                      onClick={() => {
+                        return handleStartEdit(currency);
+                      }}
+                    >
+                      Edit symbol
+                    </Button>
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="h-7 w-7 text-red-500 hover:text-red-600 ml-auto"
+                      disabled={deletingId === currency.id}
+                      onClick={() => {
+                        return setPendingDelete(currency);
+                      }}
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </Button>
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
 
           {!currencies.length && (
@@ -337,7 +366,11 @@ export function CurrencyManager() {
                 size="sm"
                 variant="outline"
                 disabled={currentPage === 1}
-                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                onClick={() => {
+                  return setCurrentPage((p) => {
+                    return Math.max(1, p - 1);
+                  });
+                }}
               >
                 <ChevronLeft className="h-4 w-4" />
                 Previous
@@ -349,7 +382,11 @@ export function CurrencyManager() {
                 size="sm"
                 variant="outline"
                 disabled={currentPage === totalPages}
-                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                onClick={() => {
+                  return setCurrentPage((p) => {
+                    return Math.min(totalPages, p + 1);
+                  });
+                }}
               >
                 Next
                 <ChevronRight className="h-4 w-4" />
@@ -361,7 +398,9 @@ export function CurrencyManager() {
 
       <ConfirmDialog
         open={!!pendingDelete}
-        onOpenChange={(open) => !open && setPendingDelete(null)}
+        onOpenChange={(open) => {
+          return !open && setPendingDelete(null);
+        }}
         title={`Delete "${pendingDelete?.code}"?`}
         description="This permanently removes the currency. If it's used by existing giving records, deletion will be blocked - deactivate it instead. This action cannot be undone."
         confirmLabel="Delete"

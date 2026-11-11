@@ -42,7 +42,9 @@ export function OrderOfServiceModal({
   }, [open, items]);
 
   const handleDrop = (dropIndex: number) => {
-    if (dragIndex === null || dragIndex === dropIndex) return;
+    if (dragIndex === null || dragIndex === dropIndex) {
+      return;
+    }
 
     const reordered = [...localItems];
     const [moved] = reordered.splice(dragIndex, 1);
@@ -52,13 +54,21 @@ export function OrderOfServiceModal({
   };
 
   const handleAddItem = () => {
-    if (!newItem.trim()) return;
-    setLocalItems((prev) => [...prev, newItem.trim()]);
+    if (!newItem.trim()) {
+      return;
+    }
+    setLocalItems((prev) => {
+      return [...prev, newItem.trim()];
+    });
     setNewItem("");
   };
 
   const handleRemoveItem = (index: number) => {
-    setLocalItems((prev) => prev.filter((_, i) => i !== index));
+    setLocalItems((prev) => {
+      return prev.filter((_, i) => {
+        return i !== index;
+      });
+    });
   };
 
   const handleSave = () => {
@@ -79,43 +89,55 @@ export function OrderOfServiceModal({
         </DialogHeader>
 
         <div className="px-5 py-4 space-y-2">
-          {localItems.map((item, index) => (
-            <div
-              key={`${item}-${index}`}
-              className="flex items-center gap-3 rounded-md border px-3 py-2 bg-white"
-              draggable={editable}
-              onDragStart={() => setDragIndex(index)}
-              onDragOver={(e) => {
-                if (editable) e.preventDefault();
-              }}
-              onDrop={() => {
-                if (editable) handleDrop(index);
-              }}
-            >
-              {editable && <GripVertical className="h-4 w-4 text-gray-500" />}
-              <span className="flex h-5 w-5 items-center justify-center rounded-full bg-gray-100 text-xs font-medium flex-shrink-0">
-                {index + 1}
-              </span>
-              <Text className="flex-1">{item}</Text>
-              {editable && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => handleRemoveItem(index)}
-                  className="text-destructive-600 hover:text-destructive-700"
-                >
-                  Remove
-                </Button>
-              )}
-            </div>
-          ))}
+          {localItems.map((item, index) => {
+            return (
+              <div
+                key={`${item}-${index}`}
+                className="flex items-center gap-3 rounded-md border px-3 py-2 bg-white"
+                draggable={editable}
+                onDragStart={() => {
+                  return setDragIndex(index);
+                }}
+                onDragOver={(e) => {
+                  if (editable) {
+                    e.preventDefault();
+                  }
+                }}
+                onDrop={() => {
+                  if (editable) {
+                    handleDrop(index);
+                  }
+                }}
+              >
+                {editable && <GripVertical className="h-4 w-4 text-gray-500" />}
+                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-gray-100 text-xs font-medium flex-shrink-0">
+                  {index + 1}
+                </span>
+                <Text className="flex-1">{item}</Text>
+                {editable && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      return handleRemoveItem(index);
+                    }}
+                    className="text-destructive-600 hover:text-destructive-700"
+                  >
+                    Remove
+                  </Button>
+                )}
+              </div>
+            );
+          })}
 
           {editable && (
             <div className="flex items-center gap-2 pt-2">
               <Input
                 placeholder="Add order item"
                 value={newItem}
-                onChange={(e) => setNewItem(e.target.value)}
+                onChange={(e) => {
+                  return setNewItem(e.target.value);
+                }}
               />
               <Button
                 size="icon"
@@ -134,7 +156,12 @@ export function OrderOfServiceModal({
               Save Order
             </Button>
           ) : (
-            <Button className="w-full" onClick={() => onOpenChange(false)}>
+            <Button
+              className="w-full"
+              onClick={() => {
+                return onOpenChange(false);
+              }}
+            >
               Close
             </Button>
           )}

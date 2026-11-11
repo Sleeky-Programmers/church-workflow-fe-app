@@ -34,7 +34,7 @@ import { DepartmentTabs } from "@/lib/enums";
 import { Loader } from "@/components/ui/loader";
 import DepartmentSidebar from "@/components/features/dashboard/departments/DepartmentSidebar";
 import { Input } from "@/components/ui/input";
-import { ChevronDown, Search } from "lucide-react";
+import { Search } from "lucide-react";
 
 import { getMembersColumns } from "@/components/features/dashboard/departments/member-column";
 
@@ -67,33 +67,39 @@ function MobileMembersList({
 }) {
   return (
     <div className="divide-y border rounded-xl overflow-hidden bg-white">
-      {members.map((member) => (
-        <div
-          key={member.id}
-          className="flex items-center justify-between px-4 py-4"
-        >
-          <div className="flex items-center gap-3">
-            <Input
-              type="checkbox"
-              checked={selectedRows.includes(member.id)}
-              onChange={() => onToggle(member.id)}
-            />
-
-            <div>
-              <Text>{member.name}</Text>
-              <Text>{member.contact}</Text>
-            </div>
-          </div>
-
-          <Button
-            size="sm"
-            variant="destructive"
-            onClick={() => onRemove(member.id)}
+      {members.map((member) => {
+        return (
+          <div
+            key={member.id}
+            className="flex items-center justify-between px-4 py-4"
           >
-            Remove
-          </Button>
-        </div>
-      ))}
+            <div className="flex items-center gap-3">
+              <Input
+                type="checkbox"
+                checked={selectedRows.includes(member.id)}
+                onChange={() => {
+                  return onToggle(member.id);
+                }}
+              />
+
+              <div>
+                <Text>{member.name}</Text>
+                <Text>{member.contact}</Text>
+              </div>
+            </div>
+
+            <Button
+              size="sm"
+              variant="destructive"
+              onClick={() => {
+                return onRemove(member.id);
+              }}
+            >
+              Remove
+            </Button>
+          </div>
+        );
+      })}
     </div>
   );
 }
@@ -127,7 +133,9 @@ export default function DepartmentDetailPage() {
 
       try {
         const response = await fetchDepartmentById(id);
-        if (isMounted) setDepartment(response);
+        if (isMounted) {
+          setDepartment(response);
+        }
       } catch (err: any) {
         if (isMounted) {
           setError(err.message || "Failed to fetch department");
@@ -146,26 +154,34 @@ export default function DepartmentDetailPage() {
   }, [id]);
 
   const membersData: MemberItem[] =
-    department?.members?.map((member) => ({
-      id: member.id,
-      name: member.fullName,
-      joined: formatDate(member.dateJoined),
-      contact: member.phoneNumber || member.email || "-",
-    })) ?? [];
+    department?.members?.map((member) => {
+      return {
+        id: member.id,
+        name: member.fullName,
+        joined: formatDate(member.dateJoined),
+        contact: member.phoneNumber || member.email || "-",
+      };
+    }) ?? [];
 
   const toggleRow = (rowId: string) => {
-    setSelectedRows((prev) =>
-      prev.includes(rowId)
-        ? prev.filter((id) => id !== rowId)
-        : [...prev, rowId],
-    );
+    setSelectedRows((prev) => {
+      return prev.includes(rowId)
+        ? prev.filter((id) => {
+            return id !== rowId;
+          })
+        : [...prev, rowId];
+    });
   };
 
   const toggleAll = () => {
     if (selectedRows.length === membersData.length) {
       setSelectedRows([]);
     } else {
-      setSelectedRows(membersData.map((member) => member.id));
+      setSelectedRows(
+        membersData.map((member) => {
+          return member.id;
+        }),
+      );
     }
   };
 
@@ -201,10 +217,16 @@ export default function DepartmentDetailPage() {
         }
         return {
           ...prev,
-          members: prev.members.filter((m) => !ids.includes(m.id)),
+          members: prev.members.filter((m) => {
+            return !ids.includes(m.id);
+          }),
         };
       });
-      setSelectedRows((prev) => prev.filter((rowId) => !ids.includes(rowId)));
+      setSelectedRows((prev) => {
+        return prev.filter((rowId) => {
+          return !ids.includes(rowId);
+        });
+      });
 
       toast({
         title: "Removed",
@@ -306,7 +328,9 @@ export default function DepartmentDetailPage() {
       {isMobile && (
         <div className="flex gap-2">
           <Button
-            onClick={() => setTab(DepartmentTabs.MEMBERS)}
+            onClick={() => {
+              return setTab(DepartmentTabs.MEMBERS);
+            }}
             variant={tab === DepartmentTabs.MEMBERS ? "default" : "outline"}
             className="flex-1"
           >
@@ -314,7 +338,9 @@ export default function DepartmentDetailPage() {
           </Button>
 
           <Button
-            onClick={() => setTab(DepartmentTabs.REQUISITIONS)}
+            onClick={() => {
+              return setTab(DepartmentTabs.REQUISITIONS);
+            }}
             variant={
               tab === DepartmentTabs.REQUISITIONS ? "default" : "outline"
             }
@@ -368,7 +394,9 @@ export default function DepartmentDetailPage() {
                     <Table
                       columns={membersColumns}
                       data={membersData}
-                      rowKey={(row) => row.id}
+                      rowKey={(row) => {
+                        return row.id;
+                      }}
                     />
                   )}
                 </>
@@ -384,7 +412,9 @@ export default function DepartmentDetailPage() {
 
       <AlertDialog
         open={!!removeTarget}
-        onOpenChange={(open) => !open && setRemoveTarget(null)}
+        onOpenChange={(open) => {
+          return !open && setRemoveTarget(null);
+        }}
       >
         <AlertDialogContent>
           <AlertDialogHeader>

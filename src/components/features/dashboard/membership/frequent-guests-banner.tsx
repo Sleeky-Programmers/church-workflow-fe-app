@@ -36,7 +36,9 @@ export function FrequentGuestsBanner({
     load();
   }, [load]);
 
-  if (!guests.length) return null;
+  if (!guests.length) {
+    return null;
+  }
 
   const convert = async (guest: FrequentGuest) => {
     setBusyId(guest._id);
@@ -48,7 +50,11 @@ export function FrequentGuestsBanner({
         title: "Changed to member",
         description: `${guest.fullName} is now a member.`,
       });
-      setGuests((prev) => prev.filter((g) => g._id !== guest._id));
+      setGuests((prev) => {
+        return prev.filter((g) => {
+          return g._id !== guest._id;
+        });
+      });
       onConverted?.();
     } catch (err: any) {
       toast({
@@ -68,17 +74,22 @@ export function FrequentGuestsBanner({
           <UserCheck className="mt-0.5 h-4 w-4 shrink-0 text-primary-500" />
           <p className="text-gray-800">
             <span className="font-semibold">
-              {guests.length} {guests.length === 1 ? "guest has" : "guests have"}{" "}
-              attended 4 or more services in the last 60 days.
+              {guests.length}{" "}
+              {guests.length === 1 ? "guest has" : "guests have"} attended 4 or
+              more services in the last 60 days.
             </span>{" "}
-            They now count towards your member limit. Change them to members
-            to add them to departments and teams.
+            They now count towards your member limit. Change them to members to
+            add them to departments and teams.
           </p>
         </div>
         <Button
           size="sm"
           variant="outline"
-          onClick={() => setExpanded((v) => !v)}
+          onClick={() => {
+            return setExpanded((v) => {
+              return !v;
+            });
+          }}
         >
           {expanded ? "Hide" : "Review"}
         </Button>
@@ -86,21 +97,25 @@ export function FrequentGuestsBanner({
 
       {expanded && (
         <ul className="mt-3 divide-y divide-blue-100 rounded-md bg-white">
-          {guests.map((guest) => (
-            <li
-              key={guest._id}
-              className="flex items-center justify-between gap-2 px-3 py-2"
-            >
-              <span className="truncate text-gray-900">{guest.fullName}</span>
-              <Button
-                size="sm"
-                disabled={busyId === guest._id}
-                onClick={() => convert(guest)}
+          {guests.map((guest) => {
+            return (
+              <li
+                key={guest._id}
+                className="flex items-center justify-between gap-2 px-3 py-2"
               >
-                {busyId === guest._id ? "Saving…" : "Change to member"}
-              </Button>
-            </li>
-          ))}
+                <span className="truncate text-gray-900">{guest.fullName}</span>
+                <Button
+                  size="sm"
+                  disabled={busyId === guest._id}
+                  onClick={() => {
+                    return convert(guest);
+                  }}
+                >
+                  {busyId === guest._id ? "Saving…" : "Change to member"}
+                </Button>
+              </li>
+            );
+          })}
         </ul>
       )}
     </div>

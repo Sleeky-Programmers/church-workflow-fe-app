@@ -60,40 +60,44 @@ export function ContactDetailsStep({
             Contact Details
           </Heading>
           <Text variant="default" className="mt-1">
-            Enter the member's phone number, email, and address details
+            Enter the member&apos;s phone number, email, and address details
           </Text>
         </div>
         <div className="grid grid-cols-2 gap-4">
           <FormField
             control={form.control}
             name="email"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="mb-2">Email</FormLabel>
-                <FormControl>
-                  <Input
-                    type="email"
-                    placeholder="Enter email address"
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+            render={({ field }) => {
+              return (
+                <FormItem>
+                  <FormLabel className="mb-2">Email</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="email"
+                      placeholder="Enter email address"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              );
+            }}
           />
 
           <FormField
             control={form.control}
             name="phone"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="mb-2">Phone Number</FormLabel>
-                <FormControl>
-                  <Input placeholder="Enter phone number" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+            render={({ field }) => {
+              return (
+                <FormItem>
+                  <FormLabel className="mb-2">Phone Number</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter phone number" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              );
+            }}
           />
         </div>
 
@@ -101,44 +105,50 @@ export function ContactDetailsStep({
           <FormField
             control={form.control}
             name="address"
-            render={({ field }) => (
-              <FormItem className="col-span-2">
-                <FormLabel className="mb-2">Address</FormLabel>
-                <FormControl>
-                  <Input placeholder="Enter address" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+            render={({ field }) => {
+              return (
+                <FormItem className="col-span-2">
+                  <FormLabel className="mb-2">Address</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter address" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              );
+            }}
           />
           <FormField
             control={form.control}
             name="occupation"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="mb-2">Occupation</FormLabel>
-                <FormControl>
-                  <Input placeholder="Enter occupation" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+            render={({ field }) => {
+              return (
+                <FormItem>
+                  <FormLabel className="mb-2">Occupation</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter occupation" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              );
+            }}
           />
           <FormField
             control={form.control}
             name="education"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="mb-2">Educational Background</FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="Enter educational background"
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+            render={({ field }) => {
+              return (
+                <FormItem>
+                  <FormLabel className="mb-2">Educational Background</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="Enter educational background"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              );
+            }}
           />
         </div>
         <div className="flex justify-between">

@@ -50,35 +50,42 @@ export function UserTable({
         </TableRow>
       </TableHeader>
       <TableBody>
-        {users.map((user) => (
-          <TableRow key={user.id}>
-            <TableCell className="font-medium">
-              <span className="inline-flex items-center gap-2">
-                {user.name}
-                {user.isCurrentUser && (
-                  <Badge shape="pill" className="bg-primary-50 text-primary-700 border border-primary-200">
-                    You
-                  </Badge>
-                )}
-              </span>
-            </TableCell>
-            <TableCell>{user.email}</TableCell>
-            <TableCell>{user.role}</TableCell>
-            <TableCell>
-              <StatusBadge status={user.status} />
-            </TableCell>
-            <TableCell>{user.dateInvited}</TableCell>
-            <TableCell className="text-right">
-              <UserActionsMenu
-                userId={user.id}
-                userStatus={user.status}
-                onActionSelect={(action) => onActionSelect(user.id, action)}
-                canManageBranchAccess={canManageBranchAccess}
-                isCurrentUser={user.isCurrentUser}
-              />
-            </TableCell>
-          </TableRow>
-        ))}
+        {users.map((user) => {
+          return (
+            <TableRow key={user.id}>
+              <TableCell className="font-medium">
+                <span className="inline-flex items-center gap-2">
+                  {user.name}
+                  {user.isCurrentUser && (
+                    <Badge
+                      shape="pill"
+                      className="bg-primary-50 text-primary-700 border border-primary-200"
+                    >
+                      You
+                    </Badge>
+                  )}
+                </span>
+              </TableCell>
+              <TableCell>{user.email}</TableCell>
+              <TableCell>{user.role}</TableCell>
+              <TableCell>
+                <StatusBadge status={user.status} />
+              </TableCell>
+              <TableCell>{user.dateInvited}</TableCell>
+              <TableCell className="text-right">
+                <UserActionsMenu
+                  userId={user.id}
+                  userStatus={user.status}
+                  onActionSelect={(action) => {
+                    return onActionSelect(user.id, action);
+                  }}
+                  canManageBranchAccess={canManageBranchAccess}
+                  isCurrentUser={user.isCurrentUser}
+                />
+              </TableCell>
+            </TableRow>
+          );
+        })}
       </TableBody>
     </Table>
   );

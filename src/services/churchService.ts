@@ -1,4 +1,4 @@
-// services/churchService.ts
+// Services/churchService.ts
 
 import { authenticatedFetch } from "@/lib/api";
 import { ReminderTimeBefore } from "@/types";
@@ -62,13 +62,15 @@ export interface CreateChurchServiceDto {
   reminderTimeBefore?: ReminderTimeBefore;
 }
 
-export interface UpdateChurchServiceDto extends Partial<CreateChurchServiceDto> {}
+export type UpdateChurchServiceDto = Partial<CreateChurchServiceDto>;
 
 export async function updateChurch(data: any, file?: File) {
   const formData = new FormData();
 
   Object.entries(data).forEach(([key, value]) => {
-    if (value) formData.append(key, value as string);
+    if (value) {
+      formData.append(key, value as string);
+    }
   });
 
   if (file) {
@@ -89,10 +91,18 @@ export async function getAllChurchServices(params?: {
 }) {
   const queryParams = new URLSearchParams();
 
-  if (params?.page) queryParams.append("page", params.page.toString());
-  if (params?.limit) queryParams.append("limit", params.limit.toString());
-  if (params?.search) queryParams.append("search", params.search);
-  if (params?.status) queryParams.append("status", params.status);
+  if (params?.page) {
+    queryParams.append("page", params.page.toString());
+  }
+  if (params?.limit) {
+    queryParams.append("limit", params.limit.toString());
+  }
+  if (params?.search) {
+    queryParams.append("search", params.search);
+  }
+  if (params?.status) {
+    queryParams.append("status", params.status);
+  }
 
   const url = `/church-services${queryParams.toString() ? `?${queryParams.toString()}` : ""}`;
 

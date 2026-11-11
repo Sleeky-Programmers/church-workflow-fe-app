@@ -42,7 +42,7 @@ export interface AssetUnit {
   serial: string;
   condition: AssetCondition;
   conditionNote: string;
-  /** yyyy-MM-dd, or empty. */
+  /** Yyyy-MM-dd, or empty. */
   purchaseDate: string;
   value: number | null;
   addedAt?: string;
@@ -190,9 +190,11 @@ export const ASSET_STATUS_FILTERS: { value: string; label: string }[] = [
   { value: "Disposed", label: "Disposed" },
 ];
 
-export const ASSET_CATEGORIES = ASSET_CATEGORY_FILTERS.filter(
-  (option) => option.value !== "ALL",
-).map((option) => option.label);
+export const ASSET_CATEGORIES = ASSET_CATEGORY_FILTERS.filter((option) => {
+  return option.value !== "ALL";
+}).map((option) => {
+  return option.label;
+});
 
 export const ASSET_RISKS: AssetRisk[] = ["Low", "Medium", "High"];
 export const ASSET_STATUSES: AssetStatus[] = ["Active", "Inactive", "Disposed"];

@@ -26,41 +26,47 @@ export default function DepartmentMobile({ data }: Props) {
 
   return (
     <div className="space-y-3 px-3 pt-3">
-      {data.map((dept) => (
-        <Card
-          key={dept.id}
-          className="rounded-2xl cursor-pointer"
-          onClick={() =>
-            router.push(RouteConfig.dashboard.departmentDetails(dept.id))
-          }
-        >
-          <CardContent className="p-4 space-y-3">
-            <div className="flex items-center justify-between">
-              <Heading level={4} text={dept.name} className="truncate" />
+      {data.map((dept) => {
+        return (
+          <Card
+            key={dept.id}
+            className="rounded-2xl cursor-pointer"
+            onClick={() => {
+              return router.push(
+                RouteConfig.dashboard.departmentDetails(dept.id),
+              );
+            }}
+          >
+            <CardContent className="p-4 space-y-3">
+              <div className="flex items-center justify-between">
+                <Heading level={4} text={dept.name} className="truncate" />
 
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8 shrink-0"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <MoreVertical className="h-4 w-4" />
-              </Button>
-            </div>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 shrink-0"
+                  onClick={(e) => {
+                    return e.stopPropagation();
+                  }}
+                >
+                  <MoreVertical className="h-4 w-4" />
+                </Button>
+              </div>
 
-            <div className="space-y-1">
-              <Text text={`HOD: ${dept.hod?.name ?? "-"}`} />
+              <div className="space-y-1">
+                <Text text={`HOD: ${dept.hod?.name ?? "-"}`} />
 
-              <Text text={`Members: ${dept.members}`} />
+                <Text text={`Members: ${dept.members}`} />
 
-              <Span
-                text={dept.status}
-                variant={dept.status === "Active" ? "success" : "muted"}
-              />
-            </div>
-          </CardContent>
-        </Card>
-      ))}
+                <Span
+                  text={dept.status}
+                  variant={dept.status === "Active" ? "success" : "muted"}
+                />
+              </div>
+            </CardContent>
+          </Card>
+        );
+      })}
     </div>
   );
 }

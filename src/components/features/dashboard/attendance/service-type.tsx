@@ -48,7 +48,9 @@ export function ServiceTypeModal({
 
         <div className="grid grid-cols-2 gap-4 py-6">
           <Button
-            onClick={() => handleTypeSelect(ServiceType.REGULAR)}
+            onClick={() => {
+              return handleTypeSelect(ServiceType.REGULAR);
+            }}
             className="flex flex-col items-center gap-4 p-8 rounded-lg border border-primary-200 bg-primary-50 hover:bg-primary-100 hover:border-primary-300 transition-colors"
           >
             <RefreshCw className="h-10 w-10 text-primary-600" />
@@ -57,7 +59,9 @@ export function ServiceTypeModal({
           </Button>
 
           <Button
-            onClick={() => handleTypeSelect(ServiceType.SPECIAL)}
+            onClick={() => {
+              return handleTypeSelect(ServiceType.SPECIAL);
+            }}
             className="flex flex-col items-center gap-4 p-8 rounded-lg border border-primary-200 bg-primary-50 hover:bg-primary-100 hover:border-primary-300 transition-colors"
           >
             <Star className="h-10 w-10 text-primary-600" />

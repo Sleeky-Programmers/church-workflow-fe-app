@@ -6,8 +6,16 @@ type CommandPaletteStore = {
   toggle: () => void;
 };
 
-export const useCommandPaletteStore = create<CommandPaletteStore>()((set) => ({
-  open: false,
-  setOpen: (open) => set({ open }),
-  toggle: () => set((state) => ({ open: !state.open })),
-}));
+export const useCommandPaletteStore = create<CommandPaletteStore>()((set) => {
+  return {
+    open: false,
+    setOpen: (open) => {
+      return set({ open });
+    },
+    toggle: () => {
+      return set((state) => {
+        return { open: !state.open };
+      });
+    },
+  };
+});

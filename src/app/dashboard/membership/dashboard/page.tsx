@@ -34,13 +34,11 @@ import {
   fadeUpBounce,
   staggerContainer,
   hoverLiftStrong,
-  hoverLift,
   tapPress,
   hoverSpring,
 } from "@/components/features/dashboard/membership/animations";
 import Heading from "@/components/ui/typography/Heading";
 import { Loader } from "@/components/ui/loader";
-import { useIsMobile } from "@/hooks/use-mobile";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import {
@@ -125,7 +123,10 @@ function SectionCard({
 }) {
   return (
     <div
-      className={cn("bg-white rounded-2xl border border-gray-200 p-5", className)}
+      className={cn(
+        "bg-white rounded-2xl border border-gray-200 p-5",
+        className,
+      )}
     >
       <div className="flex items-start justify-between gap-3 mb-4">
         <div>
@@ -141,7 +142,13 @@ function SectionCard({
   );
 }
 
-function ViewAllLink({ href, label = "View all" }: { href: string; label?: string }) {
+function ViewAllLink({
+  href,
+  label = "View all",
+}: {
+  href: string;
+  label?: string;
+}) {
   return (
     <Link
       href={href}
@@ -163,7 +170,6 @@ const ALERT_ICON_BY_CATEGORY: Record<string, typeof Bell> = {
 };
 
 export default function MembershipDashboardPage() {
-  const isMobile = useIsMobile();
   const { toast } = useToast();
 
   const [data, setData] = useState<PastoralDashboard | null>(null);
@@ -171,13 +177,17 @@ export default function MembershipDashboardPage() {
   const [actingOn, setActingOn] = useState<string | null>(null);
 
   const load = (silent = false) => {
-    if (!silent) setIsLoading(true);
+    if (!silent) {
+      setIsLoading(true);
+    }
     fetchPastoralDashboard()
       .then(setData)
       .catch(() => {
         toast({ title: "Failed to load membership dashboard" });
       })
-      .finally(() => setIsLoading(false));
+      .finally(() => {
+        return setIsLoading(false);
+      });
   };
 
   useEffect(() => {
@@ -199,20 +209,22 @@ export default function MembershipDashboardPage() {
   };
 
   const handleMarkRead = async (alert: Alert) => {
-    if (alert.read) return;
+    if (alert.read) {
+      return;
+    }
     setActingOn(alert.alertId);
     try {
       await setAlertRead(alert.alertId, true);
-      setData((prev) =>
-        prev
+      setData((prev) => {
+        return prev
           ? {
               ...prev,
-              recentAlerts: prev.recentAlerts.map((a) =>
-                a.alertId === alert.alertId ? { ...a, read: true } : a,
-              ),
+              recentAlerts: prev.recentAlerts.map((a) => {
+                return a.alertId === alert.alertId ? { ...a, read: true } : a;
+              }),
             }
-          : prev,
-      );
+          : prev;
+      });
     } catch {
       toast({ title: "Failed to mark alert as read", variant: "destructive" });
     } finally {
@@ -221,7 +233,9 @@ export default function MembershipDashboardPage() {
   };
 
   const stats = useMemo(() => {
-    if (!data) return [];
+    if (!data) {
+      return [];
+    }
     const s = data.stats;
     return [
       {
@@ -264,11 +278,18 @@ export default function MembershipDashboardPage() {
   }, [data]);
 
   const engagementSlices = useMemo(() => {
-    if (!data) return [];
+    if (!data) {
+      return [];
+    }
     const e = data.engagement;
     return [
       { name: "Active", value: e.active, color: "#2563EB", dot: "bg-blue-600" },
-      { name: "Growing", value: e.growing, color: "#F97316", dot: "bg-orange-500" },
+      {
+        name: "Growing",
+        value: e.growing,
+        color: "#F97316",
+        dot: "bg-orange-500",
+      },
       {
         name: "Needs Follow-Up",
         value: e.needsFollowUp,
@@ -276,11 +297,18 @@ export default function MembershipDashboardPage() {
         dot: "bg-yellow-500",
       },
       { name: "At Risk", value: e.atRisk, color: "#EF4444", dot: "bg-red-500" },
-      { name: "Inactive", value: e.inactive, color: "#9CA3AF", dot: "bg-gray-400" },
+      {
+        name: "Inactive",
+        value: e.inactive,
+        color: "#9CA3AF",
+        dot: "bg-gray-400",
+      },
     ];
   }, [data]);
 
-  const engagementTotal = engagementSlices.reduce((sum, s) => sum + s.value, 0);
+  const engagementTotal = engagementSlices.reduce((sum, s) => {
+    return sum + s.value;
+  }, 0);
   const activePercent =
     engagementTotal > 0
       ? ((engagementSlices[0].value / engagementTotal) * 100).toFixed(1)
@@ -324,23 +352,25 @@ export default function MembershipDashboardPage() {
           animate="visible"
           className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-3"
         >
-          {stats.map((s) => (
-            <motion.div
-              key={s.label}
-              variants={fadeUpBounce}
-              whileHover={hoverLiftStrong}
-              whileTap={tapPress}
-              transition={hoverSpring}
-              className="cursor-default"
-            >
-              <StatCard
-                label={s.label}
-                value={s.value}
-                icon={s.icon}
-                iconClass={s.iconClass}
-              />
-            </motion.div>
-          ))}
+          {stats.map((s) => {
+            return (
+              <motion.div
+                key={s.label}
+                variants={fadeUpBounce}
+                whileHover={hoverLiftStrong}
+                whileTap={tapPress}
+                transition={hoverSpring}
+                className="cursor-default"
+              >
+                <StatCard
+                  label={s.label}
+                  value={s.value}
+                  icon={s.icon}
+                  iconClass={s.iconClass}
+                />
+              </motion.div>
+            );
+          })}
         </motion.div>
 
         {/* Attention + Alerts - sections fade-rise in sequence */}
@@ -352,7 +382,9 @@ export default function MembershipDashboardPage() {
         >
           <SectionCard
             title="Members Needing Attention"
-            action={<ViewAllLink href="/dashboard/membership/attention-center" />}
+            action={
+              <ViewAllLink href="/dashboard/membership/attention-center" />
+            }
           >
             {!data || data.attention.length === 0 ? (
               <EmptyState
@@ -406,7 +438,9 @@ export default function MembershipDashboardPage() {
 
           <SectionCard
             title="Recent Alerts"
-            action={<ViewAllLink href="/dashboard/membership/attention-center" />}
+            action={
+              <ViewAllLink href="/dashboard/membership/attention-center" />
+            }
           >
             {!data || data.recentAlerts.length === 0 ? (
               <EmptyState
@@ -466,7 +500,9 @@ export default function MembershipDashboardPage() {
                         </p>
                         <div className="flex items-center gap-3 mt-1.5">
                           <button
-                            onClick={() => handleMarkRead(alert)}
+                            onClick={() => {
+                              return handleMarkRead(alert);
+                            }}
                             disabled={alert.read || actingOn === alert.alertId}
                             className={cn(
                               "text-xs font-medium",
@@ -478,7 +514,9 @@ export default function MembershipDashboardPage() {
                             {alert.read ? "Read" : "Mark Read"}
                           </button>
                           <button
-                            onClick={() => handleResolve(alert)}
+                            onClick={() => {
+                              return handleResolve(alert);
+                            }}
                             disabled={actingOn === alert.alertId}
                             className="text-xs font-medium text-green-600 hover:underline"
                           >
@@ -552,10 +590,12 @@ export default function MembershipDashboardPage() {
                       tickLine={false}
                     />
                     <Tooltip
-                      formatter={(value, name) => [
-                        value,
-                        name === "attendance" ? "Attendance" : "First Timers",
-                      ]}
+                      formatter={(value, name) => {
+                        return [
+                          value,
+                          name === "attendance" ? "Attendance" : "First Timers",
+                        ];
+                      }}
                       contentStyle={{
                         borderRadius: 10,
                         border: "1px solid #E5E7EB",
@@ -610,9 +650,9 @@ export default function MembershipDashboardPage() {
                         paddingAngle={2}
                         strokeWidth={0}
                       >
-                        {engagementSlices.map((slice) => (
-                          <Cell key={slice.name} fill={slice.color} />
-                        ))}
+                        {engagementSlices.map((slice) => {
+                          return <Cell key={slice.name} fill={slice.color} />;
+                        })}
                       </Pie>
                     </PieChart>
                   </ResponsiveContainer>
@@ -624,24 +664,26 @@ export default function MembershipDashboardPage() {
                   </div>
                 </div>
                 <div className="flex flex-col gap-3 w-full">
-                  {engagementSlices.map((item) => (
-                    <div
-                      key={item.name}
-                      className="flex items-center justify-between gap-2"
-                    >
-                      <div className="flex items-center gap-2">
-                        <span
-                          className={cn("w-2.5 h-2.5 rounded-full", item.dot)}
-                        />
-                        <span className="text-sm text-gray-700">
-                          {item.name}
+                  {engagementSlices.map((item) => {
+                    return (
+                      <div
+                        key={item.name}
+                        className="flex items-center justify-between gap-2"
+                      >
+                        <div className="flex items-center gap-2">
+                          <span
+                            className={cn("w-2.5 h-2.5 rounded-full", item.dot)}
+                          />
+                          <span className="text-sm text-gray-700">
+                            {item.name}
+                          </span>
+                        </div>
+                        <span className="text-sm font-semibold text-gray-900">
+                          {((item.value / engagementTotal) * 100).toFixed(1)}%
                         </span>
                       </div>
-                      <span className="text-sm font-semibold text-gray-900">
-                        {((item.value / engagementTotal) * 100).toFixed(1)}%
-                      </span>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             )}
@@ -650,37 +692,40 @@ export default function MembershipDashboardPage() {
 
         {/* Highly Engaged - top members link out to the full members list */}
         <motion.div variants={fadeUp} initial="hidden" animate="visible">
-        <SectionCard
-          title="Highly Engaged"
-          action={
-            <ViewAllLink href="/dashboard/membership/members" label="All Members" />
-          }
-        >
-          {(data?.stats.highlyEngaged ?? 0) === 0 ? (
-            <EmptyState
-              icon={TrendingUp}
-              title="No highly engaged members yet"
-              description="Members with 80%+ attendance will be recognised here as records build up."
-            />
-          ) : (
-            <div className="flex items-center gap-3 p-4 rounded-lg bg-green-50/60 border border-green-100">
-              <div className="w-10 h-10 rounded-lg bg-green-100 text-green-600 flex items-center justify-center shrink-0">
-                <TrendingUp className="h-5 w-5" />
+          <SectionCard
+            title="Highly Engaged"
+            action={
+              <ViewAllLink
+                href="/dashboard/membership/members"
+                label="All Members"
+              />
+            }
+          >
+            {(data?.stats.highlyEngaged ?? 0) === 0 ? (
+              <EmptyState
+                icon={TrendingUp}
+                title="No highly engaged members yet"
+                description="Members with 80%+ attendance will be recognised here as records build up."
+              />
+            ) : (
+              <div className="flex items-center gap-3 p-4 rounded-lg bg-green-50/60 border border-green-100">
+                <div className="w-10 h-10 rounded-lg bg-green-100 text-green-600 flex items-center justify-center shrink-0">
+                  <TrendingUp className="h-5 w-5" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-gray-900">
+                    {data?.stats.highlyEngaged} member
+                    {data?.stats.highlyEngaged === 1 ? "" : "s"} with 80%+
+                    attendance
+                  </p>
+                  <p className="text-xs text-gray-500 mt-0.5">
+                    Your most committed members - consider them for leadership
+                    and volunteering opportunities.
+                  </p>
+                </div>
               </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-gray-900">
-                  {data?.stats.highlyEngaged} member
-                  {data?.stats.highlyEngaged === 1 ? "" : "s"} with 80%+
-                  attendance
-                </p>
-                <p className="text-xs text-gray-500 mt-0.5">
-                  Your most committed members - consider them for leadership and
-                  volunteering opportunities.
-                </p>
-              </div>
-            </div>
-          )}
-        </SectionCard>
+            )}
+          </SectionCard>
         </motion.div>
       </div>
     </div>

@@ -71,7 +71,9 @@ export function EditDepartmentDialog({
       setIsLoading(true);
       try {
         const dept = await fetchDepartmentById(departmentId!);
-        if (cancelled) return;
+        if (cancelled) {
+          return;
+        }
 
         setName(dept.name);
         setDescription(dept.description || "");
@@ -93,7 +95,9 @@ export function EditDepartmentDialog({
           onOpenChange(false);
         }
       } finally {
-        if (!cancelled) setIsLoading(false);
+        if (!cancelled) {
+          setIsLoading(false);
+        }
       }
     }
 
@@ -172,7 +176,9 @@ export function EditDepartmentDialog({
                 <Label>Department Name</Label>
                 <Input
                   value={name}
-                  onChange={(e) => setName(e.target.value)}
+                  onChange={(e) => {
+                    return setName(e.target.value);
+                  }}
                   disabled={isSaving}
                 />
               </div>
@@ -219,7 +225,9 @@ export function EditDepartmentDialog({
                 <Textarea
                   rows={4}
                   value={description}
-                  onChange={(e) => setDescription(e.target.value)}
+                  onChange={(e) => {
+                    return setDescription(e.target.value);
+                  }}
                   disabled={isSaving}
                 />
               </div>

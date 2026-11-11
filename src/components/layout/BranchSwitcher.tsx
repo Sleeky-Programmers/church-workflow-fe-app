@@ -20,20 +20,26 @@ export function BranchSwitcher({ fullWidth = false }: { fullWidth?: boolean }) {
   const [isSwitching, setIsSwitching] = useState(false);
 
   // Nothing to switch between for single-location churches - stay invisible.
-  if (branches.length <= 1) return null;
+  if (branches.length <= 1) {
+    return null;
+  }
 
-  const activeBranch = branches.find((branch) => branch._id === activeBranchId);
+  const activeBranch = branches.find((branch) => {
+    return branch._id === activeBranchId;
+  });
 
   const handleSwitch = async (branchId: string) => {
-    if (branchId === activeBranchId || isSwitching) return;
+    if (branchId === activeBranchId || isSwitching) {
+      return;
+    }
 
     setIsSwitching(true);
     try {
       await switchActiveBranch(branchId);
       // No shared query cache across the dashboard's data hooks - a full
-      // reload is the only reliable way to guarantee every branch-scoped
-      // view (members, attendance, services, ...) refetches under the
-      // newly active branch instead of showing stale cross-branch data.
+      // Reload is the only reliable way to guarantee every branch-scoped
+      // View (members, attendance, services, ...) refetches under the
+      // Newly active branch instead of showing stale cross-branch data.
       window.location.reload();
     } finally {
       setIsSwitching(false);
@@ -55,7 +61,9 @@ export function BranchSwitcher({ fullWidth = false }: { fullWidth?: boolean }) {
           <Building2 className="w-4 h-4 shrink-0" />
           <span
             className={
-              fullWidth ? "min-w-0 flex-1 truncate text-left" : "max-w-[140px] truncate"
+              fullWidth
+                ? "min-w-0 flex-1 truncate text-left"
+                : "max-w-[140px] truncate"
             }
           >
             {activeBranch?.name || "Select branch"}
@@ -73,18 +81,22 @@ export function BranchSwitcher({ fullWidth = false }: { fullWidth?: boolean }) {
       >
         <DropdownMenuLabel>Branches</DropdownMenuLabel>
         <DropdownMenuSeparator />
-        {branches.map((branch) => (
-          <DropdownMenuItem
-            key={branch._id}
-            onClick={() => handleSwitch(branch._id)}
-            className="flex items-center justify-between"
-          >
-            <span className="truncate">{branch.name}</span>
-            {branch._id === activeBranchId && (
-              <Check className="w-4 h-4 shrink-0" />
-            )}
-          </DropdownMenuItem>
-        ))}
+        {branches.map((branch) => {
+          return (
+            <DropdownMenuItem
+              key={branch._id}
+              onClick={() => {
+                return handleSwitch(branch._id);
+              }}
+              className="flex items-center justify-between"
+            >
+              <span className="truncate">{branch.name}</span>
+              {branch._id === activeBranchId && (
+                <Check className="w-4 h-4 shrink-0" />
+              )}
+            </DropdownMenuItem>
+          );
+        })}
       </DropdownMenuContent>
     </DropdownMenu>
   );

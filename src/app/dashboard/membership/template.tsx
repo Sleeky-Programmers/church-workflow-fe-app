@@ -6,8 +6,8 @@ import { pageTransition } from "@/components/features/dashboard/membership/anima
 
 // Route-level transition for every page under /dashboard/membership.
 // Next.js remounts a template on navigation, so the enter animation runs on
-// each sub-page change (dashboard → members → settings etc.), giving the
-// module a consistent, quick fade-rise entrance.
+// Each sub-page change (dashboard → members → settings etc.), giving the
+// Module a consistent, quick fade-rise entrance.
 export default function MembershipTemplate({
   children,
 }: {

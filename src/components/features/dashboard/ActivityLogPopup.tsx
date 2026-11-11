@@ -19,7 +19,9 @@ export default function ActivityLogPopup({
     <Dialog
       open={!!selectedRow}
       onOpenChange={(open) => {
-        if (!open) setSelectedRow(null);
+        if (!open) {
+          setSelectedRow(null);
+        }
       }}
     >
       <DialogContent showClose={false}>
@@ -65,17 +67,19 @@ export default function ActivityLogPopup({
             />
 
             <div className="divide-y">
-              {activityDetailsConfig.map(({ key, getValue }) => (
-                <div key={key} className="flex items-start gap-4 py-3">
-                  <Span variant="indicator" className="mt-1" />
-                  <Text variant="label" className="w-40">
-                    {key}:
-                  </Text>
-                  <div className="flex-1 text-right">
-                    {getValue(selectedRow)}
+              {activityDetailsConfig.map(({ key, getValue }) => {
+                return (
+                  <div key={key} className="flex items-start gap-4 py-3">
+                    <Span variant="indicator" className="mt-1" />
+                    <Text variant="label" className="w-40">
+                      {key}:
+                    </Text>
+                    <div className="flex-1 text-right">
+                      {getValue(selectedRow)}
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         )}

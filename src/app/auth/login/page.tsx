@@ -91,7 +91,11 @@ export default function LoginPage() {
           transition={{ duration: 0.25, ease: "easeOut" }}
         >
           {step === "login" && (
-            <LoginForm onForgotPassword={() => setStep("forgot-password")} />
+            <LoginForm
+              onForgotPassword={() => {
+                return setStep("forgot-password");
+              }}
+            />
           )}
 
           {step === "forgot-password" && (
@@ -102,12 +106,18 @@ export default function LoginPage() {
             <VerifyCodeForm
               email={email}
               onVerify={handleVerifyOtp}
-              onResend={() => requestOtp(email)}
+              onResend={() => {
+                return requestOtp(email);
+              }}
             />
           )}
 
           {step === "reset-password" && (
-            <ResetPasswordForm onSuccess={() => setStep("login")} />
+            <ResetPasswordForm
+              onSuccess={() => {
+                return setStep("login");
+              }}
+            />
           )}
         </motion.div>
       </AnimatePresence>

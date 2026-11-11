@@ -23,8 +23,8 @@ const DEFAULT_KEYWORDS = [
   "church volunteer management software",
   "ministry management software",
   // Free / small-church tier - honest, low-competition, high-intent terms
-  // the Starter plan genuinely satisfies (100 members, 3 users, membership +
-  // attendance + small teams).
+  // The Starter plan genuinely satisfies (100 members, 3 users, membership +
+  // Attendance + small teams).
   "free church management software",
   "small church management software",
   "church management software for small churches",

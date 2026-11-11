@@ -98,8 +98,12 @@ export function fetchReportFeed(
   opts: { count?: number; branch?: string } = {},
 ) {
   const params = new URLSearchParams({ period });
-  if (opts.count) params.set("count", String(opts.count));
-  if (opts.branch) params.set("branch", opts.branch);
+  if (opts.count) {
+    params.set("count", String(opts.count));
+  }
+  if (opts.branch) {
+    params.set("branch", opts.branch);
+  }
   return authenticatedFetch<FeedResponse>(`/reports/feed?${params}`, {
     method: "GET",
   });
@@ -107,12 +111,24 @@ export function fetchReportFeed(
 
 export function fetchReportSummary(req: ReportRequest) {
   const params = new URLSearchParams();
-  if (req.period) params.set("period", req.period);
-  if (req.anchor) params.set("anchor", req.anchor);
-  if (req.from) params.set("from", req.from);
-  if (req.to) params.set("to", req.to);
-  if (req.sections?.length) params.set("sections", req.sections.join(","));
-  if (req.branch) params.set("branch", req.branch);
+  if (req.period) {
+    params.set("period", req.period);
+  }
+  if (req.anchor) {
+    params.set("anchor", req.anchor);
+  }
+  if (req.from) {
+    params.set("from", req.from);
+  }
+  if (req.to) {
+    params.set("to", req.to);
+  }
+  if (req.sections?.length) {
+    params.set("sections", req.sections.join(","));
+  }
+  if (req.branch) {
+    params.set("branch", req.branch);
+  }
   return authenticatedFetch<SummaryResponse>(`/reports/summary?${params}`, {
     method: "GET",
   });
@@ -144,7 +160,7 @@ export async function exportReport(
     method: "POST",
     body: JSON.stringify({ format, ...req }),
     // The shared fetch helper omits the JSON header for file downloads, which
-    // would leave the server unable to read this request body.
+    // Would leave the server unable to read this request body.
     headers: { "Content-Type": "application/json" },
     responseType: "blob",
   });

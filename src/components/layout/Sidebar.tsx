@@ -43,19 +43,27 @@ export const normalizeIcon = (
 
   // If it's an object with src (like from require/import)
   if (icon?.src || typeof icon === "object") {
-    return ({ className }) => (
-      <Image
-        src={icon.src || icon}
-        alt="icon"
-        width={16}
-        height={16}
-        className={className}
-      />
-    );
+    const ImageIcon = ({ className }: { className?: string }) => {
+      return (
+        <Image
+          src={icon.src || icon}
+          alt="icon"
+          width={16}
+          height={16}
+          className={className}
+        />
+      );
+    };
+    ImageIcon.displayName = "ImageIcon";
+    return ImageIcon;
   }
 
   // Fallback component
-  return () => <span className="w-4 h-4" />;
+  const FallbackIcon = () => {
+    return <span className="w-4 h-4" />;
+  };
+  FallbackIcon.displayName = "FallbackIcon";
+  return FallbackIcon;
 };
 
 export function AppSidebar() {
@@ -66,9 +74,12 @@ export function AppSidebar() {
   const { isMobile, setOpenMobile } = useSidebar();
 
   const isActive = (url: string) => {
-    if (!url) return false;
-    const normalize = (p: string | null | undefined) =>
-      p ? p.replace(/\/+$/, "").replace(/^$/, "") : "";
+    if (!url) {
+      return false;
+    }
+    const normalize = (p: string | null | undefined) => {
+      return p ? p.replace(/\/+$/, "").replace(/^$/, "") : "";
+    };
     const current = normalize(pathname);
     const target = normalize(url);
     return current === target;
@@ -95,23 +106,27 @@ export function AppSidebar() {
 
   const comingSoonTitles: string[] = [];
 
-  const mainPages = SidebarData.pages.filter(
-    (p) => !comingSoonTitles.includes(p.title),
-  );
+  const mainPages = SidebarData.pages.filter((p) => {
+    return !comingSoonTitles.includes(p.title);
+  });
 
-  const comingSoonPages = SidebarData.pages.filter((p) =>
-    comingSoonTitles.includes(p.title),
-  );
+  const comingSoonPages = SidebarData.pages.filter((p) => {
+    return comingSoonTitles.includes(p.title);
+  });
 
   // A module is "active" when the current path lives under it, e.g.
   // /dashboard/membership/... highlights the Membership parent item.
-  const isModuleActive = (page: (typeof SidebarData.pages)[number]) =>
-    Boolean(page.url) && pathname.startsWith(page.url);
+  const isModuleActive = (page: (typeof SidebarData.pages)[number]) => {
+    return Boolean(page.url) && pathname.startsWith(page.url);
+  };
 
   const [openModules, setOpenModules] = useState<Record<string, boolean>>({});
 
-  const toggleModule = (title: string) =>
-    setOpenModules((prev) => ({ ...prev, [title]: !prev[title] }));
+  const toggleModule = (title: string) => {
+    return setOpenModules((prev) => {
+      return { ...prev, [title]: !prev[title] };
+    });
+  };
 
   return (
     <Sidebar>
@@ -142,7 +157,9 @@ export function AppSidebar() {
             <SidebarMenuItem>
               <SidebarMenuButton
                 isActive={activeTab === ActiveTab.FAVOURITES}
-                onClick={() => setActiveTab(ActiveTab.FAVOURITES)}
+                onClick={() => {
+                  return setActiveTab(ActiveTab.FAVOURITES);
+                }}
               >
                 <Text
                   variant={
@@ -157,7 +174,9 @@ export function AppSidebar() {
             <SidebarMenuItem>
               <SidebarMenuButton
                 isActive={activeTab === ActiveTab.RECENT}
-                onClick={() => setActiveTab(ActiveTab.RECENT)}
+                onClick={() => {
+                  return setActiveTab(ActiveTab.RECENT);
+                }}
               >
                 <Text
                   variant={
@@ -227,7 +246,9 @@ export function AppSidebar() {
                     <SuggestionAnchor
                       id={[
                         `nav:${page.url}`,
-                        ...(page.children ?? []).map((c) => `nav:${c.url}`),
+                        ...(page.children ?? []).map((c) => {
+                          return `nav:${c.url}`;
+                        }),
                       ]}
                     >
                       <SidebarMenuButton
@@ -358,28 +379,30 @@ export function AppSidebar() {
         </SidebarFooter> */}
         <SidebarFooter className="mt-auto">
           <SidebarMenu>
-            {SidebarData.footer.map((page) => (
-              <SidebarMenuItem key={page.title}>
-                {page.title === "Logout" ? (
-                  <SidebarMenuButton asChild isActive={false}>
-                    <button
-                      onClick={handleLogout}
-                      className="flex items-center gap-2 w-full"
-                    >
-                      <page.icon />
-                      <Text>{page.title}</Text>
-                    </button>
-                  </SidebarMenuButton>
-                ) : (
-                  <SidebarMenuButton asChild isActive={isActive(page.url)}>
-                    <Link href={page.url} onClick={handleNavigate}>
-                      <page.icon />
-                      <Text>{page.title}</Text>
-                    </Link>
-                  </SidebarMenuButton>
-                )}
-              </SidebarMenuItem>
-            ))}
+            {SidebarData.footer.map((page) => {
+              return (
+                <SidebarMenuItem key={page.title}>
+                  {page.title === "Logout" ? (
+                    <SidebarMenuButton asChild isActive={false}>
+                      <button
+                        onClick={handleLogout}
+                        className="flex items-center gap-2 w-full"
+                      >
+                        <page.icon />
+                        <Text>{page.title}</Text>
+                      </button>
+                    </SidebarMenuButton>
+                  ) : (
+                    <SidebarMenuButton asChild isActive={isActive(page.url)}>
+                      <Link href={page.url} onClick={handleNavigate}>
+                        <page.icon />
+                        <Text>{page.title}</Text>
+                      </Link>
+                    </SidebarMenuButton>
+                  )}
+                </SidebarMenuItem>
+              );
+            })}
           </SidebarMenu>
         </SidebarFooter>
       </SidebarContent>

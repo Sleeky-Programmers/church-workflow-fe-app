@@ -59,7 +59,11 @@ export function AddMembersToDepartmentDialog({
   }
 
   function removeSelected(id: string) {
-    setMemberIds((prev) => prev.filter((member) => member !== id));
+    setMemberIds((prev) => {
+      return prev.filter((member) => {
+        return member !== id;
+      });
+    });
 
     setMemberMap((prev) => {
       const copy = { ...prev };
@@ -117,7 +121,11 @@ export function AddMembersToDepartmentDialog({
                   return (
                     <Span key={id} variant="chip">
                       {member.fullName.split(" ")[0]}
-                      <Button onClick={() => removeSelected(id)}>
+                      <Button
+                        onClick={() => {
+                          return removeSelected(id);
+                        }}
+                      >
                         <X className="w-3 h-3 ml-1" />
                       </Button>
                     </Span>

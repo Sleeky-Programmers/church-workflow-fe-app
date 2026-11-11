@@ -55,8 +55,12 @@ interface EditSmallTeamDialogProps {
 
 const getInitials = (fullName: string) => {
   const names = fullName.trim().split(" ").filter(Boolean);
-  if (!names.length) return "?";
-  if (names.length === 1) return names[0][0].toUpperCase();
+  if (!names.length) {
+    return "?";
+  }
+  if (names.length === 1) {
+    return names[0][0].toUpperCase();
+  }
   return `${names[0][0]}${names[names.length - 1][0]}`.toUpperCase();
 };
 
@@ -118,7 +122,9 @@ export function EditSmallTeamDialog({
     form.setValue(
       "memberIds",
       current.includes(memberId)
-        ? current.filter((id) => id !== memberId)
+        ? current.filter((id) => {
+            return id !== memberId;
+          })
         : [...current, memberId],
       { shouldValidate: true },
     );
@@ -154,7 +160,9 @@ export function EditSmallTeamDialog({
                 size="icon"
                 variant="ghost"
                 aria-label="Close dialog"
-                onClick={() => onOpenChange(false)}
+                onClick={() => {
+                  return onOpenChange(false);
+                }}
               >
                 <X className="w-4 h-4" />
               </Button>
@@ -168,86 +176,92 @@ export function EditSmallTeamDialog({
               <FormField
                 control={form.control}
                 name="name"
-                render={({ field }) => (
-                  <FormItem className="space-y-1 w-full">
-                    <FormLabel className="text-sm font-medium">
-                      Team Name <span className="text-red-500">*</span>
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="Enter team name"
-                        className="w-full"
-                        disabled={isSaving}
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+                render={({ field }) => {
+                  return (
+                    <FormItem className="space-y-1 w-full">
+                      <FormLabel className="text-sm font-medium">
+                        Team Name <span className="text-red-500">*</span>
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="Enter team name"
+                          className="w-full"
+                          disabled={isSaving}
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  );
+                }}
               />
 
               {/* Status */}
               <FormField
                 control={form.control}
                 name="status"
-                render={({ field }) => (
-                  <FormItem className="space-y-1 w-full">
-                    <FormLabel className="text-sm font-medium">
-                      Status
-                    </FormLabel>
-                    <Select
-                      value={field.value}
-                      onValueChange={field.onChange}
-                      disabled={isSaving}
-                    >
-                      <FormControl>
-                        <SelectTrigger className="w-full">
-                          <SelectValue placeholder="Select status" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="ACTIVE">Active</SelectItem>
-                        <SelectItem value="INACTIVE">Inactive</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </FormItem>
-                )}
+                render={({ field }) => {
+                  return (
+                    <FormItem className="space-y-1 w-full">
+                      <FormLabel className="text-sm font-medium">
+                        Status
+                      </FormLabel>
+                      <Select
+                        value={field.value}
+                        onValueChange={field.onChange}
+                        disabled={isSaving}
+                      >
+                        <FormControl>
+                          <SelectTrigger className="w-full">
+                            <SelectValue placeholder="Select status" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="ACTIVE">Active</SelectItem>
+                          <SelectItem value="INACTIVE">Inactive</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </FormItem>
+                  );
+                }}
               />
 
               {/* Description */}
               <FormField
                 control={form.control}
                 name="description"
-                render={({ field }) => (
-                  <FormItem className="space-y-1 w-full">
-                    <FormLabel className="text-sm font-medium">
-                      Description
-                    </FormLabel>
-                    <FormControl>
-                      <Textarea
-                        placeholder="Enter team description (optional)"
-                        className="resize-y w-full min-h-[60px]"
-                        rows={2}
-                        disabled={isSaving}
-                        {...field}
-                      />
-                    </FormControl>
-                    <div className="flex justify-between">
-                      <FormMessage />
-                      <Text
-                        variant="muted"
-                        className={cn(
-                          "text-xs ml-auto",
-                          (field.value?.length || 0) > 2000
-                            ? "text-red-500"
-                            : "",
-                        )}
-                      >
-                        {field.value?.length || 0}/2000
-                      </Text>
-                    </div>
-                  </FormItem>
-                )}
+                render={({ field }) => {
+                  return (
+                    <FormItem className="space-y-1 w-full">
+                      <FormLabel className="text-sm font-medium">
+                        Description
+                      </FormLabel>
+                      <FormControl>
+                        <Textarea
+                          placeholder="Enter team description (optional)"
+                          className="resize-y w-full min-h-[60px]"
+                          rows={2}
+                          disabled={isSaving}
+                          {...field}
+                        />
+                      </FormControl>
+                      <div className="flex justify-between">
+                        <FormMessage />
+                        <Text
+                          variant="muted"
+                          className={cn(
+                            "text-xs ml-auto",
+                            (field.value?.length || 0) > 2000
+                              ? "text-red-500"
+                              : "",
+                          )}
+                        >
+                          {field.value?.length || 0}/2000
+                        </Text>
+                      </div>
+                    </FormItem>
+                  );
+                }}
               />
 
               {/* Leader */}
@@ -255,17 +269,17 @@ export function EditSmallTeamDialog({
                 leaderId={leaderId || ""}
                 leaderName={team.leader?.name}
                 readOnly={!canChangeLeader}
-                onLeaderIdChange={(id) =>
-                  form.setValue("leaderId", id || null, {
+                onLeaderIdChange={(id) => {
+                  return form.setValue("leaderId", id || null, {
                     shouldValidate: true,
-                  })
-                }
+                  });
+                }}
                 pendingLeaderEmail={pendingLeaderEmail || null}
-                onPendingLeaderEmailChange={(email) =>
-                  form.setValue("pendingLeaderEmail", email, {
+                onPendingLeaderEmailChange={(email) => {
+                  return form.setValue("pendingLeaderEmail", email, {
                     shouldValidate: true,
-                  })
-                }
+                  });
+                }}
                 disabled={isSaving}
               />
 
@@ -273,87 +287,91 @@ export function EditSmallTeamDialog({
               <FormField
                 control={form.control}
                 name="memberIds"
-                render={() => (
-                  <FormItem className="space-y-1 w-full">
-                    <div className="flex items-center justify-between">
-                      <FormLabel className="text-sm font-medium">
-                        Team Members <span className="text-red-500">*</span>
-                      </FormLabel>
-                      <Text variant="muted" className="text-xs">
-                        {selectedMemberIds.length} selected
-                      </Text>
-                    </div>
-                    <FormMessage />
-                    <div className="border rounded-lg max-h-[150px] overflow-y-auto divide-y">
-                      {members.map((member) => {
-                        const isSelected = selectedMemberIds.includes(
-                          member.id,
-                        );
-                        const isLeader = leaderId === member.id;
+                render={() => {
+                  return (
+                    <FormItem className="space-y-1 w-full">
+                      <div className="flex items-center justify-between">
+                        <FormLabel className="text-sm font-medium">
+                          Team Members <span className="text-red-500">*</span>
+                        </FormLabel>
+                        <Text variant="muted" className="text-xs">
+                          {selectedMemberIds.length} selected
+                        </Text>
+                      </div>
+                      <FormMessage />
+                      <div className="border rounded-lg max-h-[150px] overflow-y-auto divide-y">
+                        {members.map((member) => {
+                          const isSelected = selectedMemberIds.includes(
+                            member.id,
+                          );
+                          const isLeader = leaderId === member.id;
 
-                        return (
-                          <div
-                            key={member.id}
-                            className={cn(
-                              "flex items-center justify-between px-3 py-2 cursor-pointer hover:bg-gray-50 transition-colors",
-                              isSelected && "bg-blue-50/50",
-                            )}
-                            onClick={() => toggleMember(member.id)}
-                          >
-                            <div className="flex items-center gap-3 min-w-0">
-                              <Avatar className="h-8 w-8">
-                                <AvatarFallback className="bg-gray-200 text-gray-700 text-xs">
-                                  {getInitials(member.fullName)}
-                                </AvatarFallback>
-                              </Avatar>
-                              <div className="min-w-0">
-                                <Text className="text-sm truncate">
-                                  {member.fullName}
-                                  {isLeader && (
-                                    <span className="ml-2 text-xs text-blue-600 font-medium">
-                                      (Leader)
-                                    </span>
-                                  )}
-                                </Text>
-                                <Text
-                                  variant="muted"
-                                  className="text-xs truncate"
-                                >
-                                  {member.email}
-                                </Text>
+                          return (
+                            <div
+                              key={member.id}
+                              className={cn(
+                                "flex items-center justify-between px-3 py-2 cursor-pointer hover:bg-gray-50 transition-colors",
+                                isSelected && "bg-blue-50/50",
+                              )}
+                              onClick={() => {
+                                return toggleMember(member.id);
+                              }}
+                            >
+                              <div className="flex items-center gap-3 min-w-0">
+                                <Avatar className="h-8 w-8">
+                                  <AvatarFallback className="bg-gray-200 text-gray-700 text-xs">
+                                    {getInitials(member.fullName)}
+                                  </AvatarFallback>
+                                </Avatar>
+                                <div className="min-w-0">
+                                  <Text className="text-sm truncate">
+                                    {member.fullName}
+                                    {isLeader && (
+                                      <span className="ml-2 text-xs text-blue-600 font-medium">
+                                        (Leader)
+                                      </span>
+                                    )}
+                                  </Text>
+                                  <Text
+                                    variant="muted"
+                                    className="text-xs truncate"
+                                  >
+                                    {member.email}
+                                  </Text>
+                                </div>
+                              </div>
+                              <div
+                                className={cn(
+                                  "w-4 h-4 rounded border flex items-center justify-center flex-shrink-0",
+                                  isSelected
+                                    ? "bg-blue-600 border-blue-600"
+                                    : "border-gray-300",
+                                )}
+                              >
+                                {isSelected && (
+                                  <svg
+                                    className="w-3 h-3 text-white"
+                                    fill="none"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth="2"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                  >
+                                    <path d="M5 13l4 4L19 7" />
+                                  </svg>
+                                )}
                               </div>
                             </div>
-                            <div
-                              className={cn(
-                                "w-4 h-4 rounded border flex items-center justify-center flex-shrink-0",
-                                isSelected
-                                  ? "bg-blue-600 border-blue-600"
-                                  : "border-gray-300",
-                              )}
-                            >
-                              {isSelected && (
-                                <svg
-                                  className="w-3 h-3 text-white"
-                                  fill="none"
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth="2"
-                                  viewBox="0 0 24 24"
-                                  stroke="currentColor"
-                                >
-                                  <path d="M5 13l4 4L19 7" />
-                                </svg>
-                              )}
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                    <Text variant="muted" className="text-xs">
-                      Click a member to toggle selection
-                    </Text>
-                  </FormItem>
-                )}
+                          );
+                        })}
+                      </div>
+                      <Text variant="muted" className="text-xs">
+                        Click a member to toggle selection
+                      </Text>
+                    </FormItem>
+                  );
+                }}
               />
             </div>
           </Form>
@@ -362,7 +380,9 @@ export function EditSmallTeamDialog({
           <div className="flex justify-end gap-3 border-t border-gray-200 px-4 sm:px-6 py-3 sm:py-4 bg-gray-50 shrink-0 rounded-b-xl">
             <Button
               variant="outline"
-              onClick={() => onOpenChange(false)}
+              onClick={() => {
+                return onOpenChange(false);
+              }}
               disabled={isSaving}
               size="sm"
             >

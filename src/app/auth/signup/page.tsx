@@ -12,7 +12,12 @@ export default function SignupPage() {
   return (
     <Suspense
       fallback={
-        <AuthLayout variant="signup" onBack={() => router.push("/")}>
+        <AuthLayout
+          variant="signup"
+          onBack={() => {
+            return router.push("/");
+          }}
+        >
           <div className="flex flex-col items-center justify-center gap-4">
             <Loader />
             <Text variant="muted">Loading...</Text>

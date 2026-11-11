@@ -12,7 +12,7 @@ export const metadata = generateSeoMetadata({
 });
 
 // See src/app/page.tsx for why this is revalidated rather than left fully
-// static - this page's plan prices come from the same server fetch.
+// Static - this page's plan prices come from the same server fetch.
 export const revalidate = 3600;
 
 const INCLUDED_FEATURES = [
@@ -31,25 +31,28 @@ export default function FreeChurchManagementSoftwarePage() {
     >
       <section className="max-w-3xl mx-auto px-6 py-16">
         <Heading level={2} className="text-2xl md:text-3xl font-black mb-4">
-          What's Actually Free
+          What&apos;s Actually Free
         </Heading>
         <div className="space-y-4">
           <Text variant="muted" className="leading-relaxed">
             A cell group, a house church, a church plant, or a single department
-            of a larger church doesn't need - or want to pay for - enterprise
-            church software. Church Workflow's Starter plan is a genuinely free
-            church attendance tracker and member management system, not a 14-day
-            trial that quietly starts charging you. There's no card required to
-            start, and no expiry date on the free tier itself.
+            of a larger church doesn&apos;t need - or want to pay for -
+            enterprise church software. Church Workflow&apos;s Starter plan is a
+            genuinely free church attendance tracker and member management
+            system, not a 14-day trial that quietly starts charging you.
+            There&apos;s no card required to start, and no expiry date on the
+            free tier itself.
           </Text>
 
           <div className="rounded-xl border border-gray-200 bg-gray-50 p-6 space-y-3">
-            {INCLUDED_FEATURES.map((feature) => (
-              <div key={feature} className="flex items-start gap-2">
-                <Check size={16} className="text-green-600 mt-0.5 shrink-0" />
-                <Text className="text-sm">{feature}</Text>
-              </div>
-            ))}
+            {INCLUDED_FEATURES.map((feature) => {
+              return (
+                <div key={feature} className="flex items-start gap-2">
+                  <Check size={16} className="text-green-600 mt-0.5 shrink-0" />
+                  <Text className="text-sm">{feature}</Text>
+                </div>
+              );
+            })}
           </div>
 
           <Heading level={3} className="text-lg font-bold mt-6 mb-2">
@@ -58,11 +61,11 @@ export default function FreeChurchManagementSoftwarePage() {
           <Text variant="muted" className="leading-relaxed">
             The Starter plan covers up to 100 members and 3 users - plenty for a
             cell group management app, a house church, or a church planting team
-            getting started. We say this plainly because a "free plan" that
-            hides its real limits until you hit a wall isn't actually free, it's
-            a trap. Church Workflow shows a warning inside your dashboard as you
-            approach 100 members, well before you're blocked from adding more -
-            no surprises.
+            getting started. We say this plainly because a &quot;free plan&quot;
+            that hides its real limits until you hit a wall isn&apos;t actually
+            free, it&apos;s a trap. Church Workflow shows a warning inside your
+            dashboard as you approach 100 members, well before you&apos;re
+            blocked from adding more - no surprises.
           </Text>
 
           <Heading level={3} className="text-lg font-bold mt-6 mb-2">

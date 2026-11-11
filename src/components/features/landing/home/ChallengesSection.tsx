@@ -3,6 +3,7 @@
 import { Text } from "@/components/ui/typography/Text";
 import Heading from "@/components/ui/typography/Heading";
 import { ChallengeCard } from "@/components/ui/landing-page/ChallengeCard";
+import Image from "next/image";
 
 const challenges = [
   {
@@ -28,26 +29,20 @@ const challenges = [
 export default function ChallengesSection() {
   return (
     <section className="relative bg-white py-24 px-6 overflow-hidden">
-      <img
-        loading="lazy"
-        decoding="async"
+      <Image
         src="/assets/icons/star.svg"
         alt=""
         aria-hidden="true"
         width={32}
         height={32}
-        className="absolute top-12 right-[10%] select-none pointer-events-none"
-      />
-      <img
-        loading="lazy"
-        decoding="async"
+        className="absolute top-12 right-[10%] select-none pointer-events-none" />
+      <Image
         src="/assets/icons/star.svg"
         alt=""
         aria-hidden="true"
         width={28}
         height={28}
-        className="absolute bottom-16 left-[8%] select-none pointer-events-none"
-      />
+        className="absolute bottom-16 left-[8%] select-none pointer-events-none" />
 
       <div className="max-w-4xl mx-auto text-center mb-20">
         <Heading
@@ -56,14 +51,11 @@ export default function ChallengesSection() {
         >
           <span className="relative inline-block text-[#0C5FB3]">
             The Challenges
-            <img
-              loading="lazy"
-              decoding="async"
+            <Image
               src="/assets/icons/wave.svg"
               alt=""
               aria-hidden="true"
-              className="absolute -bottom-2 left-0 w-full h-auto"
-            />
+              className="absolute -bottom-2 left-0 w-full h-auto" width={0} height={0} sizes="100vw" />
           </span>
           <span className="text-black">Churches Face</span>
         </Heading>
@@ -75,9 +67,9 @@ export default function ChallengesSection() {
       </div>
 
       <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-10">
-        {challenges.map((challenge) => (
-          <ChallengeCard key={challenge.title} {...challenge} />
-        ))}
+        {challenges.map((challenge) => {
+          return <ChallengeCard key={challenge.title} {...challenge} />;
+        })}
       </div>
     </section>
   );

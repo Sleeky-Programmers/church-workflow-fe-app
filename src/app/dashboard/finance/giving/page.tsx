@@ -53,7 +53,9 @@ export default function GivingBatchesPage() {
   useEffect(() => {
     getMyChurch()
       .then((church) => {
-        if (church?.defaultCurrency) setCurrency(church.defaultCurrency);
+        if (church?.defaultCurrency) {
+          setCurrency(church.defaultCurrency);
+        }
       })
       .catch(() => {});
   }, []);
@@ -88,27 +90,35 @@ export default function GivingBatchesPage() {
     {
       key: "date",
       header: "Date",
-      render: (row) => format(new Date(row.date), "MMM d, yyyy"),
+      render: (row) => {
+        return format(new Date(row.date), "MMM d, yyyy");
+      },
       width: "w-32",
     },
     {
       key: "service",
       header: "Service",
-      render: (row) => row.serviceTitle || "-",
+      render: (row) => {
+        return row.serviceTitle || "-";
+      },
     },
     {
       key: "status",
       header: "Status",
-      render: (row) => <BatchStatusBadge status={row.status} />,
+      render: (row) => {
+        return <BatchStatusBadge status={row.status} />;
+      },
     },
     {
       key: "totalAmount",
       header: "Total",
-      render: (row) => (
-        <span className="font-semibold">
-          {formatCurrency(row.totalAmount, currency)}
-        </span>
-      ),
+      render: (row) => {
+        return (
+          <span className="font-semibold">
+            {formatCurrency(row.totalAmount, currency)}
+          </span>
+        );
+      },
       align: "right",
     },
   ];
@@ -155,7 +165,9 @@ export default function GivingBatchesPage() {
             <Input
               type="date"
               value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
+              onChange={(e) => {
+                return setStartDate(e.target.value);
+              }}
               className="w-40"
             />
           </div>
@@ -164,7 +176,9 @@ export default function GivingBatchesPage() {
             <Input
               type="date"
               value={endDate}
-              onChange={(e) => setEndDate(e.target.value)}
+              onChange={(e) => {
+                return setEndDate(e.target.value);
+              }}
               className="w-40"
             />
           </div>
@@ -178,11 +192,13 @@ export default function GivingBatchesPage() {
         <Table
           columns={columns}
           data={batches}
-          rowKey={(row) => row.id}
+          rowKey={(row) => {
+            return row.id;
+          }}
           isLoading={isLoading}
-          onRowClick={(row) =>
-            router.push(`/dashboard/finance/giving/${row.id}`)
-          }
+          onRowClick={(row) => {
+            return router.push(`/dashboard/finance/giving/${row.id}`);
+          }}
           emptyState={
             <div className="py-10 text-center">
               <Text variant="muted">

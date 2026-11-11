@@ -78,7 +78,12 @@ export function SignupPageContent() {
 
   if (isLoading) {
     return (
-      <AuthLayout variant="signup" onBack={() => router.push("/")}>
+      <AuthLayout
+        variant="signup"
+        onBack={() => {
+          return router.push("/");
+        }}
+      >
         <div className="flex flex-col items-center justify-center gap-4">
           <Loader />
           <Text variant="muted">Loading your invite...</Text>
@@ -89,13 +94,20 @@ export function SignupPageContent() {
 
   if (error && isAdmin) {
     return (
-      <AuthLayout variant="signup" onBack={() => router.push("/")}>
+      <AuthLayout
+        variant="signup"
+        onBack={() => {
+          return router.push("/");
+        }}
+      >
         <div className="flex flex-col items-center justify-center gap-4">
           <Text variant="error" className="text-center">
             {error}
           </Text>
           <Button
-            onClick={() => router.push(RouteConfig.auth.signIn)}
+            onClick={() => {
+              return router.push(RouteConfig.auth.signIn);
+            }}
             variant="link"
           >
             Go to login

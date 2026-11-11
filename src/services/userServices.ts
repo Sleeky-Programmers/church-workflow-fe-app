@@ -1,6 +1,4 @@
 import { authenticatedFetch } from "@/lib/api";
-import { AdminResponse } from "@/lib/interface";
-import { mapAdminToOption } from "@/mappers/admin.mapper";
 
 type FetchOptionsParams = {
   page?: number;
@@ -18,7 +16,9 @@ export async function fetchAdmins({
     limit: String(limit),
   });
 
-  if (search) params.append("search", search);
+  if (search) {
+    params.append("search", search);
+  }
 
   const response = await authenticatedFetch<{
     data: any[];
@@ -26,10 +26,12 @@ export async function fetchAdmins({
   }>(`/admin?${params}`);
 
   return {
-    data: response.data.map((admin) => ({
-      id: admin.id || admin._id,
-      fullName: admin.fullName || `${admin.firstName} ${admin.lastName}`,
-    })),
+    data: response.data.map((admin) => {
+      return {
+        id: admin.id || admin._id,
+        fullName: admin.fullName || `${admin.firstName} ${admin.lastName}`,
+      };
+    }),
     pagination: response.pagination,
   };
 }

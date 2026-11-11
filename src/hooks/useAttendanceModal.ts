@@ -35,7 +35,9 @@ function modalReducer(state: ModalState, action: ModalAction): ModalState {
       return { ...state, view: action.view };
 
     case "SET_MEMBERS":
-      const allMemberIds = action.members.map((m) => m.id);
+      const allMemberIds = action.members.map((m) => {
+        return m.id;
+      });
       return {
         ...state,
         allMembers: action.members,
@@ -47,11 +49,15 @@ function modalReducer(state: ModalState, action: ModalAction): ModalState {
       return {
         ...state,
         presentMembers: isPresent
-          ? state.presentMembers.filter((id) => id !== action.memberId)
+          ? state.presentMembers.filter((id) => {
+              return id !== action.memberId;
+            })
           : [...state.presentMembers, action.memberId],
         absentMembers: isPresent
           ? [...state.absentMembers, action.memberId]
-          : state.absentMembers.filter((id) => id !== action.memberId),
+          : state.absentMembers.filter((id) => {
+              return id !== action.memberId;
+            }),
         hasChanges: false,
       };
 
@@ -60,8 +66,12 @@ function modalReducer(state: ModalState, action: ModalAction): ModalState {
         ...state,
         presentMembers: action.memberIds,
         absentMembers: state.allMembers
-          .map((m) => m.id)
-          .filter((id) => !action.memberIds.includes(id)),
+          .map((m) => {
+            return m.id;
+          })
+          .filter((id) => {
+            return !action.memberIds.includes(id);
+          }),
         view: "stats",
         hasChanges: true,
       };
@@ -69,9 +79,9 @@ function modalReducer(state: ModalState, action: ModalAction): ModalState {
     case "REMOVE_MEMBER":
       return {
         ...state,
-        presentMembers: state.presentMembers.filter(
-          (id) => id !== action.memberId,
-        ),
+        presentMembers: state.presentMembers.filter((id) => {
+          return id !== action.memberId;
+        }),
         absentMembers: [...state.absentMembers, action.memberId],
         removedMembers: [...state.removedMembers, action.memberId],
         hasChanges: true,
@@ -79,12 +89,16 @@ function modalReducer(state: ModalState, action: ModalAction): ModalState {
 
     case "UNDO_REMOVE":
       const lastRemoved = state.removedMembers[state.removedMembers.length - 1];
-      if (!lastRemoved) return state;
+      if (!lastRemoved) {
+        return state;
+      }
 
       return {
         ...state,
         presentMembers: [...state.presentMembers, lastRemoved],
-        absentMembers: state.absentMembers.filter((id) => id !== lastRemoved),
+        absentMembers: state.absentMembers.filter((id) => {
+          return id !== lastRemoved;
+        }),
         removedMembers: state.removedMembers.slice(0, -1),
       };
 
@@ -95,9 +109,9 @@ function modalReducer(state: ModalState, action: ModalAction): ModalState {
       return {
         ...state,
         presentMembers: nextPresentMembers,
-        absentMembers: state.absentMembers.filter(
-          (id) => !action.memberIds.includes(id),
-        ),
+        absentMembers: state.absentMembers.filter((id) => {
+          return !action.memberIds.includes(id);
+        }),
         view: "stats",
         hasChanges: true,
       };
@@ -107,8 +121,12 @@ function modalReducer(state: ModalState, action: ModalAction): ModalState {
         ...state,
         presentMembers: action.memberIds,
         absentMembers: state.allMembers
-          .map((m) => m.id)
-          .filter((id) => !action.memberIds.includes(id)),
+          .map((m) => {
+            return m.id;
+          })
+          .filter((id) => {
+            return !action.memberIds.includes(id);
+          }),
         hasChanges: true,
       };
 
@@ -203,21 +221,28 @@ export function useAttendanceModal() {
   }, []);
 
   const getPresentMembers = useCallback(() => {
-    return state.allMembers.filter((m) => state.presentMembers.includes(m.id));
+    return state.allMembers.filter((m) => {
+      return state.presentMembers.includes(m.id);
+    });
   }, [state.allMembers, state.presentMembers]);
 
   const getAbsentMembers = useCallback(() => {
-    return state.allMembers.filter((m) => state.absentMembers.includes(m.id));
+    return state.allMembers.filter((m) => {
+      return state.absentMembers.includes(m.id);
+    });
   }, [state.allMembers, state.absentMembers]);
 
   const getFilteredMembers = useCallback(() => {
-    if (!state.searchQuery) return state.allMembers;
+    if (!state.searchQuery) {
+      return state.allMembers;
+    }
 
-    return state.allMembers.filter(
-      (m) =>
+    return state.allMembers.filter((m) => {
+      return (
         m.name.toLowerCase().includes(state.searchQuery.toLowerCase()) ||
-        m.email.toLowerCase().includes(state.searchQuery.toLowerCase()),
-    );
+        m.email.toLowerCase().includes(state.searchQuery.toLowerCase())
+      );
+    });
   }, [state.allMembers, state.searchQuery]);
 
   return {

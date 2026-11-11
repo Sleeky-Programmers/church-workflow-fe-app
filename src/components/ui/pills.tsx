@@ -31,7 +31,9 @@ export function Pills<T extends string>({
             <Button
               key={option.value}
               variant={isActive ? "default" : "ghost"} // ✅ use variant
-              onClick={() => onChange(option.value)}
+              onClick={() => {
+                return onChange(option.value);
+              }}
               className="rounded-full px-3 py-1 h-auto text-sm font-medium"
             >
               {option.label}
@@ -51,7 +53,9 @@ export function Pills<T extends string>({
           <Button
             key={option.value}
             variant={isActive ? "default" : "ghost"}
-            onClick={() => onChange(option.value)}
+            onClick={() => {
+              return onChange(option.value);
+            }}
           >
             {option.label}
           </Button>

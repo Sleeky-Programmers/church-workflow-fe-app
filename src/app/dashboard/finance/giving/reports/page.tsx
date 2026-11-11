@@ -32,14 +32,14 @@ const LINE_COLORS = ["#2563EB", "#F97316", "#10B981", "#EF4444", "#A855F7"];
 
 function toCsv(rows: (string | number)[][]) {
   return rows
-    .map((row) =>
-      row
+    .map((row) => {
+      return row
         .map((cell) => {
           const value = String(cell ?? "");
           return value.includes(",") ? `"${value.replace(/"/g, '""')}"` : value;
         })
-        .join(","),
-    )
+        .join(",");
+    })
     .join("\n");
 }
 
@@ -92,10 +92,15 @@ export default function GivingReportsPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const currencyCodes = useMemo(
-    () => Array.from(new Set(trend.map((p) => p.currencyCode))),
-    [trend],
-  );
+  const currencyCodes = useMemo(() => {
+    return Array.from(
+      new Set(
+        trend.map((p) => {
+          return p.currencyCode;
+        }),
+      ),
+    );
+  }, [trend]);
 
   const chartData = useMemo(() => {
     const byMonth: Record<string, Record<string, number>> = {};
@@ -103,10 +108,12 @@ export default function GivingReportsPage() {
       byMonth[point.month] = byMonth[point.month] || {};
       byMonth[point.month][point.currencyCode] = point.totalAmount;
     }
-    return Object.entries(byMonth).map(([month, values]) => ({
-      month,
-      ...values,
-    }));
+    return Object.entries(byMonth).map(([month, values]) => {
+      return {
+        month,
+        ...values,
+      };
+    });
   }, [trend]);
 
   const chartConfig = useMemo(() => {
@@ -123,21 +130,29 @@ export default function GivingReportsPage() {
   }, [currencyCodes]);
 
   const handleExportCsv = () => {
-    if (!summary) return;
+    if (!summary) {
+      return;
+    }
     const rows: (string | number)[][] = [
       ["Giving Report", `${startDate} to ${endDate}`],
       [],
       ["By Offering Type"],
       ["Offering Type", "Amount"],
-      ...summary.byOfferingType.map((row) => [row.name, row.amount]),
+      ...summary.byOfferingType.map((row) => {
+        return [row.name, row.amount];
+      }),
       [],
       ["By Currency"],
       ["Currency", "Amount"],
-      ...summary.byCurrency.map((row) => [row.currencyCode, row.amount]),
+      ...summary.byCurrency.map((row) => {
+        return [row.currencyCode, row.amount];
+      }),
       [],
       ["Monthly Trend"],
       ["Month", "Currency", "Amount"],
-      ...trend.map((row) => [row.month, row.currencyCode, row.totalAmount]),
+      ...trend.map((row) => {
+        return [row.month, row.currencyCode, row.totalAmount];
+      }),
     ];
 
     downloadCsv(`giving-report-${startDate}-to-${endDate}.csv`, toCsv(rows));
@@ -162,7 +177,9 @@ export default function GivingReportsPage() {
           <Input
             type="date"
             value={startDate}
-            onChange={(e) => setStartDate(e.target.value)}
+            onChange={(e) => {
+              return setStartDate(e.target.value);
+            }}
             className="w-40"
           />
         </div>
@@ -171,7 +188,9 @@ export default function GivingReportsPage() {
           <Input
             type="date"
             value={endDate}
-            onChange={(e) => setEndDate(e.target.value)}
+            onChange={(e) => {
+              return setEndDate(e.target.value);
+            }}
             className="w-40"
           />
         </div>
@@ -196,19 +215,21 @@ export default function GivingReportsPage() {
               </span>
             </div>
 
-            {summary.byCurrency.map((row) => (
-              <div
-                key={row.currencyCode}
-                className="bg-white rounded-2xl border border-gray-300 p-4 shadow-[0_1px_4px_rgba(0,0,0,0.06)]"
-              >
-                <p className="text-[13px] font-bold text-black mb-1">
-                  Total {row.currencyCode}
-                </p>
-                <span className="text-xl font-bold text-black">
-                  {formatCurrency(row.amount, row.currencyCode)}
-                </span>
-              </div>
-            ))}
+            {summary.byCurrency.map((row) => {
+              return (
+                <div
+                  key={row.currencyCode}
+                  className="bg-white rounded-2xl border border-gray-300 p-4 shadow-[0_1px_4px_rgba(0,0,0,0.06)]"
+                >
+                  <p className="text-[13px] font-bold text-black mb-1">
+                    Total {row.currencyCode}
+                  </p>
+                  <span className="text-xl font-bold text-black">
+                    {formatCurrency(row.amount, row.currencyCode)}
+                  </span>
+                </div>
+              );
+            })}
           </div>
 
           <div className="bg-white rounded-2xl border border-gray-300 p-5">
@@ -233,32 +254,37 @@ export default function GivingReportsPage() {
                   <XAxis dataKey="month" tickLine={false} axisLine={false} />
                   <YAxis tickLine={false} axisLine={false} width={40} />
                   <Tooltip content={<ChartTooltipContent />} />
-                  {currencyCodes.map((code) => (
-                    <Line
-                      key={code}
-                      type="monotone"
-                      dataKey={code}
-                      stroke={`var(--color-${code})`}
-                      strokeWidth={2}
-                      dot={false}
-                    />
-                  ))}
+                  {currencyCodes.map((code) => {
+                    return (
+                      <Line
+                        key={code}
+                        type="monotone"
+                        dataKey={code}
+                        stroke={`var(--color-${code})`}
+                        strokeWidth={2}
+                        dot={false}
+                      />
+                    );
+                  })}
                 </LineChart>
               </ChartContainer>
             )}
 
             <div className="mt-3 flex flex-wrap gap-4 text-sm">
-              {currencyCodes.map((code, index) => (
-                <div key={code} className="flex items-center gap-2">
-                  <Span
-                    className="w-3 h-3 rounded-sm"
-                    style={{
-                      backgroundColor: LINE_COLORS[index % LINE_COLORS.length],
-                    }}
-                  />
-                  <Text text={code} />
-                </div>
-              ))}
+              {currencyCodes.map((code, index) => {
+                return (
+                  <div key={code} className="flex items-center gap-2">
+                    <Span
+                      className="w-3 h-3 rounded-sm"
+                      style={{
+                        backgroundColor:
+                          LINE_COLORS[index % LINE_COLORS.length],
+                      }}
+                    />
+                    <Text text={code} />
+                  </div>
+                );
+              })}
             </div>
           </div>
 
@@ -268,17 +294,19 @@ export default function GivingReportsPage() {
                 By Offering Type
               </Text>
               <div className="space-y-2">
-                {summary.byOfferingType.map((row) => (
-                  <div
-                    key={row.name}
-                    className="flex items-center justify-between text-sm"
-                  >
-                    <Span>{row.name}</Span>
-                    <Span className="font-semibold">
-                      {row.amount.toLocaleString()}
-                    </Span>
-                  </div>
-                ))}
+                {summary.byOfferingType.map((row) => {
+                  return (
+                    <div
+                      key={row.name}
+                      className="flex items-center justify-between text-sm"
+                    >
+                      <Span>{row.name}</Span>
+                      <Span className="font-semibold">
+                        {row.amount.toLocaleString()}
+                      </Span>
+                    </div>
+                  );
+                })}
                 {!summary.byOfferingType.length && (
                   <Text variant="muted" className="text-sm">
                     No data for this range.
@@ -290,17 +318,19 @@ export default function GivingReportsPage() {
             <div className="bg-white rounded-2xl border border-gray-300 p-5">
               <Text className="font-bold text-black mb-3">By Currency</Text>
               <div className="space-y-2">
-                {summary.byCurrency.map((row) => (
-                  <div
-                    key={row.currencyCode}
-                    className="flex items-center justify-between text-sm"
-                  >
-                    <Span>{row.currencyCode}</Span>
-                    <Span className="font-semibold">
-                      {formatCurrency(row.amount, row.currencyCode)}
-                    </Span>
-                  </div>
-                ))}
+                {summary.byCurrency.map((row) => {
+                  return (
+                    <div
+                      key={row.currencyCode}
+                      className="flex items-center justify-between text-sm"
+                    >
+                      <Span>{row.currencyCode}</Span>
+                      <Span className="font-semibold">
+                        {formatCurrency(row.amount, row.currencyCode)}
+                      </Span>
+                    </div>
+                  );
+                })}
                 {!summary.byCurrency.length && (
                   <Text variant="muted" className="text-sm">
                     No data for this range.

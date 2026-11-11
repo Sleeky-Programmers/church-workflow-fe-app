@@ -19,8 +19,8 @@ type AddMemberFormatModalProps = {
 };
 
 // Per the Figma design: a centered "Add Member" dialog with two large square
-// tiles - "Create a Form" and "Upload CSV" - each with a big blue icon and a
-// bordered card; the hovered/selected tile gets a light blue fill.
+// Tiles - "Create a Form" and "Upload CSV" - each with a big blue icon and a
+// Bordered card; the hovered/selected tile gets a light blue fill.
 export function AddMemberFormatModal({
   open,
   onOpenChange,
@@ -56,13 +56,18 @@ export function AddMemberFormatModal({
         >
           <button
             type="button"
-            onClick={() => handleFormatSelect(MemberFormType.FORM)}
+            onClick={() => {
+              return handleFormatSelect(MemberFormType.FORM);
+            }}
             className={cn(
               "flex flex-col items-center justify-center gap-5 rounded-lg border border-gray-200 bg-white transition-colors hover:bg-blue-50/60 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-200",
               isMobile ? "h-40 w-full" : "h-44 w-full",
             )}
           >
-            <FolderPlus className="h-12 w-12 text-primary-400" strokeWidth={1.5} />
+            <FolderPlus
+              className="h-12 w-12 text-primary-400"
+              strokeWidth={1.5}
+            />
             <span className="text-xs font-bold tracking-wide text-primary-400 uppercase">
               Create a Form
             </span>
@@ -70,7 +75,9 @@ export function AddMemberFormatModal({
 
           <button
             type="button"
-            onClick={() => handleFormatSelect(MemberFormType.CSV)}
+            onClick={() => {
+              return handleFormatSelect(MemberFormType.CSV);
+            }}
             className={cn(
               "flex flex-col items-center justify-center gap-5 rounded-lg border border-gray-200 bg-blue-50/60 transition-colors hover:bg-blue-100/70 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-200",
               isMobile ? "h-40 w-full" : "h-44 w-full",

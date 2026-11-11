@@ -29,6 +29,7 @@ import {
   ReminderTimeBefore,
 } from "@/types";
 import { convertTo12HourFormat } from "@/utils/helpers";
+import { useLatest } from "@/hooks/use-latest";
 
 const EVENT_STORAGE_KEY = "dashboard:events";
 
@@ -50,48 +51,54 @@ const mapNumberToReminderTime = (value: number): ReminderTimeBefore => {
   return mapping[value] || ReminderTimeBefore.MINUTES_30;
 };
 
-const createDefaultFormData = (date = ""): EventFormData => ({
-  title: "",
-  type: EventType.WORSHIP_SERVICE,
-  recurrence: EventRecurrence.NONE,
-  date,
-  startTime: "",
-  endTime: "",
-  location: "",
-  description: "",
-  sendReminder: true,
-  reminderType: EventReminderType.IN_APP,
-  remindBeforeMinutes: ReminderTimeBefore.MINUTES_30,
-});
+const createDefaultFormData = (date = ""): EventFormData => {
+  return {
+    title: "",
+    type: EventType.WORSHIP_SERVICE,
+    recurrence: EventRecurrence.NONE,
+    date,
+    startTime: "",
+    endTime: "",
+    location: "",
+    description: "",
+    sendReminder: true,
+    reminderType: EventReminderType.IN_APP,
+    remindBeforeMinutes: ReminderTimeBefore.MINUTES_30,
+  };
+};
 
-const toFormData = (event: ChurchEvent): EventFormData => ({
-  title: event.title,
-  type: event.type,
-  recurrence: event.recurrence,
-  date: event.date,
-  startTime: event.startTime,
-  endTime: event.endTime || "",
-  location: event.location || "",
-  description: event.description || "",
-  sendReminder: event.sendReminder,
-  reminderType: event.reminderType,
-  remindBeforeMinutes: mapNumberToReminderTime(event.remindBeforeMinutes), // Convert number to enum
-});
+const toFormData = (event: ChurchEvent): EventFormData => {
+  return {
+    title: event.title,
+    type: event.type,
+    recurrence: event.recurrence,
+    date: event.date,
+    startTime: event.startTime,
+    endTime: event.endTime || "",
+    location: event.location || "",
+    description: event.description || "",
+    sendReminder: event.sendReminder,
+    reminderType: event.reminderType,
+    remindBeforeMinutes: mapNumberToReminderTime(event.remindBeforeMinutes), // Convert number to enum
+  };
+};
 
 // Transform API response to ChurchService type
-const transformChurchService = (apiService: any): ChurchService => ({
-  id: apiService._id,
-  churchId: apiService.churchId,
-  title: apiService.title,
-  type: apiService.type,
-  day: apiService.day,
-  startTime: apiService.startTime,
-  endTime: apiService.endTime,
-  location: apiService.location,
-  specialDays: apiService.specialDays || [],
-  createdAt: apiService.createdAt,
-  updatedAt: apiService.updatedAt,
-});
+const transformChurchService = (apiService: any): ChurchService => {
+  return {
+    id: apiService._id,
+    churchId: apiService.churchId,
+    title: apiService.title,
+    type: apiService.type,
+    day: apiService.day,
+    startTime: apiService.startTime,
+    endTime: apiService.endTime,
+    location: apiService.location,
+    specialDays: apiService.specialDays || [],
+    createdAt: apiService.createdAt,
+    updatedAt: apiService.updatedAt,
+  };
+};
 
 // Helper to map form data to API DTO
 const mapFormDataToApiDto = (
@@ -148,8 +155,8 @@ const mapFormDataToApiDto = (
     }
 
     // The backend requires `day` for every REGULAR service. Default it to
-    // the selected date's weekday whenever the recurrence choice doesn't
-    // already imply one (e.g. "Weekly on Sunday" always means SUNDAY).
+    // The selected date's weekday whenever the recurrence choice doesn't
+    // Already imply one (e.g. "Weekly on Sunday" always means SUNDAY).
     if (!baseDto.day && payload.date) {
       const dateObj = new Date(payload.date);
       baseDto.day = dateObj
@@ -197,8 +204,7 @@ export default function EventsPage() {
       if (result.pagination) {
         setPagination(result.pagination);
       }
-    } catch (error) {
-      console.error("Failed to fetch church services:", error);
+    } catch {
       toast({
         title: "Error",
         description: "Failed to load church services",
@@ -209,13 +215,23 @@ export default function EventsPage() {
     }
   };
 
+  const fetchChurchServicesRef = useLatest(fetchChurchServices);
+
+  useEffect(() => {
+    fetchChurchServicesRef.current();
+  }, [fetchChurchServicesRef]);
+
   // Load events from localStorage
   useEffect(() => {
-    if (typeof window === "undefined") return;
+    if (typeof window === "undefined") {
+      return;
+    }
 
     try {
       const stored = window.localStorage.getItem(EVENT_STORAGE_KEY);
-      if (!stored) return;
+      if (!stored) {
+        return;
+      }
       const parsed = JSON.parse(stored) as ChurchEvent[];
       if (Array.isArray(parsed)) {
         setEvents(parsed);
@@ -226,12 +242,9 @@ export default function EventsPage() {
   }, []);
 
   // Fetch church services on component mount
-  useEffect(() => {
-    fetchChurchServices();
-  }, []);
 
   // Fetch all members once, for the Birthday filter's date-of-birth data -
-  // same underlying data the dashboard's upcoming-birthdays widget uses.
+  // Same underlying data the dashboard's upcoming-birthdays widget uses.
   useEffect(() => {
     let cancelled = false;
 
@@ -248,9 +261,7 @@ export default function EventsPage() {
         if (!cancelled) {
           setMembers(allMembers);
         }
-      } catch (error) {
-        console.error("Failed to fetch members for birthdays:", error);
-      }
+      } catch {}
     }
 
     loadAllMembers();
@@ -261,7 +272,9 @@ export default function EventsPage() {
 
   // Save events to localStorage
   useEffect(() => {
-    if (typeof window === "undefined") return;
+    if (typeof window === "undefined") {
+      return;
+    }
     window.localStorage.setItem(EVENT_STORAGE_KEY, JSON.stringify(events));
   }, [events]);
 
@@ -330,7 +343,7 @@ export default function EventsPage() {
         }
 
         // Same as create: `day` is required for REGULAR services, so default
-        // it to the selected date's weekday when the recurrence doesn't imply one.
+        // It to the selected date's weekday when the recurrence doesn't imply one.
         if (!updateData.day && payload.date) {
           const dateObj = new Date(payload.date);
           updateData.day = dateObj
@@ -375,7 +388,9 @@ export default function EventsPage() {
         colorClass: typeMeta.colorClass,
       };
 
-      setEvents((prev) => [...prev, newEvent]);
+      setEvents((prev) => {
+        return [...prev, newEvent];
+      });
 
       toast({
         title: "Success",
@@ -412,8 +427,7 @@ export default function EventsPage() {
           title: "Success",
           description: "Church service deleted successfully",
         });
-      } catch (error) {
-        console.error("Failed to delete church service:", error);
+      } catch {
         toast({
           title: "Error",
           description: "Failed to delete church service",
@@ -422,7 +436,11 @@ export default function EventsPage() {
         return;
       }
     } else {
-      setEvents((prev) => prev.filter((event) => event.id !== eventId));
+      setEvents((prev) => {
+        return prev.filter((event) => {
+          return event.id !== eventId;
+        });
+      });
       toast({
         title: "Deleted",
         description: "Event deleted successfully",

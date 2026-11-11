@@ -6,7 +6,9 @@ let cache: Title[] | null = null;
 let inFlight: Promise<Title[]> | null = null;
 
 function loadTitles(): Promise<Title[]> {
-  if (cache) return Promise.resolve(cache);
+  if (cache) {
+    return Promise.resolve(cache);
+  }
   if (!inFlight) {
     inFlight = fetchTitles()
       .then((data) => {
@@ -25,15 +27,21 @@ export function useTitles() {
   const [isLoading, setIsLoading] = useState(!cache);
 
   useEffect(() => {
-    if (cache) return;
+    if (cache) {
+      return;
+    }
     let cancelled = false;
     setIsLoading(true);
     loadTitles()
       .then((data) => {
-        if (!cancelled) setTitles(data);
+        if (!cancelled) {
+          setTitles(data);
+        }
       })
       .finally(() => {
-        if (!cancelled) setIsLoading(false);
+        if (!cancelled) {
+          setIsLoading(false);
+        }
       });
     return () => {
       cancelled = true;

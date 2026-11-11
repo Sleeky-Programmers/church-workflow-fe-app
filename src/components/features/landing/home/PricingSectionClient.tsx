@@ -17,10 +17,13 @@ import {
 } from "@/lib/plan-utils";
 import { getCurrentPlan } from "@/services/billingService";
 import { CurrentPlanResponse, Plan } from "@/types";
+import Image from "next/image";
 
 type BillingCycle = "monthly" | "yearly";
 
-const formatPrice = (price: number) => `₦${price.toLocaleString()}`;
+const formatPrice = (price: number) => {
+  return `₦${price.toLocaleString()}`;
+};
 
 interface PricingSectionClientProps {
   plans: Plan[];
@@ -37,19 +40,24 @@ export default function PricingSectionClient({
   const router = useRouter();
 
   // Only logged-in visitors have a subscription to reflect - fails silently
-  // so an anonymous visitor or a fetch hiccup never blocks the public page.
+  // So an anonymous visitor or a fetch hiccup never blocks the public page.
   useEffect(() => {
     if (!getAccessToken()) {
       return;
     }
     getCurrentPlan()
       .then(setCurrentPlan)
-      .catch(() => setCurrentPlan(null));
+      .catch(() => {
+        return setCurrentPlan(null);
+      });
   }, []);
 
-  const isCurrentPlan = (plan: Plan) =>
-    currentPlan?.type === plan.type &&
-    currentPlan?.status === SubscriptionStatus.ACTIVE;
+  const isCurrentPlan = (plan: Plan) => {
+    return (
+      currentPlan?.type === plan.type &&
+      currentPlan?.status === SubscriptionStatus.ACTIVE
+    );
+  };
 
   const handleGetStarted = (planKey: string) => {
     if (loadingPlan) {
@@ -57,7 +65,9 @@ export default function PricingSectionClient({
     }
 
     // Enterprise is quoted and activated by our team, never bought here.
-    const selected = plans.find((p) => p.type === planKey);
+    const selected = plans.find((p) => {
+      return p.type === planKey;
+    });
     if (isContactSalesPlan(selected)) {
       router.push(CONTACT_SALES_HREF);
       return;
@@ -77,7 +87,7 @@ export default function PricingSectionClient({
     const token = getAccessToken();
 
     // Already on an active paid plan - send them to the dashboard's
-    // plan-change-aware checkout instead of the new-subscriber checkout.
+    // Plan-change-aware checkout instead of the new-subscriber checkout.
     const isActivePaidPlan =
       currentPlan?.status === SubscriptionStatus.ACTIVE &&
       currentPlan?.type !== PlanType.STARTER;
@@ -102,35 +112,30 @@ export default function PricingSectionClient({
   };
 
   // Yearly billing is shown as its monthly-equivalent (yearly total / 12) so
-  // the two toggle states are visually comparable at a glance - the actual
-  // yearly total is still what gets charged, just not the headline number.
-  const getDisplayPrice = (plan: Plan) =>
-    billing === "monthly"
+  // The two toggle states are visually comparable at a glance - the actual
+  // Yearly total is still what gets charged, just not the headline number.
+  const getDisplayPrice = (plan: Plan) => {
+    return billing === "monthly"
       ? plan.monthlyPrice
       : Math.round(plan.yearlyPrice / 12);
+  };
 
   return (
     <section id="pricing" className="relative w-full">
-      <img
-        loading="lazy"
-        decoding="async"
+      <Image
         src="/landing-page/light-blue.png"
         alt=""
         aria-hidden="true"
-        className="absolute inset-0 w-full h-full object-fill pointer-events-none select-none"
-      />
+        className="absolute inset-0 w-full h-full object-fill pointer-events-none select-none" fill sizes="100vw" />
 
       <div className="relative z-10 py-20 px-6">
-        <img
-          loading="lazy"
-          decoding="async"
+        <Image
           src="/assets/icons/star.svg"
           alt=""
           aria-hidden="true"
           width={28}
           height={28}
-          className="absolute top-12 left-14 select-none pointer-events-none"
-        />
+          className="absolute top-12 left-14 select-none pointer-events-none" />
 
         <div className="max-w-3xl mx-auto text-center mb-10">
           <Heading
@@ -139,14 +144,11 @@ export default function PricingSectionClient({
           >
             <span className="relative inline-block text-[#0C5FB3]">
               Flexible Plans
-              <img
-                loading="lazy"
-                decoding="async"
+              <Image
                 src="/assets/icons/wave.svg"
                 alt=""
                 aria-hidden="true"
-                className="absolute -bottom-1 left-0 w-full h-auto"
-              />
+                className="absolute -bottom-1 left-0 w-full h-auto" width={0} height={0} sizes="100vw" />
             </span>{" "}
             for Every Church
           </Heading>
@@ -159,7 +161,9 @@ export default function PricingSectionClient({
         <div className="flex items-center justify-center gap-3 mb-12">
           <div className="flex items-center bg-gray-200 rounded-full p-1 shadow-sm border border-gray-200">
             <button
-              onClick={() => setBilling("monthly")}
+              onClick={() => {
+                return setBilling("monthly");
+              }}
               className={`px-5 py-1.5 rounded-full text-sm font-medium transition-all ${
                 billing === "monthly"
                   ? "bg-[#0C5FB3] text-[#ffff] shadow"
@@ -169,7 +173,9 @@ export default function PricingSectionClient({
               Monthly
             </button>
             <button
-              onClick={() => setBilling("yearly")}
+              onClick={() => {
+                return setBilling("yearly");
+              }}
               className={`px-5 py-1.5 rounded-full text-sm font-medium transition-all ${
                 billing === "yearly"
                   ? "bg-[#0C5FB3] text-[#ffff] shadow"
@@ -185,101 +191,112 @@ export default function PricingSectionClient({
         </div>
 
         <div className="max-w-6xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-5 items-stretch">
-          {plans.map((plan) => (
-            <div
-              key={plan.type}
-              className={`relative flex flex-col h-full rounded-2xl bg-[#ffffff] px-5 py-6 gap-5 ${
-                plan.popular
-                  ? "border-2 border-[#0C5FB3] shadow-xl"
-                  : "border border-gray-200 shadow-sm"
-              }`}
-            >
-              {plan.popular && (
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                  <span className="inline-block whitespace-nowrap bg-[#0C5FB3] text-[#ffff] text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full">
-                    Most Popular
-                  </span>
-                </div>
-              )}
-
-              <div className="flex flex-col gap-1">
-                <Text variant="label" className="text-gray-800">
-                  {plan.name}
-                </Text>
-                {isContactSalesPlan(plan) ? (
-                  <>
-                    <div className="flex items-baseline gap-1.5 flex-wrap">
-                      <span className="text-xs text-gray-500">From</span>
-                      <span className="text-2xl font-black text-gray-900">
-                        {formatPrice(plan.monthlyPrice)}
-                      </span>
-                      <span className="text-xs text-gray-400">/ month</span>
-                    </div>
-                    <span className="text-[11px] text-gray-400">
-                      tailored to your church
+          {plans.map((plan) => {
+            return (
+              <div
+                key={plan.type}
+                className={`relative flex flex-col h-full rounded-2xl bg-[#ffffff] px-5 py-6 gap-5 ${
+                  plan.popular
+                    ? "border-2 border-[#0C5FB3] shadow-xl"
+                    : "border border-gray-200 shadow-sm"
+                }`}
+              >
+                {plan.popular && (
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                    <span className="inline-block whitespace-nowrap bg-[#0C5FB3] text-[#ffff] text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full">
+                      Most Popular
                     </span>
-                  </>
-                ) : (
-                  <>
-                    <div className="flex items-baseline gap-1.5 flex-wrap">
-                      {billing === "yearly" && plan.monthlyPrice > 0 && (
-                        <span className="text-sm text-gray-400 line-through">
+                  </div>
+                )}
+
+                <div className="flex flex-col gap-1">
+                  <Text variant="label" className="text-gray-800">
+                    {plan.name}
+                  </Text>
+                  {isContactSalesPlan(plan) ? (
+                    <>
+                      <div className="flex items-baseline gap-1.5 flex-wrap">
+                        <span className="text-xs text-gray-500">From</span>
+                        <span className="text-2xl font-black text-gray-900">
                           {formatPrice(plan.monthlyPrice)}
                         </span>
-                      )}
-                      <span className="text-2xl font-black text-gray-900">
-                        {formatPrice(getDisplayPrice(plan))}
-                      </span>
-                      <span className="text-xs text-gray-400">/ month</span>
-                    </div>
-                    {billing === "yearly" && plan.monthlyPrice > 0 && (
+                        <span className="text-xs text-gray-400">/ month</span>
+                      </div>
                       <span className="text-[11px] text-gray-400">
-                        billed annually
+                        tailored to your church
                       </span>
-                    )}
-                  </>
+                    </>
+                  ) : (
+                    <>
+                      <div className="flex items-baseline gap-1.5 flex-wrap">
+                        {billing === "yearly" && plan.monthlyPrice > 0 && (
+                          <span className="text-sm text-gray-400 line-through">
+                            {formatPrice(plan.monthlyPrice)}
+                          </span>
+                        )}
+                        <span className="text-2xl font-black text-gray-900">
+                          {formatPrice(getDisplayPrice(plan))}
+                        </span>
+                        <span className="text-xs text-gray-400">/ month</span>
+                      </div>
+                      {billing === "yearly" && plan.monthlyPrice > 0 && (
+                        <span className="text-[11px] text-gray-400">
+                          billed annually
+                        </span>
+                      )}
+                    </>
+                  )}
+                </div>
+
+                <div className="flex flex-col gap-2.5 flex-1">
+                  {[...getPlanLimitLines(plan), ...plan.features].map(
+                    (feature) => {
+                      return (
+                        <div key={feature} className="flex items-start gap-2">
+                          <Check
+                            size={14}
+                            className="text-green-600 mt-0.5 shrink-0"
+                          />
+                          <Text
+                            variant="muted"
+                            className="text-xs leading-snug"
+                          >
+                            {feature}
+                          </Text>
+                        </div>
+                      );
+                    },
+                  )}
+                </div>
+
+                {isCurrentPlan(plan) ? (
+                  <button
+                    disabled
+                    className="w-full rounded-lg mt-auto py-2 px-4 text-sm font-semibold text-gray-500 bg-gray-100 cursor-not-allowed flex items-center justify-center gap-1.5"
+                  >
+                    <Check size={14} />
+                    Current Plan
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => {
+                      return handleGetStarted(plan.type);
+                    }}
+                    disabled={loadingPlan !== null}
+                    className="w-full rounded-lg mt-auto py-2 px-4 text-sm font-semibold text-[#0C5FB3] bg-[#0C5FB3]/10 cursor-pointer hover:bg-[#0C5FB3]/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {loadingPlan === plan.type
+                      ? "Redirecting..."
+                      : isContactSalesPlan(plan)
+                        ? "Contact us"
+                        : plan.type === "STARTER"
+                          ? "Get Started Free"
+                          : "Get Started"}
+                  </button>
                 )}
               </div>
-
-              <div className="flex flex-col gap-2.5 flex-1">
-                {[...getPlanLimitLines(plan), ...plan.features].map((feature) => (
-                  <div key={feature} className="flex items-start gap-2">
-                    <Check
-                      size={14}
-                      className="text-green-600 mt-0.5 shrink-0"
-                    />
-                    <Text variant="muted" className="text-xs leading-snug">
-                      {feature}
-                    </Text>
-                  </div>
-                ))}
-              </div>
-
-              {isCurrentPlan(plan) ? (
-                <button
-                  disabled
-                  className="w-full rounded-lg mt-auto py-2 px-4 text-sm font-semibold text-gray-500 bg-gray-100 cursor-not-allowed flex items-center justify-center gap-1.5"
-                >
-                  <Check size={14} />
-                  Current Plan
-                </button>
-              ) : (
-                <button
-                  onClick={() => handleGetStarted(plan.type)}
-                  disabled={loadingPlan !== null}
-                  className="w-full rounded-lg mt-auto py-2 px-4 text-sm font-semibold text-[#0C5FB3] bg-[#0C5FB3]/10 cursor-pointer hover:bg-[#0C5FB3]/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {loadingPlan === plan.type
-                    ? "Redirecting..."
-                    : isContactSalesPlan(plan)
-                      ? "Contact us"
-                      : plan.type === "STARTER"
-                        ? "Get Started Free"
-                        : "Get Started"}
-                </button>
-              )}
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         <Text

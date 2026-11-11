@@ -7,31 +7,44 @@ export const activityDetailsConfig: {
 }[] = [
   {
     key: ActivityDetailLabel.ACTION,
-    getValue: (row) => row.action,
+    getValue: (row) => {
+      return row.action;
+    },
   },
   {
     key: ActivityDetailLabel.BY,
-    getValue: (row) =>
-      `${row.adminId?.firstName || "Unknown"} ${row.adminId?.lastName || ""}`,
+    getValue: (row) => {
+      return `${row.adminId?.firstName || "Unknown"} ${row.adminId?.lastName || ""}`;
+    },
   },
   {
     key: ActivityDetailLabel.MODULE,
-    getValue: (row) => row.module,
+    getValue: (row) => {
+      return row.module;
+    },
   },
   {
     key: ActivityDetailLabel.AFFECTED_RECORD,
-    getValue: (row) => row.details,
+    getValue: (row) => {
+      return row.details;
+    },
   },
   {
     key: ActivityDetailLabel.STATUS,
-    getValue: () => "Approved",
+    getValue: () => {
+      return "Approved";
+    },
   },
   {
     key: ActivityDetailLabel.TRIGGERED_FROM,
-    getValue: () => "Requisition Form > Pending List",
+    getValue: () => {
+      return "Requisition Form > Pending List";
+    },
   },
   {
     key: ActivityDetailLabel.DETAILS,
-    getValue: (row) => `“${row.details}”`,
+    getValue: (row) => {
+      return `“${row.details}”`;
+    },
   },
 ];

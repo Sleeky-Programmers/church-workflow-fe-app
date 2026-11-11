@@ -31,8 +31,8 @@ interface TitleComboboxProps {
 }
 
 // Searchable title picker: type-ahead over the church's configured title
-// list (case/punctuation-insensitive), with a "Use '...'" fallback so any
-// custom title up to 50 chars can still be entered when nothing matches.
+// List (case/punctuation-insensitive), with a "Use '...'" fallback so any
+// Custom title up to 50 chars can still be entered when nothing matches.
 // The list itself is managed at Settings > Titles & Locations.
 export function TitleCombobox({
   value,
@@ -44,23 +44,30 @@ export function TitleCombobox({
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
 
-  const activeLabels = useMemo(
-    () => titles.filter((t) => t.isActive).map((t) => t.name),
-    [titles],
-  );
+  const activeLabels = useMemo(() => {
+    return titles
+      .filter((t) => {
+        return t.isActive;
+      })
+      .map((t) => {
+        return t.name;
+      });
+  }, [titles]);
 
   const filteredLabels = useMemo(() => {
     const query = normalizeTitleQuery(search);
-    if (!query) return activeLabels;
-    return activeLabels.filter((label) =>
-      normalizeTitleQuery(label).includes(query),
-    );
+    if (!query) {
+      return activeLabels;
+    }
+    return activeLabels.filter((label) => {
+      return normalizeTitleQuery(label).includes(query);
+    });
   }, [activeLabels, search]);
 
   const trimmedSearch = search.trim();
-  const hasExactMatch = activeLabels.some(
-    (label) => normalizeTitleQuery(label) === normalizeTitleQuery(trimmedSearch),
-  );
+  const hasExactMatch = activeLabels.some((label) => {
+    return normalizeTitleQuery(label) === normalizeTitleQuery(trimmedSearch);
+  });
 
   const handleSelect = (label: string) => {
     onChange(label);
@@ -90,25 +97,38 @@ export function TitleCombobox({
         <Command shouldFilter={false}>
           <CommandInput
             value={search}
-            onValueChange={(v) => setSearch(v.slice(0, TITLE_MAX_LENGTH))}
+            onValueChange={(v) => {
+              return setSearch(v.slice(0, TITLE_MAX_LENGTH));
+            }}
             placeholder="Search titles..."
           />
 
           <CommandList className="max-h-64">
             <CommandGroup>
-              {filteredLabels.map((label) => (
-                <CommandItem key={label} onSelect={() => handleSelect(label)}>
-                  {label}
-                  <Check
-                    className={`ml-auto h-4 w-4 ${value === label ? "opacity-100" : "opacity-0"}`}
-                  />
-                </CommandItem>
-              ))}
+              {filteredLabels.map((label) => {
+                return (
+                  <CommandItem
+                    key={label}
+                    onSelect={() => {
+                      return handleSelect(label);
+                    }}
+                  >
+                    {label}
+                    <Check
+                      className={`ml-auto h-4 w-4 ${value === label ? "opacity-100" : "opacity-0"}`}
+                    />
+                  </CommandItem>
+                );
+              })}
             </CommandGroup>
 
             {trimmedSearch && !hasExactMatch && (
               <CommandGroup>
-                <CommandItem onSelect={() => handleSelect(trimmedSearch)}>
+                <CommandItem
+                  onSelect={() => {
+                    return handleSelect(trimmedSearch);
+                  }}
+                >
                   Use &ldquo;{trimmedSearch}&rdquo;
                 </CommandItem>
               </CommandGroup>

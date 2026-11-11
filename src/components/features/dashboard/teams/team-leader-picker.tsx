@@ -13,7 +13,7 @@ interface TeamLeaderPickerProps {
 }
 
 // Thin wrapper around the shared AdminInvitePicker, kept so existing
-// small-team call sites don't need to change.
+// Small-team call sites don't need to change.
 export function TeamLeaderPicker({
   leaderId,
   leaderName,

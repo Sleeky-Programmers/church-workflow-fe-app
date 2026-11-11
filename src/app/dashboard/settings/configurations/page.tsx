@@ -9,12 +9,7 @@ import { PaymentMethodManager } from "@/components/features/dashboard/finance/gi
 import { LocationManager } from "@/components/features/dashboard/settings/location-manager";
 import { TitleManager } from "@/components/features/dashboard/settings/title-manager";
 import { Loader } from "@/components/ui/loader";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Heading from "@/components/ui/typography/Heading";
 import { Text } from "@/components/ui/typography/Text";
 import { useHasAccess } from "@/lib/access-control";
@@ -45,11 +40,15 @@ export default function ConfigurationsSettingsPage() {
 function ConfigurationsContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const accessScope = useUserStore((state) => state.accessScope);
+  const accessScope = useUserStore((state) => {
+    return state.accessScope;
+  });
   const canManageLists = accessScope === "ORG_WIDE";
   const canManageGiving = useHasAccess("GIVING", "FULL_ACCESS");
 
-  const activeTab = TABS.some((tab) => tab.value === searchParams.get("tab"))
+  const activeTab = TABS.some((tab) => {
+    return tab.value === searchParams.get("tab");
+  })
     ? (searchParams.get("tab") as string)
     : TABS[0].value;
 
@@ -61,25 +60,25 @@ function ConfigurationsContent() {
     <div className="space-y-6">
       <Heading level={3}>Configurations</Heading>
       <Text variant="muted" className="text-sm">
-        Manage the church-wide settings used across Members, Attendance,
-        Events, and Giving. Changes apply church-wide, including all
-        branches.
+        Manage the church-wide settings used across Members, Attendance, Events,
+        and Giving. Changes apply church-wide, including all branches.
       </Text>
 
       <Tabs value={activeTab} onValueChange={handleTabChange}>
         <TabsList className="h-auto flex-wrap justify-start gap-1">
-          {TABS.map((tab) => (
-            <TabsTrigger key={tab.value} value={tab.value}>
-              {tab.label}
-            </TabsTrigger>
-          ))}
+          {TABS.map((tab) => {
+            return (
+              <TabsTrigger key={tab.value} value={tab.value}>
+                {tab.label}
+              </TabsTrigger>
+            );
+          })}
         </TabsList>
 
         <TabsContent value="location" className="w-full">
           {!canManageLists && (
             <Text variant="muted" className="text-sm mb-3">
-              Only org-wide admins can add, rename, or deactivate entries
-              here.
+              Only org-wide admins can add, rename, or deactivate entries here.
             </Text>
           )}
           <LocationManager readOnly={!canManageLists} />
@@ -88,8 +87,7 @@ function ConfigurationsContent() {
         <TabsContent value="titles" className="w-full">
           {!canManageLists && (
             <Text variant="muted" className="text-sm mb-3">
-              Only org-wide admins can add, rename, or deactivate entries
-              here.
+              Only org-wide admins can add, rename, or deactivate entries here.
             </Text>
           )}
           <TitleManager readOnly={!canManageLists} />

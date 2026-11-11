@@ -23,7 +23,9 @@ export function AuthAwareCta({
   signedOutLabel = "Sign Up",
   signedInLabel = "Go to Dashboard",
 }: AuthAwareCtaProps) {
-  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  const isAuthenticated = useAuthStore((s) => {
+    return s.isAuthenticated;
+  });
 
   return (
     <Link href={isAuthenticated ? "/dashboard" : "/auth/signup"}>

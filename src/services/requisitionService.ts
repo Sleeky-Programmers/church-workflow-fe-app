@@ -59,10 +59,18 @@ export async function createRequisition(payload: CreateRequisitionPayload) {
 export async function fetchRequisitions(params: RequisitionQueryParams) {
   const query = new URLSearchParams();
 
-  if (params.page) query.append("page", String(params.page));
-  if (params.limit) query.append("limit", String(params.limit));
-  if (params.departmentId) query.append("departmentId", params.departmentId);
-  if (params.status) query.append("status", params.status);
+  if (params.page) {
+    query.append("page", String(params.page));
+  }
+  if (params.limit) {
+    query.append("limit", String(params.limit));
+  }
+  if (params.departmentId) {
+    query.append("departmentId", params.departmentId);
+  }
+  if (params.status) {
+    query.append("status", params.status);
+  }
 
   return authenticatedFetch<{
     data: RequisitionResponse[];

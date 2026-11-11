@@ -132,7 +132,9 @@ export default function FinancePage() {
   }, [activeTab]);
 
   const handleConfirmDeleteExpense = async () => {
-    if (!deleteTarget) return;
+    if (!deleteTarget) {
+      return;
+    }
 
     try {
       await deleteExpense(deleteTarget.id);
@@ -153,7 +155,9 @@ export default function FinancePage() {
     {
       key: "date",
       header: "Date",
-      render: (row) => format(new Date(row.date), "MMM d, yyyy"),
+      render: (row) => {
+        return format(new Date(row.date), "MMM d, yyyy");
+      },
       width: "w-32",
     },
     {
@@ -164,21 +168,27 @@ export default function FinancePage() {
     {
       key: "description",
       header: "Description",
-      render: (row) => <span className="line-clamp-1">{row.description}</span>,
+      render: (row) => {
+        return <span className="line-clamp-1">{row.description}</span>;
+      },
     },
     {
       key: "department",
       header: "Department",
-      render: (row) => row.departmentName || "-",
+      render: (row) => {
+        return row.departmentName || "-";
+      },
     },
     {
       key: "amount",
       header: "Amount",
-      render: (row) => (
-        <span className="font-semibold">
-          {formatCurrency(row.amount, row.currency || currency)}
-        </span>
-      ),
+      render: (row) => {
+        return (
+          <span className="font-semibold">
+            {formatCurrency(row.amount, row.currency || currency)}
+          </span>
+        );
+      },
       align: "right",
     },
     ...(canDeleteExpenses
@@ -186,17 +196,21 @@ export default function FinancePage() {
           {
             key: "actions",
             header: "",
-            render: (row: ExpenseResponse) => (
-              <div className="flex justify-end w-full">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setDeleteTarget(row)}
-                >
-                  <Trash2 className="w-4 h-4 text-red-500" />
-                </Button>
-              </div>
-            ),
+            render: (row: ExpenseResponse) => {
+              return (
+                <div className="flex justify-end w-full">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => {
+                      return setDeleteTarget(row);
+                    }}
+                  >
+                    <Trash2 className="w-4 h-4 text-red-500" />
+                  </Button>
+                </div>
+              );
+            },
             align: "right" as const,
           },
         ]
@@ -216,20 +230,24 @@ export default function FinancePage() {
       </div>
 
       <div className="flex items-center gap-2 border-b border-gray-200">
-        {(["giving", "expenses"] as FinanceTab[]).map((tab) => (
-          <button
-            key={tab}
-            onClick={() => setActiveTab(tab)}
-            className={cn(
-              "px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors",
-              activeTab === tab
-                ? "border-primary-500 text-primary-600"
-                : "border-transparent text-gray-500 hover:text-gray-700",
-            )}
-          >
-            {tab === "giving" ? "Giving" : "Expenses"}
-          </button>
-        ))}
+        {(["giving", "expenses"] as FinanceTab[]).map((tab) => {
+          return (
+            <button
+              key={tab}
+              onClick={() => {
+                return setActiveTab(tab);
+              }}
+              className={cn(
+                "px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors",
+                activeTab === tab
+                  ? "border-primary-500 text-primary-600"
+                  : "border-transparent text-gray-500 hover:text-gray-700",
+              )}
+            >
+              {tab === "giving" ? "Giving" : "Expenses"}
+            </button>
+          );
+        })}
       </div>
 
       <div className="flex flex-wrap items-end gap-3">
@@ -238,7 +256,9 @@ export default function FinancePage() {
           <Input
             type="date"
             value={startDate}
-            onChange={(e) => setStartDate(e.target.value)}
+            onChange={(e) => {
+              return setStartDate(e.target.value);
+            }}
             className="w-40"
           />
         </div>
@@ -247,7 +267,9 @@ export default function FinancePage() {
           <Input
             type="date"
             value={endDate}
-            onChange={(e) => setEndDate(e.target.value)}
+            onChange={(e) => {
+              return setEndDate(e.target.value);
+            }}
             className="w-40"
           />
         </div>
@@ -293,22 +315,26 @@ export default function FinancePage() {
             {!givingSummaryLoading &&
               givingSummary &&
               [...givingSummary.byOfferingType]
-                .sort((a, b) => b.amount - a.amount)
+                .sort((a, b) => {
+                  return b.amount - a.amount;
+                })
                 .slice(0, 1)
-                .map((row) => (
-                  <div
-                    key={row.name}
-                    className="bg-white rounded-2xl border border-gray-300 p-4
+                .map((row) => {
+                  return (
+                    <div
+                      key={row.name}
+                      className="bg-white rounded-2xl border border-gray-300 p-4
                                shadow-[0_1px_4px_rgba(0,0,0,0.06)]"
-                  >
-                    <p className="text-[13px] font-bold text-black mb-1">
-                      Top Offering Type
-                    </p>
-                    <span className="text-xl font-bold text-black">
-                      {row.name}
-                    </span>
-                  </div>
-                ))}
+                    >
+                      <p className="text-[13px] font-bold text-black mb-1">
+                        Top Offering Type
+                      </p>
+                      <span className="text-xl font-bold text-black">
+                        {row.name}
+                      </span>
+                    </div>
+                  );
+                })}
           </div>
 
           <div className="bg-white rounded-2xl border border-gray-300 p-5 space-y-3">
@@ -320,17 +346,19 @@ export default function FinancePage() {
               </Text>
             ) : givingSummary.byOfferingType.length ? (
               <div className="space-y-2">
-                {givingSummary.byOfferingType.map((row) => (
-                  <div
-                    key={row.name}
-                    className="flex items-center justify-between text-sm"
-                  >
-                    <Span>{row.name}</Span>
-                    <Span className="font-semibold">
-                      {formatCurrency(row.amount, currency)}
-                    </Span>
-                  </div>
-                ))}
+                {givingSummary.byOfferingType.map((row) => {
+                  return (
+                    <div
+                      key={row.name}
+                      className="flex items-center justify-between text-sm"
+                    >
+                      <Span>{row.name}</Span>
+                      <Span className="font-semibold">
+                        {formatCurrency(row.amount, currency)}
+                      </Span>
+                    </div>
+                  );
+                })}
               </div>
             ) : (
               <Text variant="muted" className="text-sm">
@@ -377,9 +405,9 @@ export default function FinancePage() {
               <span className="text-xl font-bold text-black">
                 {expenseSummaryLoading || !expenseSummary?.byCategory.length
                   ? "-"
-                  : [...expenseSummary.byCategory].sort(
-                      (a, b) => b.amount - a.amount,
-                    )[0]?.category}
+                  : [...expenseSummary.byCategory].sort((a, b) => {
+                      return b.amount - a.amount;
+                    })[0]?.category}
               </span>
             </div>
           </div>
@@ -389,7 +417,9 @@ export default function FinancePage() {
               columns={expenseColumns}
               minWidth="min-w-[720px]"
               data={expenses}
-              rowKey={(row) => row.id}
+              rowKey={(row) => {
+                return row.id;
+              }}
               isLoading={expensesLoading}
               emptyState={
                 <div className="py-10 text-center">
@@ -408,7 +438,9 @@ export default function FinancePage() {
 
       <AlertDialog
         open={!!deleteTarget}
-        onOpenChange={(open) => !open && setDeleteTarget(null)}
+        onOpenChange={(open) => {
+          return !open && setDeleteTarget(null);
+        }}
       >
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -418,7 +450,11 @@ export default function FinancePage() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setDeleteTarget(null)}>
+            <AlertDialogCancel
+              onClick={() => {
+                return setDeleteTarget(null);
+              }}
+            >
               Cancel
             </AlertDialogCancel>
             <AlertDialogAction onClick={handleConfirmDeleteExpense}>

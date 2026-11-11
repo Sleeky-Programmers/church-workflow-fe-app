@@ -67,21 +67,32 @@ export const InputField = ({
           id={id}
           placeholder={placeholder}
           value={value}
-          onChange={(e) =>
-            (onChange as (e: React.ChangeEvent<HTMLTextAreaElement>) => void)?.(e)
-          }
+          onChange={(e) => {
+            return (
+              onChange as (e: React.ChangeEvent<HTMLTextAreaElement>) => void
+            )?.(e);
+          }}
         />
       ) : as === HtmlInputElementTypes.SELECT ? (
-        <Select value={value} onValueChange={(v) => callOnChangeWithValue(v)}>
+        <Select
+          value={value}
+          onValueChange={(v) => {
+            return callOnChangeWithValue(v);
+          }}
+        >
           <SelectTrigger>
-            <SelectValue placeholder={selectPlaceholder ?? placeholder ?? "Select"} />
+            <SelectValue
+              placeholder={selectPlaceholder ?? placeholder ?? "Select"}
+            />
           </SelectTrigger>
           <SelectContent>
-            {options.map((opt) => (
-              <SelectItem key={opt.value} value={opt.value}>
-                {opt.label}
-              </SelectItem>
-            ))}
+            {options.map((opt) => {
+              return (
+                <SelectItem key={opt.value} value={opt.value}>
+                  {opt.label}
+                </SelectItem>
+              );
+            })}
           </SelectContent>
         </Select>
       ) : (
@@ -90,7 +101,9 @@ export const InputField = ({
           type={type}
           placeholder={placeholder}
           value={value}
-          onChange={onChange as (e: React.ChangeEvent<HTMLInputElement>) => void}
+          onChange={
+            onChange as (e: React.ChangeEvent<HTMLInputElement>) => void
+          }
           leftIcon={leftIcon}
           rightIcon={rightIcon}
         />

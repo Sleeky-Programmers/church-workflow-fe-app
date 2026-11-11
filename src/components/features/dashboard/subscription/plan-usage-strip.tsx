@@ -8,19 +8,22 @@ import { getMemberLimitStatus } from "@/services/memberService";
 import { LimitUsage, MemberLimitStatus } from "@/types";
 
 const formatUsage = (usage?: LimitUsage) => {
-  if (!usage) return "—";
+  if (!usage) {
+    return "—";
+  }
   const current = usage.current.toLocaleString();
   return usage.unlimited
     ? `${current} / Unlimited`
     : `${current} / ${usage.limit.toLocaleString()}`;
 };
 
-const tone = (usage?: LimitUsage) =>
-  usage?.isOverLimit || usage?.atLimit
+const tone = (usage?: LimitUsage) => {
+  return usage?.isOverLimit || usage?.atLimit
     ? "text-red-600"
     : usage?.isNearLimit
       ? "text-amber-600"
       : "text-gray-900";
+};
 
 /**
  * Plan usage line for the dashboard, e.g.
@@ -32,18 +35,27 @@ export function PlanUsageStrip({ className }: { className?: string }) {
   useEffect(() => {
     let cancelled = false;
     getMemberLimitStatus()
-      .then((s) => !cancelled && setStatus(s))
-      .catch(() => !cancelled && setStatus(null));
+      .then((s) => {
+        return !cancelled && setStatus(s);
+      })
+      .catch(() => {
+        return !cancelled && setStatus(null);
+      });
     return () => {
       cancelled = true;
     };
   }, []);
 
-  if (!status?.members || !status?.guests) return null;
+  if (!status?.members || !status?.guests) {
+    return null;
+  }
 
   const { members, guests, frequentGuests = 0 } = status;
   const needsUpgrade =
-    members.atLimit || guests.atLimit || members.isNearLimit || guests.isNearLimit;
+    members.atLimit ||
+    guests.atLimit ||
+    members.isNearLimit ||
+    guests.isNearLimit;
 
   return (
     <div

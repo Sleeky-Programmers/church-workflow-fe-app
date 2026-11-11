@@ -57,7 +57,7 @@ export async function manualVerifyPayment(
 }
 
 // Used by the public post-payment landing page for visitors who return from
-// the gateway without an active session - no auth required.
+// The gateway without an active session - no auth required.
 export async function publicVerifyPayment(
   reference: string,
   provider: "PAYSTACK" | "FLUTTERWAVE",

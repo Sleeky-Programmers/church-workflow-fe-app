@@ -1,11 +1,6 @@
 "use client";
 
-import {
-  AlertTriangle,
-  ChevronLeft,
-  ChevronRight,
-  Trash2,
-} from "lucide-react";
+import { AlertTriangle, ChevronLeft, ChevronRight, Trash2 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -47,10 +42,12 @@ export function PaymentMethodManager() {
   const [currentPage, setCurrentPage] = useState(1);
 
   const totalPages = Math.max(1, Math.ceil(methods.length / PAGE_SIZE));
-  const pagedMethods = useMemo(
-    () => methods.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE),
-    [methods, currentPage],
-  );
+  const pagedMethods = useMemo(() => {
+    return methods.slice(
+      (currentPage - 1) * PAGE_SIZE,
+      currentPage * PAGE_SIZE,
+    );
+  }, [methods, currentPage]);
 
   const load = async () => {
     setIsLoading(true);
@@ -60,7 +57,11 @@ export function PaymentMethodManager() {
         fetchPaymentMethods(),
         fetchPaymentMethodPresets(),
       ]);
-      setMethods([...methodsData].sort((a, b) => a.sortOrder - b.sortOrder));
+      setMethods(
+        [...methodsData].sort((a, b) => {
+          return a.sortOrder - b.sortOrder;
+        }),
+      );
       setPresets(presetsData);
     } catch (err: any) {
       setError(err.message || "Failed to load payment methods");
@@ -75,17 +76,23 @@ export function PaymentMethodManager() {
   }, []);
 
   useEffect(() => {
-    if (currentPage > totalPages) setCurrentPage(totalPages);
+    if (currentPage > totalPages) {
+      setCurrentPage(totalPages);
+    }
   }, [currentPage, totalPages]);
 
-  const availablePresets = useMemo(
-    () =>
-      presets.filter((preset) => !methods.some((m) => m.code === preset.code)),
-    [presets, methods],
-  );
+  const availablePresets = useMemo(() => {
+    return presets.filter((preset) => {
+      return !methods.some((m) => {
+        return m.code === preset.code;
+      });
+    });
+  }, [presets, methods]);
 
   const handleAdd = async () => {
-    if (!selectedPreset) return;
+    if (!selectedPreset) {
+      return;
+    }
     setIsSaving(true);
     setError(null);
     try {
@@ -114,7 +121,9 @@ export function PaymentMethodManager() {
   };
 
   const handleConfirmDelete = async () => {
-    if (!pendingDelete) return;
+    if (!pendingDelete) {
+      return;
+    }
     const method = pendingDelete;
     setDeletingId(method.id);
     setError(null);
@@ -162,11 +171,13 @@ export function PaymentMethodManager() {
             />
           </SelectTrigger>
           <SelectContent>
-            {availablePresets.map((preset) => (
-              <SelectItem key={preset.code} value={preset.code}>
-                {preset.name}
-              </SelectItem>
-            ))}
+            {availablePresets.map((preset) => {
+              return (
+                <SelectItem key={preset.code} value={preset.code}>
+                  {preset.name}
+                </SelectItem>
+              );
+            })}
           </SelectContent>
         </Select>
         <Button onClick={handleAdd} disabled={isSaving || !selectedPreset}>
@@ -181,47 +192,53 @@ export function PaymentMethodManager() {
       ) : (
         <>
           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
-            {pagedMethods.map((method) => (
-              <div
-                key={method.id}
-                className="rounded-xl border border-gray-200 p-3 flex flex-col gap-2 hover:border-gray-300 transition-colors"
-              >
-                <div className="min-w-0">
-                  <p className="text-sm font-semibold text-gray-900 truncate">
-                    {method.name}
-                  </p>
-                  <span
-                    className={`inline-block mt-1 text-[11px] px-1.5 py-0.5 rounded-full ${
-                      method.isActive
-                        ? "bg-green-50 text-green-700"
-                        : "bg-gray-100 text-gray-500"
-                    }`}
-                  >
-                    {method.isActive ? "Active" : "Inactive"}
-                  </span>
-                </div>
+            {pagedMethods.map((method) => {
+              return (
+                <div
+                  key={method.id}
+                  className="rounded-xl border border-gray-200 p-3 flex flex-col gap-2 hover:border-gray-300 transition-colors"
+                >
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold text-gray-900 truncate">
+                      {method.name}
+                    </p>
+                    <span
+                      className={`inline-block mt-1 text-[11px] px-1.5 py-0.5 rounded-full ${
+                        method.isActive
+                          ? "bg-green-50 text-green-700"
+                          : "bg-gray-100 text-gray-500"
+                      }`}
+                    >
+                      {method.isActive ? "Active" : "Inactive"}
+                    </span>
+                  </div>
 
-                <div className="flex items-center gap-1.5 pt-1">
-                  <Button
-                    size="sm"
-                    variant={method.isActive ? "outline" : "secondary"}
-                    className="h-7 px-2 text-xs"
-                    onClick={() => handleToggleActive(method)}
-                  >
-                    {method.isActive ? "Deactivate" : "Activate"}
-                  </Button>
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    className="h-7 w-7 text-red-500 hover:text-red-600 ml-auto"
-                    disabled={deletingId === method.id}
-                    onClick={() => setPendingDelete(method)}
-                  >
-                    <Trash2 className="w-3.5 h-3.5" />
-                  </Button>
+                  <div className="flex items-center gap-1.5 pt-1">
+                    <Button
+                      size="sm"
+                      variant={method.isActive ? "outline" : "secondary"}
+                      className="h-7 px-2 text-xs"
+                      onClick={() => {
+                        return handleToggleActive(method);
+                      }}
+                    >
+                      {method.isActive ? "Deactivate" : "Activate"}
+                    </Button>
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="h-7 w-7 text-red-500 hover:text-red-600 ml-auto"
+                      disabled={deletingId === method.id}
+                      onClick={() => {
+                        return setPendingDelete(method);
+                      }}
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </Button>
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
 
           {!methods.length && (
@@ -237,7 +254,11 @@ export function PaymentMethodManager() {
                 size="sm"
                 variant="outline"
                 disabled={currentPage === 1}
-                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                onClick={() => {
+                  return setCurrentPage((p) => {
+                    return Math.max(1, p - 1);
+                  });
+                }}
               >
                 <ChevronLeft className="h-4 w-4" />
                 Previous
@@ -249,7 +270,11 @@ export function PaymentMethodManager() {
                 size="sm"
                 variant="outline"
                 disabled={currentPage === totalPages}
-                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                onClick={() => {
+                  return setCurrentPage((p) => {
+                    return Math.min(totalPages, p + 1);
+                  });
+                }}
               >
                 Next
                 <ChevronRight className="h-4 w-4" />
@@ -261,7 +286,9 @@ export function PaymentMethodManager() {
 
       <ConfirmDialog
         open={!!pendingDelete}
-        onOpenChange={(open) => !open && setPendingDelete(null)}
+        onOpenChange={(open) => {
+          return !open && setPendingDelete(null);
+        }}
         title={`Delete "${pendingDelete?.name}"?`}
         description="This permanently removes the payment method. If it's used by existing giving records, deletion will be blocked - deactivate it instead. This action cannot be undone."
         confirmLabel="Delete"

@@ -6,7 +6,6 @@ import {
   Shield,
   Settings as SettingsIcon,
   Lock,
-  ParkingMeterIcon,
   Building2,
   ListChecks,
 } from "lucide-react";

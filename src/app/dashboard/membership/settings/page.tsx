@@ -13,7 +13,6 @@ import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import {
   fadeUp,
-  staggerContainer,
   hoverLift,
   hoverSpring,
 } from "@/components/features/dashboard/membership/animations";
@@ -22,7 +21,6 @@ import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import Heading from "@/components/ui/typography/Heading";
-import { useIsMobile } from "@/hooks/use-mobile";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import {
@@ -31,12 +29,13 @@ import {
   updatePastoralSettings,
   type PastoralSettings,
 } from "@/services/pastoralService";
+import { useLatest } from "@/hooks/use-latest";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Membership settings per the Figma design, fully wired: values persist to the
-// backend, threshold ordering is validated, toggles auto-sync with the tracking
-// mode, live member counts preview each threshold's impact, and unsaved edits
-// are guarded on navigation.
+// Backend, threshold ordering is validated, toggles auto-sync with the tracking
+// Mode, live member counts preview each threshold's impact, and unsaved edits
+// Are guarded on navigation.
 // ─────────────────────────────────────────────────────────────────────────────
 
 const THRESHOLDS = [
@@ -93,7 +92,6 @@ const SERVICE_TRACKING_OPTIONS = [
 type ThresholdKey = (typeof THRESHOLDS)[number]["key"];
 
 export default function MembershipSettingsPage() {
-  const isMobile = useIsMobile();
   const { toast } = useToast();
 
   const [thresholds, setThresholds] = useState<Record<ThresholdKey, number>>({
@@ -145,37 +143,53 @@ export default function MembershipSettingsPage() {
       .catch(() => {
         // First visit: server creates defaults on read
       })
-      .finally(() => setIsLoading(false));
+      .finally(() => {
+        return setIsLoading(false);
+      });
   }, []);
 
   // Live impact counts, debounced so dragging a slider doesn't hammer the API
   const countsTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const impactInputsRef = useLatest({
+    thresholds,
+    trackingMode,
+    countSpecialEvents,
+  });
   useEffect(() => {
-    if (isLoading) return;
-    if (countsTimer.current) clearTimeout(countsTimer.current);
+    if (isLoading) {
+      return;
+    }
+    if (countsTimer.current) {
+      clearTimeout(countsTimer.current);
+    }
     countsTimer.current = setTimeout(() => {
+      const current = impactInputsRef.current;
       fetchPastoralImpactCounts({
-        needsFollowUpThreshold: thresholds["needs-follow-up"],
-        atRiskThreshold: thresholds["at-risk"],
-        inactiveThreshold: thresholds.inactive,
-        trackingMode,
-        countSpecialEvents,
+        needsFollowUpThreshold: current.thresholds["needs-follow-up"],
+        atRiskThreshold: current.thresholds["at-risk"],
+        inactiveThreshold: current.thresholds.inactive,
+        trackingMode: current.trackingMode,
+        countSpecialEvents: current.countSpecialEvents,
       })
         .then(setCounts)
         .catch(() => {});
     }, 400);
     return () => {
-      if (countsTimer.current) clearTimeout(countsTimer.current);
+      if (countsTimer.current) {
+        clearTimeout(countsTimer.current);
+      }
     };
-  }, [settingsKey, isLoading]);
+  }, [settingsKey, isLoading, impactInputsRef]);
 
   // Ordering rule: needs-follow-up <= at-risk <= inactive
   const orderingError = (() => {
     const { "needs-follow-up": nfu, "at-risk": ar, inactive: ina } = thresholds;
-    if (nfu > ar)
+    if (nfu > ar) {
       return "Needs Follow-Up threshold cannot be greater than the At Risk threshold.";
-    if (ar > ina)
+    }
+    if (ar > ina) {
       return "At Risk threshold cannot be greater than the Inactive threshold.";
+    }
     return null;
   })();
 
@@ -185,7 +199,7 @@ export default function MembershipSettingsPage() {
   }, [settingsKey]);
 
   // Auto-sync: All Services implies counting special events; narrower modes
-  // default it back off unless the user explicitly re-enables it afterwards.
+  // Default it back off unless the user explicitly re-enables it afterwards.
   const applyTrackingMode = (mode: PastoralSettings["trackingMode"]) => {
     setTrackingMode(mode);
     if (mode === "ALL_SERVICES") {
@@ -197,7 +211,9 @@ export default function MembershipSettingsPage() {
   };
 
   const handleSave = async () => {
-    if (validationError || archiveDaysInvalid) return;
+    if (validationError || archiveDaysInvalid) {
+      return;
+    }
     setIsSaving(true);
     try {
       await updatePastoralSettings({
@@ -226,8 +242,8 @@ export default function MembershipSettingsPage() {
   };
 
   // Unsaved-changes guard: warn on tab close/reload, and intercept in-app
-  // link clicks with a confirm dialog (Next App Router has no router-level
-  // blocker, so we listen at the capture phase before Next handles the nav).
+  // Link clicks with a confirm dialog (Next App Router has no router-level
+  // Blocker, so we listen at the capture phase before Next handles the nav).
   const dirtyRef = useRef(dirty);
   dirtyRef.current = dirty && !isSaving;
 
@@ -240,11 +256,17 @@ export default function MembershipSettingsPage() {
     };
 
     const onClickCapture = (e: MouseEvent) => {
-      if (!dirtyRef.current) return;
+      if (!dirtyRef.current) {
+        return;
+      }
       const anchor = (e.target as HTMLElement)?.closest?.("a");
-      if (!anchor) return;
+      if (!anchor) {
+        return;
+      }
       const href = anchor.getAttribute("href");
-      if (!href || href.startsWith("#") || href.startsWith("http")) return;
+      if (!href || href.startsWith("#") || href.startsWith("http")) {
+        return;
+      }
       if (!window.confirm("You have unsaved changes. Leave without saving?")) {
         e.preventDefault();
         e.stopPropagation();
@@ -355,10 +377,12 @@ export default function MembershipSettingsPage() {
                       max={12}
                       step={1}
                       onValueChange={(vals) => {
-                        setThresholds((prev) => ({
-                          ...prev,
-                          [t.key]: vals[0],
-                        }));
+                        setThresholds((prev) => {
+                          return {
+                            ...prev,
+                            [t.key]: vals[0],
+                          };
+                        });
                         setDirty(true);
                       }}
                     />
@@ -387,7 +411,7 @@ export default function MembershipSettingsPage() {
                 Service Tracking
               </h2>
               <p className="text-sm text-gray-500 mt-0.5">
-                Choose which services count toward a member's absence tally
+                Choose which services count toward a member&apos;s absence tally
               </p>
             </div>
           </div>
@@ -400,7 +424,9 @@ export default function MembershipSettingsPage() {
                 <motion.button
                   key={option.key}
                   type="button"
-                  onClick={() => applyTrackingMode(option.key)}
+                  onClick={() => {
+                    return applyTrackingMode(option.key);
+                  }}
                   whileHover={selected ? undefined : hoverLift}
                   transition={hoverSpring}
                   className={cn(
@@ -479,8 +505,8 @@ export default function MembershipSettingsPage() {
                   Count Small Teams Meetings
                 </p>
                 <p className="text-sm text-gray-500 mt-0.5">
-                  Small teams attendance (or absence) is factored into engagement
-                  tracking
+                  Small teams attendance (or absence) is factored into
+                  engagement tracking
                 </p>
               </div>
               <Switch
@@ -517,8 +543,8 @@ export default function MembershipSettingsPage() {
               </label>
               <p className="text-sm text-gray-500 mt-0.5">
                 Guests with no attendance for this long move to the archive and
-                stop counting towards your guest limit. You can restore them
-                any time. Between 30 and 180 days.
+                stop counting towards your guest limit. You can restore them any
+                time. Between 30 and 180 days.
               </p>
             </div>
             <div className="flex items-center gap-2 shrink-0">
@@ -563,35 +589,35 @@ export default function MembershipSettingsPage() {
 
         {/* ── Save ── */}
         <motion.div variants={fadeUp} initial="hidden" animate="visible">
-        <Button
-          onClick={handleSave}
-          disabled={
-            isSaving ||
-            isLoading ||
-            Boolean(validationError) ||
-            archiveDaysInvalid ||
-            !dirty
-          }
-          className="w-full h-11 rounded-lg text-sm font-semibold"
-        >
-          <FileText className="h-4 w-4 mr-2" />
-          {isSaving
-            ? "Saving…"
-            : dirty
-              ? "Save Changes"
-              : "All changes saved"}
-        </Button>
-
-        <p className="text-xs text-gray-400 text-center mt-3">
-          Changes take effect immediately on the{" "}
-          <Link
-            href="/dashboard/membership/dashboard"
-            className="text-primary-400 hover:underline"
+          <Button
+            onClick={handleSave}
+            disabled={
+              isSaving ||
+              isLoading ||
+              Boolean(validationError) ||
+              archiveDaysInvalid ||
+              !dirty
+            }
+            className="w-full h-11 rounded-lg text-sm font-semibold"
           >
-            Pastoral Dashboard
-          </Link>{" "}
-          and Attention Center once saved.
-        </p>
+            <FileText className="h-4 w-4 mr-2" />
+            {isSaving
+              ? "Saving…"
+              : dirty
+                ? "Save Changes"
+                : "All changes saved"}
+          </Button>
+
+          <p className="text-xs text-gray-400 text-center mt-3">
+            Changes take effect immediately on the{" "}
+            <Link
+              href="/dashboard/membership/dashboard"
+              className="text-primary-400 hover:underline"
+            >
+              Pastoral Dashboard
+            </Link>{" "}
+            and Attention Center once saved.
+          </p>
         </motion.div>
       </div>
     </div>

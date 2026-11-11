@@ -43,24 +43,28 @@ export function RolesTable({ roles, onActionSelect }: RolesTableProps) {
         </TableRow>
       </TableHeader>
       <TableBody>
-        {roles.map((role) => (
-          <TableRow key={role.id}>
-            <TableCell className="font-medium">{role.name}</TableCell>
-            <TableCell className="py-2 px-4 ">
-              <RoleTypeBadge type={role.type} />
-            </TableCell>
-            <TableCell className="py-2 px-4 ">{role.users}</TableCell>
-            <TableCell className="py-2 px-4 ">
-              <RoleStatusBadge status={role.status} />
-            </TableCell>
-            <TableCell className="text-right">
-              <RoleActionsMenu
-                status={role.status}
-                onActionSelect={(action) => onActionSelect(role.id, action)}
-              />
-            </TableCell>
-          </TableRow>
-        ))}
+        {roles.map((role) => {
+          return (
+            <TableRow key={role.id}>
+              <TableCell className="font-medium">{role.name}</TableCell>
+              <TableCell className="py-2 px-4 ">
+                <RoleTypeBadge type={role.type} />
+              </TableCell>
+              <TableCell className="py-2 px-4 ">{role.users}</TableCell>
+              <TableCell className="py-2 px-4 ">
+                <RoleStatusBadge status={role.status} />
+              </TableCell>
+              <TableCell className="text-right">
+                <RoleActionsMenu
+                  status={role.status}
+                  onActionSelect={(action) => {
+                    return onActionSelect(role.id, action);
+                  }}
+                />
+              </TableCell>
+            </TableRow>
+          );
+        })}
       </TableBody>
     </Table>
   );

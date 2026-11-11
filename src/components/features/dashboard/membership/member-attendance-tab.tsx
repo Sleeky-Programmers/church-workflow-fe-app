@@ -54,19 +54,25 @@ export function MemberAttendanceTab({
 
   const formatMonthLabel = (month: string) => {
     const date = new Date(`${month}-01T00:00:00`);
-    if (Number.isNaN(date.getTime())) return month;
+    if (Number.isNaN(date.getTime())) {
+      return month;
+    }
     return date.toLocaleString(undefined, { month: "short", year: "numeric" });
   };
 
   const formatTime = (value: string) => {
     const date = new Date(value);
-    if (Number.isNaN(date.getTime())) return value;
+    if (Number.isNaN(date.getTime())) {
+      return value;
+    }
     return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
   };
 
   const formatDate = (value: string) => {
     const date = new Date(value);
-    if (Number.isNaN(date.getTime())) return value;
+    if (Number.isNaN(date.getTime())) {
+      return value;
+    }
     return date.toISOString().split("T")[0];
   };
 
@@ -95,10 +101,14 @@ export function MemberAttendanceTab({
       });
     }
     if (filterValue === "present") {
-      return records.filter((record) => record.status === "Present");
+      return records.filter((record) => {
+        return record.status === "Present";
+      });
     }
     if (filterValue === "absent") {
-      return records.filter((record) => record.status === "Absent");
+      return records.filter((record) => {
+        return record.status === "Absent";
+      });
     }
     return records;
   }, [records, filterValue]);
@@ -111,12 +121,12 @@ export function MemberAttendanceTab({
         rate: stats.rate,
       };
     }
-    const attended = records.filter(
-      (record) => record.status === "Present",
-    ).length;
-    const missed = records.filter(
-      (record) => record.status === "Absent",
-    ).length;
+    const attended = records.filter((record) => {
+      return record.status === "Present";
+    }).length;
+    const missed = records.filter((record) => {
+      return record.status === "Absent";
+    }).length;
     const rate = records.length
       ? Math.round((attended / records.length) * 100)
       : 0;
@@ -134,19 +144,21 @@ export function MemberAttendanceTab({
         )}
         {trends.length > 0 && (
           <div className="mb-4 grid grid-cols-2 lg:grid-cols-4 gap-3">
-            {trends.slice(-4).map((trend) => (
-              <div
-                key={trend.month}
-                className="rounded-lg border bg-white px-3 py-2"
-              >
-                <Text variant="default" className="text-sm font-medium">
-                  {formatMonthLabel(trend.month)}
-                </Text>
-                <Text variant="muted" className="text-xs">
-                  {trend.attended}/{trend.total} ({trend.rate}%)
-                </Text>
-              </div>
-            ))}
+            {trends.slice(-4).map((trend) => {
+              return (
+                <div
+                  key={trend.month}
+                  className="rounded-lg border bg-white px-3 py-2"
+                >
+                  <Text variant="default" className="text-sm font-medium">
+                    {formatMonthLabel(trend.month)}
+                  </Text>
+                  <Text variant="muted" className="text-xs">
+                    {trend.attended}/{trend.total} ({trend.rate}%)
+                  </Text>
+                </div>
+              );
+            })}
           </div>
         )}
         <div className="bg-white rounded-lg border overflow-hidden">
@@ -161,44 +173,48 @@ export function MemberAttendanceTab({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredRecords.map((record) => (
-                <TableRow key={record.id}>
-                  <TableCell>
-                    <Text variant="default" className="text-sm font-medium">
-                      {record.service}
-                    </Text>
-                  </TableCell>
-                  <TableCell>
-                    <Text variant="default" className="text-sm">
-                      {formatDate(record.date)}
-                    </Text>
-                  </TableCell>
-                  <TableCell>
-                    <Badge
-                      variant={
-                        record.status === "Present" ? "default" : "destructive"
-                      }
-                      className={
-                        record.status === "Present"
-                          ? "bg-success-100 text-success-700 hover:bg-success-100"
-                          : ""
-                      }
-                    >
-                      {record.status}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <Text variant="default" className="text-sm">
-                      {record.recordedBy}
-                    </Text>
-                  </TableCell>
-                  <TableCell>
-                    <Text variant="default" className="text-sm">
-                      {formatTime(record.time)}
-                    </Text>
-                  </TableCell>
-                </TableRow>
-              ))}
+              {filteredRecords.map((record) => {
+                return (
+                  <TableRow key={record.id}>
+                    <TableCell>
+                      <Text variant="default" className="text-sm font-medium">
+                        {record.service}
+                      </Text>
+                    </TableCell>
+                    <TableCell>
+                      <Text variant="default" className="text-sm">
+                        {formatDate(record.date)}
+                      </Text>
+                    </TableCell>
+                    <TableCell>
+                      <Badge
+                        variant={
+                          record.status === "Present"
+                            ? "default"
+                            : "destructive"
+                        }
+                        className={
+                          record.status === "Present"
+                            ? "bg-success-100 text-success-700 hover:bg-success-100"
+                            : ""
+                        }
+                      >
+                        {record.status}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <Text variant="default" className="text-sm">
+                        {record.recordedBy}
+                      </Text>
+                    </TableCell>
+                    <TableCell>
+                      <Text variant="default" className="text-sm">
+                        {formatTime(record.time)}
+                      </Text>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
             </TableBody>
           </Table>
 
@@ -272,7 +288,9 @@ export function MemberAttendanceTab({
                         ? "bg-success-600 hover:bg-success-700"
                         : "bg-destructive-600 hover:bg-destructive-700"
                     }`}
-                    onClick={() => setSelectedRecord(record)}
+                    onClick={() => {
+                      return setSelectedRecord(record);
+                    }}
                   >
                     View Details
                   </Button>
@@ -292,7 +310,9 @@ export function MemberAttendanceTab({
       <Dialog
         open={Boolean(selectedRecord)}
         onOpenChange={(open) => {
-          if (!open) setSelectedRecord(null);
+          if (!open) {
+            setSelectedRecord(null);
+          }
         }}
       >
         <DialogContent
@@ -310,7 +330,9 @@ export function MemberAttendanceTab({
                   <Button
                     variant="ghost"
                     size="icon"
-                    onClick={() => setSelectedRecord(null)}
+                    onClick={() => {
+                      return setSelectedRecord(null);
+                    }}
                   >
                     <X className="h-4 w-4" />
                   </Button>
