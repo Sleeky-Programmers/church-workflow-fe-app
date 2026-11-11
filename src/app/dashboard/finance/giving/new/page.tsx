@@ -8,6 +8,7 @@ import { Suspense, useEffect, useMemo, useState } from "react";
 import { DuplicateWarningBanner } from "@/components/features/dashboard/finance/giving/duplicate-warning-banner";
 import { EntryLine } from "@/components/features/dashboard/finance/giving/entry-line";
 import { Button } from "@/components/ui/button";
+import { DatePicker } from "@/components/ui/date-picker";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Loader } from "@/components/ui/loader";
@@ -83,12 +84,11 @@ function NewGivingBatchContent() {
   const [churchServiceId, setChurchServiceId] = useState(
     searchParams.get("churchServiceId") || "",
   );
-  // The date is fixed to the service occurrence this batch is being
-  // Recorded for - it's never editable in this form (see the read-only
-  // Date field below).
-  const [date] = useState(
-    searchParams.get("date") || format(new Date(), "yyyy-MM-dd"),
-  );
+  // Selectable range: from the service occurrence date (when we arrived from
+  // One) up to today - giving can't be recorded for a future date.
+  const today = format(new Date(), "yyyy-MM-dd");
+  const serviceDate = searchParams.get("date") || undefined;
+  const [date, setDate] = useState(serviceDate || today);
   const [countedWith, setCountedWith] = useState("");
   const [notes, setNotes] = useState("");
   const [entries, setEntries] = useState<GivingBatchEntryPayload[]>([]);
@@ -203,6 +203,7 @@ function NewGivingBatchContent() {
   const isFormValid =
     churchServiceId &&
     date &&
+    duplicateBatchId === undefined &&
     entries.length > 0 &&
     entries.every(
       (entry) =>
@@ -213,6 +214,15 @@ function NewGivingBatchContent() {
     );
 
   const handleSave = async (submitAfterSave: boolean) => {
+    if (duplicateBatchId !== undefined) {
+      toast({
+        title: "Record already exists",
+        description:
+          "A giving record already exists for this service and date. It can only be edited.",
+        variant: "destructive",
+      });
+      return;
+    }
     if (!isFormValid) {
       toast({
         title: "Missing information",
@@ -293,10 +303,17 @@ function NewGivingBatchContent() {
 
             <div className="space-y-1.5">
               <Label>Date</Label>
-              <Input type="date" value={date} disabled readOnly />
+              <DatePicker
+                value={date}
+                onChange={(next) => next && setDate(next)}
+                minDate={serviceDate}
+                maxDate={today}
+                disabled={isSaving}
+              />
               <Text variant="muted" className="text-xs">
-                Fixed to the service occurrence being recorded and can&apos;t
-                be changed.
+                {serviceDate
+                  ? "From the service date up to today."
+                  : "Today or an earlier date; future dates aren't allowed."}
               </Text>
             </div>
 

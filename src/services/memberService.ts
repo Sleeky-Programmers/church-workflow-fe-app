@@ -54,6 +54,20 @@ function normalizeMemberPayload(data: Partial<NewMemberData>) {
   };
 }
 
+export type MemberBirthday = {
+  _id: string;
+  fullName: string;
+  birthday: string;
+};
+
+/** Name + birthday for every member that has one set (single light query). */
+export async function fetchMemberBirthdays(): Promise<MemberBirthday[]> {
+  const res = await authenticatedFetch<MemberBirthday[]>("/members/birthdays", {
+    method: "GET",
+  });
+  return Array.isArray(res) ? res : [];
+}
+
 export async function fetchMembers(
   page = 1,
   limit = 10,

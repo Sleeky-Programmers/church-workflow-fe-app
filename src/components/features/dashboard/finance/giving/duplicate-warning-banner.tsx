@@ -10,8 +10,8 @@ export function DuplicateWarningBanner({ batchId }: { batchId?: string }) {
           A giving batch already exists for this service and date.
         </p>
         <p className="mt-0.5">
-          Saving will create a separate batch. Consider editing the existing one
-          instead
+          A new record can&apos;t be created; the existing one can only be
+          edited (every edit is recorded in the audit trail)
           {batchId ? (
             <>
               {" - "}

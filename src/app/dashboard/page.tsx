@@ -39,7 +39,7 @@ import {
   sortBirthdaysByNearest,
 } from "@/lib/utils";
 import { fetchGivingMonthlyTrend } from "@/services/givingService";
-import { fetchMembers as fetchMemberProfiles } from "@/services/memberService";
+import { fetchMemberBirthdays } from "@/services/memberService";
 import { useUserStore } from "@/stores/useUserStore";
 import { ChurchEvent } from "@/types";
 
@@ -135,34 +135,38 @@ export default function Dashboard() {
   const loadAttendanceData = useCallback(async () => {
     setAttendanceLoading(true);
     setAttendanceError(false);
-    try {
-      // Fetch attendance stats
-      const stats = await fetchAttendanceStats();
-      const { totalAttendance, attendanceGrowth, monthlyAttendanceTrends } =
-        stats;
-      setServiceAttendance(totalAttendance.toLocaleString());
+    // Stats (the card) and trend (the chart) are independent requests: fire
+    // them together instead of back-to-back, and don't let a chart failure
+    // mark the card as broken (or vice versa).
+    const [statsResult, trendResult] = await Promise.allSettled([
+      fetchAttendanceStats(),
+      fetchAttendanceTrend(),
+    ]);
+
+    if (statsResult.status === "fulfilled") {
+      const { totalAttendance, attendanceGrowth } = statsResult.value;
+      setServiceAttendance((totalAttendance ?? 0).toLocaleString());
       setServiceAttendanceGrowth(attendanceGrowth || "0%");
-      const trends = monthlyAttendanceTrends || [];
-      setAttendanceTrendData(trends);
-
-      // Fetch attendance trend (regular and special services)
-      const trend = await fetchAttendanceTrend();
-
-      // Combine regular and special service data for the chart
-      const combinedTrendData = trend.regularService.map((regular, index) => ({
-        month: regular.month,
-        thisMonth: regular.totalAttendance,
-        lastMonth: trend.specialService[index]?.totalAttendance || 0,
-      }));
-
-      // Update attendance trend data with the combined data
-      setAttendanceTrendData(combinedTrendData);
-    } catch (error) {
-      console.error("Failed to load attendance data:", error);
+    } else {
+      console.error("Failed to load attendance stats:", statsResult.reason);
       setAttendanceError(true);
-    } finally {
-      setAttendanceLoading(false);
     }
+
+    if (trendResult.status === "fulfilled") {
+      const trend = trendResult.value;
+      // Combine regular and special service data for the chart
+      setAttendanceTrendData(
+        (trend.regularService || []).map((regular, index) => ({
+          month: regular.month,
+          thisMonth: regular.totalAttendance,
+          lastMonth: trend.specialService?.[index]?.totalAttendance || 0,
+        })),
+      );
+    } else {
+      console.error("Failed to load attendance trend:", trendResult.reason);
+    }
+
+    setAttendanceLoading(false);
   }, []);
 
   useEffect(() => {
@@ -200,14 +204,10 @@ export default function Dashboard() {
     async function loadBirthdays() {
       setBirthdaysLoading(true);
       try {
-        const members: any[] = [];
-        let page = 1;
-        while (page <= 3) {
-          const res = await fetchMemberProfiles(page, 100);
-          members.push(...(res.data || []));
-          if (!res.pagination?.hasNextPage) break;
-          page++;
-        }
+        // One light request (name + birthday only) instead of up to three
+        // sequential pages of full member records, which also silently
+        // missed anyone past the 300th member.
+        const members = await fetchMemberBirthdays();
         if (!mounted) return;
         const today = new Date();
         const cutoff = new Date();

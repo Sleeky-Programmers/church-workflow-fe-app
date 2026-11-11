@@ -824,8 +824,8 @@ export function FileInput({
   };
 
   const csvContent = `${CSV_TEMPLATE_COLUMNS.map((key) => FIELD_LABELS[key]).join(",")}
-MR.,Anthony Carter,MALE,1/12/1991,SINGLE,,,,14155667788,anthony.carter@example.com,Developer,Bachelor,Member,7/15/2022,,TRUE,Music,Outreach,Iota Group
-MRS.,Rebecca Allen,FEMALE,4/25/1984,MARRIED,5/10/2009,,,14156778899,rebecca.allen@example.com,Teacher,Master,Visitor,2/18/2021,Grace Church,FALSE,,,`;
+MR.,Chinedu Okafor,MALE,3/14/1988,MARRIED,6/20/2015,,,0803 123 4567,chinedu.okafor@example.com,Accountant,Bachelor,Member,7/15/2022,,TRUE,Choir,Ushering,Lekki Cell
+MRS.,Funmilayo Adeyemi,FEMALE,9/2/1993,MARRIED,11/12/2019,,,0806 234 5678,funmilayo.adeyemi@example.com,Nurse,HND,Visitor,10/5/2026,,FALSE,,,`;
 
   return (
     <div className="space-y-5">

@@ -37,7 +37,88 @@ function clearSessionScopedStorage() {
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Read timeouts + in-flight de-duplication
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Reads that take longer than this are aborted with a clear message. */
+const READ_TIMEOUT_MS = 25_000;
+
+export const REQUEST_TIMEOUT_MESSAGE =
+  "The server took too long to respond. Please try again.";
+
+function isReadRequest(options: RequestInit) {
+  const method = (options.method || "GET").toUpperCase();
+  return method === "GET" || method === "HEAD";
+}
+
+/**
+ * fetch() with a timeout for reads only. Without it a stalled request hangs
+ * the widget's spinner forever (or until the platform kills the function and
+ * the browser reports an opaque "Failed to fetch"). Mutations are left alone:
+ * aborting them client-side wouldn't stop the server, and long writes such as
+ * CSV imports are legitimate. Callers that pass their own signal keep it.
+ */
+async function fetchWithTimeout(url: string, init: RequestInit) {
+  if (init.signal || !isReadRequest(init)) {
+    return fetch(url, init);
+  }
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), READ_TIMEOUT_MS);
+  try {
+    return await fetch(url, { ...init, signal: controller.signal });
+  } catch (err) {
+    if (controller.signal.aborted) {
+      const timeoutError: any = new Error(REQUEST_TIMEOUT_MESSAGE);
+      timeoutError.name = "TimeoutError";
+      timeoutError.isTimeout = true;
+      throw timeoutError;
+    }
+    throw err;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+// Identical GETs fired at the same moment (e.g. two dashboard widgets both
+// asking for the giving trend) share one network request. Entries are dropped
+// as soon as the request settles, so this never serves stale data.
+const inFlightReads = new Map<string, Promise<unknown>>();
+
+function dedupeRead<T>(
+  key: string | null,
+  run: () => Promise<T>,
+): Promise<T> {
+  if (!key) return run();
+  const existing = inFlightReads.get(key);
+  if (existing) return existing as Promise<T>;
+  const promise = run().finally(() => inFlightReads.delete(key));
+  inFlightReads.set(key, promise);
+  return promise;
+}
+
+function readDedupeKey(
+  kind: string,
+  endpoint: string,
+  options: RequestInit & { responseType?: string },
+): string | null {
+  if (typeof window === "undefined") return null;
+  if (!isReadRequest(options) || options.body || options.signal) return null;
+  if (options.responseType && options.responseType !== "json") return null;
+  const token = localStorage.getItem("accessToken") || "";
+  return `${kind}|${options.method || "GET"}|${endpoint}|${token}`;
+}
+
 export async function authenticatedFetch<T>(
+  endpoint: string,
+  options: RequestInit & { responseType?: "json" | "blob" | "text" } = {},
+): Promise<T> {
+  return dedupeRead(readDedupeKey("auth", endpoint, options), () =>
+    authenticatedFetchImpl<T>(endpoint, options),
+  );
+}
+
+async function authenticatedFetchImpl<T>(
   endpoint: string,
   options: RequestInit & { responseType?: "json" | "blob" | "text" } = {},
 ): Promise<T> {
@@ -56,7 +137,7 @@ export async function authenticatedFetch<T>(
     ...options.headers,
   });
 
-  const response = await fetch(`${BASE_URL}${endpoint}`, {
+  const response = await fetchWithTimeout(`${BASE_URL}${endpoint}`, {
     ...options,
     headers: getHeaders(token),
   });
@@ -68,7 +149,7 @@ export async function authenticatedFetch<T>(
       localStorage.setItem("accessToken", refreshData.accessToken);
       localStorage.setItem("refreshToken", refreshData.refreshToken);
 
-      const retryResponse = await fetch(`${BASE_URL}${endpoint}`, {
+      const retryResponse = await fetchWithTimeout(`${BASE_URL}${endpoint}`, {
         ...options,
         headers: getHeaders(refreshData.accessToken),
       });
@@ -135,10 +216,19 @@ export async function apiFetch<T>(
   endpoint: string,
   options: RequestInit,
 ): Promise<T> {
+  return dedupeRead(readDedupeKey("api", endpoint, options), () =>
+    apiFetchImpl<T>(endpoint, options),
+  );
+}
+
+async function apiFetchImpl<T>(
+  endpoint: string,
+  options: RequestInit,
+): Promise<T> {
   const token =
     typeof window !== "undefined" ? localStorage.getItem("accessToken") : null;
 
-  const response = await fetch(`${BASE_URL}${endpoint}`, {
+  const response = await fetchWithTimeout(`${BASE_URL}${endpoint}`, {
     ...options,
     headers: {
       "Content-Type": "application/json",
